@@ -1,0 +1,2765 @@
+{
+  "common": {
+    "fileTooLarge": "{name} は大きすぎるため開けません（上限 {size} MB）。",
+    "close": "閉じる",
+    "clearAllToasts": "すべて消す",
+    "toastCount": "×{count}",
+    "cancel": "キャンセル",
+    "ok": "OK",
+    "delete": "削除",
+    "deleteConfirm": "削除する",
+    "clearConfirm": "クリアする",
+    "save": "保存",
+    "open": "開く",
+    "retry": "再試行",
+    "loading": "読み込み中…",
+    "unsaved": {
+      "title": "編集中の内容",
+      "close": "変更は保存されていませんが閉じても良いですか？",
+      "switch": "変更は保存されていませんが切り替えても良いですか？"
+    }
+  },
+  "glossary": {
+    "activity": "アクティビティ",
+    "card": "カード",
+    "variablesPanel": "変数パネル",
+    "variableBox": "変数ボックス",
+    "outputAnchor": "出力アンカー",
+    "chip": "チップ",
+    "appInputs": "アプリ入力",
+    "runPanel": "実行パネル",
+    "tab": "タブ",
+    "viewer": "ビューワー",
+    "docked": "埋め込み",
+    "floating": "自由移動",
+    "popOut": "別窓",
+    "sideLane": "支流",
+    "playbook": "プレイブック",
+    "phase": "フェーズ",
+    "outline": "アウトライン"
+  },
+  "format": {
+    "seconds": "{seconds}秒",
+    "minutesSeconds": "{minutes}分{seconds}秒",
+    "elapsed": "{minutes}m {seconds}s",
+    "empty": "（空）"
+  },
+  "terms": {
+    "title": "利用規約",
+    "revisedSummary": "{date} から新しい規約が適用されます。",
+    "version": "版 {revision}・{date} から適用",
+    "accept": "同意して始める",
+    "conditionsHeading": "使用上の注意（利用規約から抜粋）",
+    "condition2": "本ツールで作成、設定したデータは（会話や画像を含む）ブラウザの保存領域にあるため、キャッシュやサイトデータの消去、誤った操作、ブラウザやツールの不具合で消えることがあります。特に Safari では保存領域を自動で掃除する仕組みがあり、他のブラウザでも同様の注意が必要です。必要のあるデータは、都度書き出すなど控えを取ってください。",
+    "condition3": "故障や高額請求をはじめとする意図しない事故につながることがあるため、処理中は画面の動きを見守り、席を離れるときは必ず止めてください。",
+    "condition4": "当方の公式のドメインから配信された版を、Chrome・Edge・Firefox・Safari など更新が続いているブラウザで使ってください。当方が動作を確かめているのは Chrome です。それ以外のブラウザでの動作は確かめていません。",
+    "consent": "18 歳以上かつ居住地の成年年齢以上であり、利用規約とプライバシーポリシーに同意します",
+    "noticeTitle": "利用上の注意事項",
+    "noticeCheck": "{notice}を確認しました",
+    "noticeCheckLabel": "利用上の注意事項を確認しました",
+    "noticeIntro": "このツールは一見 URL 上のサーバーで動いているようにも見えますが、処理は利用者のブラウザの中（ローカル）で行われます。技術的にも道義的にもダウンロードしたソフトをご自身の PC で操作していることとほぼ同様であることをご理解ください。\n仕組み上、当方はその動作を見張ることや、異常時にその場で止めることもできません（利用規約 第2条）。本ツールの操作や、その結果として接続先に生じる費用や変化は、利用者の管理のもとにあります（第4条）。接続先で生じる料金等は利用者の負担であり、当方が補填することはありません（第8条）。\n特に注意していただきたい点を以下に抜粋・補足します。正確な内容は利用規約によります。",
+    "noticeAi4": "現代の AI には心があるわけではなく、自然な文脈の続きを予想しているにすぎません。カウンセリングや精神的な拠り所としての対話に臨むことは避けてください。",
+    "noticeAi3": "出力内容は参考にとどめ、医学・法律・税務をはじめとする専門的な判断、自身にとっての重要な判断に用いないでください。",
+    "noticeAi2": "事業者によっては学習に用いられるなど、意図せず情報漏えいにつながることがあるため、個人情報や認証情報をはじめとする機密情報は入力しないでください。",
+    "noticeAi1": "AI は間違えたり虚偽の出力をすることがあります。情報は鵜呑みにせず裏取りし、生成物を使ったり人に公開したりする前に必ず確認してください（第5条）。",
+    "noticeAiHeading": "AI の出力について",
+    "notice1": "1 回の操作で、接続先に複数の要求が自動で送られることがあります（第8条）。",
+    "noticeConfirm": "確認した",
+    "agreements": "利用規約・補足情報",
+    "notAgreed": "未確認",
+    "agreedAt": "{date} 確認済",
+    "landingSummary": "{terms}と{privacy}をご確認ください。"
+  },
+  "privacy": {
+    "title": "プライバシーポリシー",
+    "version": "{date} から適用"
+  },
+  "accessibility": {
+    "title": "アクセシビリティ方針",
+    "date": "{date} 作成",
+    "body": "1. 方針\nKisaraUI はアクセシビリティに配慮し、マウスを使わずキーボードだけでも、ノードの一覧と入力の欄、並べ替え、ノードの追加を操作できることを目指しています。\n\n2. 対象\nKisaraUI の画面（このページで動くアプリ全体）。利用者がつなぐ ComfyUI や LLM のサーバー・サービスが返す内容（生成した画像や文章、ノードの名前など）と、それらの提供元の画面は含みません。\n\n3. 目標と対応度\nJIS X 8341-3:2016 の適合レベル AA（WCAG 2.1 の AA）に配慮します。「配慮」は、ウェブアクセシビリティ基盤委員会（WAIC）の「ウェブコンテンツの JIS X 8341-3:2016 対応度表記ガイドライン」による表記で、達成基準ごとの試験の結果を示すものではありません。ただし、準拠性の確認や保証はされていません。\n\n4. 確かめ方\n開発の中で、キーボードだけで操作できるかの自動のテストや検証ツールを用いて確かめています。\n\n5. 分かっている制約\n- ワークフローのノードのつながりは図として描き、図そのものは読み上げません。つながりは名前と文字でたどれます。\n- 接続先が生成した画像の中身は、文で説明しません。\n\n6. ご意見・ご相談\n使いにくい点は、問い合わせフォーム（https://contact.kisara-ui.com）からお寄せください。"
+  },
+  "settings": {
+    "language": {
+      "label": "言語"
+    },
+    "theme": {
+      "label": "配色",
+      "system": "OS に従う",
+      "light": "ライト",
+      "dark": "ダーク"
+    },
+    "tabs": {
+      "heading": "タブ配置",
+      "chatFirst": "会話のタブを左に寄せる"
+    },
+    "loraFormat": {
+      "label": "Lora の写し取りの書式",
+      "note": "[loraname] は拡張子を除いた名前、[learntext] は学習で多かった語、[memo] はメモに置き換わります。空にすると既定に戻ります。"
+    },
+    "nodeDisplay": {
+      "heading": "ノード表示"
+    },
+    "passedLines": {
+      "label": "通過したノードの線も表示",
+      "note": "宛先のカードがカードの列の上へ過ぎた変数の線も引きます。"
+    },
+    "slideshow": {
+      "label": "スライドショーの送りの間隔（秒）",
+      "note": "画像ビューワーのスライドショーで、新しい方へ送る間隔です。",
+      "increase": "1 秒増やす",
+      "decrease": "1 秒減らす"
+    },
+    "runHistory": {
+      "heading": "履歴管理",
+      "label": "プロンプトの履歴を残す",
+      "note": "有効にした場合、実行履歴が user/kisara/history に記録され続けます。",
+      "limitLabel": "1 セッションに残す実行の数",
+      "limitNote": "セッションの記録がこの数を超えたら、古い実行から消します。",
+      "limitIncrease": "残す数を増やす",
+      "limitDecrease": "残す数を減らす"
+    },
+    "safeguards": {
+      "heading": "防御機構",
+      "note": "過剰実行防止のリミッターは変更できません。",
+      "show": "表示する",
+      "repeatFailureLimit": "繰り返し: 連続失敗で止める回数",
+      "repeatMinIntervalMs": "繰り返し: 最短の実行間隔（ms）",
+      "repeatMaxRuns": "繰り返し: 最大連続実行回数",
+      "llmRequestInputMax": "LLM: 1 回の入力の上限（トークン）",
+      "llmWindowMinutes": "LLM: 数える窓（分）",
+      "llmWindowOutputLimit": "LLM: 窓の間の出力の上限（トークン）",
+      "llmWindowInputLimit": "LLM: 窓の間の入力の上限（トークン）",
+      "llmSilentMinutes": "LLM: 中身が届かず止めるまで（分）",
+      "toolAutoRunMax": "Workflow: 確認なしで実行する数（1 回の返事）"
+    },
+    "diagnostics": {
+      "heading": "ログ基準",
+      "note": "指定レベル以上のログをブラウザ内に一時記録します。自動送信はされないため、問い合わせ時など必要な際は都度エクスポートしてください。",
+      "level": {
+        "error": "Error",
+        "warn": "Warning",
+        "info": "Info",
+        "debug": "Debug"
+      },
+      "open": "ログをエクスポート",
+      "verbose": "詳しいログを取得中",
+      "dialog": {
+        "title": "ログをエクスポート",
+        "intro": "不具合報告向けのファイルをエクスポートします。アプリからはどこにも送らないため、別途、{form}などから提供してください。",
+        "contactForm": "問い合わせフォーム",
+        "counts": "エラー {faults} 件・操作の記録 {events} 件",
+        "levels": "ログ基準: ComfyUI {comfy}・LLM {llm}",
+        "sections": "ファイルに入れるもの",
+        "group": {
+          "general": "全般",
+          "comfy": "ComfyUI",
+          "llm": "LLM"
+        },
+        "section": {
+          "format": "ファイルの種類・書き出した日時・ログ基準",
+          "faults": "起きたエラー（文面・どこで起きたか・スタックトレース）",
+          "app": "KisaraUI の版",
+          "environment": "ブラウザの種類・言語・画面の大きさ・CPU とメモリの量",
+          "settings": "設定のうち、スイッチと選択肢で選ぶもの（自由に書く文字は入りません）",
+          "comfyEvents": "操作ログ（ログ基準で選んだ分）",
+          "comfySystem": "ComfyUI の版と GPU の名前",
+          "comfyConnection": "接続の状態（つながっているか・直近の失敗の種類）",
+          "comfyUrl": "接続先 URL",
+          "workflowShape": "開いているワークフローのノードの種類と数",
+          "definitionSources": "入れているカスタムノードの名前と、それぞれのノードの数",
+          "llmEvents": "操作ログ（ログ基準で選んだ分）",
+          "llmConnection": "接続先の種類（手元か外部か・https か）",
+          "llmUrl": "接続先 URL",
+          "llmParams": "生成の設定（温度などの数値）"
+        },
+        "content": "ファイルの中身",
+        "loading": "読んでいます…",
+        "size": "{size} KB",
+        "export": "エクスポート",
+        "clear": "ログをクリア",
+        "clearTitle": "ログをクリアしますか？",
+        "clearDescription": "記録したエラーと操作をすべて消します。ログ基準はそのままです。"
+      }
+    }
+  },
+  "connection": {
+    "guide": {
+      "summary": {
+        "httpError": "接続先が HTTP エラーを返しました。",
+        "httpStatus": "接続先が HTTP {status} を返しました。",
+        "cors": "ComfyUI は応答していますが、この画面からのアクセスを許可していません（CORS）。",
+        "down": "接続先が応答しません",
+        "downTarget": "{target} が応答しません",
+        "corsOrDown": "ComfyUI が起動していないか、この画面からのアクセスを許可していません。",
+        "localNetwork": "ブラウザがローカルネットワークへのアクセスを止めています。",
+        "mixedContent": "https のページから http の ComfyUI へは、ブラウザが接続させません。",
+        "timeout": "接続先は見つかりましたが、時間内に応答がありません。",
+        "badResponse": "接続はできましたが、ComfyUI ではないものが応答しています。",
+        "offline": "ブラウザがオフラインです。",
+        "unknown": "接続できませんでした。",
+        "forbiddenRun": "ComfyUI が、この画面からの実行を拒否しました（403）。"
+      },
+      "steps": {
+        "addCorsFlag": "起動オプションに {flag} を足して起動し直す",
+        "allowThroughProxy": "リバースプロキシや認証が挟まっているなら、その設定でこの画面からのアクセスを許可する",
+        "checkUrlIsComfy": "URL が ComfyUI 本体を指しているか確認する",
+        "includePathPrefix": "リバースプロキシ配下なら、パス接頭辞まで含めて入力する（例: https://example.com/comfy）",
+        "updateForFeatures": "ComfyUI が古いと疎通に使う /features が無いことがある。更新を検討する",
+        "checkConsole": "ComfyUI のコンソールにエラーが出ていないか確認する",
+        "waitAndRetry": "起動直後なら少し待って再試行する",
+        "checkProxy": "リバースプロキシや認証が挟まっていないか確認する",
+        "restartFully": "起動用のバッチやスクリプトを直したら、ComfyUI を完全に止めてから起動し直す",
+        "checkTarget": "起動済みであることや、URL やポートに誤りがないか確認する",
+        "checkRunning": "ComfyUI が起動しているか確認する（ブラウザで接続先 URL を直接開くと画面が出る）",
+        "checkUrlAndPort": "接続先の URL とポートが合っているか確認する（既定は 8188）",
+        "allowPrompt": "アドレスバーに出る許可のダイアログで「許可」を選ぶ",
+        "allowFromSiteIcon": "出ない場合はアドレスバー左のアイコンから、このサイトのローカルネットワーク権限を許可する",
+        "openOnSameMachine": "それでも繋がらないなら、ComfyUI と同じ端末でこの画面を開く",
+        "reopenWithHttp": "この画面を http で開き直す",
+        "publishHttps": "または ComfyUI 側を https で公開する（リバースプロキシを立てる）",
+        "waitForModels": "起動直後はモデルの読み込みで待たされることがある。少し待って再試行する",
+        "checkHeavyWork": "別の重い処理が走っていないか、ComfyUI のコンソールを確認する",
+        "checkPortService": "URL のポートが別のサービスを指していないか確認する",
+        "reconnectNetwork": "ネットワークに繋がってから再試行する",
+        "checkUrlAndRetry": "URL を確認して再試行する",
+        "restartWithCors": "ComfyUI を --enable-cors-header {origin} 付きで起動し直す",
+        "writesOnlyRejected": "読み取りは通っていても、実行のような変更系のリクエストだけ拒否される点に注意"
+      }
+    },
+    "status": {
+      "socket": {
+        "connecting": "接続中",
+        "open": "受信中",
+        "reconnecting": "再接続中",
+        "closed": "切断"
+      },
+      "retry": "リトライ ({attempt}/{max})",
+      "unresponsiveRetry": "応答なしリトライ ({attempt}/{max})",
+      "connecting": "接続中…",
+      "failed": "接続失敗",
+      "connected": "接続済み",
+      "timeout": "タイムアウト",
+      "disconnected": "未接続",
+      "progress": "進捗: {state}",
+      "progressGaveUp": "進捗: 切断（再接続を {count} 回試して届きません）",
+      "progressDropped": "進捗: 切断（実行中に {count} 回切れました。使うには「再接続」を押してください）"
+    }
+  },
+  "nodeSearch": {
+    "result": {
+      "inputs": "入力: {types}",
+      "outputs": "出力: {types}",
+      "none": "なし"
+    },
+    "anyType": {
+      "label": "* を含む",
+      "title": "何にでも繋がる口（*）も型が合うものとして数えます"
+    },
+    "search": {
+      "addPlaceholder": "ノード名で検索",
+      "referencePlaceholder": "ノード名・口の名前で検索"
+    },
+    "listColumn": "左の列",
+    "reference": {
+      "type": "型",
+      "typeOutputs": "この型を出せる出力",
+      "typeInputs": "この型を受けられる入力",
+      "typeFilter": "型で絞り込む",
+      "nodes": "参照するノード",
+      "outputsList": "接続元の出力",
+      "inputsList": "接続先の入力",
+      "noOutputs": "繋げる出力がありません",
+      "noInputs": "繋げる入力がありません",
+      "linked": "接続済み",
+      "linkedTitle": "既に線が来ています。選ぶと張り替えます"
+    },
+    "filter": {
+      "input": "入力",
+      "inputTitle": "この型を受けられるノード",
+      "inputFilter": "入力の型で絞り込む",
+      "output": "出力",
+      "outputTitle": "この型を出せるノード",
+      "outputFilter": "出力の型で絞り込む",
+      "unspecified": "指定なし"
+    },
+    "empty": {
+      "noDefinitions": "ノード定義が未取得です。接続してください。",
+      "filtered": "該当するノードがありません（絞り込みを外すと増えます）",
+      "none": "該当するノードがありません"
+    },
+    "mode": {
+      "label": "追加の仕方",
+      "add": "ノード追加",
+      "reference": "ノード参照",
+      "referenceTitle": "既にあるノードへ繋ぎます",
+      "referenceDisabled": "繋ぐ起点が無いので選べません（入力・出力の三角から開いたときに使えます）"
+    },
+    "refresh": {
+      "label": "ノード定義を取り直す",
+      "title": "ノード定義を取り直します（自動では更新しません）"
+    },
+    "nav": {
+      "categories": "分類",
+      "all": "すべて"
+    }
+  },
+  "nodeSettings": {
+    "title": "{name} の詳細設定",
+    "x": "x",
+    "y": "y",
+    "width": "幅",
+    "height": "高さ",
+    "pinned": "ピン留め",
+    "pinnedTitle": "ComfyUI でこのノードを動かせなくします。このアプリで位置が変わると外れます",
+    "auto": "自動",
+    "extra": {
+      "other": "その他の項目（読み取り専用・{count} 件）"
+    }
+  },
+  "modelPicker": {
+    "folder": {
+      "loras": "Lora",
+      "checkpoints": "モデル"
+    },
+    "title": "{kind}を選ぶ",
+    "refresh": {
+      "label": "{kind}の一覧を取り直す",
+      "title": "一覧を取り直します（自動では更新しません）"
+    },
+    "directory": "ディレクトリ",
+    "directoryToggle": {
+      "show": "フォルダを出す",
+      "pin": "フォルダをピン止めする（常に出す）",
+      "unpin": "フォルダのピン止めをやめる（隠す）"
+    },
+    "nothingSelected": "カードを押して選んでください",
+    "decide": {
+      "toolbar": "{kind}の決定",
+      "label": "{kind}を決定する",
+      "title": "{name} に決めて閉じます（ダブルクリック・Enter でも決まります）"
+    },
+    "insert": {
+      "label": "{kind}を閉じずにキャレットの位置へ入れる"
+    },
+    "filter": {
+      "toolbar": "{kind}の絞り込み",
+      "label": "{kind}を絞り込む",
+      "placeholder": "名前で絞り込み"
+    },
+    "sort": {
+      "name": "名前",
+      "modified": "更新日時",
+      "created": "作成日時",
+      "size": "大きさ",
+      "ascending": "{name}・昇順（押すと降順）",
+      "descending": "{name}・降順（押すと昇順）",
+      "pick": "{name}で並べる",
+      "setAscending": "{name}・昇順で並べる",
+      "setDescending": "{name}・降順で並べる"
+    },
+    "cardHeight": {
+      "label": "高さ",
+      "input": "カードの高さ（px）"
+    },
+    "grid": {
+      "loading": "一覧を読み込み中…",
+      "empty": "該当する{kind}がありません",
+      "loadingMore": "読み込み中… {shown} / {total}"
+    },
+    "infoDock": {
+      "bottom": "情報を下に出す",
+      "right": "情報を右に出す"
+    },
+    "infoPane": "情報",
+    "field": {
+      "open": "{label}（{kind}を選ぶ）",
+      "clear": "{label}を{action}"
+    },
+    "card": {
+      "current": "いまの値"
+    },
+    "info": {
+      "panel": "モデルの情報",
+      "close": "情報を閉じる",
+      "path": "パス",
+      "copyName": "{name} の名前を写す",
+      "size": "大きさ",
+      "modified": "更新",
+      "created": "作成",
+      "name": "名称",
+      "baseModel": "ベースモデル",
+      "network": "ネットワーク",
+      "loading": "情報を読み込み中…",
+      "error": "情報を取得できません: {error}",
+      "noEmbedded": "埋め込みの情報はありません",
+      "triggerWords": "学習で多かった語",
+      "copyTriggerWords": "学習で多かった語をまとめて写す",
+      "insertTriggerWords": "学習で多かった語をキャレットの位置へ入れる",
+      "notes": "メモ",
+      "notesNone": "メモのファイルはまだありません。保存すると作られます",
+      "notesLoading": "メモを読み込み中…",
+      "notesFailed": "メモを読めません: {error}",
+      "notesSave": "メモを保存",
+      "notesSaving": "保存中…",
+      "notesSaved": "保存しました",
+      "notesSaveFailed": "保存できません: {error}",
+      "copyNotes": "メモを写す",
+      "insertNotes": "メモをキャレットの位置へ入れる",
+      "allEntries": "埋め込みの全項目"
+    }
+  },
+  "imagePicker": {
+    "kind": "画像",
+    "title": "画像を選ぶ",
+    "refresh": {
+      "label": "画像の一覧を取り直す",
+      "title": "このノードの選択肢を取り直す（自動では更新しない）"
+    },
+    "decide": {
+      "toolbar": "画像の決定",
+      "label": "画像を決定"
+    },
+    "filter": {
+      "toolbar": "画像の絞り込み",
+      "label": "画像を絞り込む"
+    },
+    "empty": "当てはまる画像がありません",
+    "upload": {
+      "label": "画像をアップロード",
+      "title": "入力フォルダへ画像をアップロードする（ファイルをここへ落としても上げられる）",
+      "drop": "落とすとアップロードします",
+      "renamed": "別の名前で保存しました: {names}",
+      "notImage": "アップロードできるのは画像だけです",
+      "noConnection": "ComfyUI に接続していません",
+      "failed": "アップロードできませんでした: {reason}",
+      "skipped": "画像でないファイルは飛ばしました"
+    }
+  },
+  "insertBar": {
+    "label": "差し込み",
+    "waiting": "一覧を読み込んでいます",
+    "lora": {
+      "title": "Lora を選んでキャレットの位置へ入れます",
+      "label": "Lora を差し込む",
+      "triggersFailed": "学習で多かった語を取れませんでした: {message}",
+      "memoFailed": "メモを取れませんでした: {message}",
+      "noTarget": "この画面の外の複数行の入力欄にキャレットを置いてから押してください（掴んで落としても入れられます）"
+    },
+    "style": {
+      "title": "スタイルの編集の画面を開きます（決定・ダブルクリックでキャレットの位置へ入れます）",
+      "label": "スタイルを開く"
+    },
+    "wildcard": {
+      "title": "ワイルドカードの一覧を開きます（決定・ダブルクリックでキャレットの位置へ入れます）",
+      "label": "ワイルドカードを差し込む"
+    },
+    "tag": {
+      "title": "タグ辞書の画面を開き、辞書を見て直します",
+      "label": "タグ辞書を開く"
+    },
+    "tool": {
+      "label": "LLM からの呼び出し設定",
+      "title": "会話の LLM からこのワークフローを呼ぶための設定"
+    },
+    "sources": {
+      "offline": "接続していません",
+      "loraUnavailable": "接続先がモデルの一覧を返しません",
+      "stylesUnavailable": "接続先のスタイルの表（styles.csv）を読めません",
+      "wildcardsNoRoute": "接続先にワイルドカードの経路がありません（Impact Pack が必要です）",
+      "wildcardsFailed": "接続先からワイルドカードの一覧を取れません",
+      "tagsUnavailable": "接続先のタグ辞書を読めません"
+    }
+  },
+  "comfy": {
+    "workspace": {
+      "taskDetail": "タスクの詳細",
+      "imageView": "画像の表示",
+      "image": "画像",
+      "workflow": "ワークフロー",
+      "closeTab": "このタブを閉じる",
+      "closeTabTitle": "保存していない編集は失われます"
+    },
+    "connection": {
+      "remoteTitle": "外部の ComfyUI に接続する注意",
+      "remoteNotice": "自分の端末や私的なネットワークの外にある ComfyUI に接続します。接続の前に、次の点をご確認ください。\n・ワークフローの実行は、その ComfyUI の GPU を使い、その状態を変えます。\n・有料のホスティングでは、利用時間や実行に応じて提供元から料金が請求されます。料金の確認と、利用の頻度・時間・費用の管理は利用者が行ってください（利用規約 第4条）。当方は補填しません（第8条）。\n・共有のサーバーでは、送った内容や生成物をその管理者や他の利用者が見られることがあります。\n・接続先の利用規約と関係する法令に沿ってご利用ください。\n・外部のサーバーの利用で生じた損害についての当方の責任は、利用規約 第11条の定めによります。\n内容にご同意いただける場合は、接続してください。",
+      "remoteAgree": "同意して接続",
+      "remoteCancel": "やめる",
+      "urlLabel": "接続先 ComfyUI の URL",
+      "connect": "接続",
+      "needsConnection": "先に接続してください",
+      "definitionCount": {
+        "other": "ノード定義 {count} 件"
+      }
+    },
+    "connect": {
+      "heading": "ComfyUI に接続する",
+      "launchStep": "1. ComfyUI をアクセス許可つきで起動する",
+      "launchNote": "ComfyUI を起動するコマンドに、次のように起動オプションを足します。",
+      "launchWhy": "このUIはブラウザ上でのローカル駆動をしますが、ComfyUIの設定によって、ブラウザが別URLへの通信をブロックしてしまうためこのオプションが必要です。",
+      "securityLink": "セキュリティ上のリスクの解説",
+      "securityCors": "ComfyUIはデフォルトで異なるURLからのリクエストを処理しないようブラウザに指示するため、enable-cors-headerのオプションにより例外条件を加える必要があります。",
+      "securityListen": "enable-cors-headerは他のPCやインターネットからネットワークアクセスを許可するものではありません。そういった設定は--listen オプションによるネットワーク公開が必要ですが、これはリスクが非常に高いため十分な知識と意図を持った場合を除き、避けてください。",
+      "securityDirect": "KisaraUIはローカルのブラウザ上で動作し、入力内容はブラウザからComfyUIへ直接送信するため、実行内容を外部に送信したり、中継することはしない設計となっています。",
+      "securityTamper": "ただし、Webサイトの改竄や悪意を持った更新により、ページに不適切なコードが埋め込まれた場合、UI上の情報を外部に送信したり、ComfyUIのAPIを介した情報搾取が理論上は可能です。",
+      "securityScope": "このようにComfyUIが持つAPIの範囲に限ったリスクを有します。ComfyUIのプロセスとしてOSリソースへのアクセス権限を得うるカスタムノードに比べれば幾分セキュアですが、潜在的に有するリスクを理解した上でご利用ください。",
+      "securityInspect": "これらのリスクが不安な場合には、ブラウザのF12開発者モード等により通信先や内容をチェックしたり、このページをファイル保存し生成AIにコード解析させるなどで検証することが可能です。",
+      "urlStep": "2. 接続先を入力して接続する",
+      "urlTabHint": "空のときに Tab キーを押すと、例のアドレスをそのまま入力します",
+      "permissionNote": "ブラウザからローカルネットワークへのアクセス許可を求められた場合は「許可」を選んでください。",
+      "connectTitle": "ComfyUI へ接続します",
+      "reconnect": "再接続",
+      "reconnectTitle": "いったん切って ComfyUI へ接続し直します",
+      "connecting": "接続しています…",
+      "target": "接続先: {url}",
+      "openHeading": "3. ワークフローを開く",
+      "fromTemplate": "テンプレートから開く",
+      "fromFile": "ファイルから開く",
+      "empty": "空で開く",
+      "connected": {
+        "other": "接続済み - ノード定義 {count} 件"
+      },
+      "connectedPlain": "接続済み"
+    },
+    "bar": {
+      "heading": "Comfyバックエンド",
+      "reconnect": "再接続",
+      "reconnectTitle": "いったん切って ComfyUI へ接続し直し、進捗の通知を張り直します",
+      "connectTitle": "ComfyUI へ接続し、進捗の通知を張り直します",
+      "checking": "接続を確かめています",
+      "noUrl": "未設定",
+      "openConnectTitle": "「ComfyUI に接続する」を開き、接続先を変えるかつなぎ直します"
+    },
+    "status": {
+      "definitionsCached": {
+        "other": "ノード定義 {count} 件（キャッシュ）"
+      },
+      "definitionsFetched": {
+        "other": "ノード定義 {count} 件（取得）"
+      },
+      "definitionsLoading": "ノード定義: 読み込み中",
+      "definitionsMissing": "ノード定義: 未取得",
+      "noTarget": "接続先未設定",
+      "detail": "（{detail}）"
+    },
+    "imageTab": {
+      "notKept": "画像は端末に残していないため、読み込み直すと表示できません。もう一度ファイルを開いてください",
+      "region": "画像の埋め込み"
+    },
+    "insert": {
+      "noFieldTitle": "この画面の外にある複数行の入力欄にキャレットを置いてから押してください",
+      "title": "選んでいる入力欄のキャレット位置に差し込みます"
+    },
+    "saveAs": {
+      "title": "名前を付けて保存",
+      "description": "ComfyUI の workflows フォルダに保存します。",
+      "nameLabel": "ワークフロー名"
+    },
+    "side": {
+      "label": "右の列",
+      "queue": "タスク",
+      "history": "履歴",
+      "report": "エラー",
+      "settings": "設定",
+      "dockBottom": "下に置く",
+      "dockRight": "右に置く",
+      "tabBoundary": "{name}のタブ"
+    },
+    "template": {
+      "title": "テンプレートから開く",
+      "fellBack": "この言語の一覧が無いため英語で表示しています",
+      "subtitle": "KisaraUI と ComfyUI に同梱のワークフロー",
+      "localeLabel": "一覧の言語",
+      "localeTitle": "題名・説明・カテゴリ名の言語です",
+      "category": "カテゴリ",
+      "toolbar": "テンプレートの操作",
+      "close": "テンプレートを閉じる",
+      "all": "すべて",
+      "filterToolbar": "テンプレートの絞り込み",
+      "filterLabel": "テンプレートを絞り込む",
+      "filterPlaceholder": "題名・説明・タグ・モデル名で絞り込み",
+      "sortLabel": "並び替え",
+      "sort": {
+        "default": "既定",
+        "popular": "人気",
+        "newest": "新しい順",
+        "name": "名前順",
+        "size": "モデルの小さい順"
+      },
+      "loading": "一覧を読み込み中…",
+      "loadFailed": "一覧を取得できません: {message}",
+      "empty": "該当するテンプレートがありません",
+      "loadingMore": "読み込み中… {shown} / {total}",
+      "builtinCategory": "KisaraUI",
+      "builtin": {
+        "a1111Txt2img": {
+          "title": "txt2img（A1111 風）",
+          "description": "Stable Diffusion web UI と同じ並びの画像生成。プロンプトに LoRA とワイルドカード、Hires. fix と ADetailer の切り替え。Impact Pack が要ります（ADetailer は Impact Subpack も）"
+        }
+      }
+    },
+    "fileInput": {
+      "dropHint": "ファイルを開く"
+    },
+    "toasts": {
+      "saved": "ComfyUI に保存しました",
+      "saveFailed": "ComfyUI に保存できません",
+      "loadFailed": "ワークフローを読み込めません"
+    },
+    "list": {
+      "label": "ワークフローの一覧",
+      "saved": "ComfyUI に保存されているワークフロー"
+    },
+    "open": {
+      "loadFailed": "一覧を取得できません: {error}",
+      "empty": "該当するワークフローがありません"
+    },
+    "tabMenu": {
+      "save": "上書き保存",
+      "saveAs": "名前を付けて保存…",
+      "export": "エクスポート",
+      "exportTitle": "Workflow JSON としてダウンロードします"
+    },
+    "saveGuard": {
+      "existsForeign": "同じ名前の、KisaraUI で作っていないワークフローがあります。別の名前にしてください（workflows/{path}）",
+      "notOwned": "KisaraUI で作ったファイルではないため上書きしませんでした。名前を付けて保存してください（workflows/{path}）",
+      "connectionChanged": "接続先が変わったため保存しませんでした。保存し直してください",
+      "notOwnedTitle": "KisaraUI で作ったファイルではないため上書きできません。名前を付けて保存してください",
+      "otherServerTitle": "別の接続先から開いたため上書きできません。名前を付けて保存してください"
+    },
+    "tool": {
+      "title": "LLM からの呼び出し設定",
+      "name": "機能名（英数、ハイフン、アンダーバー）",
+      "purpose": "ワークフローの説明",
+      "purposePlaceholder": "ワークフローの機能、呼び出すシーンやトリガー、文書形式の指定",
+      "result": "アウトプット（結果として渡す画像）",
+      "allOutputs": "すべて",
+      "params": "インプット（引数入力として求める内容）",
+      "noInputs": "アプリ入力がありません。",
+      "noParams": "引数がありません。",
+      "notEligible": "この型は引数にできません",
+      "paramName": "{label} の引数名",
+      "paramNamePlaceholder": "引数名（英数記号）",
+      "paramDescription": "{label} の説明",
+      "paramDescriptionPlaceholder": "引数の説明（ノードに渡す内容や形式）",
+      "badName": "機能名に使えるのは、英字の大文字・小文字、数字、ハイフン、アンダーバーだけです（64 字まで）。",
+      "badParamName": "引数名に使えるのは、英字の大文字・小文字、数字、ハイフン、アンダーバーだけです（64 字まで）。",
+      "duplicateParam": "同じ引数名が 2 つあります。",
+      "save": "保存",
+      "reset": "リセット",
+      "tab": "タブ",
+      "tabWithId": "{name}（{id}）",
+      "file": "ファイル名",
+      "tabClosed": "（閉じています）",
+      "unsaved": "（保存していません）",
+      "mode": "{label} の入れ方",
+      "modeOverwrite": "上書き",
+      "modePrepend": "前方追加",
+      "modeAppend": "後方追加",
+      "noOutputs": "出力ノードがありません。"
+    },
+    "landing": {
+      "title": "ワークフロー（ComfyUI）",
+      "summary": "手元の ComfyUI でワークフローを開いて実行します。",
+      "start": "ComfyUI を使う",
+      "routeName": "ComfyUI",
+      "routeVia": "HTTP・WebSocket（直接）"
+    }
+  },
+  "styles": {
+    "edit": "スタイルの編集",
+    "title": "スタイル",
+    "newStyle": "新しいスタイル",
+    "close": "スタイルの編集を閉じる",
+    "list": "スタイルの一覧",
+    "insertToolbar": "スタイルの取り込み",
+    "positive": "肯定",
+    "negative": "否定",
+    "insertPositive": "肯定の文面をキャレット位置に取り込む",
+    "insertNegative": "否定の文面をキャレット位置に取り込む",
+    "positiveText": "肯定の文面",
+    "negativeText": "否定の文面",
+    "copyPositive": "肯定の文面を写す",
+    "copyNegative": "否定の文面を写す",
+    "filterToolbar": "スタイルの絞り込み",
+    "filterLabel": "スタイルを絞り込む",
+    "filterPlaceholder": "名前・文面で絞り込み",
+    "remove": {
+      "title": "削除しますか",
+      "description": "「{name}」を表から削除します。元に戻せません。"
+    },
+    "refresh": "スタイルの表を取り直す",
+    "refreshTitle": "接続先の表を読み直します（自動では読み直しません）",
+    "itemTitle": "{name}（ダブルクリック・掴んで欄へ落とすと肯定の文面を取り込む）",
+    "name": "名前",
+    "nameLabel": "スタイルの名前",
+    "saveTitle": "接続先の表を書き戻します",
+    "saving": "保存中…",
+    "errors": {
+      "emptyName": "名前を入れてください",
+      "duplicateName": "同じ名前のスタイルがあります（大文字と小文字は区別しません）",
+      "notLoaded": "スタイルをまだ読み込めていません"
+    }
+  },
+  "wildcards": {
+    "title": "ワイルドカード",
+    "pickPrompt": "一覧から選んでください",
+    "close": "ワイルドカードを閉じる",
+    "refresh": "ワイルドカードの一覧を取り直す",
+    "refreshTitle": "接続先の一覧を読み直します（自動では読み直しません）",
+    "tree": "ワイルドカードの階層",
+    "decideToolbar": "ワイルドカードの決定",
+    "insert": "ワイルドカードをキャレット位置に取り込む",
+    "filterToolbar": "ワイルドカードの絞り込み",
+    "filterLabel": "ワイルドカードを絞り込む",
+    "filterPlaceholder": "名前で絞り込み",
+    "copy": "ワイルドカードを写す",
+    "noMatch": "当てはまるものがありません",
+    "list": "ワイルドカードの一覧",
+    "itemTitle": "{name}（ダブルクリック・掴んで欄へ落とすと取り込む）"
+  },
+  "tagComplete": {
+    "list": "タグの候補",
+    "count": "候補 {count} 件。上下で選び、Enter か Tab で入れます"
+  },
+  "tags": {
+    "title": "タグ辞書",
+    "close": "タグ辞書を閉じる",
+    "refresh": "タグ辞書を読み直す",
+    "refreshTitle": "接続先から辞書を読み直します（自動では読み直しません）",
+    "dictionaries": "辞書",
+    "all": "すべて",
+    "pysssss": "pysssss",
+    "readOnly": "読むだけ",
+    "confirmToolbar": "直しの確定",
+    "confirm": "確定",
+    "confirmLabel": "直した分を辞書へ書く",
+    "confirmTitle": "表で直した分を接続先へ書きます",
+    "confirmIdleTitle": "書く分がありません。表を直してから押します",
+    "filterToolbar": "タグの絞り込み",
+    "filterLabel": "タグを絞り込む",
+    "filterPlaceholder": "タグか別名で絞り込む",
+    "list": "タグの表",
+    "more": "ほかに {count} 件。絞り込むと出ます",
+    "tag": "タグ",
+    "aliases": "別名",
+    "priority": "優先度",
+    "rowActions": "行の操作",
+    "sortTitle": "{name}で並べ替えます（押すたびに昇順・降順・元の並び）",
+    "removeRow": "{name} を消す",
+    "removeRowTitle": "この行に取り消し線を引きます。確定で辞書から外します",
+    "restoreRow": "{name} を戻す",
+    "restoreRowTitle": "取り消し線を外します",
+    "addDictionary": "辞書を足す",
+    "addDictionaryTitle": "名前を入れて空の辞書を足します（確定で書きます）",
+    "dictionaryName": "辞書の名前",
+    "removeDictionary": "{name} を消す",
+    "removeDictionaryTitle": "辞書に取り消し線を引きます。確定でファイルを消します",
+    "restoreDictionary": "{name} を戻す",
+    "restoreDictionaryTitle": "辞書の取り消し線を外します",
+    "errors": {
+      "duplicateTag": "同じタグが 2 行あります: {name}",
+      "notLoaded": "辞書をまだ読み終えていません。読み直してからもう一度試してください",
+      "emptyName": "名前を入れてください",
+      "duplicateName": "同じ名前の辞書があります"
+    }
+  },
+  "app": {
+    "tabCount": {
+      "title": "タブが {limit} 個を超えています",
+      "description": "使っていないタブを閉じてください。開いているタブが多いと、画面と保存が遅くなります。"
+    },
+    "skipToMain": "本文へ移動",
+    "documentTitle": "{name} - KisaraUI",
+    "boundary": "アプリ",
+    "lazy": {
+      "templates": "テンプレート",
+      "chat": "会話",
+      "chatSettings": "会話の設定",
+      "chatList": "会話の一覧",
+      "storage": "ストレージの管理"
+    },
+    "overwrite": {
+      "title": "上書きしますか？",
+      "description": "同じ名前のワークフローが ComfyUI にあります（workflows/{path}）。上書きすると元に戻せません。",
+      "confirm": "上書きする"
+    },
+    "rootFallback": {
+      "title": "画面を表示できませんでした",
+      "hint": "開いていたワークフローが読めない形になっていると、読み込み直しても同じところで止まります。そのときは開いていたタブの控えを消してください（ComfyUI に保存したものとファイルは消えません）。",
+      "retry": "もう一度表示する",
+      "reload": "読み込み直す",
+      "discard": "タブの控えを消して読み込み直す",
+      "diagnostics": "ログをエクスポート",
+      "previewLabel": "書き出す中身（全文）",
+      "save": "保存する"
+    },
+    "tabs": {
+      "untitled": "名称未設定",
+      "nameField": "ワークフロー名",
+      "renameHint": "ダブルクリックで名前を変えます。閉じるのは右クリックのメニュー（キーボードでは Delete）",
+      "menu": "{name} のメニュー",
+      "list": "開いているタブ",
+      "chooseKind": "タブの種類を選ぶ",
+      "kind": {
+        "workflow": "ワークフロー",
+        "chat": "会話"
+      },
+      "receiving": "受け取り中",
+      "running": "実行中",
+      "moveLeft": "左へ移す",
+      "moveRight": "右へ移す"
+    },
+    "pin": {
+      "pin": "ピン止めする",
+      "unpin": "ピン止めを外す（アイコンに縮める）"
+    },
+    "landing": {
+      "title": "使うものを選ぶ",
+      "lead": "選ぶと、このタブがその画面に切り替わります。どこへ何が送られるかと注意は、下にまとめています。",
+      "consentHeading": "利用規約への同意",
+      "choicesLabel": "使うもの",
+      "routesHeading": "接続の経路",
+      "hostName": "このページの配信元（{url}）",
+      "hostVia": "画面のファイルだけ",
+      "hostDetail": "この画面のファイルを渡すだけです。入力や結果は通りません。",
+      "browserName": "ブラウザ（このページ）",
+      "browserDetail": "入力と結果は、ここから接続先へ直接送ります。",
+      "localDevice": "ローカル端末",
+      "notesHeading": "セキュリティの注意"
+    },
+    "welcome": {
+      "title": "KisaraUI",
+      "open": "はじめの画面を開く",
+      "aboutHeading": "これはなに？",
+      "about": "KisaraUI は LLM チャットや画像生成を手軽に実行するための API フロントエンドです。ブラウザだけで動作し、お手元の AI 実行環境やクラウド API へのリクエストを行います。",
+      "usesHeading": "できること",
+      "useChatName": "会話（LLM）",
+      "useChat": "手元の LLM サーバーや、OpenRouter などのクラウド API とつないで会話します。",
+      "useImageName": "画像生成（ComfyUI）",
+      "useImage": "手元の ComfyUI のワークフローを開き、値を変えて実行します。",
+      "featuresHeading": "特長",
+      "featureBrowserName": "ブラウザだけで動く",
+      "featureBrowser": "KisaraUI 自体のインストールやアカウントの登録は要りません。別途お持ちの LLM 実行環境や Comfy 環境へ接続してご利用ください。",
+      "featurePrivacyName": "プライバシーへの配慮",
+      "featurePrivacy": "ブラウザと推論環境が直接通信し、通信内容の中継や結果の外部送信を行いません。",
+      "featureCraftName": "シンプルさと機能性",
+      "featureCraft": "シンプルな操作性にしながら、裏側の透明性とカスタマイズ性に配慮しています。",
+      "system": "システム構成",
+      "systemLink": "（{link}）"
+    }
+  },
+  "ui": {
+    "copy": {
+      "copy": "コピー",
+      "copied": "写しました",
+      "failed": "写せません"
+    },
+    "decide": {
+      "caption": "決定"
+    },
+    "dialog": {
+      "toDocked": "埋め込みにする",
+      "toFloating": "自由移動にする",
+      "toDockedTitle": "埋め込みにする（ノードと変数の列に嵌めます）",
+      "toFloatingTitle": "自由移動にする（画面の上に浮かべて動かせます）",
+      "resize": "引いて大きさを変えます"
+    },
+    "directory": {
+      "all": "すべて"
+    },
+    "boundary": {
+      "cannotShow": "{label}を表示できません",
+      "retry": "もう一度表示する"
+    },
+    "divider": {
+      "width": "{label}の幅",
+      "height": "{label}の高さ",
+      "widthTitle": "左右に引いて幅を変えます",
+      "heightTitle": "上下に引いて高さを変えます"
+    },
+    "partLoading": {
+      "loading": "{label}を読み込んでいます",
+      "failed": "{label}を読み込めません",
+      "staleHint": "新しい版を置いた直後は、開いたままのページから読めないことがあります。",
+      "reload": "読み込み直す"
+    },
+    "combobox": {
+      "open": "{name}の一覧を開く",
+      "remove": "{item} を履歴から消す",
+      "removeHint": "履歴から消す（Shift+Delete）"
+    },
+    "drag": {
+      "instructions": "項目を掴むには空白キーか Enter キーを押します。掴んでいる間は矢印キーで動かします。もう一度空白キーか Enter キーを押すと置き、Esc キーで取り消します。",
+      "sortable": "並べ替えられる項目",
+      "draggable": "動かせる項目",
+      "item": "項目",
+      "start": "{name} を掴みました。",
+      "overSort": "{name} は {target} の位置にあります。",
+      "overDrop": "{name} は {target} の上にあります。",
+      "overHome": "{name} は元の位置にあります。",
+      "overNone": "{name} は落とせる場所の上にありません。",
+      "endSort": "{name} を {target} の位置に置きました。",
+      "endDrop": "{name} を {target} に落としました。",
+      "endHome": "{name} を元の位置に置きました。",
+      "endNone": "{name} を置きました。",
+      "cancel": "取り消しました。{name} は元の位置に戻りました。"
+    }
+  },
+  "graph": {
+    "color": {
+      "red": "赤",
+      "brown": "茶",
+      "green": "緑",
+      "blue": "青",
+      "paleBlue": "淡青",
+      "cyan": "シアン",
+      "purple": "紫",
+      "yellow": "黄",
+      "black": "黒"
+    },
+    "rows": {
+      "valueFallback": "値 {index}"
+    },
+    "search": {
+      "groups": {
+        "frequent": "よく使うもの",
+        "used": "現在使用中",
+        "custom": "カスタムノード",
+        "partner": "パートナーノード"
+      }
+    },
+    "prompt": {
+      "noOutput": "実行対象の出力ノードがありません",
+      "unknownClass": "ノード定義が見つかりません（未導入のカスタムノード？）: {type}",
+      "unresolvedWidgets": "パラメータの位置対応を解決できないため、既定値で実行します（想定 {expected} 個 / 実際 {actual} 個）",
+      "missingInput": "必須入力 \"{name}\" が未接続です",
+      "brokenNode": "読めない形のノードのため実行の形に変えられません: {message}",
+      "danglingReference": "入力 \"{name}\" の接続先（{source}）が実行対象に含まれていません",
+      "namedMismatch": "パラメータの名前の並びが定義と食い違うため、このノードは実行しません（値がずれているおそれがあります）",
+      "typeMismatch": "パラメータの値の型が定義と合わないため、このノードは実行しません（値がずれているおそれがあります）",
+      "excludedDownstream": "入力元のノード {source} を実行しないため、このノードも実行しません",
+      "subgraphCycle": "subgraph「{name}」が自分自身を含んでいるため、開けません",
+      "noOutputLeft": "実行できる出力ノードが残らないため、投入しません"
+    },
+    "parse": {
+      "notObject": "Workflow JSON がオブジェクトではありません",
+      "noNodes": "nodes[] がありません",
+      "noLinks": "links[] がありません",
+      "invalidNode": "nodes[{index}] に id または type がありません",
+      "duplicateNode": "ノードの id {id} が複数のノードで使われています（nodes[{index}]）"
+    },
+    "png": {
+      "empty": "この PNG にはワークフローも埋め込みの文字も入っていません"
+    }
+  },
+  "api": {
+    "consentRequired": "必要な同意がまだ無いため、送りませんでした。",
+    "request": {
+      "aborted": "要求が中断されました",
+      "timeout": "応答がありません（{ms}ms）",
+      "unreachable": "接続先に到達できません",
+      "parse": "JSON として解釈できない応答です",
+      "fetchFailed": "取得できませんでした ({status})"
+    },
+    "upload": {
+      "unexpected": "アップロードの応答の形が想定と違います"
+    },
+    "baseUrl": {
+      "empty": "接続先 URL が空です",
+      "unsupportedScheme": "http(s) 以外は接続先にできません: {url}",
+      "invalid": "接続先 URL の形式が不正です: {url}"
+    },
+    "prompt": {
+      "rejected": "実行を受け付けられませんでした"
+    },
+    "run": {
+      "error": "実行時エラー",
+      "interrupted": "中断しました"
+    },
+    "workflow": {
+      "exists": "同じ名前のワークフローがあります: {path}",
+      "notOwned": "KisaraUI で作ったファイルではないため上書きしませんでした: {path}"
+    },
+    "runHistory": {
+      "unexpected": "実行の記録のファイルの形が想定と違います"
+    }
+  },
+  "fault": {
+    "where": {
+      "history": "履歴 {id}",
+      "notification": "通知",
+      "nodeDefinition": "ノード定義 {name}",
+      "nodeRows": "ノード {id}（{type}）の表示",
+      "nodeVariables": "ノード {id}（{type}）の変数",
+      "processing": "処理",
+      "operation": "通信・操作"
+    },
+    "toast": {
+      "title": "{where}で想定外の失敗が起きました",
+      "description": "{message}（詳しくはブラウザのコンソールに出しています）",
+      "diagnostics": "ログをエクスポート"
+    }
+  },
+  "storageWarning": {
+    "settings": "設定をブラウザに保存できませんでした",
+    "draft": "開いているワークフローをブラウザに保存できませんでした",
+    "library": "ブラウザに保存できませんでした",
+    "description": "容量が足りないか、ブラウザの設定で保存が断られています。このページを開いている間は使えますが、読み込み直すと消えます。"
+  },
+  "writeConflict": {
+    "changed": {
+      "title": "「{name}」はほかのタブで変更されています",
+      "description": "このタブの変更は保存していません。読み込み直すと、ほかのタブの内容になります。",
+      "action": "このタブの内容で上書き"
+    },
+    "removed": {
+      "title": "「{name}」はほかのタブで削除されています",
+      "description": "このタブの変更は保存していません。読み込み直すと、一覧から消えます。",
+      "action": "このタブの内容で残す"
+    }
+  },
+  "demo": {
+    "openFile": "ファイルを開く",
+    "resetSample": "見本に戻す",
+    "openFailed": "開けませんでした: {error}",
+    "workflow": "ワークフロー",
+    "noWorkflowInImage": "この画像にはワークフローが入っていません",
+    "tagline": "ノードベースをフローベース化にした優位性検証",
+    "menu": "このデモについて",
+    "intro": {
+      "body": "左の App の列で値を変え、線をたどってカードを見てから「実行（模擬）」を押してください。どこにも送信しません。",
+      "close": "閉じる"
+    },
+    "run": {
+      "run": "実行（模擬）",
+      "runAgain": "もう一度実行",
+      "stop": "止める",
+      "close": "閉じる",
+      "note": "模擬の実行です。見本の画像で、このワークフローから作ったものではありません",
+      "running": "実行中: {name}",
+      "step": "手数 {value}/{max}",
+      "done": "終わり",
+      "outputs": "出力",
+      "show": "{name} を大きく出す",
+      "badge": "模擬"
+    }
+  },
+  "flow": {
+    "canvas": {
+      "nodeSearch": "ノードの検索",
+      "zoomIn": "拡大",
+      "zoomOut": "縮小",
+      "nodeSettings": "ノードの詳細設定",
+      "appendTitle": "末尾に追加するノード",
+      "insertTitle": "ここに追加するノード",
+      "openWorkflow": "ワークフローを開いてください",
+      "appColumn": "アプリ入力の列",
+      "appGap": "アプリ入力とカードの間",
+      "cardColumn": "カードの列",
+      "variablesGap": "カードと変数の間",
+      "variableColumn": "変数の列",
+      "connectors": "接続線"
+    },
+    "shared": {
+      "reorder": "{name} を並べ替える",
+      "addAfter": "{name} の先にノードを追加",
+      "deleteNode": "ノードを削除"
+    },
+    "card": {
+      "insertAboveLabel": "{name} の手前にノードを追加（繋がない）",
+      "toggleSelect": "{name} を選択に足す・外す",
+      "selectLabel": "{name} を選ぶ",
+      "insertAboveTitle": "ここにノードを追加（繋がずに足します）",
+      "state": {
+        "running": "実行中",
+        "error": "失敗",
+        "selected": "選択中"
+      },
+      "broken": "読めない形のノードのため表示できません: {reason}",
+      "showParams": "{name} のパラメータを表示",
+      "hideParams": "{name} のパラメータを非表示",
+      "toggleParamsTitle": "クリックでパラメータの表示を切り替え",
+      "missingDefinition": "ノード定義が見つかりません（未接続、またはこの ComfyUI に未導入のカスタムノード）",
+      "noServerDefinition": "接続先に定義がないノードです（画面操作用のノードなど）。実行には関与しません",
+      "unresolved": "このノードのパラメータ位置を解決できないため読み取り専用です",
+      "menu": "{name} のメニュー",
+      "settingsTitle": "フローに出していない設定（大きさ・ピン留め）",
+      "settings": "詳細設定…",
+      "cloneSelectedTitle": "選んでいるノードをまとめて、最後の後ろに足します（写したものどうしの線は張り直します）",
+      "cloneTitle": "同じ内容のノードをすぐ後ろに足します（入力の線は引き、出力は繋ぎません）",
+      "clone": "クローン",
+      "groupTitle": "選んでいるノードを 1 つのグループにまとめます",
+      "group": "グループ化"
+    },
+    "row": {
+      "insertBeforeLabel": "{name} の手前にノードを追加",
+      "insertBeforeTitle": "この入力の手前にノードを追加",
+      "addAppInput": "{name} をアプリ入力にする",
+      "removeAppInput": "{name} をアプリ入力から外す",
+      "appInputOnTitle": "アプリ入力（App Mode）の対象です。編集は左の列で行います",
+      "appInputOffTitle": "アプリ入力（App Mode）の対象にする",
+      "disconnectLabel": "{name} の接続を解除",
+      "disconnect": "接続を解除",
+      "unconnected": "未接続",
+      "unconnectedRequired": "未接続（必須）",
+      "unknownName": "パラメータ名を特定できません",
+      "unknownNameTitle": "ノード定義が無いため名前を特定できていません（読み取り専用）"
+    },
+    "list": {
+      "nodeLabel": "ノード {index}（{name}）",
+      "addNode": "ノードを追加",
+      "addNodeTitle": "末尾にノードを追加（繋がずに足します）",
+      "firstNode": "最初のノードを追加してください。"
+    },
+    "appInput": {
+      "dragToReorder": "ドラッグで並べ替え",
+      "importLabel": "{name} にカードの値を取り込む",
+      "menu": "アプリ入力の操作",
+      "importTitle": "カードの値を取り込む: {value}",
+      "toStyleLabel": "{name} をスタイルに送る",
+      "toStyleTitle": "この文面を肯定に入れて、スタイルの新規を開く",
+      "editCommentTitle": "{name}（押すとコメントを書き換えます）",
+      "editCommentLabel": "{name} のコメントを書き換える",
+      "commentLabel": "{name} のコメント（アプリ入力の枠）",
+      "empty": "パラメータ名の左のアイコンで、アプリ入力にする項目を選びます。",
+      "frame": "アプリ入力の枠（{name}）",
+      "remove": "アプリ入力から外す",
+      "closeFrameLabel": "{name} の枠を閉じる（アプリ入力から外す）",
+      "closeFrameTitle": "この枠の項目をアプリ入力から外します（カードの値は残ります）",
+      "argument": "LLM の引数: {name}"
+    },
+    "cardGroup": {
+      "label": "グループ {title}",
+      "reorder": "グループ {title} を並べ替える",
+      "menu": "グループ {title} のメニュー",
+      "ungroupTitle": "枠だけを外します（カードはそのまま）",
+      "ungroup": "グループを解除",
+      "rename": "グループ {title} の名前を編集する",
+      "name": "グループ {title} の名前",
+      "toSubgraph": "subgraph に変換",
+      "toSubgraphTitle": "メンバーとグループを新しい subgraph にする",
+      "deleteGroup": "グループごと削除",
+      "deleteGroupTitle": "枠と中のカードをまとめて外す",
+      "switchShow": "アプリ入力に切り替えを出す",
+      "switchHide": "切り替えを外す",
+      "switchTitle": "このグループのカードをまとめてバイパスする切り替え"
+    },
+    "groupSwitch": {
+      "title": "切り替え",
+      "clearLabel": "切り替えをまとめて外す",
+      "clearTitle": "切り替えをこの列から外す（カードはそのまま）",
+      "mixed": "一部"
+    },
+    "subgraph": {
+      "mark": "subgraph",
+      "open": "subgraph {name} を開く",
+      "openTitle": "中のノードを枠の中にカードで並べる",
+      "openMenu": "枠として開く",
+      "frame": "subgraph {name}",
+      "close": "subgraph {name} をカードに戻す",
+      "closeTitle": "1 枚のカードに戻す",
+      "closeMenu": "カードに戻す",
+      "collapse": "subgraph {name} を閉じて折りたたむ",
+      "collapseTitle": "閉じて、折りたたんだカードにする",
+      "uses": "×{count}",
+      "usesTitle": "{count} か所で使っています。中の変更はすべてに効きます",
+      "toGroup": "グループに変換",
+      "toGroupTitle": "中のノードを外へ出し、グループにまとめる"
+    },
+    "style": {
+      "color": "色",
+      "defaultColor": "既定",
+      "custom": "カスタム…",
+      "mode": "実行モード",
+      "modeNormal": "通常",
+      "modeBypass": "バイパス",
+      "modeMute": "ミュート"
+    },
+    "variables": {
+      "addAfterTitle": "この変数を受け取るノードを追加",
+      "group": "変数のまとまり（{name}）",
+      "revealTitle": "{name}（ダブルクリックでカードへ送る）",
+      "cardGroupReveal": "{title}（ダブルクリックでグループのカードへ送る）"
+    },
+    "output": {
+      "dragTitle": "{name}（パラメータへドラッグして接続）",
+      "addAfterTitle": "この出力の先にノードを追加"
+    },
+    "connector": {
+      "appLine": "アプリ入力 → {name}",
+      "insertLabel": "{name} の間にノードを挟む",
+      "insertTitle": "この線の間にノードを挟む",
+      "menu": "線のメニュー",
+      "menuInsert": "ノードを追加",
+      "menuDisconnect": "接続を削除",
+      "menuDisconnectAll": "接続を削除（{count} 本）"
+    },
+    "resize": {
+      "columnWidth": "{name}の幅",
+      "spanWidth": "{name} の幅",
+      "height": "{name} の高さ",
+      "heightTitle": "上下に引いて高さを変えます"
+    },
+    "comment": {
+      "none": "コメントなし",
+      "emptyTitle": "押すとコメントを書きます",
+      "editLabel": "{name} のコメントを編集する",
+      "write": "コメントを書く",
+      "label": "{name} のコメント"
+    },
+    "connectSlot": {
+      "title": "どこに繋ぎますか",
+      "pickInput": "{name} の入力を選んでください（起点は {type}）",
+      "pickOutput": "{name} の出力を選んでください（起点は {type}）",
+      "typeMismatch": "（型が違います）",
+      "addUnconnected": "繋がずに足す"
+    },
+    "toggles": {
+      "controlLabel": "操作系ノードを表示",
+      "controlShown": "操作系ノード（グループ切り替えなど画面操作用）を出しています",
+      "controlHidden": "操作系ノード（グループ切り替えなど画面操作用）を隠しています",
+      "unlinkedLabel": "繋がっていないノードを表示",
+      "unlinkedShown": "繋がっていないノード（メモなど）を出しています",
+      "unlinkedHidden": "繋がっていないノード（メモなど）を隠しています"
+    },
+    "sort": {
+      "label": "処理順に並べる",
+      "title": "処理の順（上流が先）にカードを並べ直します",
+      "confirmTitle": "処理順に並べますか？",
+      "confirmDescription": "カードを処理の順（上流が先）に並べ直します。いまの並びは置き換わります。",
+      "confirm": "並べる",
+      "fromOriginTitle": "縦も今の位置に寄せず、左上から置き直します",
+      "fromOrigin": "全てのノード座標を再配置"
+    },
+    "widget": {
+      "loadOptionsLabel": "{name}（選択肢を読み込む）",
+      "loadOptionsTitle": "選択肢を読み込みます",
+      "unselected": "未選択",
+      "clear": "空にする",
+      "resetToCard": "未入力に戻す",
+      "stray": "選択肢に無い値です。このまま実行すると断られます"
+    },
+    "valueTooltip": {
+      "muted": "(ミュート)",
+      "bypassed": "(バイパス)"
+    },
+    "missingDefinitions": "ノード定義が未取得です。接続するとパラメータを表示・編集できます。"
+  },
+  "run": {
+    "execution": {
+      "nodeError": "ノードの実行でエラーが起きました",
+      "unknown": "ステータス不明: 結果を確認できませんでした（通知が途切れた可能性があります）",
+      "timeout": "ステータス不明: ComfyUI から応答がありません（再接続を {count} 回試して打ち切りました）",
+      "dropped": "ステータス不明: 実行中に通知が {count} 回切れたため切断しました。使うには「再接続」を押してください",
+      "socketDown": "送っていません: ComfyUI の通知が切断されています。先に「再接続」を押してください"
+    },
+    "report": {
+      "innerLine": "（内側 #{id}）{text}",
+      "rejected": "受け付けられませんでした: {reason}",
+      "missingDefinition": "ノード定義が見つかりません: {classType}（接続先の ComfyUI に未導入か、ノード定義の更新が必要です）",
+      "missingDefinitionDisabled": "{classType} の定義が見つかりません（無効化しているので実行には含みません）",
+      "otherWriter": "「{name}」の一時保存は、ほかのブラウザのタブで書き換えられていました（{time}）",
+      "parallelEdit": "「{name}」は、ほかのブラウザのタブでも編集されています（最後の編集 {time}）",
+      "untitledTab": "名称未設定",
+      "noIssues": "問題はありません"
+    },
+    "control": {
+      "repeatHint": "このタブのワークフローを、止めるまで 1 件ずつ投げ続けます（GPU を使い続けます）。ほかのタブの繰り返しも続き、交互に処理されます。中断では止まります",
+      "repeatActive": "このタブは繰り返しの最中です。止めるのはタスクの列から",
+      "blocked": {
+        "noWorkflow": "ワークフローを開いてください",
+        "notConnected": "先に接続してください",
+        "sending": "実行を送信しています…"
+      },
+      "enqueueHint": "キューに追加します（実行中のものが終わってから動きます）",
+      "runHint": "ワークフローを実行します（GPU を使います）",
+      "queue": "キュー",
+      "run": "実行",
+      "chooseMethod": "実行の方法を選ぶ",
+      "chooseMethodHint": "実行の方法を選びます",
+      "repeat": "繰り返し実行",
+      "interrupt": "中断",
+      "interruptHint": "このタスクだけを止めます",
+      "errors": {
+        "other": "エラー {count} 件（エラーのタブを開く）"
+      },
+      "errorsHint": "エラーがあります。押すと右の列のエラーのタブを開きます",
+      "panel": "実行の操作",
+      "move": "実行の操作を動かす",
+      "moveHint": "掴んで動かします（キーボードでは空白キーで掴み、矢印キーで動かします）"
+    },
+    "convertFailed": "実行の形に変えられませんでした: {message}"
+  },
+  "queue": {
+    "dialog": {
+      "closeEsc": "閉じる（Esc）",
+      "notFollowing": "追従しない",
+      "noImages": "画像はありません"
+    },
+    "card": {
+      "openImage": "画像を開く",
+      "openImageHint": "画像をビューワーで開きます",
+      "openLatest": "最新の画像を開く",
+      "openLatestHint": "一番新しい画像をビューワーで開きます",
+      "openDetailHint": "押すと実行内容と結果を開きます",
+      "cancel": "キューから外す",
+      "cancelHint": "実行前のこのタスクをキューから外します",
+      "nodeProgress": "{finished}/{total} ノード"
+    },
+    "panel": {
+      "fetchFailed": "キューを取得できません: {error}",
+      "empty": "キューは空です",
+      "connectToShow": "接続するとキューを表示します",
+      "others": "ほかの実行: 実行中 {running}・待機 {pending}"
+    },
+    "session": {
+      "placeholder": "session: {id}",
+      "name": "セッション名",
+      "nameHint": "履歴管理の識別子を設定できます。",
+      "off": "名前を付けるには、設定で実行の記録をオンにしてください。",
+      "rotate": "次のセッションに切り替える",
+      "rotateHint": "次のセッションに切り替えます。"
+    },
+    "repeat": {
+      "untitled": "名称未設定",
+      "running": "繰り返し中",
+      "count": "{count} 回目",
+      "stop": "繰り返しを停止",
+      "stopHint": "次を投げずに繰り返しを終えます（走っている分はそのまま）"
+    },
+    "detail": {
+      "title": "タスクの詳細",
+      "fetchFailed": "詳細を取得できません: {error}",
+      "fromImage": "ComfyUI の履歴に残っていないため、生成画像に埋め込まれた内容から読み出しました",
+      "notFound": "ComfyUI の履歴に残っておらず、生成画像からも読み出せませんでした",
+      "imageWidth": "画像の幅",
+      "imageWidthHint": "左右に引いて画像の幅を変えます",
+      "newer": "新しいタスクへ",
+      "newerHint": "新しいタスクへ（←）",
+      "older": "古いタスクへ",
+      "olderHint": "古いタスクへ（→）",
+      "unknownWorkflow": "（ワークフロー名は不明）",
+      "follow": "新しいタスクに追従する",
+      "following": "追従中: タスクが終わったら、そこへ移ります",
+      "openViewer": "ビューワーで開く",
+      "openViewerHint": "この画像からビューワーに切り替えます",
+      "section": {
+        "models": "モデル",
+        "prompts": "プロンプト",
+        "settingsTimed": "実行順・所要時間と設定",
+        "settings": "設定（seed・steps など）"
+      },
+      "role": {
+        "positive": "ポジティブ",
+        "negative": "ネガティブ"
+      }
+    },
+    "failure": {
+      "interruptedLabel": "中断の内容",
+      "failedLabel": "失敗の内容",
+      "interruptedNode": "中断したノード",
+      "stoppedNode": "止まったノード",
+      "copyInterrupted": "中断の内容を写す",
+      "copyError": "エラーの内容を写す",
+      "exception": "例外",
+      "unknownType": "（種類は不明）",
+      "stepsHeading": "そこまでの処理（{order}）",
+      "orderObserved": "実行した順",
+      "orderDependency": "線のつながりから求めた順",
+      "stoppedAs": "{node}（{state}）",
+      "interrupted": "中断",
+      "failed": "失敗",
+      "dependencyNote": "ComfyUI の履歴には動いた順が残らないため、線のつながりから並べています",
+      "cached": {
+        "other": "キャッシュを使ったノード {count} 件: {nodes}"
+      },
+      "notRun": {
+        "other": "動かなかったノード {count} 件"
+      },
+      "inputs": "止まったときの入力",
+      "traceback": {
+        "other": "トレースバック（{count} 段）"
+      },
+      "rejection": {
+        "label": "断られた理由",
+        "heading": "実行を受け付けられませんでした",
+        "copy": "断られた理由を写す",
+        "notRun": "ComfyUI のキューに入る前に断られたため、実行はしていません"
+      },
+      "notes": {
+        "label": "実行の注意",
+        "heading": "注意（実行の形に変えたとき）"
+      }
+    },
+    "copyText": {
+      "unknown": "（不明）",
+      "innerLabel": "#{label}（内側 #{id}）",
+      "headingLine": "{heading}: {node}",
+      "exception": "例外: {type}",
+      "orderDependency": "依存の順",
+      "stepsHeading": "そこまでの処理（{order}）:",
+      "cached": "キャッシュを使ったノード: {nodes}",
+      "notRun": "動かなかったノード: {count} 件",
+      "inputs": "止まったときの入力:",
+      "traceback": "トレースバック:",
+      "rejection": "断られた理由: {reason}"
+    },
+    "viewer": {
+      "title": "画像ビューワー",
+      "cannotOpenWindow": "別ウィンドウを開けません",
+      "imageMissing": "{name} は ComfyUI にもうありません",
+      "allowInBrowser": "ブラウザの設定で許可してください",
+      "openWindow": "別ウィンドウで開く",
+      "openWindowHint": "別ウィンドウで開きます",
+      "grid": {
+        "increase": "{label}を増やす",
+        "decrease": "{label}を減らす",
+        "title": "{label}: {value}（{hint}）",
+        "rows": "行",
+        "rowsHint": "縦に並べる枚数",
+        "cols": "列",
+        "colsHint": "横に並べる枚数"
+      },
+      "backToGrid": "並びに戻す",
+      "toFirst": "先頭へ（全 {total} 枚）",
+      "toFirstHint": "先頭（最新）のページへ",
+      "enlarge": "{name} を大きく見る",
+      "noImagesToShow": "表示できる画像がありません",
+      "newer": "新しい方へ",
+      "newerHint": "新しい方へ（←）",
+      "older": "古い方へ",
+      "olderHint": "古い方へ（→）",
+      "follow": "新しい画像に追従する",
+      "fit": "画面に合わせる",
+      "fitHint": "画面に合わせる（f）",
+      "actualSize": "実サイズで見る",
+      "actualSizeHint": "実サイズで見る（f）",
+      "filter": {
+        "label": "出す画像の種別",
+        "all": "すべて",
+        "temp": "temp",
+        "output": "output"
+      },
+      "followHint": "新しい画像の追加に連動して先送りする",
+      "slideshow": {
+        "label": "スライドショー",
+        "title": "スライドショー: {seconds} 秒ごとに新しい方へ送ります",
+        "unit": "秒"
+      }
+    }
+  },
+  "history": {
+    "card": {
+      "unnamed": "名前なし",
+      "openImages": "{name} の画像を開く",
+      "openImagesHint": "このワークフローの画像をすべてビューワーで開く",
+      "openDetailHint": "このワークフローの実行の詳細を開く",
+      "noModel": "モデル不明",
+      "dateRuns": "{date} / {runs} 回"
+    },
+    "detail": {
+      "title": "履歴の詳細",
+      "runCount": "{count} 回",
+      "openWorkflow": "このワークフローを開く",
+      "openWorkflowHint": "選んでいる実行の画像に埋まったワークフローを開く",
+      "openFailed": "この実行の画像からワークフローを読めませんでした（PNG が無い・画像が消えた・ワークフローが埋まっていない）。",
+      "notRestored": "この実行の画面の状態を戻せませんでした",
+      "newer": "新しいカード",
+      "older": "古いカード",
+      "runs": "実行",
+      "seeds": "シード {seeds}",
+      "seedSection": "シード",
+      "seedNode": "ノード {id}",
+      "copyPrompt": "このプロンプトを写す",
+      "nodeOnly": "ノード {id}",
+      "nodeLabel": "ノード {id} {name}",
+      "nodeLabelComment": "ノード {id} {name} / {comment}",
+      "images": "画像 {count} 枚",
+      "kindModel": "モデル",
+      "kindLora": "LoRA",
+      "kindOther": "その他",
+      "session": "session: {id}",
+      "sessionNamed": "{name}（{id}）",
+      "sessionLabel": "セッション",
+      "typeLabel": "タイプ"
+    },
+    "panel": {
+      "notRecording": "実行の記録はオフです。",
+      "fetchFailed": "履歴を読めません: {error}",
+      "connectToShow": "接続すると履歴を表示します",
+      "loading": "読み込み中…",
+      "empty": "記録された実行はまだありません",
+      "refresh": "履歴を読み直す",
+      "rangeAll": "すべて",
+      "rangeUpTo": "{date} 以前",
+      "rangeLabel": "さかのぼる範囲",
+      "enableRecording": "実行の記録をオンにする"
+    }
+  },
+  "llm": {
+    "side": {
+      "label": "会話の設定",
+      "generation": "パラメタ",
+      "prompt": "プロンプト",
+      "tabBoundary": "{name}のタブ",
+      "settings": "設定",
+      "extension": "機能"
+    },
+    "connection": {
+      "baseUrl": "ベース URL",
+      "baseUrlHint": "/chat/completions の手前まで（多くは /v1 で終わる）",
+      "none": "未接続",
+      "apiKey": "API キー",
+      "showKey": "API キーを見せる",
+      "hideKey": "API キーを伏せる",
+      "enterKey": "API キーをセット",
+      "keyEntered": "設定済",
+      "keyVerified": "API キー検証済み",
+      "entryBlocked": "キーを入れる窓を開けませんでした。このサイトのポップアップを許可してから、もう一度押してください。",
+      "entryUnready": "ゲートウェイにまだつながっていません。少し待ってからもう一度押してください。続くときはページを読み込み直してください。",
+      "noModels": "接続済み - モデルの一覧なし（名前を打ち込んでください）",
+      "noKey": "API キーなし",
+      "model": "モデル",
+      "modelPlaceholder": "モデルの名前",
+      "connect": "接続",
+      "reconnect": "再接続",
+      "connecting": "接続しています…",
+      "connected": {
+        "other": "接続済み - モデル {count} 件"
+      },
+      "permissionNote": "ブラウザからローカルネットワークへのアクセス許可を求められた場合は「許可」を選んでください。",
+      "cloudNotice": "外部のクラウドサービスに接続します。接続の前に、次の点をご確認ください。\n・入力した内容や設定は、接続先のサービスに送信されます。\n・利用量に応じて、接続先のサービスから料金が請求されます。正確な料金は提供元のページでご確認ください。1 回の操作で複数の要求が送られることがあります。\n・接続先の利用規約と関係する法令に沿ってご利用ください。\n・外部サービスの利用で生じた損害についての当方の責任は、利用規約 第11条の定めによります。\n利用規約 第5条の、API キーで接続先につなぐときの条件:\n・利用額の上限を設定できる接続先では、上限を設定した API キーを使う\n・残高が上限に達したら自動で補充する設定（自動補充）は使わない\n・API キーには有効期限を設け、使い終えたら接続先で無効にする\n内容にご同意いただける場合は、接続してください。",
+      "cloudTitle": "外部クラウド接続の注意",
+      "cloudAgree": "同意して接続",
+      "cloudCancel": "やめる"
+    },
+    "generation": {
+      "set": "{name}を決める",
+      "reset": "{name}を決めないに戻す",
+      "stopHint": "1 行に 1 つ",
+      "compatHeading": "モデル互換",
+      "squash": "システムメッセージをまとめる"
+    },
+    "prompt": {
+      "system": "システムプロンプト",
+      "none": "なし",
+      "items": {
+        "main": "メインプロンプト",
+        "tone": "口調",
+        "rules": "課題の説明と決まり",
+        "examples": "例",
+        "task": "発言に添える指示",
+        "thinking": "考え方の指示",
+        "format": "出力の形",
+        "jailbreak": "履歴後の指示",
+        "nsfw": "補助プロンプト",
+        "enhanceDefinitions": "定義の強化",
+        "chatSummary": "セッション要約",
+        "chatHistory": "セッション履歴",
+        "currentInput": "送信メッセージ",
+        "personaDescription": "ペルソナの説明",
+        "charDescription": "キャラクターの説明",
+        "charPersonality": "人格の要約",
+        "scenario": "現在の状況",
+        "dialogueExamples": "対話の例",
+        "additionalInfo": "追加辞書",
+        "untitled": "名前のない項目"
+      },
+      "prefill": "プレフィル",
+      "prefillHint": "この文の続きから返答されるようにします",
+      "source": {
+        "noPreset": "プリセットなし",
+        "messages": {
+          "other": "履歴 {count} 件"
+        },
+        "history": "履歴 {kept} 件、除外 {dropped} 件"
+      },
+      "depth": "深さ {depth}",
+      "total": "合計 約 {count} トークン",
+      "totalOfLimit": "合計 約 {count} / {limit} トークン",
+      "limitDetail": "送れる上限 = 文脈長 {context} − max_tokens {maxTokens}",
+      "limitDetailNoMax": "送れる上限 = 文脈長 {context} − 返答の分 {reserve}（max_tokens は未設定）",
+      "lastActual": "前回の送信 {count}",
+      "add": "項目を追加",
+      "depthValue": "深さ（末尾から何件目）",
+      "content": "本文",
+      "locked": "動かせない項目",
+      "reorder": "{name} を並べ替える",
+      "preset": {
+        "overridden": "{name} が置き換え",
+        "choose": "（プリセット）",
+        "fromFile": "ファイルから開く…",
+        "notCard": "{name} はキャラクターカードではありません",
+        "changeImage": "{name} の画像を変更",
+        "addImage": "アバターの画像を選ぶ",
+        "untitled": "新しいプリセット",
+        "nameField": "プリセットの名前（Enter で保存）",
+        "save": "保存（上書き）",
+        "saveAs": "別名で保存",
+        "createNew": "新しく作成する",
+        "remove": "{name} を削除",
+        "removeTitle": "プリセットを削除"
+      },
+      "notes": {
+        "chatHistory": "会話のメッセージ（{count} 件）がここに入ります。",
+        "noPreset": "プリセットのこの欄がここに入ります。プリセットを選んでいません。"
+      },
+      "preview": "送る生データを表示",
+      "previewTitle": "送る中身",
+      "card": {
+        "variables": "変数・置換",
+        "variableName": "変数の名前",
+        "variableValue": "{name} の値",
+        "removeVariable": "{name} を消す",
+        "addVariable": "変数を足す",
+        "restoreVariable": "戻す",
+        "restoreVariableHint": "{name} を右の文字に替えて LLM に送り、画面では {name} に戻して出す",
+        "restoreVariableOf": "{name} を戻す",
+        "restoreNameHint": "名前を替えて送るときは、この名前を左にした戻すの行を下に足す",
+        "restoreNameExample": "赤い果物A",
+        "restoreValueExample": "りんご",
+        "greeting": "初期メッセージ",
+        "notes": "コメント",
+        "lore": "個別追加辞書",
+        "loreEnable": "{name} をこの会話で使う",
+        "respond": "チャット欄にセット"
+      },
+      "lore": {
+        "hits": {
+          "other": "追加情報 {count} 件"
+        },
+        "none": "当たっている項目はありません",
+        "tip": {
+          "dictionary": "辞書: {value}",
+          "trigger": "トリガーワード: {value}",
+          "condition": "追加条件（{logic}）: {value}",
+          "content": "追加内容: {value}"
+        }
+      },
+      "rename": "項目の名前",
+      "newItem": "新しい項目",
+      "copyOf": "{name} のコピー",
+      "renameHint": "ダブルクリックか F2 で名前を変えられます",
+      "removeOf": "{name} を削除",
+      "disable": "{name} を一時的に無効にする",
+      "enable": "{name} を有効に戻す",
+      "template": {
+        "choose": "システムプロンプトのテンプレート",
+        "name": "テンプレートの名前（Enter で保存）",
+        "overwrite": "{name} を保存（名前を変えていれば名前も変える）",
+        "saveAs": "新しいテンプレートとして保存",
+        "saveAsName": "別名で保存",
+        "remove": "{name} を削除",
+        "removeTitle": "テンプレートを削除しますか？",
+        "removeDescription": "テンプレート「{name}」を削除します。この会話の本文は残ります。"
+      },
+      "tools": {
+        "count": {
+          "other": "{count} ワークフロー"
+        }
+      },
+      "composition": {
+        "title": "プロンプト構成",
+        "expandAll": "すべて開く",
+        "collapseAll": "閉じる"
+      }
+    },
+    "chat": {
+      "citations": "出典",
+      "log": "会話のログ",
+      "input": "メッセージ",
+      "inputPlaceholder": "メッセージ（Enter で送る、Shift+Enter で改行）",
+      "send": "送る",
+      "stop": "止める",
+      "cannotSend": "先に接続の設定とモデルを選んでください",
+      "chooseModel": "先にモデルを選んでください",
+      "setKeyFirst": "先に API キーをセットしてください",
+      "aiNotice": "応答は AI が生成します。誤りや不正確な内容が含まれることがあります。",
+      "attach": "画像を添える",
+      "attachedImage": "添えた画像 {index}",
+      "removeImage": "画像 {index} を外す",
+      "sentImage": "送った画像 {index}",
+      "user": "あなた",
+      "assistant": "アシスタント",
+      "copy": "コピー",
+      "edit": "編集",
+      "delete": "消す",
+      "regenerate": "生成し直す",
+      "regenerateWithDraft": "入力欄の指示で作り直す",
+      "rollback": "ロールバック",
+      "confirmRollback": {
+        "title": "ロールバック",
+        "description": "以降の会話を破棄しここまで会話をロールバックさせます。"
+      },
+      "fork": "ここまでをフォーク",
+      "forkName": "{name} のフォーク",
+      "previous": "前の候補",
+      "next": "次の候補",
+      "candidate": "候補 {index} / {count}",
+      "reasoning": "思考",
+      "comment": "注記",
+      "stopped": "中断しました。",
+      "receiving": "受け取り中…",
+      "toolRunning": "ツールを実行中",
+      "searchResults": {
+        "other": "検索結果 {count} 件"
+      },
+      "retry": "もう一度",
+      "editField": "メッセージを編集",
+      "editHint": "Enter で確定、Esc で戻す",
+      "empty": "メッセージを送ると会話が始まります。",
+      "untitled": "新しい会話",
+      "boundary": "会話",
+      "message": "{role}のメッセージ",
+      "imageLink": "画像（読み込まない。押すと新しいタブで開く）",
+      "copyCode": "コードを写す",
+      "hello": "Hello"
+    },
+    "failure": {
+      "consent": "外部クラウド接続の注意にまだ同意していないため、送りませんでした。会話の設定のタブで同意してください。",
+      "unreachable": "サーバーから応答がありません。起動しているか、URL とポートが合っているか、ブラウザの許可の問い合わせを断っていないかを確かめてください。",
+      "mixedContent": "このページは https で開いているので、手元以外の http の宛先はブラウザが止めます。このページを http で開くか、宛先を https にしてください。",
+      "auth": "サーバーが API キーを断りました（{status}）。API キーを確かめてください。",
+      "notFound": "宛先に見つかりませんでした。ベース URL（/v1 の有無）を確かめてください。",
+      "rejected": "サーバーが要求を断りました: {message}",
+      "rejectedPlain": "サーバーが要求を断りました（{status}）。",
+      "rateLimit": "サーバーが混んでいます（429）。時間をおいてもう一度試してください。",
+      "server": "サーバーで失敗しました（{status}）。サーバーの記録を確かめてください。",
+      "interrupted": "受け取りの途中で切れました。受け取った分は残してあります。",
+      "badResponse": "サーバーの応答を会話の応答として読めませんでした。",
+      "cors": "サーバーは応答しましたが、このページ（{origin}）からの要求を断りました（CORS）。サーバーの起動コマンドに、このページを許す設定を足してください。",
+      "paused": "短い間に大量の要求と応答が続いたので止めました。確認で続けるかを選んでから、もう一度送ってください。",
+      "tooLarge": "送る中身が大きすぎるので送りませんでした（見積もりで 524,288 トークンを超えています）。履歴か添えた内容を減らしてください。",
+      "timeout": "サーバーの応答が決めた時間のうちに来なかったので止めました。受け取った分は残してあります。サーバーが動いていて混んでいないかを確かめて、もう一度試してください。",
+      "responseTooLarge": "受け取る中身が大きすぎるので、読むのをやめました。受け取った分は残してあります。"
+    },
+    "onboarding": {
+      "title": "LLM に接続する",
+      "start": "1. LLM サーバーを起動する",
+      "startNote": "ローカル：このページ（{origin}）からの要求を許す設定で起動してください。",
+      "cloudNote": "クラウド：サービスで発行した API キーで接続してください。",
+      "connect": "2. 接続する",
+      "connectNote": "ベース URL（要るなら API キーも）を入れて接続してください。",
+      "chooseModel": "3. 会話を始める",
+      "startChat": "会話を始める",
+      "launchUi": "UIを起動",
+      "corsRequired": "CORS の設定: 必須（{reason}）",
+      "corsRecommended": "CORS の設定: 推奨（{reason}）",
+      "corsUnavailable": "CORS の設定: 不可（{reason}）",
+      "corsNotNeeded": "CORS の設定: 不要（{reason}）",
+      "apiKeyRequired": "API キーの発行が必要 ({url})",
+      "keyAdvice": "キーの漏洩に備え、有効期限やレートリミットの設定を推奨",
+      "reasonOllama": "既定では localhost のみ",
+      "reasonLmStudio": "既定で許さない。--cors は全ページ許可になる。画面から Developer → Enable CORS でも可",
+      "reasonLlamaCpp": "既定では全許可。古いバージョンでは --cors-origins を使用できない場合も有",
+      "reasonVllm": "既定で許さない",
+      "modelRequired": "モデル: 指定が要る（起動したモデル 1 つだけを出す）"
+    },
+    "modelPicker": {
+      "title": "モデルを選ぶ",
+      "placeholder": "モデルを選択",
+      "open": "モデル: {name}（選ぶ）",
+      "directories": "モデルのディレクトリ",
+      "decideToolbar": "モデルの決定",
+      "decide": "選んだモデルを使う",
+      "pickPrompt": "一覧からモデルを選んでください",
+      "filterToolbar": "モデルの絞り込み",
+      "filterLabel": "モデルを絞り込む",
+      "filterPlaceholder": "名前で絞り込み・モデル名を入力",
+      "list": "モデルの一覧",
+      "useTyped": "「{name}」を使う",
+      "noModels": "モデルの一覧がありません（モデル名を入力）",
+      "noMatch": "当てはまるモデルがありません",
+      "truncated": "一覧が多すぎるので、先頭の 10,000 件だけを出しています。無いモデルは名前を打って使えます。",
+      "row": {
+        "perMillion": "{name} ${usd}/1M",
+        "usd": "{name} ${usd}",
+        "variable": "{name} 変動"
+      },
+      "sort": {
+        "name": "名前",
+        "price": "費用",
+        "created": "日付"
+      },
+      "info": {
+        "title": "モデルの情報",
+        "reasoning": "思考",
+        "reasoningMandatory": "必須（思考モデル）",
+        "reasoningOn": "対応（既定で有効）",
+        "reasoningOff": "対応（既定で無効）",
+        "reasoningSupported": "対応",
+        "reasoningNone": "非対応",
+        "efforts": "強さ: {efforts}（既定 {effort}）",
+        "pricing": "費用",
+        "pricingNote": "API 参照時の参考情報（正確な金額を公式サイトで確認の上、ご利用ください）",
+        "perMillion": "${usd} / 1M トークン",
+        "usd": "${usd}",
+        "tier": "条件: {conditions}",
+        "modalities": "入力 → 出力",
+        "modalitiesValue": "{inputs} → {outputs}",
+        "benchmarks": "ベンチマーク",
+        "description": "説明",
+        "close": "モデルの情報を閉じる",
+        "others": "ほかの項目",
+        "variable": "変動（ルーターが選ぶ）"
+      }
+    },
+    "import": {
+      "failed": "会話のファイルを読めませんでした: {name}",
+      "done": {
+        "other": "{count} 件の会話を読み込みました"
+      },
+      "skipped": {
+        "other": "読めなかった {count} 件は外しました。"
+      },
+      "dropped": {
+        "other": "ツールの呼び出し・画像・添付の {count} 件は捨てました。"
+      },
+      "full": "ブラウザの保存領域がいっぱいで、途中で止めました。要らない会話を消してください。"
+    },
+    "library": {
+      "today": "今日",
+      "yesterday": "昨日",
+      "week": "7 日以内",
+      "older": "それより前",
+      "confirmDelete": {
+        "title": "この会話を削除しますか？",
+        "description": "「{name}」を削除します。元に戻せません。タブで開いていれば、そのタブも閉じます。"
+      },
+      "confirmClear": {
+        "title": "この会話をクリアしますか？",
+        "description": "「{name}」のメッセージと要約をすべて消します。名前と設定は残し、一覧にも残ります。元に戻せません。"
+      },
+      "openElsewhere": "この会話はほかのブラウザのタブで開いています。そちらで閉じてから開いてください。",
+      "missing": "この会話が見つかりません。ほかの所で消された可能性があります。",
+      "failed": "失敗しました。接続を確かめて、もう一度試してください。",
+      "busyElsewhere": "ほかのブラウザのタブで開いている会話は、ここでは変えられません。",
+      "busyStreaming": "応答を受け取っています。止めてからクリアしてください。",
+      "full": "移す先の容量が足りません。要らない会話を消してください。",
+      "broken": "この会話は壊れていて開けません。会話の一覧のメニューから、書き出すかクリアしてください。",
+      "loadFailed": "会話を読み込めませんでした。ページを読み込み直してください。"
+    },
+    "place": {
+      "both": "ComfyUI にバックアップあり",
+      "needComfy": "ComfyUI に接続すると使えます。",
+      "backupOnly": "ComfyUI のバックアップのみ（開くとブラウザに写します）"
+    },
+    "limits": {
+      "heading": "セッション上限",
+      "maxSize": "セッションあたり上限（対話文）",
+      "logWindow": "一度に描画する発言数",
+      "messages": "件",
+      "near": "この会話は {size} MB です。{max} MB を超えると、この会話では送れなくなります。",
+      "full": "この会話は上限の {max} MB を超えたため、送れません。新しい会話で続けてください。"
+    },
+    "backup": {
+      "toggle": "ComfyUI にバックアップする",
+      "hint": "各種情報はブラウザ上に記憶しているためキャッシュクリアや自動整理で消失します。保全のために随時外部保存などを行ってください。",
+      "restored": "ComfyUI のバックアップから戻しました（追加 {added} 件・更新 {updated} 件）。",
+      "restoreFailed": "ComfyUI のバックアップを読めませんでした。",
+      "heading": "ブラウザデータの管理",
+      "confirm": {
+        "title": "ComfyUI に控えを書きますか？",
+        "description": "会話・プリセット・システムプロンプトのテンプレート・追加辞書・アバターの控えを、つないでいる ComfyUI のユーザーフォルダ（kisara/）に書きます。\n共有の ComfyUI では、その管理者や他の利用者が控えを読める場合があります。\nブラウザのデータを消しても、控えは ComfyUI に残ります。\n自分だけが使う ComfyUI のときに有効にしてください。",
+        "enable": "有効にする"
+      },
+      "manage": "ストレージの管理",
+      "toggleHint": "ComfyUI のユーザーフォルダ（kisara/）に会話内容やプリセットの写しを保存します。"
+    },
+    "storage": {
+      "title": "ストレージの管理",
+      "reload": "読み直す",
+      "loading": "読んでいます…",
+      "usage": "このサイトの使用量は約 {usage}（上限 {quota}）です。",
+      "persisted": "ブラウザはこのデータを自動では消しません。",
+      "notPersisted": "空きが足りなくなると、ブラウザがこのデータを自動で消すことがあります。",
+      "count": "{count} 件",
+      "size": "約 {size}",
+      "clear": "削除",
+      "clearFailed": "削除できませんでした。",
+      "clearAll": "全て削除",
+      "pendingReload": "消した内容は、読み込み直すと画面に反映されます。",
+      "reloadPage": "読み込み直す",
+      "overview": "全体",
+      "categories": "種類",
+      "itemsToolbar": "種類の操作",
+      "items": "中身",
+      "empty": "何もありません。",
+      "notConnected": "未接続",
+      "browserTotal": "ブラウザの合計",
+      "backupTotal": "バックアップの合計",
+      "backupOnly": "バックアップにだけあるもの",
+      "rollback": "「{name}」をバックアップから戻す",
+      "group": {
+        "llm": "LLM",
+        "comfy": "ComfyUI"
+      },
+      "column": {
+        "category": "種類",
+        "count": "件数",
+        "size": "大きさ",
+        "browser": "ブラウザ",
+        "backup": "バックアップ",
+        "comfy": "ComfyUI"
+      },
+      "area": {
+        "local": "localStorage",
+        "localHint": "設定・合意など、このアプリの小さな項目。鍵ごとに 1 件。",
+        "session": "sessionStorage",
+        "sessionHint": "ブラウザのタブを閉じると消えるので、ここでは削除しません。"
+      },
+      "table": {
+        "objectInfo": "ノード定義",
+        "objectInfoHint": "ComfyUI から読んだノード定義。接続先ごとに 1 件。",
+        "session": "編集ワークフロー",
+        "sessionHint": "ワークフローのタブごとの中身、最後に保存したタブの並び、編集の印。",
+        "chat": "会話",
+        "chatHint": "会話ごとの発言・添えた画像・個別追加辞書など。会話の一覧を含みます。",
+        "preset": "プリセット",
+        "presetHint": "保存したプリセットの文字の欄と個別追加辞書（画像はアバター）。",
+        "systemPrompt": "システムテンプレート",
+        "systemPromptHint": "テンプレートの名前・本文・生成の設定。",
+        "dictionary": "追加辞書",
+        "dictionaryHint": "全体の追加辞書とその項目。",
+        "avatar": "アバター",
+        "avatarHint": "プリセットで使うアバターの画像。",
+        "playbook": "プレイブック",
+        "playbookHint": "写して直したプレイブック。"
+      },
+      "cache": {
+        "semanticModels": "埋め込みモデル",
+        "semanticModelsHint": "近似判定のために落とした埋め込みモデルと実行の部品。"
+      },
+      "backup": {
+        "notConnected": "ComfyUI につなぐとバックアップを見られます。",
+        "failed": "バックアップを読めませんでした。"
+      },
+      "key": {
+        "settings": "設定",
+        "settingsHint": "接続先・表示の設定・列の幅・URL の履歴などの設定。",
+        "terms": "合意",
+        "termsHint": "同意した利用規約などの版と時刻。",
+        "profiles": "LLM の接続",
+        "profilesHint": "ベース URL と既定のモデル。API キーは残しません。",
+        "locale": "画面の言語",
+        "localeHint": "選んだ画面の言語。",
+        "clientId": "通知の接続の識別子",
+        "clientIdHint": "このタブが ComfyUI の通知を受けるための識別子。",
+        "tabLayout": "タブの並び",
+        "tabLayoutHint": "このブラウザのタブで開いているタブの並びと選んでいるタブ。",
+        "pastSessions": "前に使ったセッション",
+        "pastSessionsHint": "このブラウザのタブで前に使ったセッション（タスクの列に出す）。",
+        "tasks": "実行の記録（前の版）",
+        "tasksHint": "前の版が残した ComfyUI の実行の記録。今の版は読み書きしないので、消して構いません。"
+      },
+      "apply": "適用",
+      "applyHint": "印を付けた物を戻し、消します。",
+      "unmark": "削除を取り消す",
+      "deleteBackup": "「{name}」のバックアップを削除",
+      "unmarkBackup": "「{name}」のバックアップの削除を取り消す",
+      "takeBackup": "バックアップ取得",
+      "takeBackupLabel": "「{name}」のバックアップを ComfyUI に取る",
+      "backupTaken": "「{name}」のバックアップを取りました。",
+      "backupTakeFailed": "「{name}」のバックアップを取れませんでした。",
+      "breadcrumb": "今の場所",
+      "indexedDb": "IndexedDB",
+      "leadToolbar": "適用とフォルダ",
+      "unrollback": "「{name}」を戻すのを取り消す",
+      "summaryBackup": "（バックアップ {figures}）",
+      "comfyBackup": "Comfy バックアップ",
+      "raw": "「{name}」の生データ",
+      "rawBackup": "「{name}」のバックアップの生データ",
+      "rawFailed": "読めませんでした。",
+      "rawTruncated": "長いので先頭の {count} 文字だけを出しています。",
+      "export": "エクスポート",
+      "exportFailed": "エクスポートできませんでした。",
+      "openFile": "ファイルを開く",
+      "openFileHint": "エクスポートしたファイルを開き、バックアップの列に出します（ダイアログを閉じると捨てます）",
+      "closeFile": "ファイルを外す",
+      "openFailed": "この種類のエクスポートとして読めませんでした。",
+      "summaryFile": "（ファイル {figures}）",
+      "fileOnly": "ファイルにだけあるもの",
+      "rawFile": "「{name}」のファイルの生データ",
+      "fileRestored": "ファイルから {count} 件戻しました。",
+      "fileRestoreFailed": "ファイルから戻せないものがありました（形が読めません）。",
+      "restoreTooLarge": "大きすぎるので {count} 件を戻しませんでした（会話は設定の会話の上限、アバターは 20 MB、ほかは 32 MB まで）。",
+      "cleanup": {
+        "heading": "クリーンアップ",
+        "none": "ブラウザに元の無いバックアップはありません。",
+        "orphans": "ブラウザに元の無いバックアップ: {figures}",
+        "hint": "適用すると ComfyUI のファイルを消します。残したい物は種類ごとの一覧で印を外してください。",
+        "mark": "削除の印を付ける",
+        "unmark": "印を外す",
+        "notice": {
+          "title": "クリーンアップ",
+          "description": "古いバックアップデータが残っています。確認しますか？",
+          "confirm": "確認する",
+          "later": "あとで"
+        }
+      },
+      "userFiles": {
+        "history": "実行の記録",
+        "historyHint": "KisaraUI が ComfyUI のユーザーフォルダに書く実行の記録（kisara/history）。",
+        "notes": "モデルのメモ",
+        "notesHint": "ComfyUI のユーザーフォルダに保存したモデルのメモ（kisara/notes）。",
+        "styles": "スタイル",
+        "stylesHint": "ComfyUI のユーザーフォルダに保存したスタイル（kisara/styles）。",
+        "tags": "タグ辞書",
+        "tagsHint": "ComfyUI のユーザーフォルダに保存したタグ辞書と、pysssss の上書き（kisara/tags）。",
+        "notConnected": "ComfyUI につなぐとユーザーフォルダの中身を見られます。",
+        "failed": "ユーザーフォルダを読めませんでした。"
+      }
+    },
+    "avatarPicker": {
+      "title": "アバターの画像",
+      "delete": "画像を消す",
+      "notImage": "画像でないファイルは足しませんでした。",
+      "none": "なし"
+    },
+    "image": {
+      "label": "プリセットの画像",
+      "hint": "ドラッグで会話の欄の左・右・会話の欄の上・メッセージ欄の上・会話の欄の背景へ移せます",
+      "place": {
+        "left": "会話の欄の左",
+        "right": "会話の欄の右",
+        "top": "会話の欄の上",
+        "aboveInput": "メッセージ欄の上",
+        "background": "会話の欄の背景"
+      },
+      "frameSize": "画像の大きさ {width} × {height}",
+      "frameHint": "ドラッグで縦横を変えます（矢印キーでも変えられます）",
+      "show": "アバターを表示する",
+      "choose": "画像を選ぶ",
+      "clear": "画像を外す",
+      "focusPoint": "中央点（横 {x}%・縦 {y}%。矢印キーで動かす）",
+      "move": "アバターを移す",
+      "heading": "アバター"
+    },
+    "save": {
+      "fullBrowser": "ブラウザの保存領域がいっぱいで、この会話を保存できません。要らない会話を消すまで送るのを止めています。",
+      "tidy": "会話を整理する",
+      "unsavedBrowser": "この会話を保存できていません。画面の中にだけ持っています。",
+      "nearFull": "ブラウザの保存領域が残り少なくなっています。要らない会話を消してください。",
+      "waitingComfy": "この会話は {url} の ComfyUI にあります。接続すると開きます。"
+    },
+    "sidebar": {
+      "label": "会話の一覧",
+      "newChat": "新しい会話",
+      "openFile": "ファイルから開く",
+      "openFileTitle": "書き出した会話を取り込むか、キャラクターカードから新しい会話を始めます",
+      "list": "会話の一覧を出す",
+      "empty": "メッセージを送った会話がここに並びます。",
+      "place": "会話の保存先",
+      "rename": "名前を変更",
+      "duplicate": "会話を複製",
+      "clear": "会話をクリア",
+      "copyName": "{name} のコピー",
+      "export": "エクスポート",
+      "menu": "{name} のメニュー",
+      "renameField": "会話の名前",
+      "delete": "削除",
+      "openTab": "別のタブで開く",
+      "openTabOf": "{name} を別のタブで開く"
+    },
+    "dictionary": {
+      "name": "名前",
+      "scanDepth": "トリガー検索範囲",
+      "scanDepthBefore": "履歴",
+      "scanDepthHint": "件まで（および最新のユーザー入力も含む）",
+      "filterToolbar": "項目の絞り込み",
+      "filterLabel": "項目を絞り込む",
+      "filterPlaceholder": "キーか本文で絞り込む",
+      "noMatch": "当たる項目がありません",
+      "more": {
+        "other": "ほか {count} 件。絞り込むと出ます"
+      },
+      "addEntry": "追加",
+      "removeEntry": "項目を消す",
+      "content": "追加内容",
+      "depthValue": "位置",
+      "role": "発言者",
+      "enabled": "有効",
+      "noKeys": "トリガーワードなし",
+      "trigger": "トリガーワード",
+      "condition": "追加条件",
+      "placement": "追加先",
+      "reorder": "{name} を並べ替える",
+      "placeDictionary": "追加辞書",
+      "placeHistoryStart": "履歴先頭",
+      "placeHistoryEnd": "履歴末尾",
+      "details": "追加条件と追加内容",
+      "triggerHint": "カンマ区切りで複数。* は常に入れる",
+      "probability": "発動率",
+      "logicLabel": "追加条件の論理",
+      "logic": {
+        "or": "OR",
+        "and": "AND",
+        "nor": "NOR",
+        "nand": "NAND",
+        "rag": "意味近似"
+      },
+      "conditionHint": {
+        "or": "カンマ区切り。どれかが一緒に出たときだけ入れる",
+        "and": "カンマ区切り。すべてが一緒に出たときだけ入れる",
+        "nor": "カンマ区切り。どれも出ていないときだけ入れる",
+        "nand": "カンマ区切り。すべては出ていないときだけ入れる",
+        "rag": "類似度で照合させる自然文を入力。トリガーワードは無視されます"
+      },
+      "export": "JSON で書き出す",
+      "deleteMessage": "「{name}」を削除します。元に戻せません。",
+      "deleteTitle": "辞書を削除しますか？",
+      "reservedName": "{prefix} で始まる名前はアプリの予約なので付けられません。"
+    },
+    "extension": {
+      "playbook": {
+        "title": "プレイブック",
+        "hint": "決まった段取りで会話を進める枠のうち、選ぶ所に出すものを選びます。",
+        "show": "{name} を選ぶ所に出す"
+      },
+      "comfy": {
+        "title": "Comfy Workflow",
+        "hint": "LLM が下のワークフローを呼べます。実行の前に確認を出します。",
+        "skipConfirm": "実行前に確認を行わない",
+        "bypassTitle": "Workflow 実行の確認スキップ",
+        "bypassConfirm": "理解した",
+        "bypassNotice": "Workflow の実行前に確認ダイアログを表示しなくなるため、意図しない Workflow の処理が実行される可能性があります。そのほか、不具合の発生により異常な実行要求が行われ、システムや GPU に異常な負荷が掛かる可能性もあります。\nまた、クラウドサービスを利用している場合は、料金やクレジットの消費につながります。\n\nこれらに限らず、意図しない動作や事態を引き起こす可能性があるため、都度確認を行うことを推奨します。リスクを認識のうえで実行前の確認を無効にする場合は、「理解した」を押してください。",
+        "argGuide": "共通の追加指示",
+        "argGuidePlaceholder": "例: prompt は英語のタグをカンマ区切りで書く",
+        "empty": "まだワークフローがありません。",
+        "add": "追加",
+        "refresh": "更新",
+        "loading": "読み込んでいます…",
+        "remove": "{name} を外す",
+        "view": "{name} の設定を見る"
+      },
+      "problem": {
+        "noTool": "このワークフローには LLM からの呼び出し設定がありません。",
+        "badName": "機能名に使えない文字があります。",
+        "duplicate": "ほかのワークフローと名前が重なるため送りません。",
+        "unreadable": "ファイルを読めませんでした。",
+        "noDefinitions": "ComfyUI に接続していないため読み込めません。",
+        "tabClosed": "タブが閉じられていて、保存先もありません。"
+      },
+      "dictionary": {
+        "title": "動的追加辞書",
+        "hint": "指定条件に応じて追加情報を自動付与させます。",
+        "empty": "追加辞書がありません。World Info の JSON か、用語と定義の表を取り込めます。",
+        "import": "jsonを開く",
+        "create": "新規作成",
+        "newName": "新しい辞書",
+        "entries": {
+          "other": "{count} 項目"
+        },
+        "enable": "{name} をすべての会話で有効にする",
+        "view": "{name} を編集",
+        "imported": {
+          "other": "「{name}」を取り込みました（{count} 項目）。"
+        },
+        "existing": "「{name}」は取り込み済みです。有効にしました。",
+        "failed": "「{name}」を読めませんでした（{reason}）。",
+        "problem": {
+          "format": "World Info の JSON でも CSV・TSV の表でもありません",
+          "empty": "項目がありません",
+          "size": "ファイルが大きすぎます（上限 32 MB）"
+        }
+      },
+      "picker": {
+        "title": "ワークフローを追加",
+        "none": "呼び出し可能なワークフローが開かれていません。",
+        "ok": "OK",
+        "view": "{name} の設定を見る"
+      },
+      "semantic": {
+        "title": "近似判定",
+        "hint": "追加条件の判定条件に、意味が近い場合に差し込みを行う意味近似を追加します。容量とメモリを数十MB消費します。",
+        "loading": "モデルを読み込んでいます（{percent}%）",
+        "ready": "ロード済: {name}({size}MB)",
+        "stored": "保存済: {name}({size}MB)",
+        "remove": "{name} を削除",
+        "failed": "モデルを読み込めませんでした（{reason}）",
+        "retry": "やり直す",
+        "confirmTitle": "近似判定を有効にしますか？",
+        "confirmDescription": "現在の言語設定に合う埋め込みをダウンロードしブラウザに置きます。容量と共に有効化中はメモリ消費も増加します。",
+        "confirmModel": "{name}（{size}MB）",
+        "confirmModelUnknown": "{name}（容量不明）",
+        "confirmRuntime": "実行の部品 ONNX Runtime・Transformers.js（{size}MB）",
+        "confirm": "有効にする"
+      }
+    },
+    "tool": {
+      "card": "ワークフローの呼び出し {name}",
+      "writeReply": "本文を書かせる",
+      "writeReplyHint": "この応答には本文がありません。呼び出しはそのままに、この応答の本文を LLM に書かせます",
+      "receiving": "プロンプト生成中",
+      "waiting": "承諾待ち",
+      "invalid": "実行できません",
+      "declined": "却下",
+      "queued": "画像を生成中",
+      "queuedProgress": "画像を生成中（{value}/{max}）",
+      "replyText": "LLM の応答",
+      "done": "完了",
+      "noImages": "完了しました（該当する画像はありません）",
+      "failed": "失敗",
+      "unknown": "不明",
+      "run": "承諾",
+      "runAgain": "実行し直す",
+      "generate": "ワークフローを実行",
+      "noTools": "呼べるワークフローがありません（拡張のタブで選びます）",
+      "running": "実行中",
+      "generating": "LLM にワークフローを呼ばせています",
+      "argument": "{name} の値",
+      "decline": "却下",
+      "openImage": "{name} を開く",
+      "notConnected": "ComfyUI に接続していません。",
+      "openFailed": "ワークフローを開けませんでした。",
+      "noImage": "「{name}」の画像がありません。",
+      "uploadFailed": "画像を ComfyUI に置けませんでした。",
+      "submitFailed": "ComfyUI が実行を受け付けませんでした。キューのタスクを見てください。",
+      "interrupted": "実行が止められました。",
+      "unknownResult": "結果を確認できませんでした（ComfyUI に実行の記録がありません）。接続し直したときにもう一度確かめます。",
+      "problem": {
+        "unknownTool": "その名前のワークフローはありません。",
+        "json": "引数を読めない形です。",
+        "missing": "引数が足りません: {name}",
+        "unknown": "知らない引数です: {name}",
+        "type": "型が合いません: {name}",
+        "range": "範囲を外れています: {name}",
+        "choice": "選択肢にありません: {name}"
+      },
+      "summary": "{state} : Comfy Workflow - {name}",
+      "imageLoading": "画像を読み込んでいます",
+      "imageOffline": "{name}（ComfyUI に接続すると表示します）",
+      "imageMissing": "{name}（ComfyUI にもうありません）"
+    },
+    "sentRequest": {
+      "open": "送った生データを表示",
+      "title": "送った中身",
+      "choose": "出す要求",
+      "candidate": "候補 {index}　{time}",
+      "copy": "送った生データを写す"
+    },
+    "stats": {
+      "title": "応答の情報",
+      "toggle": "応答の情報を見る",
+      "tokens": "トークン",
+      "tokensValue": "入力 {prompt} / 出力 {completion}",
+      "cacheRead": "Read キャッシュ",
+      "cacheWrite": "Write キャッシュ",
+      "cacheValue": "{value} トークン",
+      "speed": "スループット",
+      "speedValue": "{value} トークン/秒",
+      "time": "時間",
+      "timeValue": "{value} 秒",
+      "cost": "費用",
+      "costValue": "${usd}（参考）",
+      "searches": "Web 検索",
+      "fetches": "Web 取得",
+      "toolCalls": "ツールの実行",
+      "countValue": {
+        "other": "{count} 回"
+      }
+    },
+    "webSearch": {
+      "off": "Web ツール：オフ",
+      "search": "Web 検索と取得：オン",
+      "confirmTitle": "Web 検索を有効にしますか",
+      "confirmDescription": "モデルが必要と判断すると、接続先のクラウドサービスに Web 検索やページ取得を要求します。\n検索や取得などの操作には、それぞれトークンとは別に所定の追加費用がかかります。\n\nWeb ページによっては、見た目に関わらず膨大な文量を取得する場合があり、大量のトークンを消費したり、ページ取得の繰り返しで高額の API 利用料につながったりするおそれがあります。\n\n利用に際しては、接続先で利用額の上限とレート制限を設定し、利用状況や課金状況を接続先で確かめるなど、本アプリ以外の手段も用いて、利用者の責任において管理してください。\n\nWeb 検索で取得したページの中身は、応答に混ざって会話に入ります。Web 検索を有効にした会話には、漏れて困る情報を入れないでください。",
+      "enable": "有効にする",
+      "cancel": "取りやめる"
+    },
+    "settings": {
+      "embeddingModel": "埋め込みモデル",
+      "webSearch": "Web 検索",
+      "webTool": "使用ツール",
+      "engineOff": "無効",
+      "engineAuto": "自動",
+      "engineExa": "Exa",
+      "engineParallel": "Parallel",
+      "enginePerplexity": "Perplexity",
+      "engineMode": "{engine} - {mode}",
+      "webSearchHint": "OpenRouter に接続しているときだけ使います"
+    },
+    "summary": {
+      "field": "要約の本文",
+      "run": "要約する",
+      "running": "要約しています…",
+      "unavailable": "縮める発言がありません（新しい 4 件はそのまま残します）",
+      "trimmed": {
+        "other": "上限に収めるため、古い履歴 {count} 件を除外して送りました。要約すると、除外せずに送れます。"
+      },
+      "nearLimit": "送れる上限に近づいています。要約すると、古い履歴を外さずに続けられます。",
+      "count": {
+        "other": "要約 {count} 件"
+      }
+    },
+    "advisor": {
+      "open": "LLM と構成を相談する",
+      "title": "構成の相談",
+      "close": "閉じる",
+      "end": "構成の相談を終える",
+      "width": "構成の相談",
+      "input": "相談する内容",
+      "placeholder": "どんな用途の構成にしたいかを書いてください",
+      "streaming": "受け取り中…",
+      "noModel": "実行モデルが選択されていません",
+      "empty": "まだ相談していません",
+      "pending": "案を書いています…",
+      "invalid": "案を読めませんでした",
+      "apply": "反映する",
+      "applied": "反映しました",
+      "revert": "元に戻す",
+      "nothing": "この案には当てられる所がありませんでした",
+      "untitled": "構成の案",
+      "targets": {
+        "main": "メインプロンプト",
+        "item": "項目「{name}」",
+        "newItem": "新しい項目「{name}」",
+        "prefill": "プレフィル",
+        "character": "カードの欄「{field}」",
+        "removeItem": "項目「{name}」を消す",
+        "dictionaryEntry": "個別追加辞書の項目「{keys}」",
+        "dictionaryEntryIn": "個別追加辞書「{dictionary}」の項目「{keys}」"
+      },
+      "fields": {
+        "name": "アシスタント名",
+        "description": "キャラクターの説明",
+        "personality": "人格の要約",
+        "scenario": "現在の状況",
+        "mesExample": "対話の例",
+        "firstMes": "初期メッセージ"
+      },
+      "constant": "常に入れる",
+      "context": "送る付加情報",
+      "summary": "要約",
+      "nearLimit": "送れる上限に近づいています。要約すると、返答が途中で切れずに続けられます。",
+      "overLimit": "送れる上限を超えたため、返答が途中で切れたか、送れませんでした。要約すると続けられます。",
+      "greeting": {
+        "blank": "エージェントの挙動を規定するプロンプト構成を作成します。\nこの文面を切り替えて既定用途に沿った検討をすることもできます。",
+        "work": "調べものや設計など作業に用いる構成を作ります。\n用途や回答粒度、出力形式（箇条書き・表・コード）を教えてください。",
+        "story": "一緒に物語を書く構成を作ります。私が語り手として地の文を書きます。\nジャンル・文体、主な登場人物、始まりの場面などを教えてください。",
+        "roleplay": "設定したキャラクターとロールプレイで会話する構成を作ります。\n登場人物の性格や特徴、世界観や始まりの場面を教えてください。",
+        "game": "ゲームマスターとしてテキストのゲームを進める構成を作ります。\nルールや世界観、役割や進め方（選択肢・判定する）を教えてください。"
+      },
+      "record": {
+        "label": "決まったことを入れる",
+        "dictionary": "ここまでに決まったことを辞書に入れてください。",
+        "composition": "ここまでに決まったことをプロンプトの構成に入れてください。"
+      }
+    },
+    "landing": {
+      "title": "会話（LLM）",
+      "summary": "手元の LLM サーバーや外部のクラウドとつないで会話します。",
+      "start": "LLM を使う",
+      "localName": "LLM サーバー",
+      "localVia": "HTTP（直接）",
+      "cloudName": "外部のクラウド（OpenRouter など）",
+      "cloudVia": "HTTPS（直接）",
+      "cloudDetail": "API キーはこの端末から、そのサービスへだけ送ります。料金はそのサービスが請求します。",
+      "noteCors": "ローカルの LLM サーバーの多くは、既定で異なる URL からの要求を処理しないようブラウザに指示するため、CORS の許可設定により例外条件を加える必要があります。",
+      "noteCorsScope": "CORS の許可設定は、許可する URL をこのページに制限することを推奨します。制限できない場合は、別途、外部ネットワークから LLM サーバーへ接続できないようになっていることを確認してください。",
+      "noteListen": "CORS の許可設定は、他の PC やインターネットからのネットワークアクセスを許可するものではありません。そういった設定は待ち受けるアドレスを広げるネットワーク公開が必要ですが、これはリスクが非常に高いため、十分な知識と意図を持った場合を除き、避けてください。",
+      "noteSend": "入力した内容や設定は、接続先のサーバー・サービスへ送ります。",
+      "noteCost": "外部のクラウドは利用量に応じて料金がかかります。初めてつなぐ前に、注意の全文を出して同意をいただきます。",
+      "noteKey": "API キーはページを開いている間だけ持ち、ブラウザの中に残しません。残したいときはブラウザのパスワード管理をお使いください。"
+    },
+    "budget": {
+      "title": "LLM への送信を続けますか？",
+      "description": "直近 {minutes} 分で、入力が約 {input} トークン、出力が約 {output} トークンに達しました。人が読める量を大きく超えています。続けるまで、新しい要求は送りません。意図しない動きなら、接続先で利用状況とレート制限を確かめてください。",
+      "resume": "続ける",
+      "keepStopped": "止めたままにする"
+    },
+    "playbook": {
+      "title": "プレイブック",
+      "chosen": "選んでいます",
+      "start": "プレイブックを使う",
+      "close": "閉じる",
+      "phases": "フェーズ",
+      "outline": "アウトライン",
+      "replace": "置き換える",
+      "itemTitle": "見出し",
+      "itemBody": "本文",
+      "currentMark": "今の項目",
+      "makeCurrent": "「{title}」を今の項目にする",
+      "standing": "いつでも",
+      "remove": "プレイブックを外す",
+      "removeNamed": "{name} を外す",
+      "row": "プレイブック",
+      "frame": {
+        "playbook": "プレイブック",
+        "role": "役割",
+        "phase": "フェーズ",
+        "picked": "選んだ候補"
+      },
+      "builtin": {
+        "story": {
+          "name": "プロット進行",
+          "description": "前提から段までを 1 つの相談で決めて段に刻み、筋に沿って書くか流れだけ固めるかを選んで、1 段ずつ書き進める。",
+          "role": "あなたは利用者と物語を書く共作者です。{{user}} は物語の主人公で、利用者でも、あなたが話しかける相手でもありません。相談で決めた進め方に従います。筋に沿って書く物語なら、決めた設定と筋を守り、筋に無い大きな出来事を足しません。流れだけを固めた物語なら、有効な段の目的に向かいながら道筋と中身は自由に作り、予期しない出来事や人物の選択を入れます。どちらでもこれまでの本文と辞書にある事実とは矛盾させず、結末は利用者に委ねて話を畳みません。利用者の判断が要るところは、書かずに尋ねます。本文でない話（利用者の指示への返事・次の展開の案・質問）は、<comment> タグで囲んで本文と分けます。",
+          "phases": {
+            "writing": {
+              "name": "プロット進行",
+              "goal": "サブセッションでプロットを作成し、執筆する章を選択してください。"
+            }
+          },
+          "actions": {
+            "makePlan": {
+              "name": "プロットを相談",
+              "greeting": "物語の前提から段までを、順に決めます。\nはじめに進め方を選んでください。筋に沿って書く（段ごとに細かい筋まで決める）か、流れだけ固める（段は目的だけにして、中身は書くたびに任せる）かです。\nあわせて、ジャンル・雰囲気、書きたい場面や人物の手がかりを教えてください。使いたい物語の型（起承転結・三幕・ヒーローズジャーニーなど）があれば、それも教えてください。",
+              "instruction": "プロットを決める相談です。次の順に、段階ごとに案を出し、利用者が反映してから次へ進む。\n{{user}} は物語の主人公で、語り手と対話する相手ではない。{{user}} に語りかける項目や、物語を {{user}} との対話として書く項目は作らない。\n0. 進め方: 筋に沿って書くか、流れだけ固めるかを利用者に決めてもらう。決まっていなければ、向き不向き（筋に沿う: 構成を固めて書きたいとき。流れだけ: 意外な展開を楽しみたいとき）を 1 行ずつ示して尋ねる。決めた進め方は、個別追加辞書の常時の項目（コメント「進め方」）にする。\n1. 前提: 手がかりから、物語の前提（主人公の {{user}}・望み・中心の対立を含む 1 文）の案を 3〜4 つ、互いに違う方向で示し、選んでもらう。結末は書かない。選んだ前提は個別追加辞書の常時の項目にする。\n2. 人物と舞台: 主人公は {{user}} なので、別の主人公は作らない。ほかの主な人物 2〜4 人（名前・役割・望み・弱点・話し方の例）と舞台（場所・時代・決まりごと）を作る。舞台は個別追加辞書の常時の項目、人物は名前をキーワードにした項目にする。現在の状況の欄は使わない。\n3. 大枠: 利用者が選んだ物語の型（無ければ起承転結）で大枠の段を示し、段ごとの目的と、段の終わりに変わっていることを確かめてもらう。流れだけ固める進め方なら、合意した段を 1 つずつアウトラインの段にして、ここで終える。そのとき段の本文には、その段の状況と目的と、段の終わりに変わっていることだけを書き、段の中で起きる出来事は書かない。\n4. 筋（筋に沿って書く進め方だけ）: 段ごとに細かい筋を 2〜4 つに分けて候補を示し、選んでもらう。選んだ筋を、書く順に 1 つずつアウトラインの段にする。最後の段の結末は書かず、利用者が決めるものとする。"
+            },
+            "revise": {
+              "name": "直前の応答を校正",
+              "instruction": "直前の本文を編集者として読み直し、直すべき箇所だけを直した本文を書いてください。見る点は、有効な段の筋か目的に届いているか・筋に沿う物語なら筋に無い出来事を足していないか・人物の設定との食い違い・決まり文句・不要な説明・飾りすぎた文・同じ語の繰り返し・締めの癖・時制と口調のずれです。直す必要の無い文は一字一句変えず、説明や前置きを付けずに本文だけを書いてください。\n<comment>これは発言としては送らず。文書を再作成のアイコンを押下し、再生成の指示として使用してください</comment>"
+            },
+            "deepen": {
+              "name": "深める",
+              "instruction": "次の段の出来事へは進まず、決着もつけずに、今の場面に留まって深めてください。感覚の細部・間・人物の内面で場面の手触りを濃くし、緊張・感情・懸かっているものを一段高めてください。人物のやり取りだけでなく、場所・時間の制約・周りの出来事も使ってください。"
+            },
+            "shake": {
+              "name": "揺さぶる",
+              "instruction": "今の流れに、すんなり進まない要素を 1 つ入れてください。段の目的に向けた試みの失敗、思わぬ出来事、人物の迷いのどれかです。決着はつけないでください。"
+            },
+            "shift": {
+              "name": "切り替える",
+              "instruction": "同じ段の目的のまま、場面（場所・時間）か、語る人物の視点を切り替えて続けてください。切り替えたことは 1 文で示してください。"
+            },
+            "widen": {
+              "name": "広げる",
+              "instruction": "展開の向きと段の目的はそのままに、流れに変化を足してください。同じ目的への別のやり方、ほかの人物の関わり、場面の中の小さな出来事のどれかで、これまでと違う形を見せてください。新しい障害や転機は足さず、何か 1 つは前と変わった状態で終えてください。"
+            },
+            "close": {
+              "name": "終わりに向かう",
+              "instruction": "今の段を締めくくる方向で書いてください。次の段（{{nextStep}}）へ自然につながるよう、場面の区切りに向けて話をまとめてください。次の段の出来事はまだ書かないでください。"
+            }
+          },
+          "continue": "直前の本文の続きを、同じ文体と視点で書いてください。相談で決めた進め方に従い、有効な段の筋か目的を越えないでください。"
+        },
+        "roleplay": {
+          "name": "ロールプレイ",
+          "description": "舞台と関係と大きな流れを 1 つの相談で決め、{{char}} として段ごとにやり取りする。",
+          "role": "あなたは {{char}} として {{user}} と場面を演じます。{{user}} の台詞・行動・気持ちは書きません。説明と会話の例の口調を守り、有効な段の目的に向けて場面を動かしますが、{{user}} の選択を先回りしません。",
+          "phases": {
+            "prepare": {
+              "name": "準備",
+              "goal": "サブセッションで、舞台と、{{char}} と {{user}} の関係と、大きな流れの段を決めてください。"
+            },
+            "scene": {
+              "name": "場面",
+              "goal": "進めたい段をアウトラインで選び、{{char}} への発言を送信してください。場面を動かしたい時はコマンドを使ってください。"
+            },
+            "closing": {
+              "name": "締め",
+              "goal": "コマンドの「場面を締める」で段のやり取りを締め、「口調を確かめる」で口調と流れを見直してください。"
+            }
+          },
+          "actions": {
+            "makePlan": {
+              "name": "舞台と流れを決める",
+              "greeting": "ロールプレイの舞台と、{{char}} と {{user}} の関係、大きな流れを順に決めます。\n世界観や、始めたい状況の手がかりを教えてください。",
+              "instruction": "このプレイブックの準備の段です。次の順に、段階ごとに案を出し、利用者が反映してから次へ進む。\n1. 始まり: 手がかりから、始まりの状況の案を 3 つ、互いに違う雰囲気で示し、選んでもらう。\n2. 舞台と関係: 舞台・{{char}} と {{user}} の関係・{{char}} が今望んでいること・{{char}} が隠していることを決める。人物はカードの欄、舞台と関係は個別追加辞書の常時の項目、隠していることは関わる語をキーワードにした項目にする。現在の状況の欄は使わない。\n3. 大きな流れ: やり取りで進める流れを 3〜5 段にして示し、合意した段を 1 つずつアウトラインの段にする。最初の段の本文には始まりの状況を書く。段の本文には、その段の状況と、{{char}} と {{user}} の関係がどう変わるかと、{{char}} の振る舞いの向きだけを書く。{{user}} の行動は決めず、結末も書かない。"
+            },
+            "moveIdeas": {
+              "name": "動きの候補",
+              "instruction": "この先 {{char}} が取りうる動きの候補を 3 つ、番号付きで 1 行ずつ出してください。互いに違う方向にしてください。台詞や本文は書かないでください。"
+            },
+            "closeScene": {
+              "name": "場面を締める",
+              "instruction": "有効な段の目的に届いた形で、この場面を締める {{char}} の言動を描いてください。{{user}} が返事をする余地を残してください。"
+            },
+            "checkVoice": {
+              "name": "口調を確かめる",
+              "instruction": "直前の {{char}} の発言を、説明と会話の例に照らして見直し、口調と性格のずれだけを箇条書きで挙げてください。直した発言は書かないでください。"
+            }
+          },
+          "continue": "{{char}} として、直前の流れの続きを演じてください。有効な段の目的に少し近づく言動を 1 つ入れ、{{user}} が返しやすい所で止めてください。"
+        },
+        "ideas": {
+          "name": "企画",
+          "description": "考えることの枠を相談で決め、違う方向の案を数多く出し、反論で揺さぶってから、テーマにまとめて絞る。",
+          "role": "あなたは {{user}} の企画の相手です。はっきり意見を言い、前提を疑い、ほかの分野の例を持ち込みます。何にでも同意せず、最初の案に引きずられず、早いうちに実現性で案を切りません。決めるのは {{user}} です。",
+          "phases": {
+            "frame": {
+              "name": "枠を決める",
+              "goal": "サブセッションで、考えること・きっかけ・制約・欲しい結果を整え、案を出す観点をアウトラインに刻んでください。"
+            },
+            "diverge": {
+              "name": "発散",
+              "goal": "観点をアウトラインで選び、コマンドの「案を出す」で違う方向の案を数多く出してください。出し尽くしたら次の観点へ進んでください。"
+            },
+            "provoke": {
+              "name": "揺さぶる",
+              "goal": "コマンドの「反論する」「逆から考える」で、案に反論し、隠れた前提を洗い出してください。"
+            },
+            "converge": {
+              "name": "収束",
+              "goal": "コマンドの「テーマにまとめる」で案をまとめ、「絞る」で 2〜3 個に絞ってください。"
+            },
+            "capture": {
+              "name": "書き留める",
+              "goal": "コマンドの「書き留める」で、決めたこと・確かめること・残した問いを書き出してください。"
+            }
+          },
+          "actions": {
+            "shapeFrame": {
+              "name": "枠と観点を決める",
+              "greeting": "企画の枠と、案を出す観点を決めます。\n考えたい題と、きっかけ・制約・欲しい結果について分かっていることを教えてください。",
+              "instruction": "このプレイブックの枠を決める段です。次の順に、段階ごとに案を出し、利用者が反映してから次へ進む。\n1. 枠: 利用者の題について「考えること」「きっかけ」「分かっていること」「制約」「欲しい結果」を整え、足りないところは答えやすい質問を 5 つまでして埋める。整えた枠は、個別追加辞書の常時の項目にする。\n2. 観点: 案を出す切り口（使う人・技術・費用・時期・ほかの分野など）を 3〜5 つ、互いに重ならないように示し、合意した観点を 1 つずつアウトラインの段にする。段の本文には、その観点で問うこと（例:「費用を 10 分の 1 にするなら何をやめるか」）を書く。"
+            },
+            "generate": {
+              "name": "案を出す",
+              "instruction": "枠と有効な段の観点に沿って、案を 8 つ、番号付きで出してください。案ごとに 1 行目に短い名前を書き、コロンに続けて中身を 1 文で書いてください。規模・やり方・時期を互いに変えてください。良し悪しはまだ書かないでください。"
+            },
+            "objections": {
+              "name": "反論する",
+              "instruction": "ここまでの案それぞれに、厳しい批評家としての反論を 1 つずつ書いてください。その後に、案の多くが暗に置いている前提を 3 つ挙げ、一番危ういものを示してください。"
+            },
+            "reverse": {
+              "name": "逆から考える",
+              "instruction": "この課題をもっと悪くする方法を 5 つ挙げ、それぞれを裏返した案を番号付きで出してください。"
+            },
+            "themes": {
+              "name": "テーマにまとめる",
+              "instruction": "ここまでの案を、似たものどうしでテーマにまとめてください。テーマごとに案を並べ、案ごとに「利用者への効き目」「実現のしやすさ」「目的との合致」「根拠の強さ」を 1 行ずつ書いてください。"
+            },
+            "narrow": {
+              "name": "絞る",
+              "instruction": "評価をもとに、勧める案を 3 つまで番号付きで出してください。案ごとに 1 行目に案の名前を書き、コロンに続けて勧める理由を書いてください。続けて一番大きな分からないことと、それを一番安く確かめる方法を書いてください。"
+            },
+            "capture": {
+              "name": "書き留める",
+              "instruction": "選んだ案について、「決めたこと」「確かめる前提」「残った問い」「次にやること」「あえて外した案と理由」を箇条書きで書いてください。"
+            }
+          },
+          "continue": "直前の続きとして、まだ出ていない案や見方を出してください。"
+        },
+        "research": {
+          "name": "調査",
+          "description": "違う観点ごとの問いを相談で決めて段にし、問いごとに分かっていることを集め、確度を付けてまとめてから、主張を 1 つずつ確かめる。",
+          "role": "あなたは {{user}} の調べものを手伝う調査役です。分かっていることと推測を分け、確かでないことは確かでないと書きます。出典を作り上げません。{{user}} が貼った資料があれば、それを優先します。",
+          "phases": {
+            "questions": {
+              "name": "観点と問い",
+              "goal": "サブセッションで、調べる題を観点ごとの問いに分け、アウトラインに刻んでください。"
+            },
+            "gather": {
+              "name": "集める",
+              "goal": "調べたい問いをアウトラインで選び、コマンドの「答える」で分かっていることを集めてください。資料を貼って送れば、問いに関わる事実を抜き出します。"
+            },
+            "summarize": {
+              "name": "まとめる",
+              "goal": "コマンドの「まとめる」で、アウトライン全体の問いと集めたことから、最初の題に答えてください。"
+            },
+            "verify": {
+              "name": "確かめる",
+              "goal": "コマンドの「主張を確かめる」で、まとめの主張を 1 つずつ確かめてください。"
+            }
+          },
+          "actions": {
+            "makeQuestions": {
+              "name": "観点と問いを決める",
+              "greeting": "調べる題を、観点ごとの問いに分けます。\n調べたい題と、知りたい理由や使い道を教えてください。",
+              "instruction": "このプレイブックの観点と問いの段です。題について違う立場から見た観点を 4〜6 つ示し、観点ごとにその立場の人が尋ねる問いを 2〜4 つ挙げて、利用者に選んでもらう。選んだ問いを、調べる順に 1 つずつアウトラインの段にする。段の本文には観点と問いと、答えに要る粒度を書く。"
+            },
+            "answer": {
+              "name": "答える",
+              "instruction": "有効な段の問いに答えてください。先に「分かっていること」を箇条書きで、次に「推測」を分けて、最後に「確かでないこと・調べ足すこと」を書いてください。{{user}} が貼った資料を使ったときは、どの資料かを添えてください。"
+            },
+            "summarize": {
+              "name": "まとめる",
+              "instruction": "ここまでの答えから、最初の題への答えをまとめてください。所見を 5〜8 個、重要な順に、所見ごとに 1 文の主張・根拠・確度を書いてください。食い違いは片付けずにそのまま示し、最後に残った問いを書いてください。"
+            },
+            "verify": {
+              "name": "主張を確かめる",
+              "instruction": "直前のまとめの主張それぞれについて、それが正しいかを確かめる問いを 1 つ立て、まとめを見ずにその問いに答えてください。答えがまとめと食い違う主張には印を付けてください。"
+            }
+          },
+          "continue": "有効な段の問いについて、まだ書いていないことを続けて書いてください。"
+        },
+        "document": {
+          "name": "文書を書く",
+          "description": "材料と読み手から章と節の骨組みまでを 1 つの相談で決めて段にし、節ごとに書き、前提を知らない読み手として試す。",
+          "role": "あなたは {{user}} と文書を書く共著者です。読み手と、読んだ後に起こしたいことを意識して書きます。分からないことは推測で埋めず、質問します。",
+          "phases": {
+            "prepare": {
+              "name": "準備",
+              "goal": "サブセッションで、文書の種類・読み手・起こしたいこと・材料を集め、章と節の骨組みをアウトラインに刻んでください。"
+            },
+            "sections": {
+              "name": "節ごとに書く",
+              "goal": "書きたい節をアウトラインで選び、コマンドの「節を書く」で書いてください。入れる中身は「中身の候補」で選べます。"
+            },
+            "readerTest": {
+              "name": "読み手で試す",
+              "goal": "コマンドの「読み手の問いを立てる」で前提を知らない読み手として穴を探し、「通して見直す」でアウトライン全体に照らして見直してください。"
+            }
+          },
+          "actions": {
+            "makePlan": {
+              "name": "材料から骨組みまで決める",
+              "greeting": "文書の材料を集め、章と節の骨組みまでを決めます。\n文書の種類・読み手・読んだ後に起こしたいことと、手元の材料を貼ってください。",
+              "instruction": "このプレイブックの準備の段です。次の順に、段階ごとに案を出し、利用者が反映してから次へ進む。\n1. 材料: 貼られた材料を読み、「種類」「読み手」「読んだ後に起こしたいこと」「制約」を短くまとめ、足りないことを短く答えられる質問で 5〜10 個尋ねる。まとめた材料は、履歴の前に置く項目にする。\n2. 骨組み: 材料をもとに章と節の骨組みを示して合意し、節を書く順に 1 つずつアウトラインの段にする。段の本文には、その節が属する章の目的と、その節で伝えることと、読み手に残したいことを書く。本文はまだ書かない。"
+            },
+            "writeSection": {
+              "name": "節を書く",
+              "instruction": "有効な段の節の本文を書いてください。選んだ候補があればそれだけを使い、無ければ材料から選んでください。前の節と言葉の使い方を揃えてください。"
+            },
+            "contentIdeas": {
+              "name": "中身の候補",
+              "instruction": "有効な段の節に入れられる中身の候補を 8 つ、番号付きで 1 行ずつ出してください。材料にあるものを先に並べ、材料に無いものは「材料に無い」と添えて後に並べてください。"
+            },
+            "readerQuestions": {
+              "name": "読み手の問いを立てる",
+              "instruction": "この文書を初めて読む人が尋ねそうな問いを 5〜10 個、番号付きで挙げ、それぞれに文書の本文だけから答えてください。答えられない問い・誤解しそうな所・食い違いには印を付けてください。"
+            },
+            "reviewAll": {
+              "name": "通して見直す",
+              "instruction": "ここまでの本文を通して読み、流れの切れ目・重複・食い違い・中身の無い文を箇条書きで挙げてください。直す所だけを示してください。"
+            }
+          },
+          "continue": "有効な段の節の続きを書いてください。前の段落と言葉の使い方を揃えてください。"
+        }
+      },
+      "shared": {
+        "twist": {
+          "name": "展開を変える",
+          "instruction": "次の本文で、これまでの流れを変える出来事を 1 つ起こしてください。これまでの本文と決まっている設定とは矛盾させないでください。"
+        },
+        "accident": {
+          "name": "偶然の出来事",
+          "instruction": "次の本文に、誰も予期していなかった小さな偶然の出来事を 1 つ混ぜてください。"
+        },
+        "assumptions": {
+          "name": "前提を疑う",
+          "instruction": "直前のやり取りで当然のこととして置かれている前提を 1 つ挙げ、それが崩れたら何が変わるかを書いてください。"
+        },
+        "plain": {
+          "name": "やさしく言い直す",
+          "instruction": "直前の答えを、専門の言葉を使わずに、短い文で言い直してください。"
+        },
+        "changeScene": {
+          "name": "場面を変える",
+          "instruction": "時間か場所を移して、新しい場面から始めてください。移ったことを 1 文で示してから続けてください。"
+        }
+      },
+      "kind": {
+        "decide": "決める",
+        "proceed": "進める",
+        "close": "締める"
+      },
+      "candidates": "候補",
+      "candidatesFailed": "候補を読めませんでした",
+      "pickAndSend": "選んだ候補で{name}",
+      "pickOne": "「{title}」を選ぶ",
+      "untitled": "（見出しなし）",
+      "builtinGroup": "標準",
+      "ownGroup": "自分のもの",
+      "ownEmpty": "写して作ると、ここに並びます",
+      "allHidden": "機能のタブで、すべて外しています",
+      "menu": "{name} のメニュー",
+      "copy": "写して作る",
+      "edit": "直す",
+      "delete": "消す",
+      "deleteTitle": "プレイブックを消しますか？",
+      "deleteBody": "「{name}」を自分の一覧から消します。使っている会話は写しで続けられます。",
+      "editor": {
+        "title": "プレイブック",
+        "whole": "全体",
+        "name": "名前",
+        "description": "説明",
+        "role": "役割の文（アシスタントがすること・しないこと）",
+        "phaseName": "フェーズの名前",
+        "phaseKind": "種類",
+        "goal": "目的（1 行）",
+        "actions": "操作",
+        "addPhase": "フェーズ",
+        "removePhase": "このフェーズを消す",
+        "addAction": "操作",
+        "removeAction": "操作「{name}」を消す",
+        "reorder": "「{name}」を並べ替える",
+        "actionName": "操作の名前",
+        "actionKind": "種類",
+        "kinds": {
+          "send": "送る",
+          "consult": "構成の相談を開く",
+          "next": "次の段へ"
+        },
+        "instruction": "指示の本文",
+        "use": "応答の使い道",
+        "uses": {
+          "none": "なし",
+          "send": "候補を添えて送る"
+        },
+        "sendTo": "送る先の操作",
+        "noSendTo": "送る先の操作が無くなりました",
+        "copyName": "{name}（写し）",
+        "scope": {
+          "decide": "構成の相談で行う。本体の会話にはフェーズの文だけを送る",
+          "proceed": "本体の会話で行う。送るもの: フェーズの文・有効な段",
+          "close": "本体の会話で行う。送るもの: フェーズの文・有効な段（全体を出すとすべて）"
+        },
+        "greeting": "相談の初めの文",
+        "guide": "相談に渡す勘所",
+        "writesOutline": "段ごとのプロンプトをアウトラインに書かせる",
+        "advisor": "構成の相談の用途",
+        "advisors": {
+          "blank": "新しく作る",
+          "work": "作業",
+          "story": "物語の共作",
+          "roleplay": "ロールプレイ",
+          "game": "ゲームマスター"
+        },
+        "continue": "続けるの指示",
+        "outlineView": "アウトライン",
+        "outlineViews": {
+          "single": "1 つを選ぶ",
+          "multi": "いくつでも選べる",
+          "readonly": "読むだけ"
+        },
+        "revise": "入力欄に入れる（生成し直すで直前の本文を作り直す）"
+      },
+      "continueSend": "続きを書く",
+      "directionMark": "指示",
+      "phasePrev": "前のフェーズ",
+      "phaseNext": "次のフェーズ",
+      "count": "{i}/{n}",
+      "pickCancel": "やめる",
+      "cardWidth": "カード",
+      "subSession": "サブセッションを開く",
+      "pickStep": "{title}を有効にする",
+      "directionBox": "指示",
+      "directionRemove": "指示を外す",
+      "commands": "コマンド",
+      "stepPrev": "前の項目",
+      "stepNext": "次の項目",
+      "picked": "{i}/{n} 選択済み",
+      "fold": "プレイブックを縮める",
+      "unfold": "プレイブックを広げる",
+      "rowSummary": "{name}：{phase}",
+      "stepAt": "{i}/{n} {title}",
+      "noNextStep": "この先の展開",
+      "noteBox": "注記（送りません）",
+      "noteRemove": "注記を外す"
+    },
+    "received": {
+      "open": "受け取った生データを表示",
+      "title": "受け取った中身",
+      "copy": "受け取った生データを写す",
+      "truncated": "大きいので間を省いています"
+    }
+  },
+  "gateway": {
+    "entry": {
+      "title": "API キーをセット",
+      "submit": "接続",
+      "invalidUrl": "ベース URL を http:// か https:// から入れてください。",
+      "noOpener": "KisaraUI の画面から開いてください。",
+      "checking": "接続を確かめています…",
+      "verified": "接続が正常に完了しました。",
+      "authFailed": "API キーの認証に失敗しました。",
+      "verifyFailed": "接続を確かめられませんでした。",
+      "back": "戻る",
+      "close": "閉じる"
+    }
+  }
+}

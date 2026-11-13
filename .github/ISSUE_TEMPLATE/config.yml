@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Questions and other feedback
+    url: https://contact.kisara-ui.com
+    about: Ask questions or send other feedback privately through the contact form.
+  - name: Report a vulnerability
+    url: https://github.com/usegird/Kisara-UI/security/advisories/new
+    about: Report security vulnerabilities privately. Do not open a public issue.

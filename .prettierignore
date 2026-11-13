@@ -1,0 +1,16 @@
+node_modules/
+dist/
+dist-profiling/
+dist-demo/
+.dev-data/
+pnpm-lock.yaml
+
+# ユーザー提供の実データ。整形しない（提供時のまま保つ）
+workflow_sample/
+tests/fixtures/
+
+# ドキュメントは手で整形する（表の桁揃えを勝手に変えない）
+*.md
+
+# デモに埋め込んだ抜き出しのデータ（ADR-0011）。整形しない（抜き出したままに保つ）
+src/demo/*.json

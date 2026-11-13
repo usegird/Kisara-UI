@@ -1,0 +1,29 @@
+name: Feature request
+description: Suggest a new feature or an improvement to KisaraUI.
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Issues are public.** Do not post personal information, API keys, or the URLs of your
+        servers, including in screenshots.
+
+        For questions, use the contact form (https://contact.kisara-ui.com).
+  - type: textarea
+    id: problem
+    attributes:
+      label: What you want to do
+      description: The task or problem, rather than a specific solution.
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: How it could work
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: Before you submit
+      options:
+        - label: I removed personal information, API keys and server URLs, including from screenshots.
+          required: true

@@ -1,0 +1,54 @@
+name: Bug report
+description: Report something in KisaraUI that does not work as expected.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Issues are public.** Do not post personal information, API keys, or the URLs of your
+        servers (ComfyUI, LLM servers), including in screenshots and logs. Replace them with
+        placeholders such as `http://<comfyui-host>:8188`.
+
+        Report security vulnerabilities privately (see `SECURITY.md`), not here.
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1.
+        2.
+        3.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+  - type: input
+    id: version
+    attributes:
+      label: KisaraUI version
+      description: The version, or the date you used the hosted build.
+  - type: input
+    id: browser
+    attributes:
+      label: Browser and version
+  - type: input
+    id: server
+    attributes:
+      label: ComfyUI or LLM server and version, if relevant
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: Before you submit
+      options:
+        - label: >-
+            I removed personal information, API keys and server URLs, including from
+            screenshots and logs.
+          required: true

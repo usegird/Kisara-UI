@@ -1,0 +1,2787 @@
+{
+  "common": {
+    "fileTooLarge": "{name} is too large to open (limit {size} MB).",
+    "close": "Close",
+    "clearAllToasts": "Clear all",
+    "toastCount": "×{count}",
+    "cancel": "Cancel",
+    "ok": "OK",
+    "delete": "Delete",
+    "deleteConfirm": "Delete",
+    "clearConfirm": "Clear",
+    "save": "Save",
+    "open": "Open",
+    "retry": "Retry",
+    "loading": "Loading…",
+    "unsaved": {
+      "title": "Unsaved changes",
+      "close": "Your changes are not saved. Close anyway?",
+      "switch": "Your changes are not saved. Switch anyway?"
+    }
+  },
+  "glossary": {
+    "activity": "Activity",
+    "card": "Card",
+    "variablesPanel": "Variables panel",
+    "variableBox": "Variable box",
+    "outputAnchor": "Output anchor",
+    "chip": "Chip",
+    "appInputs": "App inputs",
+    "runPanel": "Run panel",
+    "tab": "Tab",
+    "viewer": "Viewer",
+    "docked": "Docked",
+    "floating": "Floating",
+    "popOut": "Pop-out window",
+    "sideLane": "Side lane",
+    "playbook": "Playbook",
+    "phase": "Phase",
+    "outline": "Outline"
+  },
+  "format": {
+    "seconds": "{seconds}s",
+    "minutesSeconds": "{minutes}m {seconds}s",
+    "elapsed": "{minutes}m {seconds}s",
+    "empty": "(empty)"
+  },
+  "terms": {
+    "title": "Terms of Use",
+    "revisedSummary": "New terms apply from {date}.",
+    "version": "Revision {revision} · effective {date}",
+    "accept": "Agree and start",
+    "conditionsHeading": "Precautions for use (excerpted from the Terms of Use)",
+    "condition2": "The data you create and set in this tool (including chats and images) lives in the browser's storage, so it can be lost when you clear the cache or site data, through mistaken operations, or through defects in the browser or the tool. Safari in particular automatically cleans up its storage, and the same care is needed in other browsers. Back up the data you need, for example by exporting it each time.",
+    "condition3": "Unintended incidents such as breakdowns or large bills can occur. Watch the screen while processing is running, and always stop it before leaving your seat.",
+    "condition4": "Use the version delivered from our official domain, in a currently maintained browser such as Chrome, Edge, Firefox or Safari. We verify how the tool runs in Chrome. We have not verified how it runs in any other browser.",
+    "consent": "I am at least 18 and of legal age where I live, and I agree to the terms of use and the privacy policy",
+    "noticeTitle": "Usage notes",
+    "noticeCheck": "I have read the {notice}",
+    "noticeCheckLabel": "I have read the usage notes",
+    "noticeIntro": "At first glance this tool may look as if it runs on a server at the URL, but the processing happens in your browser (locally). Please understand that, technically and in terms of responsibility alike, it is much the same as operating downloaded software on your own PC.\nBecause of this, we can neither monitor how it runs nor stop it on the spot when something goes wrong (Terms of Use, Article 2). Your operation of the tool, and the fees and changes it causes at the Destinations, are under your control (Article 4). Fees and other charges at the Destinations are borne by you, and we do not reimburse them (Article 8).\nThe points that need particular attention are excerpted and supplemented below. The exact content is governed by the Terms of Use.",
+    "noticeAi4": "Today's AI has no mind; it only predicts a natural continuation of the text. Do not turn to it for counseling or as an emotional anchor.",
+    "noticeAi3": "Treat the output as a reference only. Do not rely on it for professional judgments such as medical, legal or tax matters, or for decisions that matter to you.",
+    "noticeAi2": "Depending on the provider, input may be used for training and could leak unintentionally. Do not enter confidential information such as personal data or credentials.",
+    "noticeAi1": "AI can be wrong or produce false output. Do not take information at face value; verify it, and always check generated content before using it or showing it to others (Article 5).",
+    "noticeAiHeading": "About AI output",
+    "notice1": "A single action may automatically send several requests to the Destination (Article 8).",
+    "noticeConfirm": "I have read this",
+    "agreements": "Terms and notices",
+    "notAgreed": "Not confirmed",
+    "agreedAt": "{date} confirmed",
+    "landingSummary": "Please review the {terms} and {privacy}."
+  },
+  "privacy": {
+    "title": "Privacy Policy",
+    "version": "Effective {date}"
+  },
+  "accessibility": {
+    "title": "Accessibility statement",
+    "date": "Prepared {date}",
+    "body": "1. Commitment\nKisaraUI is designed with accessibility in mind, and we aim for the node list, the input fields, reordering and adding nodes to be operable with the keyboard alone.\n\n2. Scope\nThe screens of KisaraUI (the whole app running on this page). Content returned by the ComfyUI and LLM servers and services you connect to (generated images and text, node names, etc.) and the screens of those providers are not included.\n\n3. Target and conformance status\nWe aim for WCAG 2.1 Level AA (JIS X 8341-3:2016 Level AA). However, conformance has not been verified or guaranteed. In the wording of the Web Accessibility Infrastructure Committee (WAIC) of Japan, this corresponds to \"配慮\" (taken into consideration).\n\n4. How we check\nDuring development we check that the app can be operated with the keyboard alone, using automated tests and validation tools.\n\n5. Known limitations\n- The links between nodes in a workflow are drawn as a picture; the picture itself is not read aloud. The connections can be followed through names and text.\n- Images generated by the services you connect to are not described in text.\n\n6. Feedback\nPlease send us anything that is hard to use through the contact form (https://contact.kisara-ui.com)."
+  },
+  "settings": {
+    "language": {
+      "label": "Language"
+    },
+    "theme": {
+      "label": "Theme",
+      "system": "Follow system",
+      "light": "Light",
+      "dark": "Dark"
+    },
+    "tabs": {
+      "heading": "Tab order",
+      "chatFirst": "Keep chat tabs on the left"
+    },
+    "loraFormat": {
+      "label": "Lora copy format",
+      "note": "[loraname] is replaced with the name without extension, [learntext] with the most frequent training words, and [memo] with the notes. Leave empty to use the default."
+    },
+    "nodeDisplay": {
+      "heading": "Node display"
+    },
+    "passedLines": {
+      "label": "Also show lines to passed nodes",
+      "note": "Also draws variable lines whose target card has scrolled above the card column."
+    },
+    "slideshow": {
+      "label": "Slideshow interval (seconds)",
+      "note": "How often the image viewer slideshow moves to the newer page.",
+      "increase": "Increase by 1 s",
+      "decrease": "Decrease by 1 s"
+    },
+    "runHistory": {
+      "heading": "History",
+      "label": "Keep prompt history",
+      "note": "When enabled, run history keeps being recorded to user/kisara/history.",
+      "limitLabel": "Runs kept per session",
+      "limitNote": "When a session's history exceeds this, the oldest runs are removed.",
+      "limitIncrease": "Keep more runs",
+      "limitDecrease": "Keep fewer runs"
+    },
+    "safeguards": {
+      "heading": "Safeguards",
+      "note": "The limiters that prevent excessive runs cannot be changed.",
+      "show": "Show",
+      "repeatFailureLimit": "Repeat: stop after consecutive failures",
+      "repeatMinIntervalMs": "Repeat: minimum interval (ms)",
+      "repeatMaxRuns": "Repeat: maximum runs",
+      "llmRequestInputMax": "LLM: max input per request (tokens)",
+      "llmWindowMinutes": "LLM: counting window (minutes)",
+      "llmWindowOutputLimit": "LLM: output per window (tokens)",
+      "llmWindowInputLimit": "LLM: input per window (tokens)",
+      "llmSilentMinutes": "LLM: stop when nothing arrives (minutes)",
+      "toolAutoRunMax": "Workflow: runs without confirmation per reply"
+    },
+    "diagnostics": {
+      "heading": "Log level",
+      "note": "Logs at or above the selected level are temporarily recorded in your browser. They are not sent automatically, so export them each time you need them, such as when contacting us.",
+      "level": {
+        "error": "Error",
+        "warn": "Warning",
+        "info": "Info",
+        "debug": "Debug"
+      },
+      "open": "Export logs",
+      "verbose": "Collecting detailed logs",
+      "dialog": {
+        "title": "Export logs",
+        "intro": "Exports a file for bug reports. The app does not send it anywhere, so please provide it separately, for example through the {form}.",
+        "contactForm": "contact form",
+        "counts": "{faults} errors · {events} recorded operations",
+        "levels": "Log level: ComfyUI {comfy} · LLM {llm}",
+        "sections": "Included in the file",
+        "group": {
+          "general": "General",
+          "comfy": "ComfyUI",
+          "llm": "LLM"
+        },
+        "section": {
+          "format": "File type, export time and log levels",
+          "faults": "Errors that occurred (message, where, and stack trace)",
+          "app": "KisaraUI version",
+          "environment": "Browser type, language, screen size, CPU and memory amount",
+          "settings": "Settings chosen with switches and options (free text is not included)",
+          "comfyEvents": "Operation log (as much as the log level records)",
+          "comfySystem": "ComfyUI version and GPU name",
+          "comfyConnection": "Connection state (whether connected and the kind of the latest failure)",
+          "comfyUrl": "Destination URL",
+          "workflowShape": "Node types and counts in the open workflow",
+          "definitionSources": "Installed custom node names and their node counts",
+          "llmEvents": "Operation log (as much as the log level records)",
+          "llmConnection": "Destination type (local or external, https or not)",
+          "llmUrl": "Destination URL",
+          "llmParams": "Generation settings (numbers such as temperature)"
+        },
+        "content": "Content of the file",
+        "loading": "Reading…",
+        "size": "{size} KB",
+        "export": "Export",
+        "clear": "Clear logs",
+        "clearTitle": "Clear the logs?",
+        "clearDescription": "All recorded errors and operations are deleted. The log levels stay as they are."
+      }
+    }
+  },
+  "connection": {
+    "guide": {
+      "summary": {
+        "httpError": "The server returned an HTTP error.",
+        "httpStatus": "The server returned HTTP {status}.",
+        "cors": "ComfyUI is responding, but it does not allow access from this page (CORS).",
+        "down": "The server is not responding",
+        "downTarget": "{target} is not responding",
+        "corsOrDown": "ComfyUI is not running, or it does not allow access from this page.",
+        "localNetwork": "The browser is blocking access to the local network.",
+        "mixedContent": "The browser does not allow an https page to connect to ComfyUI over http.",
+        "timeout": "The server was found, but it did not respond in time.",
+        "badResponse": "Connected, but something other than ComfyUI is responding.",
+        "offline": "The browser is offline.",
+        "unknown": "Could not connect.",
+        "forbiddenRun": "ComfyUI rejected the run from this page (403)."
+      },
+      "steps": {
+        "addCorsFlag": "Restart ComfyUI with {flag} added to its launch options",
+        "allowThroughProxy": "If a reverse proxy or authentication sits in between, allow access from this page in its settings",
+        "checkUrlIsComfy": "Check that the URL points to ComfyUI itself",
+        "includePathPrefix": "Behind a reverse proxy, include the path prefix (e.g. https://example.com/comfy)",
+        "updateForFeatures": "Older ComfyUI versions may lack /features, which is used to check the connection. Consider updating",
+        "checkConsole": "Check the ComfyUI console for errors",
+        "waitAndRetry": "If ComfyUI just started, wait a moment and retry",
+        "checkProxy": "Check whether a reverse proxy or authentication sits in between",
+        "restartFully": "After editing the launch batch file or script, stop ComfyUI completely and start it again",
+        "checkTarget": "Check that it is running and that the URL and port are correct",
+        "checkRunning": "Check that ComfyUI is running (opening the server URL directly in the browser shows its page)",
+        "checkUrlAndPort": "Check that the server URL and port are correct (default is 8188)",
+        "allowPrompt": "Choose \"Allow\" in the permission prompt shown in the address bar",
+        "allowFromSiteIcon": "If no prompt appears, allow local network access for this site from the icon on the left of the address bar",
+        "openOnSameMachine": "If it still cannot connect, open this page on the same machine as ComfyUI",
+        "reopenWithHttp": "Reopen this page over http",
+        "publishHttps": "Or serve ComfyUI over https (set up a reverse proxy)",
+        "waitForModels": "Right after startup, model loading can cause delays. Wait a moment and retry",
+        "checkHeavyWork": "Check the ComfyUI console for other heavy work in progress",
+        "checkPortService": "Check that the URL port does not point to another service",
+        "reconnectNetwork": "Retry after reconnecting to the network",
+        "checkUrlAndRetry": "Check the URL and retry",
+        "restartWithCors": "Restart ComfyUI with --enable-cors-header {origin}",
+        "writesOnlyRejected": "Note that reads may succeed while only write requests such as runs are rejected"
+      }
+    },
+    "status": {
+      "socket": {
+        "connecting": "Connecting",
+        "open": "Receiving",
+        "reconnecting": "Reconnecting",
+        "closed": "Disconnected"
+      },
+      "retry": "Retry ({attempt}/{max})",
+      "unresponsiveRetry": "No response, retry ({attempt}/{max})",
+      "connecting": "Connecting…",
+      "failed": "Connection failed",
+      "connected": "Connected",
+      "timeout": "Timed out",
+      "disconnected": "Not connected",
+      "progress": "Progress: {state}",
+      "progressGaveUp": "Progress: disconnected (no response after {count} reconnect attempts)",
+      "progressDropped": "Progress: disconnected (dropped {count} times while running. Press Reconnect to use it again)"
+    }
+  },
+  "nodeSearch": {
+    "result": {
+      "inputs": "Inputs: {types}",
+      "outputs": "Outputs: {types}",
+      "none": "none"
+    },
+    "anyType": {
+      "label": "Include *",
+      "title": "Count slots that accept anything (*) as matching types"
+    },
+    "search": {
+      "addPlaceholder": "Search by node name",
+      "referencePlaceholder": "Search by node or slot name"
+    },
+    "listColumn": "Left column",
+    "reference": {
+      "type": "Type",
+      "typeOutputs": "Outputs that can provide this type",
+      "typeInputs": "Inputs that can accept this type",
+      "typeFilter": "Filter by type",
+      "nodes": "Nodes to reference",
+      "outputsList": "Source outputs",
+      "inputsList": "Target inputs",
+      "noOutputs": "No outputs to link",
+      "noInputs": "No inputs to link",
+      "linked": "Linked",
+      "linkedTitle": "Already linked. Choosing this replaces the link"
+    },
+    "filter": {
+      "input": "Input",
+      "inputTitle": "Nodes that can accept this type",
+      "inputFilter": "Filter by input type",
+      "output": "Output",
+      "outputTitle": "Nodes that can output this type",
+      "outputFilter": "Filter by output type",
+      "unspecified": "Any"
+    },
+    "empty": {
+      "noDefinitions": "Node definitions are not loaded. Please connect.",
+      "filtered": "No matching nodes (clear filters to see more)",
+      "none": "No matching nodes"
+    },
+    "mode": {
+      "label": "How to add",
+      "add": "Add node",
+      "reference": "Reference node",
+      "referenceTitle": "Link to an existing node",
+      "referenceDisabled": "Unavailable without a starting slot (available when opened from an input or output triangle)"
+    },
+    "refresh": {
+      "label": "Reload node definitions",
+      "title": "Reload node definitions (not updated automatically)"
+    },
+    "nav": {
+      "categories": "Categories",
+      "all": "All"
+    }
+  },
+  "nodeSettings": {
+    "title": "{name} settings",
+    "x": "x",
+    "y": "y",
+    "width": "Width",
+    "height": "Height",
+    "pinned": "Pinned",
+    "pinnedTitle": "Keeps the node from being moved in ComfyUI. Cleared when this app moves the node",
+    "auto": "Auto",
+    "extra": {
+      "one": "Other fields (read-only, {count} item)",
+      "other": "Other fields (read-only, {count} items)"
+    }
+  },
+  "modelPicker": {
+    "folder": {
+      "loras": "Lora",
+      "checkpoints": "Model"
+    },
+    "title": "Choose {kind}",
+    "refresh": {
+      "label": "Reload {kind} list",
+      "title": "Reload the list (not updated automatically)"
+    },
+    "directory": "Directories",
+    "directoryToggle": {
+      "show": "Show folders",
+      "pin": "Pin folders (always show)",
+      "unpin": "Unpin folders (hide)"
+    },
+    "nothingSelected": "Click a card to select it",
+    "decide": {
+      "toolbar": "{kind} confirmation",
+      "label": "Confirm {kind}",
+      "title": "Choose {name} and close (double-click or Enter also works)"
+    },
+    "insert": {
+      "label": "Insert {kind} at the caret without closing"
+    },
+    "filter": {
+      "toolbar": "{kind} filters",
+      "label": "Filter {kind}",
+      "placeholder": "Filter by name"
+    },
+    "sort": {
+      "name": "Name",
+      "modified": "Date modified",
+      "created": "Date created",
+      "size": "Size",
+      "ascending": "{name}, ascending (click for descending)",
+      "descending": "{name}, descending (click for ascending)",
+      "pick": "Sort by {name}",
+      "setAscending": "{name}, ascending",
+      "setDescending": "{name}, descending"
+    },
+    "cardHeight": {
+      "label": "Height",
+      "input": "Card height (px)"
+    },
+    "grid": {
+      "loading": "Loading list…",
+      "empty": "No matching {kind}",
+      "loadingMore": "Loading… {shown} / {total}"
+    },
+    "infoDock": {
+      "bottom": "Show info below",
+      "right": "Show info on the right"
+    },
+    "infoPane": "Info",
+    "field": {
+      "open": "{label} (choose {kind})",
+      "clear": "{action}: {label}"
+    },
+    "card": {
+      "current": "Current value"
+    },
+    "info": {
+      "panel": "Model info",
+      "close": "Close info",
+      "path": "Path",
+      "copyName": "Copy the name of {name}",
+      "size": "Size",
+      "modified": "Modified",
+      "created": "Created",
+      "name": "Name",
+      "baseModel": "Base model",
+      "network": "Network",
+      "loading": "Loading info…",
+      "error": "Couldn't get info: {error}",
+      "noEmbedded": "No embedded info",
+      "triggerWords": "Frequent training words",
+      "copyTriggerWords": "Copy all frequent training words",
+      "insertTriggerWords": "Insert all frequent training words at the caret",
+      "notes": "Notes",
+      "notesNone": "No notes file yet. Saving creates one.",
+      "notesLoading": "Loading notes…",
+      "notesFailed": "Couldn't read the notes: {error}",
+      "notesSave": "Save notes",
+      "notesSaving": "Saving…",
+      "notesSaved": "Saved",
+      "notesSaveFailed": "Couldn't save: {error}",
+      "copyNotes": "Copy the notes",
+      "insertNotes": "Insert the notes at the caret",
+      "allEntries": "All embedded fields"
+    }
+  },
+  "imagePicker": {
+    "kind": "Image",
+    "title": "Choose an image",
+    "refresh": {
+      "label": "Reload image list",
+      "title": "Reload the options of this node (not updated automatically)"
+    },
+    "decide": {
+      "toolbar": "Image confirmation",
+      "label": "Confirm image"
+    },
+    "filter": {
+      "toolbar": "Image filters",
+      "label": "Filter images"
+    },
+    "empty": "No matching images",
+    "upload": {
+      "label": "Upload images",
+      "title": "Upload images to the input folder (you can also drop files here)",
+      "drop": "Drop to upload",
+      "renamed": "Saved under a different name: {names}",
+      "notImage": "Only image files can be uploaded",
+      "noConnection": "Not connected to ComfyUI",
+      "failed": "Upload failed: {reason}",
+      "skipped": "Files that are not images were skipped"
+    }
+  },
+  "insertBar": {
+    "label": "Insert",
+    "waiting": "Loading list",
+    "lora": {
+      "title": "Choose a Lora and insert it at the caret",
+      "label": "Insert Lora",
+      "triggersFailed": "Could not get the frequent training words: {message}",
+      "memoFailed": "Could not get the notes: {message}",
+      "noTarget": "Place the caret in a multiline field outside this panel, then press (you can also drag and drop)"
+    },
+    "style": {
+      "title": "Open the style editor (confirm or double-click to insert at the caret)",
+      "label": "Open styles"
+    },
+    "wildcard": {
+      "title": "Open the wildcard list (confirm or double-click to insert at the caret)",
+      "label": "Insert wildcard"
+    },
+    "tag": {
+      "title": "Open the tag dictionaries to view and edit them",
+      "label": "Open tag dictionaries"
+    },
+    "tool": {
+      "label": "Call settings from LLM",
+      "title": "Settings for calling this workflow from the LLM in a chat"
+    },
+    "sources": {
+      "offline": "Not connected",
+      "loraUnavailable": "The server does not return the model list",
+      "stylesUnavailable": "Cannot read the style table (styles.csv) on the server",
+      "wildcardsNoRoute": "The server has no wildcard route (Impact Pack is required)",
+      "wildcardsFailed": "Cannot get the wildcard list from the server",
+      "tagsUnavailable": "Cannot read the tag dictionaries on the server"
+    }
+  },
+  "comfy": {
+    "workspace": {
+      "taskDetail": "Task details",
+      "imageView": "Image view",
+      "image": "Image",
+      "workflow": "Workflow",
+      "closeTab": "Close this tab",
+      "closeTabTitle": "Unsaved edits will be lost"
+    },
+    "connection": {
+      "remoteTitle": "Notice on connecting to an external ComfyUI",
+      "remoteNotice": "You are about to connect to a ComfyUI outside your own device or private network. Before connecting, please note:\n- Running workflows uses that ComfyUI's GPU and changes its state.\n- On paid hosting, the provider charges you based on usage time or runs. Checking the fees and managing how often, how long and at what cost you use it is up to you (Terms of Use, Article 4). We do not reimburse fees (Article 8).\n- On a shared server, its administrator and other users may be able to see what you send and generate.\n- Please use the server in line with its terms of use and applicable laws.\n- Our liability for damage arising from your use of external servers is as set out in Article 11 of the Terms of Use.\nIf you agree, please connect.",
+      "remoteAgree": "Agree and connect",
+      "remoteCancel": "Cancel",
+      "urlLabel": "ComfyUI URL to connect to",
+      "connect": "Connect",
+      "needsConnection": "Connect first",
+      "definitionCount": {
+        "one": "{count} node definition",
+        "other": "{count} node definitions"
+      }
+    },
+    "connect": {
+      "heading": "Connect to ComfyUI",
+      "launchStep": "1. Start ComfyUI with access allowed",
+      "launchNote": "Add the launch option to the command that starts ComfyUI, as below.",
+      "launchWhy": "This UI runs locally in your browser, but with ComfyUI's default settings the browser's requests to another URL are blocked, so this option is required.",
+      "securityLink": "About the security risks",
+      "securityCors": "By default, ComfyUI tells the browser not to process requests from a different URL, so the enable-cors-header option is needed to add an exception.",
+      "securityListen": "enable-cors-header does not allow network access from other PCs or the internet. That requires exposing ComfyUI on the network with the --listen option, which is very risky; avoid it unless you have enough knowledge and a clear intention.",
+      "securityDirect": "KisaraUI runs in your local browser and sends what you enter directly from the browser to ComfyUI, so it is designed never to send what you run to an outside party or relay it.",
+      "securityTamper": "However, if inappropriate code were embedded in the page through tampering with the website or a malicious update, it would theoretically be possible to send information on the UI elsewhere or to extract information through the ComfyUI API.",
+      "securityScope": "In this way, the risk is limited to what the ComfyUI API can do. This is somewhat more secure than custom nodes, which can gain access to OS resources as part of the ComfyUI process, but please use it with an understanding of the potential risks.",
+      "securityInspect": "If these risks concern you, you can verify them, for example by checking where and what is sent with the browser's developer tools (F12), or by saving this page and having a generative AI analyze the code.",
+      "urlStep": "2. Enter the address and connect",
+      "urlTabHint": "Press Tab while empty to enter the example address",
+      "permissionNote": "If the browser asks for permission to access the local network, choose \"Allow\".",
+      "connectTitle": "Connect to ComfyUI",
+      "reconnect": "Reconnect",
+      "reconnectTitle": "Disconnect and connect to ComfyUI again",
+      "connecting": "Connecting…",
+      "target": "Address: {url}",
+      "openHeading": "3. Open a workflow",
+      "fromTemplate": "Open from templates",
+      "fromFile": "Open from file",
+      "empty": "Open empty",
+      "connected": {
+        "one": "Connected - {count} node definition",
+        "other": "Connected - {count} node definitions"
+      },
+      "connectedPlain": "Connected"
+    },
+    "bar": {
+      "heading": "Comfy backend",
+      "reconnect": "Reconnect",
+      "reconnectTitle": "Disconnect, connect to ComfyUI again and re-open progress notifications",
+      "connectTitle": "Connect to ComfyUI and re-open progress notifications",
+      "checking": "Checking the connection",
+      "noUrl": "Not set",
+      "openConnectTitle": "Open \"Connect to ComfyUI\" to change the address or connect again"
+    },
+    "status": {
+      "definitionsCached": {
+        "one": "{count} node definition (cached)",
+        "other": "{count} node definitions (cached)"
+      },
+      "definitionsFetched": {
+        "one": "{count} node definition (fetched)",
+        "other": "{count} node definitions (fetched)"
+      },
+      "definitionsLoading": "Node definitions: loading",
+      "definitionsMissing": "Node definitions: not fetched",
+      "noTarget": "No address set",
+      "detail": "({detail})"
+    },
+    "imageTab": {
+      "notKept": "Images are not stored on this device, so they cannot be shown after a reload. Open the file again.",
+      "region": "Image metadata"
+    },
+    "insert": {
+      "noFieldTitle": "Place the caret in a multi-line field outside this dialog first",
+      "title": "Insert at the caret in the selected field"
+    },
+    "saveAs": {
+      "title": "Save as",
+      "description": "Saves to the ComfyUI workflows folder.",
+      "nameLabel": "Workflow name"
+    },
+    "side": {
+      "label": "Right column",
+      "queue": "Tasks",
+      "history": "History",
+      "report": "Errors",
+      "settings": "Settings",
+      "dockBottom": "Move to bottom",
+      "dockRight": "Move to right",
+      "tabBoundary": "{name} tab"
+    },
+    "template": {
+      "title": "Open from templates",
+      "fellBack": "No list is available in this language, so it is shown in English",
+      "subtitle": "Workflows bundled with KisaraUI and ComfyUI",
+      "localeLabel": "List language",
+      "localeTitle": "Language of titles, descriptions and category names",
+      "category": "Categories",
+      "toolbar": "Template actions",
+      "close": "Close templates",
+      "all": "All",
+      "filterToolbar": "Template filter",
+      "filterLabel": "Filter templates",
+      "filterPlaceholder": "Filter by title, description, tag or model name",
+      "sortLabel": "Sort",
+      "sort": {
+        "default": "Default",
+        "popular": "Popular",
+        "newest": "Newest",
+        "name": "Name",
+        "size": "Smallest models"
+      },
+      "loading": "Loading list…",
+      "loadFailed": "Could not fetch the list: {message}",
+      "empty": "No matching templates",
+      "loadingMore": "Loading… {shown} / {total}",
+      "builtinCategory": "KisaraUI",
+      "builtin": {
+        "a1111Txt2img": {
+          "title": "txt2img (A1111 style)",
+          "description": "Text to image laid out like the Stable Diffusion web UI. LoRA and wildcards in the prompt, Hires. fix and ADetailer switches. Needs Impact Pack (ADetailer also needs Impact Subpack)"
+        }
+      }
+    },
+    "fileInput": {
+      "dropHint": "Open file"
+    },
+    "toasts": {
+      "saved": "Saved to ComfyUI",
+      "saveFailed": "Could not save to ComfyUI",
+      "loadFailed": "Could not load the workflow"
+    },
+    "list": {
+      "label": "Workflow list",
+      "saved": "Workflows saved on ComfyUI"
+    },
+    "open": {
+      "loadFailed": "Could not fetch the list: {error}",
+      "empty": "No matching workflows"
+    },
+    "tabMenu": {
+      "save": "Save",
+      "saveAs": "Save as…",
+      "export": "Export",
+      "exportTitle": "Download as Workflow JSON"
+    },
+    "saveGuard": {
+      "existsForeign": "A workflow not created by KisaraUI already has this name. Choose another name (workflows/{path}).",
+      "notOwned": "Not overwritten because this file was not created by KisaraUI. Save it under another name (workflows/{path}).",
+      "connectionChanged": "Not saved because the connection changed. Save again.",
+      "notOwnedTitle": "This file was not created by KisaraUI, so it cannot be overwritten. Use Save As.",
+      "otherServerTitle": "This file was opened from another connection, so it cannot be overwritten. Use Save As."
+    },
+    "tool": {
+      "title": "Call settings from LLM",
+      "name": "Function name (letters, digits, hyphen, underscore)",
+      "purpose": "Workflow description",
+      "purposePlaceholder": "What the workflow does, when or on what trigger to call it, and the format to write in",
+      "result": "Output (images passed back as the result)",
+      "allOutputs": "All",
+      "params": "Input (what to ask for as arguments)",
+      "noInputs": "There are no app inputs.",
+      "noParams": "There are no arguments.",
+      "notEligible": "This type cannot be an argument",
+      "paramName": "Argument name for {label}",
+      "paramNamePlaceholder": "Argument name (letters, digits, symbols)",
+      "paramDescription": "Description for {label}",
+      "paramDescriptionPlaceholder": "Argument description (what to pass to the node and in what form)",
+      "badName": "The function name may use only upper- and lowercase letters, digits, hyphen and underscore (up to 64).",
+      "badParamName": "Argument names may use only upper- and lowercase letters, digits, hyphen and underscore (up to 64).",
+      "duplicateParam": "Two arguments have the same name.",
+      "save": "Save",
+      "reset": "Reset",
+      "tab": "Tab",
+      "tabWithId": "{name} ({id})",
+      "file": "File name",
+      "tabClosed": "(closed)",
+      "unsaved": "(not saved)",
+      "mode": "How to put {label}",
+      "modeOverwrite": "Overwrite",
+      "modePrepend": "Prepend",
+      "modeAppend": "Append",
+      "noOutputs": "There are no output nodes."
+    },
+    "landing": {
+      "title": "Workflows (ComfyUI)",
+      "summary": "Open and run workflows on your own ComfyUI.",
+      "start": "Use ComfyUI",
+      "routeName": "ComfyUI",
+      "routeVia": "HTTP / WebSocket (direct)"
+    }
+  },
+  "styles": {
+    "edit": "Edit styles",
+    "title": "Styles",
+    "newStyle": "New style",
+    "close": "Close style editor",
+    "list": "Style list",
+    "insertToolbar": "Insert style",
+    "positive": "Positive",
+    "negative": "Negative",
+    "insertPositive": "Insert the positive text at the caret",
+    "insertNegative": "Insert the negative text at the caret",
+    "positiveText": "Positive text",
+    "negativeText": "Negative text",
+    "copyPositive": "Copy positive text",
+    "copyNegative": "Copy negative text",
+    "filterToolbar": "Style filter",
+    "filterLabel": "Filter styles",
+    "filterPlaceholder": "Filter by name or text",
+    "remove": {
+      "title": "Delete?",
+      "description": "\"{name}\" will be deleted from the table. This cannot be undone."
+    },
+    "refresh": "Reload styles",
+    "refreshTitle": "Reload the table from the server (not reloaded automatically)",
+    "itemTitle": "{name} (double-click or drag onto a field to insert the positive text)",
+    "name": "Name",
+    "nameLabel": "Style name",
+    "saveTitle": "Write the table back to the server",
+    "saving": "Saving…",
+    "errors": {
+      "emptyName": "Enter a name",
+      "duplicateName": "A style with the same name already exists (case-insensitive)",
+      "notLoaded": "The styles have not been loaded yet"
+    }
+  },
+  "wildcards": {
+    "title": "Wildcards",
+    "pickPrompt": "Choose one from the list",
+    "close": "Close wildcards",
+    "refresh": "Reload wildcards",
+    "refreshTitle": "Reload the list from the server (not reloaded automatically)",
+    "tree": "Wildcard folders",
+    "decideToolbar": "Insert wildcard",
+    "insert": "Insert the wildcard at the caret",
+    "filterToolbar": "Wildcard filter",
+    "filterLabel": "Filter wildcards",
+    "filterPlaceholder": "Filter by name",
+    "copy": "Copy wildcard",
+    "noMatch": "No matches",
+    "list": "Wildcard list",
+    "itemTitle": "{name} (double-click or drag onto a field to insert)"
+  },
+  "tagComplete": {
+    "list": "Tag suggestions",
+    "count": "{count} suggestions. Up and down to choose, Enter or Tab to insert"
+  },
+  "tags": {
+    "title": "Tag dictionaries",
+    "close": "Close tag dictionaries",
+    "refresh": "Reload tag dictionaries",
+    "refreshTitle": "Reload the dictionaries from the server (not reloaded automatically)",
+    "dictionaries": "Dictionaries",
+    "all": "All",
+    "pysssss": "pysssss",
+    "readOnly": "Read only",
+    "confirmToolbar": "Confirm changes",
+    "confirm": "Confirm",
+    "confirmLabel": "Write the changes to the dictionary",
+    "confirmTitle": "Write the changes in the table to the server",
+    "confirmIdleTitle": "Nothing to write. Edit the table first",
+    "filterToolbar": "Tag filter",
+    "filterLabel": "Filter tags",
+    "filterPlaceholder": "Filter by tag or alias",
+    "list": "Tag table",
+    "more": "{count} more. Type in the filter to narrow the list",
+    "tag": "Tag",
+    "aliases": "Aliases",
+    "priority": "Priority",
+    "rowActions": "Row actions",
+    "sortTitle": "Sort by {name} (each click: ascending, descending, original order)",
+    "removeRow": "Remove {name}",
+    "removeRowTitle": "Strike out this row. It is removed from the dictionary when you confirm",
+    "restoreRow": "Restore {name}",
+    "restoreRowTitle": "Remove the strikethrough",
+    "addDictionary": "Add dictionary",
+    "addDictionaryTitle": "Enter a name to add an empty dictionary (written when you confirm)",
+    "dictionaryName": "Dictionary name",
+    "removeDictionary": "Delete {name}",
+    "removeDictionaryTitle": "Strike out this dictionary. Its file is deleted when you confirm",
+    "restoreDictionary": "Restore {name}",
+    "restoreDictionaryTitle": "Remove the strikethrough from this dictionary",
+    "errors": {
+      "duplicateTag": "The same tag appears twice: {name}",
+      "notLoaded": "The dictionaries are not loaded yet. Reload and try again",
+      "emptyName": "Enter a name",
+      "duplicateName": "A dictionary with the same name already exists"
+    }
+  },
+  "app": {
+    "tabCount": {
+      "title": "More than {limit} tabs are open",
+      "description": "Close tabs you are not using. Many open tabs slow down the page and saving."
+    },
+    "skipToMain": "Skip to main content",
+    "documentTitle": "{name} - KisaraUI",
+    "boundary": "App",
+    "lazy": {
+      "templates": "Templates",
+      "chat": "Chat",
+      "chatSettings": "Chat settings",
+      "chatList": "Chat list",
+      "storage": "Storage management"
+    },
+    "overwrite": {
+      "title": "Overwrite?",
+      "description": "A workflow with the same name already exists in ComfyUI (workflows/{path}). This cannot be undone.",
+      "confirm": "Overwrite"
+    },
+    "rootFallback": {
+      "title": "The screen could not be displayed",
+      "hint": "If an open workflow is in an unreadable state, reloading will stop at the same point. In that case, clear the saved copy of the open tabs (workflows saved in ComfyUI and your files are not deleted).",
+      "retry": "Try again",
+      "reload": "Reload",
+      "discard": "Clear saved tabs and reload",
+      "diagnostics": "Export logs",
+      "previewLabel": "Content to export (full text)",
+      "save": "Save"
+    },
+    "tabs": {
+      "untitled": "Untitled",
+      "nameField": "Workflow name",
+      "renameHint": "Double-click to rename. Close it from the right-click menu (Delete on the keyboard)",
+      "menu": "{name} menu",
+      "list": "Open tabs",
+      "chooseKind": "Choose a tab type",
+      "kind": {
+        "workflow": "Workflow",
+        "chat": "Chat"
+      },
+      "receiving": "Receiving",
+      "running": "Running",
+      "moveLeft": "Move left",
+      "moveRight": "Move right"
+    },
+    "pin": {
+      "pin": "Pin open",
+      "unpin": "Unpin (collapse to icons)"
+    },
+    "landing": {
+      "title": "Choose what to use",
+      "lead": "Pick one and this tab switches to that screen. Where your data goes and what to watch out for are summarized below.",
+      "consentHeading": "Agreement to the terms",
+      "choicesLabel": "What to use",
+      "routesHeading": "Connection routes",
+      "hostName": "Where this page is served from ({url})",
+      "hostVia": "Page files only",
+      "hostDetail": "It only hands over the files of this screen. Your input and results never pass through it.",
+      "browserName": "Your browser (this page)",
+      "browserDetail": "Input and results are sent from here directly to where you connect.",
+      "localDevice": "Your device",
+      "notesHeading": "Security notes"
+    },
+    "welcome": {
+      "title": "KisaraUI",
+      "open": "Open the welcome page",
+      "aboutHeading": "What is this?",
+      "about": "KisaraUI is an API frontend for easily running LLM chat and image generation. It runs entirely in your browser and sends requests to your own AI runtime or to cloud APIs.",
+      "usesHeading": "What you can do",
+      "useChatName": "Chat (LLM)",
+      "useChat": "Connect to your own LLM server or to cloud APIs such as OpenRouter and chat.",
+      "useImageName": "Image generation (ComfyUI)",
+      "useImage": "Open workflows on your own ComfyUI, change values and run them.",
+      "featuresHeading": "Features",
+      "featureBrowserName": "Runs in the browser",
+      "featureBrowser": "No installation of KisaraUI itself and no account sign-up are needed. Connect it to the LLM runtime or ComfyUI environment you already have.",
+      "featurePrivacyName": "Privacy-minded",
+      "featurePrivacy": "Your browser communicates directly with your inference environment; what you send is never relayed and results are never sent elsewhere.",
+      "featureCraftName": "Simplicity and capability",
+      "featureCraft": "Simple to operate, while keeping what happens behind the scenes transparent and customizable.",
+      "system": "System overview",
+      "systemLink": " ({link})"
+    }
+  },
+  "ui": {
+    "copy": {
+      "copy": "Copy",
+      "copied": "Copied",
+      "failed": "Copy failed"
+    },
+    "decide": {
+      "caption": "Apply"
+    },
+    "dialog": {
+      "toDocked": "Dock",
+      "toFloating": "Float",
+      "toDockedTitle": "Dock (fit it into the node and variable columns)",
+      "toFloatingTitle": "Float (move it freely over the screen)",
+      "resize": "Drag to resize"
+    },
+    "directory": {
+      "all": "All"
+    },
+    "boundary": {
+      "cannotShow": "Cannot display {label}",
+      "retry": "Try again"
+    },
+    "divider": {
+      "width": "{label} width",
+      "height": "{label} height",
+      "widthTitle": "Drag left or right to change the width",
+      "heightTitle": "Drag up or down to change the height"
+    },
+    "partLoading": {
+      "loading": "Loading {label}…",
+      "failed": "Cannot load {label}",
+      "staleHint": "Right after a new version is deployed, a page that was already open may fail to load it.",
+      "reload": "Reload"
+    },
+    "combobox": {
+      "open": "Open the {name} list",
+      "remove": "Remove {item} from the history",
+      "removeHint": "Remove from the history (Shift+Delete)"
+    },
+    "drag": {
+      "instructions": "To pick up an item, press Space or Enter. While dragging, use the arrow keys to move it. Press Space or Enter again to drop it, or press Escape to cancel.",
+      "sortable": "sortable",
+      "draggable": "draggable",
+      "item": "item",
+      "start": "Picked up {name}.",
+      "overSort": "{name} is now at the position of {target}.",
+      "overDrop": "{name} is over {target}.",
+      "overHome": "{name} is back at its original position.",
+      "overNone": "{name} is not over a drop target.",
+      "endSort": "Placed {name} at the position of {target}.",
+      "endDrop": "Dropped {name} onto {target}.",
+      "endHome": "Dropped {name} at its original position.",
+      "endNone": "Dropped {name}.",
+      "cancel": "Cancelled. {name} went back to its original position."
+    }
+  },
+  "graph": {
+    "color": {
+      "red": "Red",
+      "brown": "Brown",
+      "green": "Green",
+      "blue": "Blue",
+      "paleBlue": "Pale blue",
+      "cyan": "Cyan",
+      "purple": "Purple",
+      "yellow": "Yellow",
+      "black": "Black"
+    },
+    "rows": {
+      "valueFallback": "Value {index}"
+    },
+    "search": {
+      "groups": {
+        "frequent": "Frequently used",
+        "used": "In use",
+        "custom": "Custom nodes",
+        "partner": "Partner nodes"
+      }
+    },
+    "prompt": {
+      "noOutput": "There is no output node to run",
+      "unknownClass": "Node definition not found (custom node not installed?): {type}",
+      "unresolvedWidgets": "Could not match widget values to their positions, so defaults will be used (expected {expected}, got {actual})",
+      "missingInput": "Required input \"{name}\" is not connected",
+      "brokenNode": "Cannot convert an unreadable node for running: {message}",
+      "danglingReference": "The source ({source}) of input \"{name}\" is not included in the run",
+      "namedMismatch": "Not run: the parameter names do not match the definition order (the values may be shifted)",
+      "typeMismatch": "Not run: a parameter value does not match its type in the definition (the values may be shifted)",
+      "excludedDownstream": "Not run because its input node {source} is not run",
+      "subgraphCycle": "Subgraph \"{name}\" contains itself, so it cannot be expanded",
+      "noOutputLeft": "Not submitted: no output node is left to run"
+    },
+    "parse": {
+      "notObject": "Workflow JSON is not an object",
+      "noNodes": "nodes[] is missing",
+      "noLinks": "links[] is missing",
+      "invalidNode": "nodes[{index}] has no id or type",
+      "duplicateNode": "Node id {id} is used by more than one node (nodes[{index}])"
+    },
+    "png": {
+      "empty": "This PNG contains neither a workflow nor embedded text"
+    }
+  },
+  "api": {
+    "consentRequired": "Not sent, because the required agreement has not been given yet.",
+    "request": {
+      "aborted": "The request was aborted",
+      "timeout": "No response ({ms}ms)",
+      "unreachable": "Cannot reach the server",
+      "parse": "The response is not valid JSON",
+      "fetchFailed": "Failed to fetch ({status})"
+    },
+    "upload": {
+      "unexpected": "The upload response has an unexpected shape"
+    },
+    "baseUrl": {
+      "empty": "The server URL is empty",
+      "unsupportedScheme": "Only http(s) servers are supported: {url}",
+      "invalid": "Invalid server URL: {url}"
+    },
+    "prompt": {
+      "rejected": "The prompt was rejected"
+    },
+    "run": {
+      "error": "Runtime error",
+      "interrupted": "Interrupted"
+    },
+    "workflow": {
+      "exists": "A workflow with the same name exists: {path}",
+      "notOwned": "Not overwritten because this file was not created by KisaraUI: {path}"
+    },
+    "runHistory": {
+      "unexpected": "The run history file has an unexpected format"
+    }
+  },
+  "fault": {
+    "where": {
+      "history": "History {id}",
+      "notification": "Notification",
+      "nodeDefinition": "Node definition {name}",
+      "nodeRows": "Display of node {id} ({type})",
+      "nodeVariables": "Variables of node {id} ({type})",
+      "processing": "Processing",
+      "operation": "Communication or operation"
+    },
+    "toast": {
+      "title": "Unexpected failure in {where}",
+      "description": "{message} (see the browser console for details)",
+      "diagnostics": "Export logs"
+    }
+  },
+  "storageWarning": {
+    "settings": "Could not save settings to this browser",
+    "draft": "Could not save the open workflows to this browser",
+    "library": "Could not save to this browser",
+    "description": "Storage may be full or blocked by browser settings. Changes stay while this page is open but are lost on reload."
+  },
+  "writeConflict": {
+    "changed": {
+      "title": "\"{name}\" was changed in another tab",
+      "description": "This tab's changes were not saved. Reload to see the other tab's version.",
+      "action": "Overwrite with this tab's version"
+    },
+    "removed": {
+      "title": "\"{name}\" was deleted in another tab",
+      "description": "This tab's changes were not saved. Reload to see the list without it.",
+      "action": "Keep this tab's version"
+    }
+  },
+  "demo": {
+    "openFile": "Open file",
+    "resetSample": "Back to sample",
+    "openFailed": "Could not open: {error}",
+    "workflow": "Workflow",
+    "noWorkflowInImage": "This image contains no workflow",
+    "tagline": "Testing the advantages of a flow-based take on node-based workflows",
+    "menu": "About this demo",
+    "intro": {
+      "body": "Change values in the App column on the left, follow the lines into the cards, then press Run (simulated). Nothing is sent anywhere.",
+      "close": "Dismiss"
+    },
+    "run": {
+      "run": "Run (simulated)",
+      "runAgain": "Run again",
+      "stop": "Stop",
+      "close": "Close",
+      "note": "Simulated — sample images, not generated from this workflow",
+      "running": "Running: {name}",
+      "step": "Step {value}/{max}",
+      "done": "Done",
+      "outputs": "Outputs",
+      "show": "Show {name}",
+      "badge": "Simulated"
+    }
+  },
+  "flow": {
+    "canvas": {
+      "nodeSearch": "Node search",
+      "zoomIn": "Zoom in",
+      "zoomOut": "Zoom out",
+      "nodeSettings": "Node settings",
+      "appendTitle": "Node to add at the end",
+      "insertTitle": "Node to add here",
+      "openWorkflow": "Open a workflow",
+      "appColumn": "App inputs column",
+      "appGap": "Gap between app inputs and cards",
+      "cardColumn": "Card column",
+      "variablesGap": "Gap between cards and variables",
+      "variableColumn": "Variables column",
+      "connectors": "Connection lines"
+    },
+    "shared": {
+      "reorder": "Reorder {name}",
+      "addAfter": "Add a node after {name}",
+      "deleteNode": "Delete node"
+    },
+    "card": {
+      "insertAboveLabel": "Add a node before {name} (unconnected)",
+      "toggleSelect": "Add {name} to the selection or remove it",
+      "selectLabel": "Select {name}",
+      "insertAboveTitle": "Add a node here (without connecting it)",
+      "state": {
+        "running": "Running",
+        "error": "Failed",
+        "selected": "Selected"
+      },
+      "broken": "This node can't be shown because its data is unreadable: {reason}",
+      "showParams": "Show parameters of {name}",
+      "hideParams": "Hide parameters of {name}",
+      "toggleParamsTitle": "Click to show or hide parameters",
+      "missingDefinition": "Node definition not found (not connected, or a custom node not installed on this ComfyUI)",
+      "noServerDefinition": "The server has no definition for this node (e.g. a UI-only node). It does not take part in execution.",
+      "unresolved": "Read-only: the parameter positions of this node can't be resolved",
+      "menu": "Menu for {name}",
+      "settingsTitle": "Settings not shown in the flow (size, pinned)",
+      "settings": "Settings…",
+      "cloneSelectedTitle": "Adds the selected nodes after the last one (links between the copies are reconnected)",
+      "cloneTitle": "Adds an identical node right after this one (input links are kept; outputs are not connected)",
+      "clone": "Clone",
+      "groupTitle": "Puts the selected nodes into one group",
+      "group": "Group"
+    },
+    "row": {
+      "insertBeforeLabel": "Add a node before {name}",
+      "insertBeforeTitle": "Add a node before this input",
+      "addAppInput": "Add {name} to app inputs",
+      "removeAppInput": "Remove {name} from app inputs",
+      "appInputOnTitle": "This is an app input (App Mode). Edit it in the left column.",
+      "appInputOffTitle": "Make this an app input (App Mode)",
+      "disconnectLabel": "Disconnect {name}",
+      "disconnect": "Disconnect",
+      "unconnected": "Not connected",
+      "unconnectedRequired": "Not connected (required)",
+      "unknownName": "Can't identify the parameter name",
+      "unknownNameTitle": "The name can't be identified because there is no node definition (read-only)"
+    },
+    "list": {
+      "nodeLabel": "Node {index} ({name})",
+      "addNode": "Add node",
+      "addNodeTitle": "Add a node at the end (without connecting it)",
+      "firstNode": "Add the first node."
+    },
+    "appInput": {
+      "dragToReorder": "Drag to reorder",
+      "importLabel": "Copy the card value into {name}",
+      "menu": "Actions for app inputs",
+      "importTitle": "Copy the card value: {value}",
+      "toStyleLabel": "Send {name} to a new style",
+      "toStyleTitle": "Open a new style with this text as the positive prompt",
+      "editCommentTitle": "{name} (click to edit the comment)",
+      "editCommentLabel": "Edit the comment of {name}",
+      "commentLabel": "Comment of {name} (app input frame)",
+      "empty": "Use the icon to the left of a parameter name to choose app inputs.",
+      "frame": "App input frame ({name})",
+      "remove": "Remove from app inputs",
+      "closeFrameLabel": "Close the {name} frame (remove from app inputs)",
+      "closeFrameTitle": "Removes this frame's items from app inputs (card values are kept)",
+      "argument": "LLM argument: {name}"
+    },
+    "cardGroup": {
+      "label": "Group {title}",
+      "reorder": "Reorder group {title}",
+      "menu": "Menu for group {title}",
+      "ungroupTitle": "Removes only the frame (the cards stay as they are)",
+      "ungroup": "Ungroup",
+      "rename": "Rename group {title}",
+      "name": "Name of group {title}",
+      "toSubgraph": "Convert to subgraph",
+      "toSubgraphTitle": "Move the members and the group into a new subgraph",
+      "deleteGroup": "Delete group and members",
+      "deleteGroupTitle": "Removes the frame and all the cards in it",
+      "switchShow": "Show switch in app inputs",
+      "switchHide": "Remove switch from app inputs",
+      "switchTitle": "A switch that bypasses all the cards in this group at once"
+    },
+    "groupSwitch": {
+      "title": "Switches",
+      "clearLabel": "Remove all switches",
+      "clearTitle": "Remove the switches from this column (the cards stay as they are)",
+      "mixed": "Partly"
+    },
+    "subgraph": {
+      "mark": "subgraph",
+      "open": "Open subgraph {name}",
+      "openTitle": "Show the nodes inside as cards in a frame",
+      "openMenu": "Open as frame",
+      "frame": "Subgraph {name}",
+      "close": "Return subgraph {name} to a card",
+      "closeTitle": "Return to a single card",
+      "closeMenu": "Return to card",
+      "collapse": "Close subgraph {name} and fold the card",
+      "collapseTitle": "Close and fold into a small card",
+      "uses": "×{count}",
+      "usesTitle": "Used in {count} places. Changes inside apply to all of them",
+      "toGroup": "Convert to group",
+      "toGroupTitle": "Move the nodes inside out into a group"
+    },
+    "style": {
+      "color": "Color",
+      "defaultColor": "Default",
+      "custom": "Custom…",
+      "mode": "Mode",
+      "modeNormal": "Normal",
+      "modeBypass": "Bypass",
+      "modeMute": "Mute"
+    },
+    "variables": {
+      "addAfterTitle": "Add a node that receives this variable",
+      "group": "Variable group ({name})",
+      "revealTitle": "{name} (double-click to go to the card)",
+      "cardGroupReveal": "{title} (double-click to go to the group's cards)"
+    },
+    "output": {
+      "dragTitle": "{name} (drag onto a parameter to connect)",
+      "addAfterTitle": "Add a node after this output"
+    },
+    "connector": {
+      "appLine": "App input → {name}",
+      "insertLabel": "Insert a node into {name}",
+      "insertTitle": "Insert a node into this link",
+      "menu": "Line menu",
+      "menuInsert": "Add node",
+      "menuDisconnect": "Delete connection",
+      "menuDisconnectAll": "Delete connections ({count})"
+    },
+    "resize": {
+      "columnWidth": "Width of {name}",
+      "spanWidth": "Width of {name}",
+      "height": "Height of {name}",
+      "heightTitle": "Drag up or down to change the height"
+    },
+    "comment": {
+      "none": "No comment",
+      "emptyTitle": "Click to write a comment",
+      "editLabel": "Edit the comment of {name}",
+      "write": "Write a comment",
+      "label": "Comment of {name}"
+    },
+    "connectSlot": {
+      "title": "Where should it connect?",
+      "pickInput": "Choose an input of {name} (starting from {type})",
+      "pickOutput": "Choose an output of {name} (starting from {type})",
+      "typeMismatch": " (type mismatch)",
+      "addUnconnected": "Add without connecting"
+    },
+    "toggles": {
+      "controlLabel": "Show UI control nodes",
+      "controlShown": "Showing UI control nodes (e.g. group switches)",
+      "controlHidden": "Hiding UI control nodes (e.g. group switches)",
+      "unlinkedLabel": "Show unconnected nodes",
+      "unlinkedShown": "Showing unconnected nodes (e.g. notes)",
+      "unlinkedHidden": "Hiding unconnected nodes (e.g. notes)"
+    },
+    "sort": {
+      "label": "Sort by execution order",
+      "title": "Reorders cards by execution order (upstream first)",
+      "confirmTitle": "Sort by execution order?",
+      "confirmDescription": "Cards will be reordered by execution order (upstream first). The current order will be replaced.",
+      "confirm": "Sort",
+      "fromOriginTitle": "Lays out from the top left instead of keeping the current vertical positions",
+      "fromOrigin": "Reposition all node coordinates"
+    },
+    "widget": {
+      "loadOptionsLabel": "{name} (load options)",
+      "loadOptionsTitle": "Loads the options",
+      "unselected": "Not selected",
+      "clear": "Clear",
+      "resetToCard": "Reset to unset",
+      "stray": "This value isn't one of the options. Running as is will be rejected."
+    },
+    "valueTooltip": {
+      "muted": "(muted)",
+      "bypassed": "(bypassed)"
+    },
+    "missingDefinitions": "Node definitions haven't been loaded. Connect to show and edit parameters."
+  },
+  "run": {
+    "execution": {
+      "nodeError": "An error occurred while running the node",
+      "unknown": "Status unknown: could not confirm the result (notifications may have been interrupted)",
+      "timeout": "Status unknown: no response from ComfyUI (gave up after {count} reconnect attempts)",
+      "dropped": "Status unknown: disconnected because notifications dropped {count} times while running. Press Reconnect to use it again",
+      "socketDown": "Not sent: disconnected from ComfyUI notifications. Press Reconnect first"
+    },
+    "report": {
+      "innerLine": "(inner #{id}) {text}",
+      "rejected": "Not accepted: {reason}",
+      "missingDefinition": "Node definition not found: {classType} (not installed on the connected ComfyUI, or the node definitions need refreshing)",
+      "missingDefinitionDisabled": "No definition for {classType} (disabled, so it is not part of the run)",
+      "otherWriter": "The temporary save of \"{name}\" was updated by another browser tab ({time})",
+      "parallelEdit": "\"{name}\" is also being edited in another browser tab (last edit {time})",
+      "untitledTab": "Untitled",
+      "noIssues": "No issues"
+    },
+    "control": {
+      "repeatHint": "Keeps queueing this tab's workflow one at a time until you stop it (keeps using the GPU). Repeats in other tabs keep running and take turns. Stops on interruption",
+      "repeatActive": "This tab is already repeating. Stop it from the task column",
+      "blocked": {
+        "noWorkflow": "Open a workflow",
+        "notConnected": "Connect first",
+        "sending": "Sending the run…"
+      },
+      "enqueueHint": "Add to the queue (runs after the current one finishes)",
+      "runHint": "Run the workflow (uses the GPU)",
+      "queue": "Queue",
+      "run": "Run",
+      "chooseMethod": "Choose how to run",
+      "chooseMethodHint": "Choose how to run",
+      "repeat": "Run repeatedly",
+      "interrupt": "Interrupt",
+      "interruptHint": "Stops only this task",
+      "errors": {
+        "one": "{count} error (open the Errors tab)",
+        "other": "{count} errors (open the Errors tab)"
+      },
+      "errorsHint": "There are errors. Click to open the Errors tab in the right column",
+      "panel": "Run controls",
+      "move": "Move the run controls",
+      "moveHint": "Drag to move (with the keyboard, press Space to grab and the arrow keys to move)"
+    },
+    "convertFailed": "Could not convert to a runnable prompt: {message}"
+  },
+  "queue": {
+    "dialog": {
+      "closeEsc": "Close (Esc)",
+      "notFollowing": "Not following",
+      "noImages": "No images"
+    },
+    "card": {
+      "openImage": "Open image",
+      "openImageHint": "Open the image in the viewer",
+      "openLatest": "Open the latest image",
+      "openLatestHint": "Open the newest image in the viewer",
+      "openDetailHint": "Click to open what was run and its results",
+      "cancel": "Remove from queue",
+      "cancelHint": "Removes this task from the queue before it runs",
+      "nodeProgress": "{finished}/{total} nodes"
+    },
+    "panel": {
+      "fetchFailed": "Could not get the queue: {error}",
+      "empty": "The queue is empty",
+      "connectToShow": "Connect to show the queue",
+      "others": "Other runs: {running} running, {pending} waiting"
+    },
+    "session": {
+      "placeholder": "session: {id}",
+      "name": "Session name",
+      "nameHint": "Set an identifier for managing history.",
+      "off": "Turn on run history in Settings to name this session.",
+      "rotate": "Switch to the next session",
+      "rotateHint": "Switches to the next session."
+    },
+    "repeat": {
+      "untitled": "Untitled",
+      "running": "Repeating",
+      "count": "Run {count}",
+      "stop": "Stop repeating",
+      "stopHint": "Ends repeating without queueing the next one (what is running keeps going)"
+    },
+    "detail": {
+      "title": "Task details",
+      "fetchFailed": "Could not get the details: {error}",
+      "fromImage": "Not in the ComfyUI history, so the details were read from the data embedded in the generated image",
+      "notFound": "Not in the ComfyUI history, and could not be read from the generated image either",
+      "imageWidth": "Image width",
+      "imageWidthHint": "Drag left or right to change the image width",
+      "newer": "Newer task",
+      "newerHint": "Newer task (←)",
+      "older": "Older task",
+      "olderHint": "Older task (→)",
+      "unknownWorkflow": "(workflow name unknown)",
+      "follow": "Follow new tasks",
+      "following": "Following: moves to each task when it finishes",
+      "openViewer": "Open in viewer",
+      "openViewerHint": "Switch to the viewer from this image",
+      "section": {
+        "models": "Models",
+        "prompts": "Prompts",
+        "settingsTimed": "Run order, duration, and settings",
+        "settings": "Settings (seed, steps, etc.)"
+      },
+      "role": {
+        "positive": "Positive",
+        "negative": "Negative"
+      }
+    },
+    "failure": {
+      "interruptedLabel": "Interruption details",
+      "failedLabel": "Failure details",
+      "interruptedNode": "Interrupted node",
+      "stoppedNode": "Failed node",
+      "copyInterrupted": "Copy interruption details",
+      "copyError": "Copy error details",
+      "exception": "Exception",
+      "unknownType": "(unknown type)",
+      "stepsHeading": "Steps up to that point ({order})",
+      "orderObserved": "in run order",
+      "orderDependency": "ordered by links",
+      "stoppedAs": "{node} ({state})",
+      "interrupted": "interrupted",
+      "failed": "failed",
+      "dependencyNote": "The ComfyUI history does not record the run order, so the steps are ordered by links",
+      "cached": {
+        "one": "{count} node used the cache: {nodes}",
+        "other": "{count} nodes used the cache: {nodes}"
+      },
+      "notRun": {
+        "one": "{count} node did not run",
+        "other": "{count} nodes did not run"
+      },
+      "inputs": "Inputs when it stopped",
+      "traceback": {
+        "one": "Traceback ({count} frame)",
+        "other": "Traceback ({count} frames)"
+      },
+      "rejection": {
+        "label": "Reason for rejection",
+        "heading": "The run was not accepted",
+        "copy": "Copy reason for rejection",
+        "notRun": "Rejected before entering the ComfyUI queue, so nothing was run"
+      },
+      "notes": {
+        "label": "Run notes",
+        "heading": "Notes (when converting for the run)"
+      }
+    },
+    "copyText": {
+      "unknown": "(unknown)",
+      "innerLabel": "#{label} (inner #{id})",
+      "headingLine": "{heading}: {node}",
+      "exception": "Exception: {type}",
+      "orderDependency": "in dependency order",
+      "stepsHeading": "Steps up to that point ({order}):",
+      "cached": "Nodes that used the cache: {nodes}",
+      "notRun": "Nodes that did not run: {count}",
+      "inputs": "Inputs when it stopped:",
+      "traceback": "Traceback:",
+      "rejection": "Reason for rejection: {reason}"
+    },
+    "viewer": {
+      "title": "Image viewer",
+      "cannotOpenWindow": "Cannot open a separate window",
+      "imageMissing": "{name} is not on ComfyUI any more",
+      "allowInBrowser": "Allow it in your browser settings",
+      "openWindow": "Open in a separate window",
+      "openWindowHint": "Opens in a separate window",
+      "grid": {
+        "increase": "Increase {label}",
+        "decrease": "Decrease {label}",
+        "title": "{label}: {value} ({hint})",
+        "rows": "Rows",
+        "rowsHint": "images stacked vertically",
+        "cols": "Columns",
+        "colsHint": "images side by side"
+      },
+      "backToGrid": "Back to the grid",
+      "toFirst": "Go to the first (of {total})",
+      "toFirstHint": "Go to the first (newest) page",
+      "enlarge": "View {name} larger",
+      "noImagesToShow": "No images to show",
+      "newer": "Newer",
+      "newerHint": "Newer (←)",
+      "older": "Older",
+      "olderHint": "Older (→)",
+      "follow": "Follow new images",
+      "fit": "Fit to screen",
+      "fitHint": "Fit to screen (f)",
+      "actualSize": "View at actual size",
+      "actualSizeHint": "View at actual size (f)",
+      "filter": {
+        "label": "Image types",
+        "all": "All",
+        "temp": "temp",
+        "output": "output"
+      },
+      "followHint": "Moves forward along with newly added images",
+      "slideshow": {
+        "label": "Slideshow",
+        "title": "Slideshow: moves to the newer page every {seconds} s",
+        "unit": "s"
+      }
+    }
+  },
+  "history": {
+    "card": {
+      "unnamed": "Untitled",
+      "openImages": "Open the images of {name}",
+      "openImagesHint": "Open every image of this workflow in the viewer",
+      "openDetailHint": "Open the details of this workflow's runs",
+      "noModel": "unknown model",
+      "dateRuns": "{date} / {runs} runs"
+    },
+    "detail": {
+      "title": "History details",
+      "runCount": "{count} runs",
+      "openWorkflow": "Open this workflow",
+      "openWorkflowHint": "Open the workflow embedded in the selected run's image",
+      "openFailed": "Couldn't read a workflow from this run's images (no PNG, image removed, or no workflow embedded).",
+      "notRestored": "The screen state of this run could not be restored",
+      "newer": "Newer card",
+      "older": "Older card",
+      "runs": "Runs",
+      "seeds": "Seed {seeds}",
+      "seedSection": "Seeds",
+      "seedNode": "node {id}",
+      "copyPrompt": "Copy this prompt",
+      "nodeOnly": "node {id}",
+      "nodeLabel": "node {id} {name}",
+      "nodeLabelComment": "node {id} {name} / {comment}",
+      "images": "{count} images",
+      "kindModel": "Model",
+      "kindLora": "LoRA",
+      "kindOther": "Other",
+      "session": "session: {id}",
+      "sessionNamed": "{name} ({id})",
+      "sessionLabel": "Session",
+      "typeLabel": "Type"
+    },
+    "panel": {
+      "notRecording": "Run history is off.",
+      "fetchFailed": "Could not read the history: {error}",
+      "connectToShow": "Connect to show the history",
+      "loading": "Loading…",
+      "empty": "No recorded runs yet",
+      "refresh": "Reload history",
+      "rangeAll": "All",
+      "rangeUpTo": "Records up to {date}",
+      "rangeLabel": "How far back to show",
+      "enableRecording": "Turn on run history"
+    }
+  },
+  "llm": {
+    "side": {
+      "label": "Chat settings",
+      "generation": "Parameters",
+      "prompt": "Prompt",
+      "tabBoundary": "{name} tab",
+      "settings": "Settings",
+      "extension": "Features"
+    },
+    "connection": {
+      "baseUrl": "Base URL",
+      "baseUrlHint": "Up to just before /chat/completions (usually ends with /v1)",
+      "none": "Not connected",
+      "apiKey": "API key",
+      "showKey": "Show API key",
+      "hideKey": "Hide API key",
+      "enterKey": "Set API key",
+      "keyEntered": "Key set",
+      "keyVerified": "API key verified",
+      "entryBlocked": "Couldn't open the key window. Allow pop-ups for this site, then press it again.",
+      "entryUnready": "Not connected to the gateway yet. Wait a moment and press it again. If this keeps happening, reload the page.",
+      "noModels": "Connected - no model list (type the model name)",
+      "noKey": "No API key",
+      "model": "Model",
+      "modelPlaceholder": "Model name",
+      "connect": "Connect",
+      "reconnect": "Reconnect",
+      "connecting": "Connecting…",
+      "connected": {
+        "one": "Connected - {count} model",
+        "other": "Connected - {count} models"
+      },
+      "permissionNote": "If the browser asks for permission to access your local network, choose \"Allow\".",
+      "cloudNotice": "You are about to connect to an external cloud service. Before connecting, please note:\n- What you enter and your settings will be sent to the service.\n- The service will charge you based on your usage. Please check the provider's page for exact pricing. A single action may send several requests.\n- Please use the service in line with its terms of use and applicable laws.\n- Our liability for damage arising from your use of external services is as set out in Article 11 of the Terms of Use.\nConditions for connecting with an API key (Terms of Use, Article 5):\n- Where the destination lets you set a spending limit, use an API key with a limit set\n- Do not use a setting that automatically tops up your balance when the limit is reached\n- Give API keys an expiry date, and revoke them at the destination when you stop using them\nIf you agree, please connect.",
+      "cloudTitle": "Notice on external cloud services",
+      "cloudAgree": "Agree and connect",
+      "cloudCancel": "Cancel"
+    },
+    "generation": {
+      "set": "Set {name}",
+      "reset": "Unset {name}",
+      "stopHint": "One per line",
+      "compatHeading": "Model compatibility",
+      "squash": "Squash system messages"
+    },
+    "prompt": {
+      "system": "System prompt",
+      "none": "None",
+      "items": {
+        "main": "Main Prompt",
+        "tone": "Tone",
+        "rules": "Task description & rules",
+        "examples": "Examples",
+        "task": "Instruction with input",
+        "thinking": "Thinking steps",
+        "format": "Output format",
+        "jailbreak": "Post-History Instructions",
+        "nsfw": "Auxiliary Prompt",
+        "enhanceDefinitions": "Enhance Definitions",
+        "chatSummary": "Session summary",
+        "chatHistory": "Session history",
+        "currentInput": "Message to send",
+        "personaDescription": "Persona Description",
+        "charDescription": "Char Description",
+        "charPersonality": "Char Personality",
+        "scenario": "Current situation",
+        "dialogueExamples": "Chat Examples",
+        "additionalInfo": "Additional dictionary",
+        "untitled": "Untitled item"
+      },
+      "prefill": "Prefill",
+      "prefillHint": "The reply continues from this text.",
+      "source": {
+        "noPreset": "No preset",
+        "messages": {
+          "one": "History: {count}",
+          "other": "History: {count}"
+        },
+        "history": "History: {kept}, excluded: {dropped}"
+      },
+      "depth": "Depth {depth}",
+      "total": "Estimated ≈{count} tokens",
+      "totalOfLimit": "Estimated ≈{count} / {limit} tokens",
+      "limitDetail": "Input limit = context length {context} − max_tokens {maxTokens}",
+      "limitDetailNoMax": "Input limit = context length {context} − reply reserve {reserve} (max_tokens not set)",
+      "lastActual": "Last sent: {count}",
+      "add": "Add item",
+      "depthValue": "Depth (messages from the end)",
+      "content": "Content",
+      "locked": "Fixed item (cannot be moved)",
+      "reorder": "Reorder {name}",
+      "preset": {
+        "overridden": "Replaced by {name}",
+        "choose": "(Preset)",
+        "fromFile": "Open from file…",
+        "notCard": "{name} is not a character card",
+        "changeImage": "Change the image of {name}",
+        "addImage": "Choose an avatar image",
+        "untitled": "New preset",
+        "nameField": "Preset name (Enter to save)",
+        "save": "Save (overwrite)",
+        "saveAs": "Save as new",
+        "createNew": "Create new",
+        "remove": "Delete {name}",
+        "removeTitle": "Delete preset"
+      },
+      "notes": {
+        "chatHistory": "The chat messages ({count}) go here.",
+        "noPreset": "This field of the preset goes here. No preset is linked."
+      },
+      "preview": "Show raw request data",
+      "previewTitle": "What will be sent",
+      "card": {
+        "variables": "Variables / replacements",
+        "variableName": "Variable name",
+        "variableValue": "Value of {name}",
+        "removeVariable": "Remove {name}",
+        "addVariable": "Add a variable",
+        "restoreVariable": "Restore",
+        "restoreVariableHint": "Send {name} to the LLM as the text on the right, and show {name} again on screen",
+        "restoreVariableOf": "Restore {name}",
+        "restoreNameHint": "To send a different name, add a restore row below with this name on the left",
+        "restoreNameExample": "Red fruit A",
+        "restoreValueExample": "apple",
+        "greeting": "First message",
+        "notes": "Comment",
+        "lore": "Individual dictionary",
+        "loreEnable": "Use {name} in this chat",
+        "respond": "Set as the last reply in the chat"
+      },
+      "lore": {
+        "hits": {
+          "other": "{count} additional info"
+        },
+        "none": "No entries match yet.",
+        "tip": {
+          "dictionary": "Dictionary: {value}",
+          "trigger": "Trigger words: {value}",
+          "condition": "Condition ({logic}): {value}",
+          "content": "Content: {value}"
+        }
+      },
+      "rename": "Item name",
+      "newItem": "New item",
+      "copyOf": "Copy of {name}",
+      "renameHint": "Double-click or press F2 to rename",
+      "removeOf": "Delete {name}",
+      "disable": "Temporarily disable {name}",
+      "enable": "Enable {name} again",
+      "template": {
+        "choose": "System prompt template",
+        "name": "Template name (Enter to save)",
+        "overwrite": "Save {name} (renames it if the name changed)",
+        "saveAs": "Save as a new template",
+        "saveAsName": "Save as new",
+        "remove": "Delete {name}",
+        "removeTitle": "Delete this template?",
+        "removeDescription": "The template \"{name}\" will be deleted. The text in this chat stays."
+      },
+      "tools": {
+        "count": {
+          "one": "{count} workflow",
+          "other": "{count} workflows"
+        }
+      },
+      "composition": {
+        "title": "Prompt composition",
+        "expandAll": "Expand all",
+        "collapseAll": "Collapse"
+      }
+    },
+    "chat": {
+      "citations": "Sources",
+      "log": "Chat log",
+      "input": "Message",
+      "inputPlaceholder": "Message (Enter to send, Shift+Enter for a new line)",
+      "send": "Send",
+      "stop": "Stop",
+      "cannotSend": "Choose a connection profile and a model first",
+      "chooseModel": "Choose a model first",
+      "setKeyFirst": "Set the API key first",
+      "aiNotice": "Responses are generated by AI and may contain errors or inaccuracies.",
+      "attach": "Attach image",
+      "attachedImage": "Attached image {index}",
+      "removeImage": "Remove image {index}",
+      "sentImage": "Sent image {index}",
+      "user": "You",
+      "assistant": "Assistant",
+      "copy": "Copy",
+      "edit": "Edit",
+      "delete": "Delete",
+      "regenerate": "Regenerate",
+      "regenerateWithDraft": "Redo with the input as instruction",
+      "rollback": "Roll back",
+      "confirmRollback": {
+        "title": "Roll back",
+        "description": "Discards the conversation after this point and rolls it back to here."
+      },
+      "fork": "Fork up to here",
+      "forkName": "{name} (fork)",
+      "previous": "Previous candidate",
+      "next": "Next candidate",
+      "candidate": "Candidate {index} of {count}",
+      "reasoning": "Reasoning",
+      "comment": "Note",
+      "stopped": "Interrupted.",
+      "receiving": "Receiving…",
+      "toolRunning": "Running tools",
+      "searchResults": {
+        "one": "{count} search result",
+        "other": "{count} search results"
+      },
+      "retry": "Try again",
+      "editField": "Edit message",
+      "editHint": "Enter to save, Esc to cancel",
+      "empty": "Send a message to start the chat.",
+      "untitled": "New chat",
+      "boundary": "Chat",
+      "message": "{role} message",
+      "imageLink": "Image (not loaded; opens in a new tab)",
+      "copyCode": "Copy code",
+      "hello": "Hello"
+    },
+    "failure": {
+      "consent": "Not sent, because you have not yet agreed to the notice on connecting to external cloud services. Agree to it in the chat settings tab.",
+      "unreachable": "No response from the server. Check that it is running, that the URL and port are correct, and that you did not deny the browser's permission prompt.",
+      "mixedContent": "This page is served over https, so the browser blocks http addresses other than this computer. Open this page over http, or use an https address.",
+      "auth": "The server refused the API key ({status}). Check the API key.",
+      "notFound": "Nothing was found at this address. Check the base URL (with or without /v1).",
+      "rejected": "The server rejected the request: {message}",
+      "rejectedPlain": "The server rejected the request ({status}).",
+      "rateLimit": "The server is busy (429). Wait a moment and try again.",
+      "server": "The server failed ({status}). Check the server log.",
+      "interrupted": "The connection was cut while receiving. What was received is kept.",
+      "badResponse": "The server's reply could not be read as a chat response.",
+      "cors": "The server responded but refused requests from this page ({origin}) (CORS). Add the setting that allows this page to the server's start command.",
+      "paused": "Stopped because a very large amount of requests and replies continued in a short time. Choose whether to continue in the confirmation, then send again.",
+      "tooLarge": "Not sent: the content to send is too large (over 524,288 tokens by estimate). Shorten the history or the attached content.",
+      "timeout": "The server did not respond in time, so the request was stopped. Anything received is kept. Check that the server is running and not overloaded, then try again.",
+      "responseTooLarge": "The response was too large, so reading stopped. Anything received is kept."
+    },
+    "onboarding": {
+      "title": "Connect to an LLM",
+      "start": "1. Start the LLM server",
+      "startNote": "Local: start the server with a setting that allows requests from this page ({origin}).",
+      "cloudNote": "Cloud: connect with an API key issued by the service.",
+      "connect": "2. Connect",
+      "connectNote": "Enter the base URL (and an API key if needed), then connect.",
+      "chooseModel": "3. Start a chat",
+      "startChat": "Start a chat",
+      "launchUi": "Launch UI",
+      "corsRequired": "CORS setting: required ({reason})",
+      "corsRecommended": "CORS setting: recommended ({reason})",
+      "corsUnavailable": "CORS setting: not available ({reason})",
+      "corsNotNeeded": "CORS setting: not needed ({reason})",
+      "apiKeyRequired": "An API key is required ({url})",
+      "keyAdvice": "To prepare for a leaked key, setting an expiration date and rate limit is recommended",
+      "reasonOllama": "localhost only by default",
+      "reasonLmStudio": "not allowed by default; --cors allows every page. In the app, Developer → Enable CORS also works",
+      "reasonLlamaCpp": "every page is allowed by default; older versions may not accept --cors-origins",
+      "reasonVllm": "not allowed by default",
+      "modelRequired": "Model: required (serves only the model it was started with)"
+    },
+    "modelPicker": {
+      "title": "Choose a model",
+      "placeholder": "Select a model",
+      "open": "Model: {name} (choose)",
+      "directories": "Model directories",
+      "decideToolbar": "Decide the model",
+      "decide": "Use the chosen model",
+      "pickPrompt": "Choose a model from the list",
+      "filterToolbar": "Filter models",
+      "filterLabel": "Filter models",
+      "filterPlaceholder": "Filter by name, or type a model name",
+      "list": "Models",
+      "useTyped": "Use “{name}”",
+      "noModels": "No model list (type a model name)",
+      "noMatch": "No matching models",
+      "truncated": "The list is too long, so only the first 10,000 models are shown. Type a name to use a model that is not listed.",
+      "row": {
+        "perMillion": "{name} ${usd}/1M",
+        "usd": "{name} ${usd}",
+        "variable": "{name} varies"
+      },
+      "sort": {
+        "name": "Name",
+        "price": "Price",
+        "created": "Date"
+      },
+      "info": {
+        "title": "Model information",
+        "reasoning": "Reasoning",
+        "reasoningMandatory": "Required (thinking model)",
+        "reasoningOn": "Supported (on by default)",
+        "reasoningOff": "Supported (off by default)",
+        "reasoningSupported": "Supported",
+        "reasoningNone": "Not supported",
+        "efforts": "Efforts: {efforts} (default {effort})",
+        "pricing": "Pricing",
+        "pricingNote": "Reference information from the API. Check the exact price on the official site before use.",
+        "perMillion": "${usd} / 1M tokens",
+        "usd": "${usd}",
+        "tier": "When: {conditions}",
+        "modalities": "Input → output",
+        "modalitiesValue": "{inputs} → {outputs}",
+        "benchmarks": "Benchmarks",
+        "description": "Description",
+        "close": "Close model information",
+        "others": "Other fields",
+        "variable": "varies (chosen by the router)"
+      }
+    },
+    "import": {
+      "failed": "Could not read the chat file: {name}",
+      "done": {
+        "one": "Imported {count} chat",
+        "other": "Imported {count} chats"
+      },
+      "skipped": {
+        "one": "{count} chat could not be read and was left out.",
+        "other": "{count} chats could not be read and were left out."
+      },
+      "dropped": {
+        "one": "{count} tool call, image or attachment was left out.",
+        "other": "{count} tool calls, images or attachments were left out."
+      },
+      "full": "Browser storage is full, so the import stopped partway. Delete chats you no longer need."
+    },
+    "library": {
+      "today": "Today",
+      "yesterday": "Yesterday",
+      "week": "Previous 7 days",
+      "older": "Older",
+      "confirmDelete": {
+        "title": "Delete this chat?",
+        "description": "\"{name}\" will be deleted. This cannot be undone. If it is open in a tab, the tab is closed."
+      },
+      "confirmClear": {
+        "title": "Clear this chat?",
+        "description": "All messages and the summary in \"{name}\" will be deleted. The chat stays in the list with its name and settings. This cannot be undone."
+      },
+      "openElsewhere": "This chat is open in another browser tab. Close it there first.",
+      "missing": "This chat was not found. It may have been deleted elsewhere.",
+      "failed": "The operation failed. Check the connection and try again.",
+      "busyElsewhere": "This chat is open in another browser tab, so it cannot be changed here.",
+      "busyStreaming": "A reply is still being received. Stop it before clearing.",
+      "full": "There is not enough space at the destination. Delete chats you no longer need.",
+      "broken": "This chat is damaged and cannot be opened. Export it or clear it from the menu in the chat list.",
+      "loadFailed": "The chat could not be loaded. Reload the page."
+    },
+    "place": {
+      "both": "Backed up to ComfyUI",
+      "needComfy": "Connect to ComfyUI to use this.",
+      "backupOnly": "Only in the ComfyUI backup (opening copies it to this browser)"
+    },
+    "limits": {
+      "heading": "Session limits",
+      "maxSize": "Limit per session (chat text)",
+      "logWindow": "Messages rendered at once",
+      "messages": "msgs",
+      "near": "This conversation is {size} MB. Above {max} MB you can no longer send in it.",
+      "full": "This conversation is over the {max} MB limit, so you can no longer send in it. Continue in a new conversation."
+    },
+    "backup": {
+      "toggle": "Back up to ComfyUI",
+      "hint": "Your data is stored in this browser, so clearing the cache or automatic cleanup can erase it. Save it elsewhere from time to time to keep it safe.",
+      "restored": "Restored from the ComfyUI backup: {added} added, {updated} updated.",
+      "restoreFailed": "Could not read the ComfyUI backup.",
+      "heading": "Browser data",
+      "confirm": {
+        "title": "Write backups to ComfyUI?",
+        "description": "Backups of your chats, presets, system prompt templates, extra dictionaries and avatars will be written to the user folder (kisara/) of the connected ComfyUI.\nOn a shared ComfyUI, its administrator and other users may be able to read them.\nThe backups stay in ComfyUI even if you clear your browser data.\nTurn this on only for a ComfyUI that only you use.",
+        "enable": "Turn on"
+      },
+      "manage": "Manage storage",
+      "toggleHint": "Saves copies of your chats and presets to the ComfyUI user folder (kisara/)."
+    },
+    "storage": {
+      "title": "Storage",
+      "reload": "Reload",
+      "loading": "Reading…",
+      "usage": "This site uses about {usage} of {quota}.",
+      "persisted": "The browser has agreed not to clear this data automatically.",
+      "notPersisted": "The browser may clear this data automatically when space runs low.",
+      "count": "{count} items",
+      "size": "about {size}",
+      "clear": "Delete",
+      "clearFailed": "Could not delete it.",
+      "clearAll": "Delete all",
+      "pendingReload": "Reload the page to reflect what you erased.",
+      "reloadPage": "Reload page",
+      "overview": "Overview",
+      "categories": "Categories",
+      "itemsToolbar": "Category actions",
+      "items": "Items",
+      "empty": "Nothing here.",
+      "notConnected": "Not connected",
+      "browserTotal": "Browser total",
+      "backupTotal": "Backup total",
+      "backupOnly": "Only in the backup",
+      "rollback": "Restore “{name}” from the backup",
+      "group": {
+        "llm": "LLM",
+        "comfy": "ComfyUI"
+      },
+      "column": {
+        "category": "Category",
+        "count": "Items",
+        "size": "Size",
+        "browser": "Browser",
+        "backup": "Backup",
+        "comfy": "ComfyUI"
+      },
+      "area": {
+        "local": "localStorage",
+        "localHint": "Small items of this app such as settings and agreements, one per key.",
+        "session": "sessionStorage",
+        "sessionHint": "Erased when the browser tab is closed, so it cannot be deleted here."
+      },
+      "table": {
+        "objectInfo": "Node definitions",
+        "objectInfoHint": "Node definitions read from each ComfyUI, kept per connection.",
+        "session": "Edited workflows",
+        "sessionHint": "The content of each open workflow tab, the last tab order and edit marks.",
+        "chat": "Chats",
+        "chatHint": "Each chat with its messages, attached images and per-chat dictionaries, plus the chat list.",
+        "preset": "Presets",
+        "presetHint": "Saved presets with their fields and dictionaries (images are in Avatars).",
+        "systemPrompt": "System templates",
+        "systemPromptHint": "Template names, text and generation settings.",
+        "dictionary": "Extra dictionaries",
+        "dictionaryHint": "Global extra dictionaries and their entries.",
+        "avatar": "Avatars",
+        "avatarHint": "Avatar images used by presets.",
+        "playbook": "Playbooks",
+        "playbookHint": "Playbooks you copied and edited."
+      },
+      "cache": {
+        "semanticModels": "Embedding models",
+        "semanticModelsHint": "Embedding models and runtime downloaded for semantic matching."
+      },
+      "backup": {
+        "notConnected": "Connect to ComfyUI to see the backups.",
+        "failed": "Could not read the backups."
+      },
+      "key": {
+        "settings": "Settings",
+        "settingsHint": "Connection target, display settings, column widths, URL histories and other settings.",
+        "terms": "Agreements",
+        "termsHint": "Which version of the terms you agreed to, and when.",
+        "profiles": "LLM connection",
+        "profilesHint": "Base URL and default model. API keys are not stored.",
+        "locale": "Language",
+        "localeHint": "The display language you chose.",
+        "clientId": "Notification ID",
+        "clientIdHint": "The ID this tab uses to receive ComfyUI notifications.",
+        "tabLayout": "Tab order",
+        "tabLayoutHint": "The tabs open in this browser tab and which one is selected.",
+        "pastSessions": "Past sessions",
+        "pastSessionsHint": "Sessions this browser tab used before, for the task list.",
+        "tasks": "Run log (earlier version)",
+        "tasksHint": "ComfyUI run records left by an earlier version. This version no longer reads or writes them, so you can delete them."
+      },
+      "apply": "Apply",
+      "applyHint": "Restore and delete the marked items.",
+      "unmark": "Undo delete",
+      "deleteBackup": "Delete the backup of “{name}”",
+      "unmarkBackup": "Keep the backup of “{name}”",
+      "takeBackup": "Back up",
+      "takeBackupLabel": "Back up “{name}” to ComfyUI",
+      "backupTaken": "Backed up “{name}”.",
+      "backupTakeFailed": "Could not back up “{name}”.",
+      "breadcrumb": "Location",
+      "indexedDb": "IndexedDB",
+      "leadToolbar": "Apply and folders",
+      "unrollback": "Do not restore “{name}”",
+      "summaryBackup": "(backup {figures})",
+      "comfyBackup": "Comfy backups",
+      "raw": "Raw data of “{name}”",
+      "rawBackup": "Raw backup data of “{name}”",
+      "rawFailed": "Could not read it.",
+      "rawTruncated": "It is long, so only the first {count} characters are shown.",
+      "export": "Export",
+      "exportFailed": "Could not export.",
+      "openFile": "Open file",
+      "openFileHint": "Open an exported file and show it in the backup column (discarded when the dialog closes)",
+      "closeFile": "Stop using the file",
+      "openFailed": "This file could not be read as an export of this kind.",
+      "summaryFile": "(file {figures})",
+      "fileOnly": "Only in the file",
+      "rawFile": "Raw file data of “{name}”",
+      "fileRestored": "Restored {count} from the file.",
+      "fileRestoreFailed": "Some items could not be restored from the file (unreadable shape).",
+      "restoreTooLarge": "{count} items were not restored because they are too large (chats: the chat size limit in settings; avatars: 20 MB; others: 32 MB).",
+      "cleanup": {
+        "heading": "Cleanup",
+        "none": "There are no backups whose original is gone from the browser.",
+        "orphans": "Backups whose original is gone from the browser: {figures}",
+        "hint": "Applying deletes the files in ComfyUI. Unmark any you want to keep in each category.",
+        "mark": "Mark for deletion",
+        "unmark": "Remove marks",
+        "notice": {
+          "title": "Cleanup",
+          "description": "Old backup data remains. Do you want to review it?",
+          "confirm": "Review",
+          "later": "Later"
+        }
+      },
+      "userFiles": {
+        "history": "Run history",
+        "historyHint": "Run records KisaraUI writes to the ComfyUI user folder (kisara/history).",
+        "notes": "Model notes",
+        "notesHint": "Model notes saved to the ComfyUI user folder (kisara/notes).",
+        "styles": "Styles",
+        "stylesHint": "Styles saved to the ComfyUI user folder (kisara/styles).",
+        "tags": "Tag dictionaries",
+        "tagsHint": "Tag dictionaries and pysssss overrides, saved in the ComfyUI user folder (kisara/tags).",
+        "notConnected": "Connect to ComfyUI to see the files in its user folder.",
+        "failed": "Could not read the user folder."
+      }
+    },
+    "avatarPicker": {
+      "title": "Avatar images",
+      "delete": "Delete image",
+      "notImage": "Files that are not images were not added.",
+      "none": "None"
+    },
+    "image": {
+      "label": "Preset image",
+      "hint": "Drag to move it to the left or right of the chat, above the chat, above the message box, or into the chat background",
+      "place": {
+        "left": "Left of the chat",
+        "right": "Right of the chat",
+        "top": "Above the chat",
+        "aboveInput": "Above the message box",
+        "background": "Chat background"
+      },
+      "frameSize": "Image size {width} × {height}",
+      "frameHint": "Drag to change the width and height (arrow keys work too)",
+      "show": "Show avatar",
+      "choose": "Choose an image",
+      "clear": "Remove the image",
+      "focusPoint": "Focus point ({x}% across, {y}% down; move with the arrow keys)",
+      "move": "Move the avatar",
+      "heading": "Avatar"
+    },
+    "save": {
+      "fullBrowser": "Browser storage is full, so this chat cannot be saved. Sending is stopped until you delete chats you no longer need.",
+      "tidy": "Tidy up chats",
+      "unsavedBrowser": "This chat could not be saved. It is kept only on this screen.",
+      "nearFull": "Browser storage is almost full. Delete chats you no longer need.",
+      "waitingComfy": "This chat is saved in the ComfyUI at {url}. Connect to it to open the chat."
+    },
+    "sidebar": {
+      "label": "Chats",
+      "newChat": "New chat",
+      "openFile": "Open from file",
+      "openFileTitle": "Import exported chats, or start a new chat from a character card",
+      "list": "Show chats",
+      "empty": "Chats you send messages in appear here.",
+      "place": "Where chats are saved",
+      "rename": "Rename",
+      "duplicate": "Duplicate chat",
+      "clear": "Clear chat",
+      "copyName": "{name} (copy)",
+      "export": "Export",
+      "menu": "Menu for {name}",
+      "renameField": "Chat name",
+      "delete": "Delete",
+      "openTab": "Open in another tab",
+      "openTabOf": "Open {name} in another tab"
+    },
+    "dictionary": {
+      "name": "Name",
+      "scanDepth": "Trigger scan range",
+      "scanDepthBefore": "History",
+      "scanDepthHint": "messages back (plus the latest user input)",
+      "filterToolbar": "Filter entries",
+      "filterLabel": "Filter entries",
+      "filterPlaceholder": "Filter by key or text",
+      "noMatch": "No matching entries.",
+      "more": {
+        "one": "{count} more. Filter to see it.",
+        "other": "{count} more. Filter to see them."
+      },
+      "addEntry": "Add",
+      "removeEntry": "Delete entry",
+      "content": "Content to add",
+      "depthValue": "Position",
+      "role": "Speaker",
+      "enabled": "Enabled",
+      "noKeys": "No trigger words",
+      "trigger": "Trigger words",
+      "condition": "Extra condition",
+      "placement": "Insert at",
+      "reorder": "Reorder {name}",
+      "placeDictionary": "Additional dictionary",
+      "placeHistoryStart": "Start of history",
+      "placeHistoryEnd": "End of history",
+      "details": "Condition and content",
+      "triggerHint": "Separate with commas. * always adds it",
+      "probability": "Chance %",
+      "logicLabel": "Condition logic",
+      "logic": {
+        "or": "OR",
+        "and": "AND",
+        "nor": "NOR",
+        "nand": "NAND",
+        "rag": "Semantic"
+      },
+      "conditionHint": {
+        "or": "Comma-separated. Adds when any of these also appears",
+        "and": "Comma-separated. Adds when all of these also appear",
+        "nor": "Comma-separated. Adds when none of these appears",
+        "nand": "Comma-separated. Adds unless all of these appear",
+        "rag": "Natural-language text matched by similarity. Trigger words are ignored"
+      },
+      "export": "Export as JSON",
+      "deleteMessage": "\"{name}\" will be deleted. This cannot be undone.",
+      "deleteTitle": "Delete this dictionary?",
+      "reservedName": "Names starting with {prefix} are reserved for the app and cannot be used."
+    },
+    "extension": {
+      "playbook": {
+        "title": "Playbook",
+        "hint": "Choose which playbooks to offer for moving a chat along set steps.",
+        "show": "Offer {name} in the chooser"
+      },
+      "comfy": {
+        "title": "Comfy Workflow",
+        "hint": "The LLM can call the workflows below. You confirm each run.",
+        "skipConfirm": "Do not confirm before running",
+        "bypassTitle": "Skip workflow run confirmation",
+        "bypassConfirm": "I understand",
+        "bypassNotice": "The confirmation dialog will no longer appear before a workflow runs, so workflows may run unintentionally. A malfunction could also send abnormal run requests and put abnormal load on your system or GPU.\nIf you use a cloud service, this also consumes fees or credits.\n\nBecause this and other unintended behavior or situations may occur, we recommend confirming each run. If you understand the risks and want to turn off confirmation before runs, press \"I understand\".",
+        "argGuide": "Shared additional instructions",
+        "argGuidePlaceholder": "e.g. Write prompt as comma-separated English tags",
+        "empty": "No workflows yet.",
+        "add": "Add",
+        "refresh": "Refresh",
+        "loading": "Loading…",
+        "remove": "Remove {name}",
+        "view": "View the settings of {name}"
+      },
+      "problem": {
+        "noTool": "This workflow has no call settings from the LLM.",
+        "badName": "The function name has characters that cannot be used.",
+        "duplicate": "Not sent: the name is the same as another workflow.",
+        "unreadable": "Could not read the file.",
+        "noDefinitions": "Not connected to ComfyUI, so it cannot be loaded.",
+        "tabClosed": "The tab is closed and the workflow was never saved."
+      },
+      "dictionary": {
+        "title": "Dynamic additional dictionary",
+        "hint": "Automatically adds extra information according to the conditions you set.",
+        "empty": "No dictionaries yet. You can import World Info JSON or a term and definition table.",
+        "import": "Open JSON",
+        "create": "New",
+        "newName": "New dictionary",
+        "entries": {
+          "one": "{count} entry",
+          "other": "{count} entries"
+        },
+        "enable": "Use {name} in all chats",
+        "view": "Edit {name}",
+        "imported": {
+          "one": "Imported “{name}” ({count} entry).",
+          "other": "Imported “{name}” ({count} entries)."
+        },
+        "existing": "“{name}” was already imported. It is now enabled.",
+        "failed": "Could not read “{name}” ({reason}).",
+        "problem": {
+          "format": "not a World Info JSON or a CSV/TSV table",
+          "empty": "no entries",
+          "size": "the file is too large (limit 32 MB)"
+        }
+      },
+      "picker": {
+        "title": "Add workflows",
+        "none": "No callable workflow is open.",
+        "ok": "OK",
+        "view": "View settings of {name}"
+      },
+      "semantic": {
+        "title": "Similarity",
+        "hint": "Adds Semantic to the condition logic, inserting when the meaning is close. Uses tens of MB of storage and memory.",
+        "loading": "Loading the model ({percent}%)",
+        "ready": "Loaded: {name} ({size}MB)",
+        "stored": "Saved: {name} ({size}MB)",
+        "remove": "Delete {name}",
+        "failed": "Could not load the model ({reason})",
+        "retry": "Retry",
+        "confirmTitle": "Turn on similarity?",
+        "confirmDescription": "Downloads an embedding model suited to your current language setting and keeps it in this browser. Besides the storage, memory use also increases while it is on.",
+        "confirmModel": "{name} ({size}MB)",
+        "confirmModelUnknown": "{name} (size unknown)",
+        "confirmRuntime": "Runtime: ONNX Runtime and Transformers.js ({size}MB)",
+        "confirm": "Turn on"
+      }
+    },
+    "tool": {
+      "card": "Workflow call {name}",
+      "writeReply": "Write the reply",
+      "writeReplyHint": "The reply has no text. Have the LLM write it in this response, keeping the calls",
+      "receiving": "Writing the prompt",
+      "waiting": "Waiting for approval",
+      "invalid": "Cannot run",
+      "declined": "Rejected",
+      "queued": "Generating the image",
+      "queuedProgress": "Generating the image ({value}/{max})",
+      "replyText": "LLM reply",
+      "done": "Done",
+      "noImages": "Done (no matching images)",
+      "failed": "Failed",
+      "unknown": "Unknown",
+      "run": "Approve",
+      "runAgain": "Run again",
+      "generate": "Run a workflow",
+      "noTools": "No workflow to call (choose them in the Extensions tab)",
+      "running": "Running",
+      "generating": "Asking the LLM to call the workflow",
+      "argument": "Value of {name}",
+      "decline": "Reject",
+      "openImage": "Open {name}",
+      "notConnected": "Not connected to ComfyUI.",
+      "openFailed": "Could not open the workflow.",
+      "noImage": "There is no image for \"{name}\".",
+      "uploadFailed": "Could not place the image on ComfyUI.",
+      "submitFailed": "ComfyUI did not accept the run. See the task in the queue.",
+      "interrupted": "The run was stopped.",
+      "unknownResult": "Could not confirm the result (ComfyUI has no record of the run). It is checked again after reconnecting.",
+      "problem": {
+        "unknownTool": "No workflow has this name.",
+        "json": "The arguments are not in a readable form.",
+        "missing": "Missing argument: {name}",
+        "unknown": "Unknown argument: {name}",
+        "type": "Wrong type: {name}",
+        "range": "Out of range: {name}",
+        "choice": "Not one of the choices: {name}"
+      },
+      "summary": "{state} : Comfy Workflow - {name}",
+      "imageLoading": "Loading the image",
+      "imageOffline": "{name} (shown when connected to ComfyUI)",
+      "imageMissing": "{name} (not on ComfyUI any more)"
+    },
+    "sentRequest": {
+      "open": "Show sent raw data",
+      "title": "Sent data",
+      "choose": "Request to show",
+      "candidate": "Candidate {index} · {time}",
+      "copy": "Copy the sent raw data"
+    },
+    "stats": {
+      "title": "Response information",
+      "toggle": "Show response information",
+      "tokens": "Tokens",
+      "tokensValue": "in {prompt} / out {completion}",
+      "cacheRead": "Cache read",
+      "cacheWrite": "Cache write",
+      "cacheValue": "{value} tokens",
+      "speed": "Throughput",
+      "speedValue": "{value} tokens/s",
+      "time": "Time",
+      "timeValue": "{value} s",
+      "cost": "Cost",
+      "costValue": "${usd} (reference)",
+      "searches": "Web search",
+      "fetches": "Web fetch",
+      "toolCalls": "Tool calls",
+      "countValue": {
+        "one": "{count} time",
+        "other": "{count} times"
+      }
+    },
+    "webSearch": {
+      "off": "Web tools: off",
+      "search": "Web search and fetch: on",
+      "confirmTitle": "Turn on web search?",
+      "confirmDescription": "When the model decides it is needed, the connected cloud service is asked to search the web or fetch pages.\nEach operation, such as a search or a fetch, incurs a set extra fee on top of tokens.\n\nSome web pages contain far more text than they appear to, so a fetch may consume a large number of tokens, and repeated fetches may lead to high API charges.\n\nWhen using this feature, set a spending limit and rate limits with the connected service, and manage your usage at your own responsibility by means other than the App as well, such as checking usage and billing status with the connected service.\n\nThe content of pages retrieved by web search enters the chat mixed into the responses. Do not put information you could not afford to have leaked into chats with web search enabled.",
+      "enable": "Turn on",
+      "cancel": "Cancel"
+    },
+    "settings": {
+      "embeddingModel": "Embedding model",
+      "webSearch": "Web search",
+      "webTool": "Tool",
+      "engineOff": "Disabled",
+      "engineAuto": "Auto",
+      "engineExa": "Exa",
+      "engineParallel": "Parallel",
+      "enginePerplexity": "Perplexity",
+      "engineMode": "{engine} - {mode}",
+      "webSearchHint": "Used only when connected to OpenRouter"
+    },
+    "summary": {
+      "field": "Summary",
+      "run": "Summarize",
+      "running": "Summarizing…",
+      "unavailable": "Nothing to summarize (the latest 4 messages are kept as they are)",
+      "trimmed": {
+        "one": "To fit the limit, the oldest {count} message was excluded. Summarize to send without excluding anything.",
+        "other": "To fit the limit, the oldest {count} messages were excluded. Summarize to send without excluding anything."
+      },
+      "nearLimit": "Approaching the input limit. Summarize to keep going without excluding old messages.",
+      "count": {
+        "one": "Summary of {count} message",
+        "other": "Summary of {count} messages"
+      }
+    },
+    "advisor": {
+      "open": "Design the prompt with the LLM",
+      "title": "Prompt design",
+      "close": "Close",
+      "end": "End the prompt design chat",
+      "width": "Prompt design",
+      "input": "Message about the prompt",
+      "placeholder": "Describe what the prompt is for",
+      "streaming": "Receiving…",
+      "noModel": "No model is selected to run",
+      "empty": "Nothing discussed yet",
+      "pending": "Writing a proposal…",
+      "invalid": "Could not read this proposal",
+      "apply": "Apply",
+      "applied": "Applied",
+      "revert": "Undo",
+      "nothing": "Nothing in this proposal could be applied",
+      "untitled": "Prompt proposal",
+      "targets": {
+        "main": "Main prompt",
+        "item": "Item \"{name}\"",
+        "newItem": "New item \"{name}\"",
+        "prefill": "Prefill",
+        "character": "Card field \"{field}\"",
+        "removeItem": "Remove item \"{name}\"",
+        "dictionaryEntry": "Individual dictionary entry \"{keys}\"",
+        "dictionaryEntryIn": "Entry \"{keys}\" in the individual dictionary \"{dictionary}\""
+      },
+      "fields": {
+        "name": "Assistant name",
+        "description": "Character description",
+        "personality": "Personality summary",
+        "scenario": "Current situation",
+        "mesExample": "Dialogue examples",
+        "firstMes": "First message"
+      },
+      "constant": "always",
+      "context": "Additional information sent",
+      "summary": "Summary",
+      "nearLimit": "Approaching the input limit. Summarize to keep going without replies being cut off.",
+      "overLimit": "The input limit was exceeded, so the reply was cut off or could not be sent. Summarize to keep going.",
+      "greeting": {
+        "blank": "Let us create a prompt composition that defines how the agent behaves.\nYou can also switch this message to work along a preset use.",
+        "work": "Let us build a prompt for work such as research or design.\nTell me the use, how detailed the answers should be, and the output format (bullets, tables, code).",
+        "story": "Let us build a prompt for writing a story together, with me narrating.\nTell me the genre and style, the main characters, the opening scene and so on.",
+        "roleplay": "Let us build a prompt for role-play with the character you set up.\nTell me the characters' personalities and traits, the setting and the opening scene.",
+        "game": "Let us build a prompt for running a text game, with me as the game master.\nTell me the rules and setting, the roles and how to proceed (choices, checks)."
+      },
+      "record": {
+        "label": "Put in what we decided",
+        "dictionary": "Put what we have decided so far into the dictionary.",
+        "composition": "Put what we have decided so far into the prompt composition."
+      }
+    },
+    "landing": {
+      "title": "Chat (LLM)",
+      "summary": "Chat with an LLM server on your machine or an external cloud service.",
+      "start": "Use an LLM",
+      "localName": "LLM server",
+      "localVia": "HTTP (direct)",
+      "cloudName": "External cloud (e.g. OpenRouter)",
+      "cloudVia": "HTTPS (direct)",
+      "cloudDetail": "Your API key is sent from this device to that service only. That service bills you.",
+      "noteCors": "By default, many local LLM servers tell the browser not to process requests from a different URL, so their CORS setting is needed to add an exception.",
+      "noteCorsScope": "We recommend limiting the CORS setting to allow only this page's URL. If you can't limit it, separately make sure the LLM server can't be reached from external networks.",
+      "noteListen": "The CORS setting doesn't allow network access from other PCs or the internet. That requires exposing the server on the network by widening the address it listens on, which is very risky, so avoid it unless you have the knowledge and a clear intent.",
+      "noteSend": "What you enter and your settings are sent to the server or service you connect to.",
+      "noteCost": "External cloud services charge by usage. Before you first connect, the full notice is shown and your agreement is asked.",
+      "noteKey": "KisaraUI keeps your API key only while the page is open and never stores it in your browser. To save it, use your browser's password manager."
+    },
+    "budget": {
+      "title": "Continue sending to the LLM?",
+      "description": "In the last {minutes} minutes, about {input} input tokens and {output} output tokens were used — far more than a person can read. New requests are stopped until you continue. Check usage and rate limits at your provider if this was not intended.",
+      "resume": "Continue",
+      "keepStopped": "Keep stopped"
+    },
+    "playbook": {
+      "title": "Playbook",
+      "chosen": "Chosen",
+      "start": "Use a playbook",
+      "close": "Close",
+      "phases": "Phases",
+      "outline": "Outline",
+      "replace": "Replace",
+      "itemTitle": "Heading",
+      "itemBody": "Details",
+      "currentMark": "Current item",
+      "makeCurrent": "Make \"{title}\" the current item",
+      "standing": "Anytime",
+      "remove": "Remove playbook",
+      "removeNamed": "Remove {name}",
+      "row": "Playbook",
+      "frame": {
+        "playbook": "Playbook",
+        "role": "Role",
+        "phase": "Phase",
+        "picked": "Chosen candidates"
+      },
+      "builtin": {
+        "story": {
+          "name": "Plot progression",
+          "description": "Decide everything from the premise to the sections in one consultation and cut them into steps, choose whether to follow a plot or only fix the flow, and write one step at a time.",
+          "role": "You are a co-writer working on a story with the person you are talking to. {{user}} is the protagonist of the story; {{user}} is not that person and not someone you talk to. Follow the way of writing decided in the plot consultation. For a story that follows the plot, keep the decided setting and beats and do not add big events that are not in the beats. For a story where only the flow is fixed, head for the goal of the enabled step while freely making the path and contents, and bring in unexpected events and choices of the characters. Either way, do not contradict the facts in the story so far and in the dictionaries, leave the ending to the person you are writing with and do not wrap the story up. Where that person needs to decide, ask instead of writing. Put anything that is not the story itself (replies to their instructions, ideas for what comes next, questions) in <comment> tags, apart from the story text.",
+          "phases": {
+            "writing": {
+              "name": "Plot progression",
+              "goal": "Create the plot in the sub-session, and select the chapter to write."
+            }
+          },
+          "actions": {
+            "makePlan": {
+              "name": "Consult on the plot",
+              "greeting": "We will decide the story from the premise to the sections, in order.\nFirst, choose the way of writing: follow a plot (decide detailed beats for each section), or fix only the flow (sections have only goals, and the contents are left to each writing).\nAlso tell me the genre and mood, and any hints of scenes or characters you want. If you have a story structure in mind (four-part, three-act, hero's journey...), tell me that too.",
+              "instruction": "This is the consultation for deciding the plot. Go through the steps below in order; propose for each step, and move on after the user applies it.\n{{user}} is the protagonist of the story, not someone the narrator talks with. Never write entries that address {{user}} or describe the story as a dialogue with {{user}}.\n0. Way of writing: let the user decide whether to follow a plot or to fix only the flow. If not decided, show in one line each what each suits (follow a plot: when you want a fixed structure; only the flow: when you want to enjoy unexpected turns) and ask. Make the decided way a constant individual dictionary entry (comment \"Way of writing\").\n1. Premise: from the hints, offer 3-4 premises (one sentence each, with {{user}} as the protagonist, their want and the central conflict) in different directions, and let the user pick one. Do not write the ending. Make the chosen premise a constant individual dictionary entry.\n2. Characters and setting: {{user}} is the protagonist, so do not create another protagonist. Create 2-4 other main characters (name, role, want, weakness, one sample line) and the setting (place, era, rules). Make the setting a constant individual dictionary entry, and each character an entry keyed by their name. Do not use currentSituation.\n3. Outline: show the sections in the structure the user chose (four-part if none), with the goal of each and what has changed at its end, and confirm them. If only the flow is fixed, turn the agreed sections into outline steps one by one and finish here. In that case write in each step only its situation, its goal and what has changed at its end, not the events inside it.\n4. Beats (only when following a plot): for each section, offer 2-4 detailed beats as candidates and let the user pick. Turn the chosen beats into outline steps one by one in writing order. Do not write the ending of the last section; the user decides it."
+            },
+            "revise": {
+              "name": "Proofread the last reply",
+              "instruction": "Reread the last passage as an editor and write it again with only the parts that need fixing changed. Check whether it reaches the beat or goal of the enabled step, whether a plot-following story adds events not in the beats, contradictions with the character settings, clichés, unnecessary exposition, purple prose, repeated words, habits in endings, and drift in tense and voice. Keep every sentence that needs no fix word for word, and write only the passage, with no explanation or preface.\n<comment>Do not send this as a message. Press the regenerate icon and use it as the instruction for regenerating.</comment>"
+            },
+            "deepen": {
+              "name": "Deepen",
+              "instruction": "Without moving on to the events of the next step or settling anything, stay in the current scene and deepen it. Thicken its texture with sensory detail, pauses and the characters’ inner state, and raise the tension, emotions or what is at stake by one notch. Use not only the exchange between characters but also the place, time pressure and what happens around them."
+            },
+            "shake": {
+              "name": "Shake up",
+              "instruction": "Add one thing that keeps the story from going smoothly: an attempt toward the goal of the step that fails, an unexpected event, or a character’s doubt. Do not settle it."
+            },
+            "shift": {
+              "name": "Switch",
+              "instruction": "Keep the goal of the step, and continue after switching the scene (place, time) or the character whose view tells it. Show the switch in one sentence."
+            },
+            "widen": {
+              "name": "Widen",
+              "instruction": "Keep the direction of the story and the goal of the step, and add variation to the flow. Show it in a different form through another way toward the same goal, another character getting involved, or a small event within the scene. Do not add new obstacles or turning points, and end with at least one thing changed from before."
+            },
+            "close": {
+              "name": "Head to the end",
+              "instruction": "Write toward closing the current step. Bring the scene to a break so that it leads naturally into the next step ({{nextStep}}). Do not write the events of the next step yet."
+            }
+          },
+          "continue": "Continue the text right after the last passage, in the same style and point of view. Follow the way of writing decided in the plot consultation, and do not go beyond the beat or goal of the enabled step."
+        },
+        "roleplay": {
+          "name": "Role-play",
+          "description": "Decide the setting, the relationship and the big flow in one consultation, and play step by step as {{char}}.",
+          "role": "You play scenes with {{user}} as {{char}}. Do not write the lines, actions or feelings of {{user}}. Keep the voice of the description and the dialogue examples, and move scenes toward the goal of the enabled step without getting ahead of the choices of {{user}}.",
+          "phases": {
+            "prepare": {
+              "name": "Preparation",
+              "goal": "In the sub-session, decide the setting, the relationship between {{char}} and {{user}}, and the steps of the big flow."
+            },
+            "scene": {
+              "name": "Scene",
+              "goal": "Select the step to move on in the outline and send what you say to {{char}}. Use the commands when you want to move the scene."
+            },
+            "closing": {
+              "name": "Closing",
+              "goal": "Close the exchange of the section with the command \"Close the scene\", and review the voice and flow with \"Check the voice\"."
+            }
+          },
+          "actions": {
+            "makePlan": {
+              "name": "Decide setting and flow",
+              "greeting": "Let's decide the setting of the role-play, the relationship between {{char}} and {{user}}, and the big flow, in order.\nTell me hints about the world and the situation you want to start in.",
+              "instruction": "This is the preparation phase of this playbook. Go through the steps below in order; propose for each step, and move on after the user applies it.\n1. Opening: from the hints, offer 3 opening situations with different moods and let the user pick one.\n2. Setting and relationship: decide the setting, the relationship between {{char}} and {{user}}, what {{char}} wants now and what {{char}} hides. Put the character into the card fields, the setting and relationship into constant individual dictionary entries, and what is hidden into an entry keyed by related words. Do not use currentSituation.\n3. Big flow: show the flow of the exchange in 3-5 sections, and turn the agreed sections into outline steps one by one. Write the opening situation into the first step. In each step write only its situation, how the relationship between {{char}} and {{user}} changes and which way {{char}} leans. Do not decide the actions of {{user}}, and do not write the ending."
+            },
+            "moveIdeas": {
+              "name": "Move ideas",
+              "instruction": "Give 3 numbered one-line candidates for moves {{char}} could make next, in different directions. Do not write lines or the passage."
+            },
+            "closeScene": {
+              "name": "Close the scene",
+              "instruction": "Describe what {{char}} says and does to close this scene in a way that reaches the goal of the enabled step. Leave room for {{user}} to reply."
+            },
+            "checkVoice": {
+              "name": "Check the voice",
+              "instruction": "Review the last line of {{char}} against the description and the dialogue examples, and list only the drifts in voice and character. Do not write a fixed line."
+            }
+          },
+          "continue": "As {{char}}, continue the flow from where it stopped. Include one action that moves a little toward the goal of the enabled step, and stop where {{user}} can easily reply."
+        },
+        "ideas": {
+          "name": "Ideas",
+          "description": "Decide the frame in a consultation, produce many ideas in different directions, shake them with objections, then group them into themes and narrow down.",
+          "role": "You are {{user}}'s partner for ideas. Speak your mind, question assumptions and bring in examples from other fields. Do not agree with everything, do not anchor on the first idea, and do not cut ideas early for feasibility. {{user}} decides.",
+          "phases": {
+            "frame": {
+              "name": "Frame",
+              "goal": "In the sub-session, shape what to think about, the trigger, the constraints and the wanted result, and cut the perspectives for ideas into outline steps."
+            },
+            "diverge": {
+              "name": "Diverge",
+              "goal": "Select a perspective in the outline and produce many ideas in different directions with the command \"Generate ideas\". When they run out, go to the next perspective."
+            },
+            "provoke": {
+              "name": "Provoke",
+              "goal": "With the commands \"Object\" and \"Reverse\", object to the ideas and dig out hidden assumptions."
+            },
+            "converge": {
+              "name": "Converge",
+              "goal": "Group the ideas with the command \"Group into themes\", and narrow them down to 2-3 with \"Narrow down\"."
+            },
+            "capture": {
+              "name": "Capture",
+              "goal": "With the command \"Capture\", write out what was decided, what to check and the open questions."
+            }
+          },
+          "actions": {
+            "shapeFrame": {
+              "name": "Shape the frame and perspectives",
+              "greeting": "We will decide the frame of the project and the perspectives for ideas.\nTell me the topic you want to think about, and what you know about the trigger, the constraints and the wanted result.",
+              "instruction": "This is the frame phase of this playbook. Go through the steps below in order; propose for each step, and move on after the user applies it.\n1. Frame: shape \"what to think about\", \"trigger\", \"what is known\", \"constraints\" and \"wanted result\" for the topic, and fill gaps with up to 5 easy questions. Make the shaped frame a constant individual dictionary entry.\n2. Perspectives: offer 3-5 non-overlapping angles for ideas (users, technology, cost, timing, other fields...), and turn the agreed perspectives into outline steps one by one. In each step write what to ask from that perspective (e.g. \"What would we drop if the cost were a tenth?\")."
+            },
+            "generate": {
+              "name": "Generate ideas",
+              "instruction": "Along the frame and the perspective of the enabled step, give 8 numbered ideas. For each, write a short name on the first line, then after a colon the content in one sentence. Vary the scale, method and timing. Do not judge them yet."
+            },
+            "objections": {
+              "name": "Object",
+              "instruction": "Write one objection to each idea so far as a harsh critic. Then name 3 assumptions most ideas make implicitly, and point out the riskiest one."
+            },
+            "reverse": {
+              "name": "Reverse",
+              "instruction": "List 5 ways to make this problem worse, and give a numbered idea that turns each one around."
+            },
+            "themes": {
+              "name": "Group into themes",
+              "instruction": "Group the ideas so far into themes of similar ones. List the ideas under each theme, and write one line each on \"effect for users\", \"ease of doing\", \"fit with the goal\" and \"strength of evidence\"."
+            },
+            "narrow": {
+              "name": "Narrow down",
+              "instruction": "Based on the evaluation, give up to 3 numbered recommended ideas. For each, write the name on the first line, then after a colon why you recommend it. Then write the biggest unknown and the cheapest way to check it."
+            },
+            "capture": {
+              "name": "Capture",
+              "instruction": "For the chosen ideas, list \"what was decided\", \"assumptions to check\", \"open questions\", \"next actions\" and \"ideas left out on purpose and why\" as bullet points."
+            }
+          },
+          "continue": "Continuing from there, give ideas or angles that have not come up yet."
+        },
+        "research": {
+          "name": "Research",
+          "description": "Decide questions by perspective in a consultation and make them steps, gather what is known per question, summarize with confidence, then check the claims one by one.",
+          "role": "You are a researcher helping {{user}}. Separate what is known from guesses, and say plainly what is uncertain. Do not make up sources. Prefer material {{user}} has pasted.",
+          "phases": {
+            "questions": {
+              "name": "Perspectives and questions",
+              "goal": "In the sub-session, split the topic into questions by perspective and cut them into outline steps."
+            },
+            "gather": {
+              "name": "Gather",
+              "goal": "Select the question to research in the outline and gather what is known with the command \"Answer\". Paste material and send it to extract the facts related to the question."
+            },
+            "summarize": {
+              "name": "Summarize",
+              "goal": "With the command \"Summarize\", answer the original topic from the questions of the whole outline and what was gathered."
+            },
+            "verify": {
+              "name": "Verify",
+              "goal": "With the command \"Verify claims\", check the claims of the summary one by one."
+            }
+          },
+          "actions": {
+            "makeQuestions": {
+              "name": "Decide perspectives and questions",
+              "greeting": "Let's split the topic into questions by perspective.\nTell me the topic and why you want to know or how you will use it.",
+              "instruction": "This is the perspectives and questions phase of this playbook. Show 4-6 perspectives on the topic from different standpoints, list 2-4 questions a person in each would ask, and let the user pick. Turn the chosen questions into outline steps one by one in research order. In each step write the perspective, the question and the level of detail the answer needs."
+            },
+            "answer": {
+              "name": "Answer",
+              "instruction": "Answer the question of the enabled step. First list \"what is known\", then \"guesses\" separately, and last \"what is uncertain or needs more research\". When you use material {{user}} pasted, say which."
+            },
+            "summarize": {
+              "name": "Summarize",
+              "instruction": "From the answers so far, summarize the answer to the original topic. Write 5-8 findings in order of importance, each with a one-sentence claim, evidence and confidence. Show conflicts as they are without settling them, and write the remaining questions last."
+            },
+            "verify": {
+              "name": "Verify claims",
+              "instruction": "For each claim of the previous summary, pose one question that checks whether it is right, and answer it without looking at the summary. Mark the claims whose answers conflict with the summary."
+            }
+          },
+          "continue": "Continue with what you have not yet written about the question of the enabled step."
+        },
+        "document": {
+          "name": "Write a document",
+          "description": "Decide everything from the material and readers to the skeleton of chapters and sections in one consultation, make it steps, write section by section, and test as a reader who does not know the background.",
+          "role": "You are a co-author writing a document with {{user}}. Write with the readers and what should happen after reading in mind. Do not fill unknowns with guesses; ask.",
+          "phases": {
+            "prepare": {
+              "name": "Preparation",
+              "goal": "In the sub-session, gather the kind of document, the readers, what should happen after reading and the material, and cut the skeleton of chapters and sections into the outline."
+            },
+            "sections": {
+              "name": "Write by section",
+              "goal": "Select the section to write in the outline and write it with the command \"Write the section\". You can pick the contents with \"Content ideas\"."
+            },
+            "readerTest": {
+              "name": "Reader test",
+              "goal": "Look for holes as a reader who does not know the background with the command \"Reader questions\", and review against the whole outline with \"Review it through\"."
+            }
+          },
+          "actions": {
+            "makePlan": {
+              "name": "Decide material to skeleton",
+              "greeting": "Let's gather the material for the document and decide everything up to the skeleton of chapters and sections.\nTell me the kind of document, the readers and what should happen after reading, and paste the material you have.",
+              "instruction": "This is the preparation phase of this playbook. Go through the steps below in order; propose for each step, and move on after the user applies it.\n1. Material: read the pasted material, sum up \"kind\", \"readers\", \"what should happen after reading\" and \"constraints\" briefly, and ask 5-10 questions that can be answered briefly about what is missing. Propose the summed-up material as an item before the session history.\n2. Skeleton: show the skeleton of chapters and sections from the material and agree on it, then turn the sections into outline steps one by one in writing order. In each step write the goal of the chapter it belongs to, what the section tells and what the reader should keep. Do not write the text yet."
+            },
+            "writeSection": {
+              "name": "Write the section",
+              "instruction": "Write the text of the section of the enabled step. Use only the chosen candidates if any, otherwise choose from the material. Keep the wording consistent with the previous sections."
+            },
+            "contentIdeas": {
+              "name": "Content ideas",
+              "instruction": "Give 8 numbered one-line candidates for contents of the section of the enabled step. Put those in the material first, and those not in the material after them, marked \"not in the material\"."
+            },
+            "readerQuestions": {
+              "name": "Reader questions",
+              "instruction": "List 5-10 numbered questions a first-time reader of this document would likely ask, and answer each only from the text of the document. Mark questions it cannot answer, places likely to be misread, and conflicts."
+            },
+            "reviewAll": {
+              "name": "Review it through",
+              "instruction": "Read the text so far through, and list breaks in the flow, repetitions, conflicts and empty sentences as bullet points. Show only the places to fix."
+            }
+          },
+          "continue": "Continue the section of the enabled step. Keep the wording consistent with the previous paragraphs."
+        }
+      },
+      "shared": {
+        "twist": {
+          "name": "Change the course",
+          "instruction": "In the next passage, make one event happen that changes the course so far. Do not contradict the story so far or the settled setting."
+        },
+        "accident": {
+          "name": "Chance event",
+          "instruction": "Mix one small chance event that nobody expected into the next passage."
+        },
+        "assumptions": {
+          "name": "Question an assumption",
+          "instruction": "Name one assumption taken for granted in the last exchange, and write what would change if it failed."
+        },
+        "plain": {
+          "name": "Say it simply",
+          "instruction": "Restate the last answer in short sentences without technical terms."
+        },
+        "changeScene": {
+          "name": "Change the scene",
+          "instruction": "Move in time or place and start a new scene. Show the move in one sentence, then continue."
+        }
+      },
+      "kind": {
+        "decide": "Decide",
+        "proceed": "Proceed",
+        "close": "Close"
+      },
+      "candidates": "Candidates",
+      "candidatesFailed": "Could not read candidates from this response",
+      "pickAndSend": "{name} with the chosen candidates",
+      "pickOne": "Choose \"{title}\"",
+      "untitled": "(no heading)",
+      "builtinGroup": "Standard",
+      "ownGroup": "Your own",
+      "ownEmpty": "Copy one to make your own; it appears here.",
+      "allHidden": "All are hidden in the Features tab.",
+      "menu": "Menu for {name}",
+      "copy": "Copy and make",
+      "edit": "Edit",
+      "delete": "Delete",
+      "deleteTitle": "Delete the playbook?",
+      "deleteBody": "\"{name}\" is removed from your list. Chats that use it keep their copy.",
+      "editor": {
+        "title": "Playbook",
+        "whole": "Overall",
+        "name": "Name",
+        "description": "Description",
+        "role": "Role text (what the assistant does and does not do)",
+        "phaseName": "Phase name",
+        "phaseKind": "Kind",
+        "goal": "Goal (one line)",
+        "actions": "Actions",
+        "addPhase": "Phase",
+        "removePhase": "Delete this phase",
+        "addAction": "Action",
+        "removeAction": "Delete the action \"{name}\"",
+        "reorder": "Reorder \"{name}\"",
+        "actionName": "Action name",
+        "actionKind": "Kind",
+        "kinds": {
+          "send": "Send",
+          "consult": "Open a consultation",
+          "next": "Next step"
+        },
+        "instruction": "Instruction",
+        "use": "Use of the response",
+        "uses": {
+          "none": "None",
+          "send": "Send with chosen candidates"
+        },
+        "sendTo": "Send with",
+        "noSendTo": "The action to send with is gone",
+        "copyName": "{name} (copy)",
+        "scope": {
+          "decide": "Done in a consultation. Only the phase text is sent to the chat",
+          "proceed": "Done in the chat. Sends: the phase text and the enabled steps",
+          "close": "Done in the chat. Sends: the phase text and the enabled steps (all after Show all)"
+        },
+        "greeting": "Opening text of the consultation",
+        "guide": "Guidance given to the consultation",
+        "writesOutline": "Have it write the prompt of each step into the outline",
+        "advisor": "Use of the consultation",
+        "advisors": {
+          "blank": "Create new",
+          "work": "Work",
+          "story": "Story writing",
+          "roleplay": "Role-play",
+          "game": "Game master"
+        },
+        "continue": "Continue direction",
+        "outlineView": "Outline",
+        "outlineViews": {
+          "single": "Pick one",
+          "multi": "Pick any",
+          "readonly": "Read only"
+        },
+        "revise": "Put in the input box (regenerate rewrites the last passage)"
+      },
+      "continueSend": "Write on",
+      "directionMark": "Direction",
+      "phasePrev": "Previous phase",
+      "phaseNext": "Next phase",
+      "count": "{i}/{n}",
+      "pickCancel": "Cancel",
+      "cardWidth": "Card",
+      "subSession": "Open sub-session",
+      "pickStep": "Enable {title}",
+      "directionBox": "Direction",
+      "directionRemove": "Remove the direction",
+      "commands": "Commands",
+      "stepPrev": "Previous item",
+      "stepNext": "Next item",
+      "picked": "{i}/{n} selected",
+      "fold": "Collapse playbook",
+      "unfold": "Expand playbook",
+      "rowSummary": "{name}: {phase}",
+      "stepAt": "{i}/{n} {title}",
+      "noNextStep": "what comes next",
+      "noteBox": "Note (not sent)",
+      "noteRemove": "Remove note"
+    },
+    "received": {
+      "open": "Show received raw data",
+      "title": "Received data",
+      "copy": "Copy the received raw data",
+      "truncated": "Shortened in the middle because it is large"
+    }
+  },
+  "gateway": {
+    "entry": {
+      "title": "Set API key",
+      "submit": "Connect",
+      "invalidUrl": "Enter a base URL that starts with http:// or https://.",
+      "noOpener": "Open this window from KisaraUI.",
+      "checking": "Checking the connection…",
+      "verified": "Connected successfully.",
+      "authFailed": "API key authentication failed.",
+      "verifyFailed": "Could not check the connection.",
+      "back": "Back",
+      "close": "Close"
+    }
+  }
+}

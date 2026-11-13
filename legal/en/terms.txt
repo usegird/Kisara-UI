@@ -1,0 +1,120 @@
+Article 1 (Scope)
+These terms set the conditions for using KisaraUI (the "App") provided by Usegrid institute ("we"). By pressing "Agree and start", you agree to these terms.
+The App is intended for people who are at least 18 years old and have reached the age of majority where they live. If you do not meet both conditions, you may not use the App.
+The App is also intended for people who contract with the Destinations themselves and can manage their fees and settings.
+
+Article 2 (Nature of the App)
+The App runs in your browser and connects directly to the ComfyUI and LLM servers and services you specify (the "Destinations"). We do not relay or collect your input, outputs or API keys. The App is not affiliated with or endorsed by any Destination. Their names are used only to indicate compatibility.
+The App's files are delivered from our domain, but once loading is complete, the App runs only in your browser. We have no means of knowing how the App is operating on your device (including defects and events at the Destinations), and we cannot monitor it or stop or fix it on the spot. We fix defects by delivering new versions, and a screen that is already loaded does not receive a fix until you reload it. We verify how the App runs in Chrome only. It is built to work in Edge, Firefox and Safari as well, but we have not verified it there.
+Our official build is only the one delivered from kisara-ui.com. Before entering an API key or similar information, check that your browser's address shows this domain.
+These terms cover only the official build delivered from our domain. Copies obtained through other channels, modified builds and copies hosted by third parties are not covered, and we accept no responsibility for them. The same applies where the App's behavior is altered in your environment, such as by browser extensions, malware on your device or tampering in transit.
+When we learn of a copy that poses as the official build and is clearly intended to harm users, we will endeavor to announce it on the App's screen or in its repository (GitHub) and to ask its hosting provider or others to take action. Such a copy is one that is made to look official (for example, by claiming to be official, or by using the same name and appearance on a confusingly similar domain without indicating that it is unofficial) and has been modified to send API keys or input elsewhere or in a similar way. Derived versions (forks) that indicate they are unofficial are not such copies.
+
+Article 3 (Our obligations)
+Our only obligation to you under these terms is to deliver the App's files from our domain, as built from the published source code. We are not obliged to ensure that the App works without defects, that it produces any particular result, to fix defects, to notify individual users of defects or incidents, or to continue delivery. Article 4, paragraph 3 describes the means we use when we do respond; it does not add to our obligations.
+
+Article 4 (Allocation of roles)
+1. Use of the App rests on the following allocation of roles among you, us and the Destinations. We are not a party to your contract with any Destination, and we do not provide any service of managing your API keys, usage or billing.
+2. What you do
+- contract with the Destinations, follow their terms of use, pay their fees and comply with the law;
+- manage your API keys (setting spending limits, rate limits and expiry dates, revoking keys after use, and keeping them secret);
+- manage how often, how long and at what cost you use the App, and check the fees against the Destination's usage statements and usage records;
+- handle what you enter and generate with the App, including not infringing the rights of others;
+- use any third-party content that a Destination retrieves, such as through web search, under its rights holders' conditions and the law;
+- watch while using the App and, if anything behaves unexpectedly, take action such as stopping use (paragraph 5).
+3. Our role, and how we respond when we do (whether we are obliged to is governed by Article 3)
+- deliver the official build, as built from the published source code, from our domain (Article 3);
+- when we learn of a defect and respond, do so by delivering a new version and by announcing it in the repository (as described in Article 2, we can neither monitor the App on your device nor stop or fix it on the spot; whether we are obliged to respond is governed by Article 3);
+- endeavor to act when we learn of a copy that poses as the official build and harms users (Article 2).
+4. What the Destinations do (under their contracts with you)
+- billing and charging, the mechanisms for spending limits and rate limits, the provision of balances and usage statements, and the content of their responses.
+5. As described in Article 2, the App runs on your device, like typical downloadable software, and we can neither monitor it nor stop it on the spot. You will watch for accidents and problems while using it (including load on the Destinations, fees and unintended generation, and including those caused by defects in the App) and, if anything behaves unexpectedly, take action such as stopping use.
+6. Your failure to watch or act as described in paragraph 5 is a circumstance taken into account under Article 5, paragraph 3. Using an API key without a spending limit or without rate limits, at a Destination that lets you set them, is taken into account as such a failure to watch or act.
+7. Running workflows uses the GPU of the connected ComfyUI and may change its state.
+8. The Destination's fees are borne by you, and we do not reimburse them (Article 8).
+
+Article 5 (Conditions of use)
+1. You must use the App in compliance with the following conditions.
+(For all use)
+- Back up any data you want to keep, such as by exporting it
+- Watch what happens on the screen while requests are being sent to a Destination, and stop before leaving your seat
+- Check generated content for accuracy and appropriateness before using it or showing it to others
+- Use the build delivered from our official domain, in a browser that its maker continues to update, such as Chrome, Edge, Firefox or Safari (we verify how the App runs in Chrome only; see Article 2)
+(When connecting to a Destination with an API key)
+- At Destinations that let you set a spending limit, use an API key with a spending limit set
+- Do not use a setting that automatically tops up your balance when the limit is reached (auto top-up)
+- Give your API keys an expiry date, and revoke them at the Destination when you stop using them
+2. Damage that arises or increases because you failed to comply with the conditions in paragraph 1 is not included in the damage under Article 11, paragraph 4.
+3. Where we are liable and your failure to comply with the conditions in paragraph 1, or your failure to watch or act as described in Article 4, paragraph 5, contributed to the occurrence or increase of the damage, that circumstance will be taken into account in determining the amount of compensation, in accordance with law (including Articles 418 and 722, paragraph 2 of the Civil Code of Japan).
+
+Article 6 (Outputs)
+1. What you generate with the App, including LLM responses and images ("Outputs"), is produced automatically by the Destinations' models and may be inaccurate, incomplete or offensive. Outputs, and any other content returned by a Destination (including images, text and tool results), do not represent our views and are not created, reviewed or guaranteed by us.
+2. Do not rely on Outputs as your sole source of truth or as a substitute for professional advice. Before using or sharing them, check that they are accurate and appropriate.
+3. Do not use Outputs for decisions that have legal or similarly significant effects on people, such as credit, employment, medical or legal decisions.
+4. Outputs are produced by systems that have no personality or feelings, and they may impersonate a person or behave as if they had a relationship with you. Do not use Outputs as a substitute for mental health support or crisis response. If you are in immediate danger, contact the emergency services or a specialist organization where you live.
+5. The App does not inspect or block the content of Outputs. What content is restricted depends on the Destination's settings and terms and on your own settings and input. If you encounter content that distresses you, you can stop using the App.
+6. We claim no rights in Outputs or in what you enter. How Outputs are handled is governed by Article 4.
+
+Article 7 (Prohibited conduct)
+You must not:
+1. Act against the law or public order and morals
+2. Infringe copyrights, portrait rights, privacy or other rights of others
+3. Violate a Destination's terms of use or access devices or services without authorization
+4. Generate content intended to harm others (including defamation, discrimination and fraud)
+5. Create sexual images of a real person without their consent, or synthetic images, audio or text of a real person that could be mistaken for fact
+6. Depict anyone under 18 in a sexual manner
+The App does not receive Outputs, so we cannot delete Outputs or stop them from being published. To have an Output removed from a place we do not manage, please contact the operator of that place. (Places we manage are those where we can remove posts, such as the Issues of the App's repository.)
+We hide or remove posts in places we manage that fall under items 1 to 6 above or infringe the rights of others. Where necessary, we may hide a post before checking with the poster.
+We accept the following reports, including from people who do not use the App, through the contact form in section 11 of the Privacy Policy:
+- that the App is being used to infringe rights or to harm others
+- that a post in a place we manage falls under items 1 to 6 above or infringes the rights of others
+- a copy that poses as the official build and is clearly intended to harm users (Article 2)
+After reviewing the reports we receive, we may take the action we consider necessary. We may also consider changes to the App's features or guidance.
+
+Article 8 (Fees)
+1. Fees for using a Destination are charged to you by that Destination. The usage figures and amounts shown in the App are estimates calculated from the Destinations' responses and other information; they do not indicate the amount you will be charged, which is determined by the Destination's usage statements. Requests whose responses carry no usage figures, such as failed requests, may not be included in what is shown.
+2. A single action by you may cause the App to send several requests to a Destination automatically (including receiving the continuation after tool calls, web searches and page fetches, and retrieving the list of models). Each of these may incur the Destination's fees.
+3. We have no means of knowing your usage or charges. Where the Destination provides the means, you must set a spending limit and rate limits (limits on the number of requests or tokens per unit of time) at the Destination. Checking your balance and usage is also up to you, at the Destination. The expiry and revocation of API keys are covered by the conditions in Article 5.
+4. We do not refund or reimburse any Destination's fees. This also applies if you are a consumer under the Consumer Contract Act of Japan. The only exceptions are where the fees were caused by our intent or gross negligence and, for a consumer, where Article 11, paragraph 4 applies (damage caused by our negligence other than gross negligence); the scope and the cap of the latter are governed by Article 11, paragraphs 4 to 9.
+
+Article 9 (Data storage)
+The App's data is stored in your browser. It may be lost not only when you clear the cache but also through browser defects or browser behavior (some browsers, such as Safari, delete a site's storage after it has not been used for a while), or through updates to or defects in the App. Back up anything you need, at your own responsibility (you can export chats or use the backups in ComfyUI). We do not hold your data and have no means of restoring data that has been lost.
+
+Article 10 (Suspension, changes and termination)
+1. We may suspend all or part of the App without prior notice for maintenance, to fix defects, because of outages at our delivery provider, or for similar reasons.
+2. We may change the App or stop providing it. Except in urgent cases, we will endeavor to notify you in its repository (GitHub) before we stop providing it.
+3. Where we cannot provide the App due to circumstances beyond our reasonable control, such as natural disasters, network outages or outages at a Destination, we are not liable.
+4. Any other damage caused to you by the above is governed by Article 11.
+
+Article 11 (Disclaimer)
+1. THE APP IS PROVIDED FREE OF CHARGE AND "AS IS". WE MAKE NO WARRANTY REGARDING THE APP, INCLUDING MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, NON-INFRINGEMENT, ACCURACY OR FREEDOM FROM DEFECTS.
+2. WE ARE NOT LIABLE FOR ANY DAMAGE ARISING FROM YOUR USE OF THE APP, WHETHER BASED ON BREACH OF CONTRACT, TORT OR ANY OTHER CAUSE. However, this paragraph does not apply where the damage is caused by our intent, or where you are a consumer under the Consumer Contract Act of Japan.
+3. IF PARAGRAPH 2 IS HELD TO HAVE NO EFFECT AS TO DAMAGE CAUSED BY OUR GROSS NEGLIGENCE, THE COMPENSATION FOR THAT DAMAGE IS LIMITED TO 30,000 YEN PER USER FOR DAMAGE ARISING FROM A SINGLE EVENT (COUNTED AS IN THE SECOND SENTENCE OF PARAGRAPH 8). EVEN IF THIS PARAGRAPH IS HELD TO HAVE NO EFFECT, PARAGRAPH 2 REMAINS IN EFFECT.
+4. IF YOU ARE A CONSUMER UNDER THE CONSUMER CONTRACT ACT OF JAPAN AND DAMAGE IS CAUSED BY OUR NEGLIGENCE (OTHER THAN GROSS NEGLIGENCE), THE SCOPE OF OUR LIABILITY IS LIMITED, AMONG THE DAMAGE ACTUALLY INCURRED BY YOU, TO ORDINARY DAMAGE (ARTICLE 416, PARAGRAPH 1 OF THE CIVIL CODE OF JAPAN).
+5. THE DAMAGE UNDER PARAGRAPH 4 DOES NOT INCLUDE LOST PROFITS (BENEFITS YOU WOULD HAVE OBTAINED BY USING THE APP) OR DAMAGE ARISING FROM SPECIAL CIRCUMSTANCES PARTICULAR TO YOU.
+6. THE DAMAGE UNDER PARAGRAPH 4 DOES NOT INCLUDE COMPENSATION FOR EMOTIONAL DISTRESS ACCOMPANYING THE LOSS OF PROPERTY OR DATA. However, this paragraph does not exclude compensation for emotional distress arising from infringement of privacy, reputation, portrait rights or other personal rights.
+7. THE DAMAGE UNDER PARAGRAPH 4 DOES NOT INCLUDE ATTORNEY FEES.
+8. EXCEPT WHERE CAUSED BY OUR INTENT OR GROSS NEGLIGENCE, THE COMPENSATION UNDER PARAGRAPH 4 IS LIMITED TO 30,000 YEN PER USER FOR DAMAGE ARISING FROM A SINGLE EVENT. WHERE SEVERAL DEFECTS OR FACTS COMBINE TO CAUSE ONE DAMAGE, AND WHERE THE SAME DEFECT OR FACT CAUSES SEVERAL DAMAGES AT DIFFERENT TIMES OR THROUGH DIFFERENT OPERATIONS, THE WHOLE COUNTS AS A SINGLE EVENT. THE LIMIT ON COMPENSATION FOR EMOTIONAL DISTRESS ARISING FROM INFRINGEMENT OF PERSONAL RIGHTS IS GOVERNED BY PARAGRAPH 9, NOT BY THIS PARAGRAPH.
+9. EXCEPT WHERE CAUSED BY OUR INTENT OR GROSS NEGLIGENCE, THE COMPENSATION WE OWE WITHIN THE SCOPE OF PARAGRAPH 4 FOR EMOTIONAL DISTRESS ARISING FROM INFRINGEMENT OF PERSONAL RIGHTS IS LIMITED TO 30,000 YEN PER USER FOR DAMAGE ARISING FROM A SINGLE EVENT (COUNTED AS IN THE SECOND SENTENCE OF PARAGRAPH 8).
+10. PARAGRAPHS 5 TO 9 EACH HAVE EFFECT INDEPENDENTLY. EVEN IF ANY OF THEM IS HELD TO HAVE NO EFFECT, PARAGRAPH 4 AND THE OTHER PARAGRAPHS REMAIN IN EFFECT. IF PARAGRAPH 4 IS HELD TO HAVE NO EFFECT, PARAGRAPHS 5 TO 9 APPLY WITH THE SAME CONTENT TO THE COMPENSATION WE OWE UNDER LAW, EXCEPT WHERE CAUSED BY OUR INTENT OR GROSS NEGLIGENCE.
+11. Notwithstanding paragraphs 2 to 10, nothing in this Article limits any liability that cannot be limited by law, including liability for our intent or gross negligence and liability for death or personal injury.
+
+Article 12 (Indemnity)
+If a third party makes a claim or brings proceedings against us because you breached these terms, or arising from your input, your Outputs or your use of the App, you will compensate us for the damage and reasonable costs we incur, to the extent attributable to you.
+
+Article 13 (Changes to these terms)
+We may change these terms. When we do, we will notify you on the App's screen or in its repository (GitHub) of the new content and the date it takes effect, before that date. For important changes that are unfavorable to you, we will ask for your agreement again on the App's screen.
+
+Article 14 (Severability)
+If any provision of these terms is held invalid or unenforceable under law, the remaining provisions remain in effect. If part of a provision is held invalid, only that part ceases to have effect, and the rest of the provision remains in effect.
+
+Article 15 (Notice before claims)
+Before bringing proceedings to claim compensation from us for damage relating to the App, please endeavor to notify us of the facts and what you seek, through the contact form in section 11 of the Privacy Policy, and to consult with us.
+
+Article 16 (Governing law and jurisdiction)
+1. These terms are governed by the laws of Japan.
+2. The Tokyo District Court has exclusive agreed jurisdiction in the first instance over any dispute relating to these terms.
+3. Notwithstanding paragraphs 1 and 2, if you are a consumer living outside Japan, the protections that the laws of your country or region give consumers and that cannot be excluded by contract apply to you, and these terms do not limit those protections.
+
+Article 17 (Language)
+These terms are written in Japanese. Versions in other languages are translations for reference, and if they differ, the Japanese version prevails. This Article does not limit the protections in Article 16, paragraph 3.

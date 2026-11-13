@@ -1,0 +1,118 @@
+/*
+ * キーの入力の窓の見た目。本体の CSS は読まない（ゲートウェイは本体の部品を持たない）
+ */
+
+:root {
+  color-scheme: light dark;
+  font-family: system-ui, sans-serif;
+  font-size: 14px;
+}
+
+body {
+  margin: 0;
+  background: Canvas;
+  color: CanvasText;
+}
+
+main {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 440px;
+  margin: 0 auto;
+  padding: 24px 20px;
+}
+
+h1 {
+  margin: 0;
+  font-size: 18px;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+input {
+  padding: 6px 8px;
+  border: 1px solid GrayText;
+  border-radius: 6px;
+  font: inherit;
+  background: Field;
+  color: FieldText;
+}
+
+button {
+  padding: 6px 12px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  font: inherit;
+  background: AccentColor;
+  color: AccentColorText;
+  cursor: pointer;
+}
+
+form > button {
+  align-self: flex-start;
+}
+
+/* 明るい背景でも暗い背景でも 4.5:1 を保つ組 */
+.error {
+  margin: 0;
+  color: light-dark(#b00020, #ff6b6b);
+}
+
+/* 目のアイコンは欄の右端に重ね、打った文字が下に潜らないよう欄の右を空ける */
+.key-box {
+  position: relative;
+  display: flex;
+}
+
+.key-box input {
+  flex: 1;
+  min-width: 0;
+  padding-right: 36px;
+}
+
+/* 押せる大きさは 24px 以上（WCAG 2.5.8） */
+button.eye {
+  position: absolute;
+  top: 50%;
+  right: 4px;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  transform: translateY(-50%);
+  background: transparent;
+  color: GrayText;
+}
+
+button.eye:hover,
+button.eye:focus-visible {
+  color: FieldText;
+}
+
+button.eye svg {
+  width: 16px;
+  height: 16px;
+}
+
+.done {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.done p {
+  margin: 0;
+}

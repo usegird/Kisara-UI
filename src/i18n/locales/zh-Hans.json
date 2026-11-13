@@ -1,0 +1,2765 @@
+{
+  "common": {
+    "fileTooLarge": "{name} 太大，无法打开（上限 {size} MB）。",
+    "close": "关闭",
+    "clearAllToasts": "全部清除",
+    "toastCount": "×{count}",
+    "cancel": "取消",
+    "ok": "确定",
+    "delete": "删除",
+    "deleteConfirm": "删除",
+    "clearConfirm": "清空",
+    "save": "保存",
+    "open": "打开",
+    "retry": "重试",
+    "loading": "加载中…",
+    "unsaved": {
+      "title": "编辑中的内容",
+      "close": "更改尚未保存，确定要关闭吗？",
+      "switch": "更改尚未保存，确定要切换吗？"
+    }
+  },
+  "glossary": {
+    "activity": "活动",
+    "card": "卡片",
+    "variablesPanel": "变量面板",
+    "variableBox": "变量框",
+    "outputAnchor": "输出锚点",
+    "chip": "变量标记",
+    "appInputs": "应用输入",
+    "runPanel": "运行面板",
+    "tab": "标签页",
+    "viewer": "查看器",
+    "docked": "嵌入",
+    "floating": "浮动",
+    "popOut": "独立窗口",
+    "sideLane": "支线",
+    "playbook": "行动手册",
+    "phase": "阶段",
+    "outline": "大纲"
+  },
+  "format": {
+    "seconds": "{seconds}秒",
+    "minutesSeconds": "{minutes}分{seconds}秒",
+    "elapsed": "{minutes}m {seconds}s",
+    "empty": "（空）"
+  },
+  "terms": {
+    "title": "使用条款",
+    "revisedSummary": "新的条款自 {date} 起适用。",
+    "version": "第 {revision} 版 · {date} 起适用",
+    "accept": "同意并开始",
+    "conditionsHeading": "使用上的注意（摘自使用条款）",
+    "condition2": "在本工具中创建、设置的数据（包括对话和图片）保存在浏览器的存储区域中，因此可能因清除缓存或网站数据、误操作、浏览器或工具的缺陷而丢失。尤其是 Safari 具有自动清理存储区域的机制，在其他浏览器中也需要同样注意。需要的数据，请每次导出等留存备份。",
+    "condition3": "可能引发故障、高额账单等意外事故。处理进行期间请注意观察画面，离开座位前务必停止。",
+    "condition4": "请使用从我方官方域名分发的版本，并在 Chrome、Edge、Firefox、Safari 等仍在持续更新的浏览器中使用。我方确认过运行情况的浏览器是 Chrome。在其他浏览器中的运行情况未经确认。",
+    "consent": "我已年满 18 岁且达到所在地区的成年年龄，并同意使用条款和隐私政策",
+    "noticeTitle": "使用注意事项",
+    "noticeCheck": "我已确认{notice}",
+    "noticeCheckLabel": "我已确认使用注意事项",
+    "noticeIntro": "本工具乍看之下像是在 URL 所在的服务器上运行，但处理实际上在用户的浏览器中（本地）进行。请理解无论在技术上还是在责任上，这都与在自己的电脑上操作下载的软件几乎相同。\n由于这一机制，我方无法监视其运行，也无法在异常时当场停止（使用条款第 2 条）。对本工具的操作，以及由此在连接目标产生的费用和变化，均在用户的管理之下（第 4 条）。在连接目标产生的费用等由用户承担，我方不予补偿（第 8 条）。\n以下摘录并补充需要特别注意的要点。准确内容以使用条款为准。",
+    "noticeAi4": "当今的 AI 并没有心智，只是在预测自然的上下文延续。请不要将其用于心理咨询或作为精神寄托进行对话。",
+    "noticeAi3": "输出内容仅供参考，请勿用于医学、法律、税务等专业判断，也不要用于对自己重要的决定。",
+    "noticeAi2": "部分服务商可能将输入用于训练，存在意外泄露的风险。请勿输入个人信息、认证信息等机密信息。",
+    "noticeAi1": "AI 可能出错或输出虚假内容。请勿轻信信息，务必核实，并在使用生成内容或向他人公开之前进行确认（第 5 条）。",
+    "noticeAiHeading": "关于 AI 的输出",
+    "notice1": "一次操作可能自动向连接目标发送多个请求（第 8 条）。",
+    "noticeConfirm": "已确认",
+    "agreements": "使用条款・补充信息",
+    "notAgreed": "未确认",
+    "agreedAt": "{date} 已确认",
+    "landingSummary": "请确认{terms}和{privacy}。"
+  },
+  "privacy": {
+    "title": "隐私政策",
+    "version": "{date} 起适用"
+  },
+  "accessibility": {
+    "title": "无障碍方针",
+    "date": "{date} 制定",
+    "body": "1. 方针\nKisaraUI 在设计上关注无障碍，我们的目标是即使不用鼠标，仅用键盘也能操作节点列表、输入栏、排序和添加节点。\n\n2. 范围\nKisaraUI 的界面（在本页面中运行的整个应用）。用户连接的 ComfyUI 或 LLM 服务器与服务返回的内容（生成的图像和文本、节点名称等）以及这些提供方的界面不在范围内。\n\n3. 目标与对应程度\n以 WCAG 2.1 AA 级（JIS X 8341-3:2016 AA 级）为目标并加以考虑。但未对符合性进行确认或保证。按照日本网络无障碍基础委员会（WAIC）的表述，这相当于\"配慮\"（已加以考虑）。\n\n4. 检查方法\n开发过程中，我们使用自动测试和验证工具，确认仅用键盘即可操作。\n\n5. 已知的限制\n- 工作流中节点之间的连接以图形绘制，图形本身不会被朗读。连接关系可以通过名称和文字来追溯。\n- 连接目标生成的图像内容不提供文字说明。\n\n6. 意见与咨询\n使用中遇到的不便，请通过咨询表单（https://contact.kisara-ui.com）告诉我们。"
+  },
+  "settings": {
+    "language": {
+      "label": "语言"
+    },
+    "theme": {
+      "label": "配色",
+      "system": "跟随系统",
+      "light": "浅色",
+      "dark": "深色"
+    },
+    "tabs": {
+      "heading": "标签页排列",
+      "chatFirst": "将对话标签页靠左排列"
+    },
+    "loraFormat": {
+      "label": "Lora 复制格式",
+      "note": "[loraname] 会替换为去掉扩展名的名称，[learntext] 会替换为训练中出现最多的词，[memo] 会替换为备注。留空则恢复默认。"
+    },
+    "nodeDisplay": {
+      "heading": "节点显示"
+    },
+    "passedLines": {
+      "label": "同时显示已经过节点的连线",
+      "note": "目标卡片已滚动到卡片列上方时，也绘制变量连线。"
+    },
+    "slideshow": {
+      "label": "幻灯片切换间隔（秒）",
+      "note": "图像查看器幻灯片切换到较新一页的间隔。",
+      "increase": "增加 1 秒",
+      "decrease": "减少 1 秒"
+    },
+    "runHistory": {
+      "heading": "历史管理",
+      "label": "保留提示词历史",
+      "note": "启用后，运行历史将持续记录到 user/kisara/history。",
+      "limitLabel": "每个会话保留的运行数",
+      "limitNote": "会话的记录超过此数量时，将从最旧的运行开始删除。",
+      "limitIncrease": "增加保留数",
+      "limitDecrease": "减少保留数"
+    },
+    "safeguards": {
+      "heading": "防护机制",
+      "note": "防止过度运行的限制器无法更改。",
+      "show": "显示",
+      "repeatFailureLimit": "重复：连续失败停止次数",
+      "repeatMinIntervalMs": "重复：最短运行间隔（ms）",
+      "repeatMaxRuns": "重复：最大连续运行次数",
+      "llmRequestInputMax": "LLM：单次输入上限（令牌）",
+      "llmWindowMinutes": "LLM：统计窗口（分钟）",
+      "llmWindowOutputLimit": "LLM：窗口内输出上限（令牌）",
+      "llmWindowInputLimit": "LLM：窗口内输入上限（令牌）",
+      "llmSilentMinutes": "LLM：无内容时停止（分钟）",
+      "toolAutoRunMax": "Workflow：每次回复无需确认的运行数"
+    },
+    "diagnostics": {
+      "heading": "日志级别",
+      "note": "在浏览器中临时记录所选级别及以上的日志。日志不会自动发送，咨询时等需要时请每次自行导出。",
+      "level": {
+        "error": "Error",
+        "warn": "Warning",
+        "info": "Info",
+        "debug": "Debug"
+      },
+      "open": "导出日志",
+      "verbose": "正在收集详细日志",
+      "dialog": {
+        "title": "导出日志",
+        "intro": "导出用于故障报告的文件。本应用不会将其发送到任何地方，请另行通过{form}等方式提供。",
+        "contactForm": "咨询表单",
+        "counts": "错误 {faults} 条 · 操作记录 {events} 条",
+        "levels": "日志级别：ComfyUI {comfy} · LLM {llm}",
+        "sections": "文件包含的内容",
+        "group": {
+          "general": "常规",
+          "comfy": "ComfyUI",
+          "llm": "LLM"
+        },
+        "section": {
+          "format": "文件类型、导出时间和日志级别",
+          "faults": "发生的错误（内容、发生位置和堆栈跟踪）",
+          "app": "KisaraUI 版本",
+          "environment": "浏览器类型、语言、屏幕尺寸、CPU 与内存大小",
+          "settings": "通过开关和选项选择的设置（不包含自由填写的文字）",
+          "comfyEvents": "操作日志（按日志级别记录的部分）",
+          "comfySystem": "ComfyUI 版本和 GPU 名称",
+          "comfyConnection": "连接状态（是否已连接、最近一次失败的类型）",
+          "comfyUrl": "连接目标 URL",
+          "workflowShape": "所打开工作流中的节点类型和数量",
+          "definitionSources": "已安装的自定义节点名称及各自的节点数",
+          "llmEvents": "操作日志（按日志级别记录的部分）",
+          "llmConnection": "连接目标的类型（本地或外部、是否为 https）",
+          "llmUrl": "连接目标 URL",
+          "llmParams": "生成设置（温度等数值）"
+        },
+        "content": "文件内容",
+        "loading": "正在读取…",
+        "size": "{size} KB",
+        "export": "导出",
+        "clear": "清除日志",
+        "clearTitle": "要清除日志吗？",
+        "clearDescription": "将删除记录的所有错误和操作。日志级别保持不变。"
+      }
+    }
+  },
+  "connection": {
+    "guide": {
+      "summary": {
+        "httpError": "服务器返回了 HTTP 错误。",
+        "httpStatus": "服务器返回了 HTTP {status}。",
+        "cors": "ComfyUI 有响应，但不允许从此页面访问（CORS）。",
+        "down": "服务器没有响应",
+        "downTarget": "{target} 没有响应",
+        "corsOrDown": "ComfyUI 未启动，或不允许从此页面访问。",
+        "localNetwork": "浏览器阻止了对本地网络的访问。",
+        "mixedContent": "浏览器不允许 https 页面连接到 http 的 ComfyUI。",
+        "timeout": "已找到服务器，但未在规定时间内响应。",
+        "badResponse": "已连接，但响应的不是 ComfyUI。",
+        "offline": "浏览器处于离线状态。",
+        "unknown": "无法连接。",
+        "forbiddenRun": "ComfyUI 拒绝了从此页面发起的运行（403）。"
+      },
+      "steps": {
+        "addCorsFlag": "在启动参数中添加 {flag} 后重新启动",
+        "allowThroughProxy": "如果中间有反向代理或认证，请在其设置中允许从此页面访问",
+        "checkUrlIsComfy": "确认 URL 指向 ComfyUI 本身",
+        "includePathPrefix": "如果位于反向代理之后，请输入包含路径前缀的地址（例如：https://example.com/comfy）",
+        "updateForFeatures": "旧版 ComfyUI 可能没有用于检测连接的 /features，请考虑更新",
+        "checkConsole": "检查 ComfyUI 控制台是否有错误",
+        "waitAndRetry": "如果刚刚启动，请稍候再重试",
+        "checkProxy": "检查中间是否有反向代理或认证",
+        "restartFully": "修改启动用的批处理或脚本后，请完全停止 ComfyUI 再重新启动",
+        "checkTarget": "请确认已启动，且 URL 和端口无误",
+        "checkRunning": "确认 ComfyUI 已启动（在浏览器中直接打开服务器 URL 会显示页面）",
+        "checkUrlAndPort": "确认服务器的 URL 和端口正确（默认为 8188）",
+        "allowPrompt": "在地址栏弹出的权限对话框中选择“允许”",
+        "allowFromSiteIcon": "如果没有弹出，请通过地址栏左侧的图标为此网站允许本地网络权限",
+        "openOnSameMachine": "如果仍无法连接，请在与 ComfyUI 相同的设备上打开此页面",
+        "reopenWithHttp": "通过 http 重新打开此页面",
+        "publishHttps": "或者通过 https 发布 ComfyUI（搭建反向代理）",
+        "waitForModels": "刚启动时可能因加载模型而需要等待。请稍候再重试",
+        "checkHeavyWork": "检查 ComfyUI 控制台，确认是否有其他繁重的处理在运行",
+        "checkPortService": "确认 URL 的端口没有指向其他服务",
+        "reconnectNetwork": "连接网络后重试",
+        "checkUrlAndRetry": "确认 URL 后重试",
+        "restartWithCors": "使用 --enable-cors-header {origin} 重新启动 ComfyUI",
+        "writesOnlyRejected": "注意：即使读取正常，运行等修改类请求也可能被单独拒绝"
+      }
+    },
+    "status": {
+      "socket": {
+        "connecting": "连接中",
+        "open": "接收中",
+        "reconnecting": "重新连接中",
+        "closed": "已断开"
+      },
+      "retry": "重试 ({attempt}/{max})",
+      "unresponsiveRetry": "无响应，重试 ({attempt}/{max})",
+      "connecting": "连接中…",
+      "failed": "连接失败",
+      "connected": "已连接",
+      "timeout": "超时",
+      "disconnected": "未连接",
+      "progress": "进度：{state}",
+      "progressGaveUp": "进度：已断开（尝试重新连接 {count} 次仍无响应）",
+      "progressDropped": "进度：已断开（运行中断开 {count} 次。请按“重新连接”后再使用）"
+    }
+  },
+  "nodeSearch": {
+    "result": {
+      "inputs": "输入：{types}",
+      "outputs": "输出：{types}",
+      "none": "无"
+    },
+    "anyType": {
+      "label": "包含 *",
+      "title": "将可连接任意类型的插槽（*）也视为类型匹配"
+    },
+    "search": {
+      "addPlaceholder": "按节点名称搜索",
+      "referencePlaceholder": "按节点名或插槽名搜索"
+    },
+    "listColumn": "左侧栏",
+    "reference": {
+      "type": "类型",
+      "typeOutputs": "可输出此类型的输出",
+      "typeInputs": "可接收此类型的输入",
+      "typeFilter": "按类型筛选",
+      "nodes": "要引用的节点",
+      "outputsList": "源节点的输出",
+      "inputsList": "目标节点的输入",
+      "noOutputs": "没有可连接的输出",
+      "noInputs": "没有可连接的输入",
+      "linked": "已连接",
+      "linkedTitle": "已有连线。选择后将替换连线"
+    },
+    "filter": {
+      "input": "输入",
+      "inputTitle": "可接收此类型的节点",
+      "inputFilter": "按输入类型筛选",
+      "output": "输出",
+      "outputTitle": "可输出此类型的节点",
+      "outputFilter": "按输出类型筛选",
+      "unspecified": "不限"
+    },
+    "empty": {
+      "noDefinitions": "尚未获取节点定义。请先连接。",
+      "filtered": "没有匹配的节点（清除筛选可显示更多）",
+      "none": "没有匹配的节点"
+    },
+    "mode": {
+      "label": "添加方式",
+      "add": "添加节点",
+      "reference": "引用节点",
+      "referenceTitle": "连接到已有节点",
+      "referenceDisabled": "没有连接起点，无法选择（从输入或输出的三角形打开时可用）"
+    },
+    "refresh": {
+      "label": "重新获取节点定义",
+      "title": "重新获取节点定义（不会自动更新）"
+    },
+    "nav": {
+      "categories": "分类",
+      "all": "全部"
+    }
+  },
+  "nodeSettings": {
+    "title": "{name} 的详细设置",
+    "x": "x",
+    "y": "y",
+    "width": "宽度",
+    "height": "高度",
+    "pinned": "固定",
+    "pinnedTitle": "在 ComfyUI 中禁止移动此节点。在本应用中位置改变时会取消",
+    "auto": "自动",
+    "extra": {
+      "other": "其他项目（只读，{count} 项）"
+    }
+  },
+  "modelPicker": {
+    "folder": {
+      "loras": "Lora",
+      "checkpoints": "模型"
+    },
+    "title": "选择{kind}",
+    "refresh": {
+      "label": "重新获取{kind}列表",
+      "title": "重新获取列表（不会自动更新）"
+    },
+    "directory": "目录",
+    "directoryToggle": {
+      "show": "显示文件夹",
+      "pin": "固定文件夹（始终显示）",
+      "unpin": "取消固定文件夹（隐藏）"
+    },
+    "nothingSelected": "点击卡片进行选择",
+    "decide": {
+      "toolbar": "确定{kind}",
+      "label": "确定{kind}",
+      "title": "确定为 {name} 并关闭（双击或按 Enter 也可确定）"
+    },
+    "insert": {
+      "label": "不关闭，将{kind}插入到光标位置"
+    },
+    "filter": {
+      "toolbar": "{kind}筛选",
+      "label": "筛选{kind}",
+      "placeholder": "按名称筛选"
+    },
+    "sort": {
+      "name": "名称",
+      "modified": "修改时间",
+      "created": "创建时间",
+      "size": "大小",
+      "ascending": "{name}・升序（点击切换为降序）",
+      "descending": "{name}・降序（点击切换为升序）",
+      "pick": "按{name}排序",
+      "setAscending": "按{name}升序排序",
+      "setDescending": "按{name}降序排序"
+    },
+    "cardHeight": {
+      "label": "高度",
+      "input": "卡片高度（px）"
+    },
+    "grid": {
+      "loading": "正在加载列表…",
+      "empty": "没有匹配的{kind}",
+      "loadingMore": "加载中… {shown} / {total}"
+    },
+    "infoDock": {
+      "bottom": "在下方显示信息",
+      "right": "在右侧显示信息"
+    },
+    "infoPane": "信息",
+    "field": {
+      "open": "{label}（选择{kind}）",
+      "clear": "{action}{label}"
+    },
+    "card": {
+      "current": "当前值"
+    },
+    "info": {
+      "panel": "模型信息",
+      "close": "关闭信息",
+      "path": "路径",
+      "copyName": "复制 {name} 的名称",
+      "size": "大小",
+      "modified": "修改",
+      "created": "创建",
+      "name": "名称",
+      "baseModel": "基础模型",
+      "network": "网络",
+      "loading": "正在加载信息…",
+      "error": "无法获取信息：{error}",
+      "noEmbedded": "没有嵌入的信息",
+      "triggerWords": "训练中的高频词",
+      "copyTriggerWords": "复制全部训练高频词",
+      "insertTriggerWords": "将训练中的高频词插入光标处",
+      "notes": "备注",
+      "notesNone": "还没有备注文件。保存后会创建。",
+      "notesLoading": "正在读取备注…",
+      "notesFailed": "无法读取备注：{error}",
+      "notesSave": "保存备注",
+      "notesSaving": "正在保存…",
+      "notesSaved": "已保存",
+      "notesSaveFailed": "无法保存：{error}",
+      "copyNotes": "复制备注",
+      "insertNotes": "将备注插入光标处",
+      "allEntries": "全部嵌入项目"
+    }
+  },
+  "imagePicker": {
+    "kind": "图像",
+    "title": "选择图像",
+    "refresh": {
+      "label": "重新获取图像列表",
+      "title": "重新获取此节点的选项（不会自动更新）"
+    },
+    "decide": {
+      "toolbar": "确定图像",
+      "label": "确定图像"
+    },
+    "filter": {
+      "toolbar": "筛选图像",
+      "label": "筛选图像"
+    },
+    "empty": "没有符合的图像",
+    "upload": {
+      "label": "上传图像",
+      "title": "将图像上传到输入文件夹（也可以把文件拖到这里）",
+      "drop": "松开即可上传",
+      "renamed": "已用其他名称保存：{names}",
+      "notImage": "只能上传图像文件",
+      "noConnection": "未连接到 ComfyUI",
+      "failed": "上传失败：{reason}",
+      "skipped": "已跳过非图像文件"
+    }
+  },
+  "insertBar": {
+    "label": "插入",
+    "waiting": "正在加载列表",
+    "lora": {
+      "title": "选择 Lora 并插入到光标位置",
+      "label": "插入 Lora",
+      "triggersFailed": "无法获取训练中的高频词：{message}",
+      "memoFailed": "无法获取备注：{message}",
+      "noTarget": "请先将光标置于此面板外的多行输入框中再按下（也可以拖放插入）"
+    },
+    "style": {
+      "title": "打开样式编辑界面（确定或双击插入到光标位置）",
+      "label": "打开样式"
+    },
+    "wildcard": {
+      "title": "打开通配符列表（确定或双击插入到光标位置）",
+      "label": "插入通配符"
+    },
+    "tag": {
+      "title": "打开标签词典，查看并修改词典",
+      "label": "打开标签词典"
+    },
+    "tool": {
+      "label": "从 LLM 调用的设置",
+      "title": "让对话中的 LLM 调用此工作流的设置"
+    },
+    "sources": {
+      "offline": "未连接",
+      "loraUnavailable": "服务器未返回模型列表",
+      "stylesUnavailable": "无法读取服务器的样式列表（styles.csv）",
+      "wildcardsNoRoute": "服务器没有通配符的路由（需要 Impact Pack）",
+      "wildcardsFailed": "无法从服务器获取通配符列表",
+      "tagsUnavailable": "无法读取服务器上的标签词典"
+    }
+  },
+  "comfy": {
+    "workspace": {
+      "taskDetail": "任务详情",
+      "imageView": "图像显示",
+      "image": "图像",
+      "workflow": "工作流",
+      "closeTab": "关闭此标签页",
+      "closeTabTitle": "未保存的编辑将会丢失"
+    },
+    "connection": {
+      "remoteTitle": "连接外部 ComfyUI 的注意事项",
+      "remoteNotice": "即将连接到你的设备或私有网络之外的 ComfyUI。连接前请确认以下几点：\n・运行工作流会使用该 ComfyUI 的 GPU，并改变其状态。\n・在付费托管上，提供方会按使用时长或运行次数收费。核对费用以及管理使用的频率、时长和费用由用户负责（使用条款 第4条）。我方不予补偿（第8条）。\n・在共享服务器上，其管理员和其他用户可能看到你发送的内容和生成内容。\n・请遵守连接目标的使用条款及相关法律法规。\n・对于因使用外部服务器造成的损失，我方的责任依照使用条款第11条的规定。\n如同意以上内容，请进行连接。",
+      "remoteAgree": "同意并连接",
+      "remoteCancel": "取消",
+      "urlLabel": "要连接的 ComfyUI 的 URL",
+      "connect": "连接",
+      "needsConnection": "请先连接",
+      "definitionCount": {
+        "other": "节点定义 {count} 个"
+      }
+    },
+    "connect": {
+      "heading": "连接到 ComfyUI",
+      "launchStep": "1. 以允许访问的方式启动 ComfyUI",
+      "launchNote": "在启动 ComfyUI 的命令中加入启动选项，如下所示。",
+      "launchWhy": "本 UI 在浏览器中本地运行，但由于 ComfyUI 的设置，浏览器发往其他 URL 的请求会被阻止，因此需要此选项。",
+      "securityLink": "安全风险说明",
+      "securityCors": "ComfyUI 默认会指示浏览器不处理来自不同 URL 的请求，因此需要通过 enable-cors-header 选项添加例外。",
+      "securityListen": "enable-cors-header 并不允许来自其他电脑或互联网的网络访问。那需要通过 --listen 选项将 ComfyUI 公开到网络上，风险非常高，除非您具备足够的知识并有明确意图，否则请避免。",
+      "securityDirect": "KisaraUI 在本地浏览器中运行，输入内容由浏览器直接发送到 ComfyUI，因此在设计上不会将执行内容发送到外部或进行中转。",
+      "securityTamper": "不过，如果因网站被篡改或恶意更新而导致页面被嵌入不当代码，理论上就可能将 UI 上的信息发送到外部，或通过 ComfyUI 的 API 窃取信息。",
+      "securityScope": "因此，风险仅限于 ComfyUI API 所能做到的范围。与可能作为 ComfyUI 进程获得操作系统资源访问权限的自定义节点相比，这相对更安全，但请在理解潜在风险的前提下使用。",
+      "securityInspect": "如果对这些风险感到不安，可以通过浏览器的 F12 开发者工具等检查通信目标和内容，或将本页面保存为文件并让生成式 AI 分析代码等方式进行验证。",
+      "urlStep": "2. 输入连接地址并连接",
+      "urlTabHint": "为空时按 Tab 键会直接填入示例地址",
+      "permissionNote": "如果浏览器询问是否允许访问本地网络，请选择“允许”。",
+      "connectTitle": "连接到 ComfyUI",
+      "reconnect": "重新连接",
+      "reconnectTitle": "先断开，再重新连接到 ComfyUI",
+      "connecting": "正在连接…",
+      "target": "连接地址：{url}",
+      "openHeading": "3. 打开工作流",
+      "fromTemplate": "从模板打开",
+      "fromFile": "从文件打开",
+      "empty": "空白打开",
+      "connected": {
+        "other": "已连接 - {count} 个节点定义"
+      },
+      "connectedPlain": "已连接"
+    },
+    "bar": {
+      "heading": "Comfy 后端",
+      "reconnect": "重新连接",
+      "reconnectTitle": "先断开，再重新连接到 ComfyUI，并重新建立进度通知",
+      "connectTitle": "连接到 ComfyUI，并重新建立进度通知",
+      "checking": "正在检查连接",
+      "noUrl": "未设置",
+      "openConnectTitle": "打开\"连接到 ComfyUI\"，更改连接目标或重新连接"
+    },
+    "status": {
+      "definitionsCached": {
+        "other": "节点定义 {count} 个（缓存）"
+      },
+      "definitionsFetched": {
+        "other": "节点定义 {count} 个（已获取）"
+      },
+      "definitionsLoading": "节点定义：加载中",
+      "definitionsMissing": "节点定义：未获取",
+      "noTarget": "未设置连接地址",
+      "detail": "（{detail}）"
+    },
+    "imageTab": {
+      "notKept": "图像未保存在本设备上，重新加载后无法显示。请再次打开文件",
+      "region": "图像元数据"
+    },
+    "insert": {
+      "noFieldTitle": "请先将光标放在本窗口外的多行输入框中再点击",
+      "title": "插入到所选输入框的光标位置"
+    },
+    "saveAs": {
+      "title": "另存为",
+      "description": "保存到 ComfyUI 的 workflows 文件夹。",
+      "nameLabel": "工作流名称"
+    },
+    "side": {
+      "label": "右侧栏",
+      "queue": "任务",
+      "history": "历史",
+      "report": "错误",
+      "settings": "设置",
+      "dockBottom": "放到下方",
+      "dockRight": "放到右侧",
+      "tabBoundary": "{name}标签页"
+    },
+    "template": {
+      "title": "从模板打开",
+      "fellBack": "没有此语言的列表，因此以英语显示",
+      "subtitle": "KisaraUI 和 ComfyUI 自带的工作流",
+      "localeLabel": "列表语言",
+      "localeTitle": "标题、说明和类别名称的语言",
+      "category": "类别",
+      "toolbar": "模板操作",
+      "close": "关闭模板",
+      "all": "全部",
+      "filterToolbar": "模板筛选",
+      "filterLabel": "筛选模板",
+      "filterPlaceholder": "按标题、说明、标签或模型名称筛选",
+      "sortLabel": "排序",
+      "sort": {
+        "default": "默认",
+        "popular": "热门",
+        "newest": "最新",
+        "name": "按名称",
+        "size": "模型从小到大"
+      },
+      "loading": "正在加载列表…",
+      "loadFailed": "无法获取列表：{message}",
+      "empty": "没有符合条件的模板",
+      "loadingMore": "加载中… {shown} / {total}",
+      "builtinCategory": "KisaraUI",
+      "builtin": {
+        "a1111Txt2img": {
+          "title": "txt2img（A1111 风格）",
+          "description": "与 Stable Diffusion web UI 相同布局的文生图。提示词中可用 LoRA 和通配符，带 Hires. fix 与 ADetailer 开关。需要 Impact Pack（ADetailer 还需要 Impact Subpack）"
+        }
+      }
+    },
+    "fileInput": {
+      "dropHint": "打开文件"
+    },
+    "toasts": {
+      "saved": "已保存到 ComfyUI",
+      "saveFailed": "无法保存到 ComfyUI",
+      "loadFailed": "无法加载工作流"
+    },
+    "list": {
+      "label": "工作流列表",
+      "saved": "保存在 ComfyUI 上的工作流"
+    },
+    "open": {
+      "loadFailed": "无法获取列表：{error}",
+      "empty": "没有符合条件的工作流"
+    },
+    "tabMenu": {
+      "save": "保存",
+      "saveAs": "另存为…",
+      "export": "导出",
+      "exportTitle": "下载为 Workflow JSON"
+    },
+    "saveGuard": {
+      "existsForeign": "已存在同名且不是由 KisaraUI 创建的工作流，请换一个名称（workflows/{path}）。",
+      "notOwned": "该文件不是由 KisaraUI 创建的，未覆盖。请使用“另存为”（workflows/{path}）。",
+      "connectionChanged": "连接已更改，未保存。请重新保存。",
+      "notOwnedTitle": "该文件不是由 KisaraUI 创建的，无法覆盖。请使用“另存为”。",
+      "otherServerTitle": "该文件来自其他连接，无法覆盖。请使用“另存为”。"
+    },
+    "tool": {
+      "title": "从 LLM 调用的设置",
+      "name": "功能名（英文字母、数字、连字符、下划线）",
+      "purpose": "工作流说明",
+      "purposePlaceholder": "工作流的功能、调用的场景或触发条件、文本格式的指定",
+      "result": "输出（作为结果返回的图像）",
+      "allOutputs": "全部",
+      "params": "输入（作为参数要求的内容）",
+      "noInputs": "没有应用输入。",
+      "noParams": "没有参数。",
+      "notEligible": "此类型不能作为参数",
+      "paramName": "{label} 的参数名",
+      "paramNamePlaceholder": "参数名（英文字母、数字、符号）",
+      "paramDescription": "{label} 的说明",
+      "paramDescriptionPlaceholder": "参数说明（传给节点的内容和格式）",
+      "badName": "功能名只能使用大小写英文字母、数字、连字符和下划线（最多 64 个）。",
+      "badParamName": "参数名只能使用大小写英文字母、数字、连字符和下划线（最多 64 个）。",
+      "duplicateParam": "有两个参数同名。",
+      "save": "保存",
+      "reset": "重置",
+      "tab": "标签页",
+      "tabWithId": "{name}（{id}）",
+      "file": "文件名",
+      "tabClosed": "（已关闭）",
+      "unsaved": "（未保存）",
+      "mode": "{label} 的填入方式",
+      "modeOverwrite": "覆盖",
+      "modePrepend": "加在前面",
+      "modeAppend": "加在后面",
+      "noOutputs": "没有输出节点。"
+    },
+    "landing": {
+      "title": "工作流（ComfyUI）",
+      "summary": "在本机的 ComfyUI 上打开并运行工作流。",
+      "start": "使用 ComfyUI",
+      "routeName": "ComfyUI",
+      "routeVia": "HTTP・WebSocket（直接）"
+    }
+  },
+  "styles": {
+    "edit": "编辑样式",
+    "title": "样式",
+    "newStyle": "新样式",
+    "close": "关闭样式编辑",
+    "list": "样式列表",
+    "insertToolbar": "插入样式",
+    "positive": "正向",
+    "negative": "反向",
+    "insertPositive": "将正向文本插入到光标位置",
+    "insertNegative": "将反向文本插入到光标位置",
+    "positiveText": "正向文本",
+    "negativeText": "反向文本",
+    "copyPositive": "复制正向文本",
+    "copyNegative": "复制反向文本",
+    "filterToolbar": "样式筛选",
+    "filterLabel": "筛选样式",
+    "filterPlaceholder": "按名称或文本筛选",
+    "remove": {
+      "title": "删除吗？",
+      "description": "将从表中删除“{name}”。此操作无法撤销。"
+    },
+    "refresh": "重新获取样式列表",
+    "refreshTitle": "重新读取服务器上的表（不会自动重新读取）",
+    "itemTitle": "{name}（双击或拖到输入框中即可插入正向文本）",
+    "name": "名称",
+    "nameLabel": "样式名称",
+    "saveTitle": "将表写回服务器",
+    "saving": "保存中…",
+    "errors": {
+      "emptyName": "请输入名称",
+      "duplicateName": "已有同名样式（不区分大小写）",
+      "notLoaded": "样式尚未读取完成"
+    }
+  },
+  "wildcards": {
+    "title": "通配符",
+    "pickPrompt": "请从列表中选择",
+    "close": "关闭通配符",
+    "refresh": "重新获取通配符列表",
+    "refreshTitle": "重新读取服务器上的列表（不会自动重新读取）",
+    "tree": "通配符层级",
+    "decideToolbar": "确定通配符",
+    "insert": "将通配符插入到光标位置",
+    "filterToolbar": "通配符筛选",
+    "filterLabel": "筛选通配符",
+    "filterPlaceholder": "按名称筛选",
+    "copy": "复制通配符",
+    "noMatch": "没有匹配项",
+    "list": "通配符列表",
+    "itemTitle": "{name}（双击或拖到输入框中即可插入）"
+  },
+  "tagComplete": {
+    "list": "标签候选",
+    "count": "{count} 个候选。用上下键选择，按 Enter 或 Tab 插入"
+  },
+  "tags": {
+    "title": "标签词典",
+    "close": "关闭标签词典",
+    "refresh": "重新读取标签词典",
+    "refreshTitle": "从服务器重新读取词典（不会自动重新读取）",
+    "dictionaries": "词典",
+    "all": "全部",
+    "pysssss": "pysssss",
+    "readOnly": "只读",
+    "confirmToolbar": "确认修改",
+    "confirm": "确认",
+    "confirmLabel": "将修改写入词典",
+    "confirmTitle": "将表格中的修改写入服务器",
+    "confirmIdleTitle": "没有要写入的内容。请先修改表格",
+    "filterToolbar": "标签筛选",
+    "filterLabel": "筛选标签",
+    "filterPlaceholder": "按标签或别名筛选",
+    "list": "标签表格",
+    "more": "还有 {count} 个。输入筛选条件即可显示",
+    "tag": "标签",
+    "aliases": "别名",
+    "priority": "优先级",
+    "rowActions": "行操作",
+    "sortTitle": "按{name}排序（每次点击依次为升序、降序、原顺序）",
+    "removeRow": "删除 {name}",
+    "removeRowTitle": "给此行加删除线。确认时从词典中移除",
+    "restoreRow": "恢复 {name}",
+    "restoreRowTitle": "去掉删除线",
+    "addDictionary": "添加词典",
+    "addDictionaryTitle": "输入名称以添加空词典（确认时写入）",
+    "dictionaryName": "词典名称",
+    "removeDictionary": "删除 {name}",
+    "removeDictionaryTitle": "给此词典加删除线。确认时删除其文件",
+    "restoreDictionary": "恢复 {name}",
+    "restoreDictionaryTitle": "去掉此词典的删除线",
+    "errors": {
+      "duplicateTag": "同一标签出现了两次：{name}",
+      "notLoaded": "词典尚未读取完毕。请重新读取后再试",
+      "emptyName": "请输入名称",
+      "duplicateName": "已有同名词典"
+    }
+  },
+  "app": {
+    "tabCount": {
+      "title": "打开的标签页超过 {limit} 个",
+      "description": "请关闭不使用的标签页。打开的标签页过多会使页面和保存变慢。"
+    },
+    "skipToMain": "跳到主要内容",
+    "documentTitle": "{name} - KisaraUI",
+    "boundary": "应用",
+    "lazy": {
+      "templates": "模板",
+      "chat": "对话",
+      "chatSettings": "对话设置",
+      "chatList": "对话列表",
+      "storage": "存储管理"
+    },
+    "overwrite": {
+      "title": "要覆盖吗？",
+      "description": "ComfyUI 中已有同名工作流（workflows/{path}）。覆盖后无法恢复。",
+      "confirm": "覆盖"
+    },
+    "rootFallback": {
+      "title": "无法显示界面",
+      "hint": "如果打开的工作流处于无法读取的状态，重新加载也会停在同一处。此时请清除已打开标签页的备份（保存在 ComfyUI 中的内容和文件不会被删除）。",
+      "retry": "重新显示",
+      "reload": "重新加载",
+      "discard": "清除标签页备份并重新加载",
+      "diagnostics": "导出日志",
+      "previewLabel": "要导出的内容（全文）",
+      "save": "保存"
+    },
+    "tabs": {
+      "untitled": "未命名",
+      "nameField": "工作流名称",
+      "renameHint": "双击可重命名。从右键菜单关闭（键盘上按 Delete）",
+      "menu": "{name} 的菜单",
+      "list": "已打开的标签页",
+      "chooseKind": "选择标签页类型",
+      "kind": {
+        "workflow": "工作流",
+        "chat": "对话"
+      },
+      "receiving": "接收中",
+      "running": "运行中",
+      "moveLeft": "向左移动",
+      "moveRight": "向右移动"
+    },
+    "pin": {
+      "pin": "固定显示",
+      "unpin": "取消固定（收起为图标）"
+    },
+    "landing": {
+      "title": "选择要使用的内容",
+      "lead": "选择后，此标签页会切换到对应的界面。数据发送到哪里以及注意事项汇总在下方。",
+      "consentHeading": "同意使用条款",
+      "choicesLabel": "要使用的内容",
+      "routesHeading": "连接路径",
+      "hostName": "本页面的分发来源（{url}）",
+      "hostVia": "仅页面文件",
+      "hostDetail": "只提供此界面的文件。输入和结果不会经过它。",
+      "browserName": "浏览器（本页面）",
+      "browserDetail": "输入和结果从这里直接发送到连接目标。",
+      "localDevice": "本地设备",
+      "notesHeading": "安全注意事项"
+    },
+    "welcome": {
+      "title": "KisaraUI",
+      "open": "打开欢迎页面",
+      "aboutHeading": "这是什么？",
+      "about": "KisaraUI 是一个用于轻松运行 LLM 聊天和图像生成的 API 前端。它只在浏览器中运行，向你手边的 AI 运行环境或云端 API 发送请求。",
+      "usesHeading": "可以做什么",
+      "useChatName": "对话（LLM）",
+      "useChat": "连接手边的 LLM 服务器或 OpenRouter 等云端 API 进行对话。",
+      "useImageName": "图像生成（ComfyUI）",
+      "useImage": "打开手边 ComfyUI 的工作流，修改数值后运行。",
+      "featuresHeading": "特点",
+      "featureBrowserName": "只在浏览器中运行",
+      "featureBrowser": "无需安装 KisaraUI 本身，也无需注册账号。请连接你另外准备的 LLM 运行环境或 Comfy 环境来使用。",
+      "featurePrivacyName": "注重隐私",
+      "featurePrivacy": "浏览器与推理环境直接通信，不中转通信内容，也不向外部发送结果。",
+      "featureCraftName": "简洁与功能性",
+      "featureCraft": "在保持操作简洁的同时，兼顾幕后的透明性与可定制性。",
+      "system": "系统构成",
+      "systemLink": "（{link}）"
+    }
+  },
+  "ui": {
+    "copy": {
+      "copy": "复制",
+      "copied": "已复制",
+      "failed": "无法复制"
+    },
+    "decide": {
+      "caption": "确定"
+    },
+    "dialog": {
+      "toDocked": "改为嵌入",
+      "toFloating": "改为浮动",
+      "toDockedTitle": "改为嵌入（嵌入节点和变量的列中）",
+      "toFloatingTitle": "改为浮动（浮在界面上方，可自由移动）",
+      "resize": "拖动以调整大小"
+    },
+    "directory": {
+      "all": "全部"
+    },
+    "boundary": {
+      "cannotShow": "无法显示{label}",
+      "retry": "重新显示"
+    },
+    "divider": {
+      "width": "{label}的宽度",
+      "height": "{label}的高度",
+      "widthTitle": "左右拖动以调整宽度",
+      "heightTitle": "上下拖动以调整高度"
+    },
+    "partLoading": {
+      "loading": "正在加载{label}",
+      "failed": "无法加载{label}",
+      "staleHint": "刚部署新版本后，已打开的页面可能无法加载。",
+      "reload": "重新加载"
+    },
+    "combobox": {
+      "open": "打开{name}列表",
+      "remove": "从历史记录中删除 {item}",
+      "removeHint": "从历史记录中删除（Shift+Delete）"
+    },
+    "drag": {
+      "instructions": "要抓取项目，请按空格键或 Enter 键。抓取期间，用方向键移动。再次按空格键或 Enter 键即可放下，按 Esc 键取消。",
+      "sortable": "可排序项",
+      "draggable": "可拖动项",
+      "item": "项目",
+      "start": "已抓取 {name}。",
+      "overSort": "{name} 现在位于 {target} 的位置。",
+      "overDrop": "{name} 位于 {target} 上方。",
+      "overHome": "{name} 已回到原来的位置。",
+      "overNone": "{name} 不在可放置的区域上方。",
+      "endSort": "已将 {name} 放到 {target} 的位置。",
+      "endDrop": "已将 {name} 放到 {target} 上。",
+      "endHome": "已将 {name} 放回原来的位置。",
+      "endNone": "已放下 {name}。",
+      "cancel": "已取消。{name} 已回到原来的位置。"
+    }
+  },
+  "graph": {
+    "color": {
+      "red": "红色",
+      "brown": "棕色",
+      "green": "绿色",
+      "blue": "蓝色",
+      "paleBlue": "淡蓝色",
+      "cyan": "青色",
+      "purple": "紫色",
+      "yellow": "黄色",
+      "black": "黑色"
+    },
+    "rows": {
+      "valueFallback": "值 {index}"
+    },
+    "search": {
+      "groups": {
+        "frequent": "常用",
+        "used": "正在使用",
+        "custom": "自定义节点",
+        "partner": "合作伙伴节点"
+      }
+    },
+    "prompt": {
+      "noOutput": "没有可运行的输出节点",
+      "unknownClass": "找不到节点定义（未安装的自定义节点？）：{type}",
+      "unresolvedWidgets": "无法解析参数的位置对应，将使用默认值运行（预期 {expected} 个 / 实际 {actual} 个）",
+      "missingInput": "必需输入“{name}”未连接",
+      "brokenNode": "节点格式无法读取，无法转换为运行格式：{message}",
+      "danglingReference": "输入“{name}”的连接源（{source}）不在运行对象中",
+      "namedMismatch": "参数名称顺序与定义不一致，不运行此节点（参数值可能错位）",
+      "typeMismatch": "参数值类型与定义不符，不运行此节点（参数值可能错位）",
+      "excludedDownstream": "输入来源节点 {source} 不运行，因此此节点也不运行",
+      "subgraphCycle": "子图“{name}”包含其自身，因此无法展开",
+      "noOutputLeft": "没有可运行的输出节点，未提交"
+    },
+    "parse": {
+      "notObject": "Workflow JSON 不是对象",
+      "noNodes": "缺少 nodes[]",
+      "noLinks": "缺少 links[]",
+      "invalidNode": "nodes[{index}] 缺少 id 或 type",
+      "duplicateNode": "节点 id {id} 被多个节点使用（nodes[{index}]）"
+    },
+    "png": {
+      "empty": "此 PNG 既不含工作流，也不含嵌入的文本"
+    }
+  },
+  "api": {
+    "consentRequired": "尚未取得必要的同意，因此没有发送。",
+    "request": {
+      "aborted": "请求已中止",
+      "timeout": "无响应（{ms}ms）",
+      "unreachable": "无法连接到服务器",
+      "parse": "响应无法解析为 JSON",
+      "fetchFailed": "获取失败（{status}）"
+    },
+    "upload": {
+      "unexpected": "上传响应的格式不符合预期"
+    },
+    "baseUrl": {
+      "empty": "服务器 URL 为空",
+      "unsupportedScheme": "仅支持 http(s) 服务器：{url}",
+      "invalid": "服务器 URL 格式无效：{url}"
+    },
+    "prompt": {
+      "rejected": "运行请求未被接受"
+    },
+    "run": {
+      "error": "运行时错误",
+      "interrupted": "已中断"
+    },
+    "workflow": {
+      "exists": "已存在同名工作流：{path}",
+      "notOwned": "该文件不是由 KisaraUI 创建的，未覆盖：{path}"
+    },
+    "runHistory": {
+      "unexpected": "运行历史文件的格式不符合预期"
+    }
+  },
+  "fault": {
+    "where": {
+      "history": "历史 {id}",
+      "notification": "通知",
+      "nodeDefinition": "节点定义 {name}",
+      "nodeRows": "节点 {id}（{type}）的显示",
+      "nodeVariables": "节点 {id}（{type}）的变量",
+      "processing": "处理",
+      "operation": "通信或操作"
+    },
+    "toast": {
+      "title": "{where}中发生意外失败",
+      "description": "{message}（详情请查看浏览器控制台）",
+      "diagnostics": "导出日志"
+    }
+  },
+  "storageWarning": {
+    "settings": "无法将设置保存到浏览器",
+    "draft": "无法将打开的工作流保存到浏览器",
+    "library": "无法保存到浏览器",
+    "description": "存储空间可能不足，或浏览器设置拒绝保存。在此页面打开期间仍可使用，但重新加载后将丢失。"
+  },
+  "writeConflict": {
+    "changed": {
+      "title": "“{name}”已在其他标签页中被更改",
+      "description": "此标签页的更改未保存。重新加载后将显示其他标签页的内容。",
+      "action": "用此标签页的内容覆盖"
+    },
+    "removed": {
+      "title": "“{name}”已在其他标签页中被删除",
+      "description": "此标签页的更改未保存。重新加载后将从列表中消失。",
+      "action": "保留此标签页的内容"
+    }
+  },
+  "demo": {
+    "openFile": "打开文件",
+    "resetSample": "恢复示例",
+    "openFailed": "无法打开：{error}",
+    "workflow": "工作流",
+    "noWorkflowInImage": "此图像不含工作流",
+    "tagline": "将节点式工作流改为流程式的优势验证",
+    "menu": "关于此演示",
+    "intro": {
+      "body": "在左侧的 App 列中修改值，沿着连线查看卡片，然后点击“运行（模拟）”。不会向任何地方发送数据。",
+      "close": "关闭"
+    },
+    "run": {
+      "run": "运行（模拟）",
+      "runAgain": "再次运行",
+      "stop": "停止",
+      "close": "关闭",
+      "note": "模拟运行。示例图像，并非由此工作流生成",
+      "running": "运行中: {name}",
+      "step": "步数 {value}/{max}",
+      "done": "完成",
+      "outputs": "输出",
+      "show": "放大显示 {name}",
+      "badge": "模拟"
+    }
+  },
+  "flow": {
+    "canvas": {
+      "nodeSearch": "节点搜索",
+      "zoomIn": "放大",
+      "zoomOut": "缩小",
+      "nodeSettings": "节点详细设置",
+      "appendTitle": "添加到末尾的节点",
+      "insertTitle": "在此处添加的节点",
+      "openWorkflow": "请打开工作流",
+      "appColumn": "应用输入列",
+      "appGap": "应用输入与卡片之间",
+      "cardColumn": "卡片列",
+      "variablesGap": "卡片与变量之间",
+      "variableColumn": "变量列",
+      "connectors": "连接线"
+    },
+    "shared": {
+      "reorder": "重新排列 {name}",
+      "addAfter": "在 {name} 之后添加节点",
+      "deleteNode": "删除节点"
+    },
+    "card": {
+      "insertAboveLabel": "在 {name} 之前添加节点（不连接）",
+      "toggleSelect": "将 {name} 加入或移出选择",
+      "selectLabel": "选择 {name}",
+      "insertAboveTitle": "在此处添加节点（不连接）",
+      "state": {
+        "running": "运行中",
+        "error": "失败",
+        "selected": "已选择"
+      },
+      "broken": "节点格式无法读取，无法显示：{reason}",
+      "showParams": "显示 {name} 的参数",
+      "hideParams": "隐藏 {name} 的参数",
+      "toggleParamsTitle": "点击切换参数显示",
+      "missingDefinition": "找不到节点定义（未连接，或此 ComfyUI 未安装该自定义节点）",
+      "noServerDefinition": "服务器上没有此节点的定义（例如仅用于界面操作的节点）。不参与执行",
+      "unresolved": "无法解析此节点的参数位置，因此为只读",
+      "menu": "{name} 的菜单",
+      "settingsTitle": "未在流程中显示的设置（尺寸、固定）",
+      "settings": "详细设置…",
+      "cloneSelectedTitle": "将所选节点一起添加到最后一个之后（副本之间的连线会重新连接）",
+      "cloneTitle": "在其后添加内容相同的节点（保留输入连线，不连接输出）",
+      "clone": "克隆",
+      "groupTitle": "将所选节点合并为一个组",
+      "group": "编组"
+    },
+    "row": {
+      "insertBeforeLabel": "在 {name} 之前添加节点",
+      "insertBeforeTitle": "在此输入之前添加节点",
+      "addAppInput": "将 {name} 设为应用输入",
+      "removeAppInput": "将 {name} 从应用输入中移除",
+      "appInputOnTitle": "这是应用输入（App Mode）项。请在左侧栏中编辑",
+      "appInputOffTitle": "设为应用输入（App Mode）项",
+      "disconnectLabel": "断开 {name} 的连接",
+      "disconnect": "断开连接",
+      "unconnected": "未连接",
+      "unconnectedRequired": "未连接（必需）",
+      "unknownName": "无法确定参数名",
+      "unknownNameTitle": "由于没有节点定义，无法确定名称（只读）"
+    },
+    "list": {
+      "nodeLabel": "节点 {index}（{name}）",
+      "addNode": "添加节点",
+      "addNodeTitle": "在末尾添加节点（不连接）",
+      "firstNode": "请添加第一个节点。"
+    },
+    "appInput": {
+      "dragToReorder": "拖动以重新排列",
+      "importLabel": "将卡片的值导入 {name}",
+      "menu": "应用输入的操作",
+      "importTitle": "导入卡片的值：{value}",
+      "toStyleLabel": "将 {name} 发送到新样式",
+      "toStyleTitle": "以此文本作为正面提示，打开新的样式",
+      "editCommentTitle": "{name}（点击编辑注释）",
+      "editCommentLabel": "编辑 {name} 的注释",
+      "commentLabel": "{name} 的注释（应用输入区块）",
+      "empty": "使用参数名左侧的图标选择要设为应用输入的项。",
+      "frame": "应用输入区块（{name}）",
+      "remove": "从应用输入中移除",
+      "closeFrameLabel": "关闭 {name} 区块（从应用输入中移除）",
+      "closeFrameTitle": "将此区块中的项从应用输入中移除（卡片的值保留）",
+      "argument": "LLM 参数: {name}"
+    },
+    "cardGroup": {
+      "label": "组 {title}",
+      "reorder": "重新排列组 {title}",
+      "menu": "组 {title} 的菜单",
+      "ungroupTitle": "仅移除框（卡片保持不变）",
+      "ungroup": "取消编组",
+      "rename": "编辑组 {title} 的名称",
+      "name": "组 {title} 的名称",
+      "toSubgraph": "转换为 subgraph",
+      "toSubgraphTitle": "将成员和分组移入新的 subgraph",
+      "deleteGroup": "删除分组及其成员",
+      "deleteGroupTitle": "移除框和其中的所有卡片",
+      "switchShow": "在应用输入中显示开关",
+      "switchHide": "移除开关",
+      "switchTitle": "一次性旁路此分组中所有卡片的开关"
+    },
+    "groupSwitch": {
+      "title": "开关",
+      "clearLabel": "移除所有开关",
+      "clearTitle": "从此列移除开关（卡片保持不变）",
+      "mixed": "部分"
+    },
+    "subgraph": {
+      "mark": "subgraph",
+      "open": "展开 subgraph {name}",
+      "openTitle": "在框中以卡片显示内部节点",
+      "openMenu": "以框展开",
+      "frame": "subgraph {name}",
+      "close": "将 subgraph {name} 恢复为卡片",
+      "closeTitle": "恢复为一张卡片",
+      "closeMenu": "恢复为卡片",
+      "collapse": "收起 subgraph {name} 并折叠卡片",
+      "collapseTitle": "收起并折叠为小卡片",
+      "uses": "×{count}",
+      "usesTitle": "在 {count} 处使用。内部的更改会应用到所有位置",
+      "toGroup": "转换为分组",
+      "toGroupTitle": "将内部节点移出并合并为一个分组"
+    },
+    "style": {
+      "color": "颜色",
+      "defaultColor": "默认",
+      "custom": "自定义…",
+      "mode": "执行模式",
+      "modeNormal": "正常",
+      "modeBypass": "绕过",
+      "modeMute": "静音"
+    },
+    "variables": {
+      "addAfterTitle": "添加接收此变量的节点",
+      "group": "变量组（{name}）",
+      "revealTitle": "{name}（双击跳转到卡片）",
+      "cardGroupReveal": "{title}（双击跳转到组内卡片）"
+    },
+    "output": {
+      "dragTitle": "{name}（拖到参数上以连接）",
+      "addAfterTitle": "在此输出之后添加节点"
+    },
+    "connector": {
+      "appLine": "应用输入 → {name}",
+      "insertLabel": "在 {name} 之间插入节点",
+      "insertTitle": "在此连线之间插入节点",
+      "menu": "连线菜单",
+      "menuInsert": "添加节点",
+      "menuDisconnect": "删除连接",
+      "menuDisconnectAll": "删除连接（{count} 条）"
+    },
+    "resize": {
+      "columnWidth": "{name}的宽度",
+      "spanWidth": "{name} 的宽度",
+      "height": "{name} 的高度",
+      "heightTitle": "上下拖动以调整高度"
+    },
+    "comment": {
+      "none": "无注释",
+      "emptyTitle": "点击撰写注释",
+      "editLabel": "编辑 {name} 的注释",
+      "write": "撰写注释",
+      "label": "{name} 的注释"
+    },
+    "connectSlot": {
+      "title": "要连接到哪里？",
+      "pickInput": "请选择 {name} 的输入（起点为 {type}）",
+      "pickOutput": "请选择 {name} 的输出（起点为 {type}）",
+      "typeMismatch": "（类型不匹配）",
+      "addUnconnected": "添加但不连接"
+    },
+    "toggles": {
+      "controlLabel": "显示操作类节点",
+      "controlShown": "正在显示操作类节点（如组切换等界面操作用节点）",
+      "controlHidden": "正在隐藏操作类节点（如组切换等界面操作用节点）",
+      "unlinkedLabel": "显示未连接的节点",
+      "unlinkedShown": "正在显示未连接的节点（如备注）",
+      "unlinkedHidden": "正在隐藏未连接的节点（如备注）"
+    },
+    "sort": {
+      "label": "按处理顺序排列",
+      "title": "按处理顺序（上游在前）重新排列卡片",
+      "confirmTitle": "要按处理顺序排列吗？",
+      "confirmDescription": "将按处理顺序（上游在前）重新排列卡片。当前的排列将被替换。",
+      "confirm": "排列",
+      "fromOriginTitle": "不保留当前纵向位置，从左上角重新放置",
+      "fromOrigin": "重新布置所有节点坐标"
+    },
+    "widget": {
+      "loadOptionsLabel": "{name}（加载选项）",
+      "loadOptionsTitle": "加载选项",
+      "unselected": "未选择",
+      "clear": "清空",
+      "resetToCard": "恢复为未输入",
+      "stray": "此值不在选项中。直接运行将被拒绝"
+    },
+    "valueTooltip": {
+      "muted": "(静音)",
+      "bypassed": "(绕过)"
+    },
+    "missingDefinitions": "尚未获取节点定义。连接后即可显示和编辑参数。"
+  },
+  "run": {
+    "execution": {
+      "nodeError": "节点运行时发生错误",
+      "unknown": "状态不明：无法确认结果（通知可能已中断）",
+      "timeout": "状态不明：ComfyUI 没有响应（尝试重新连接 {count} 次后放弃）",
+      "dropped": "状态不明：运行中通知断开 {count} 次，已断开连接。请按“重新连接”后再使用",
+      "socketDown": "未发送：ComfyUI 的通知已断开。请先按“重新连接”"
+    },
+    "report": {
+      "innerLine": "（内部 #{id}）{text}",
+      "rejected": "未被接受：{reason}",
+      "missingDefinition": "找不到节点定义：{classType}（所连接的 ComfyUI 未安装该节点，或需要更新节点定义）",
+      "missingDefinitionDisabled": "找不到 {classType} 的定义（已禁用，不参与运行）",
+      "otherWriter": "“{name}”的临时保存已被其他浏览器标签页更新（{time}）",
+      "parallelEdit": "“{name}”也正在其他浏览器标签页中编辑（最后编辑 {time}）",
+      "untitledTab": "未命名",
+      "noIssues": "没有问题"
+    },
+    "control": {
+      "repeatHint": "持续逐个提交此标签页的工作流，直到停止为止（会持续占用 GPU）。其他标签页的重复也会继续，交替处理。中断时停止",
+      "repeatActive": "此标签页正在重复执行。请从任务列停止",
+      "blocked": {
+        "noWorkflow": "请打开工作流",
+        "notConnected": "请先连接",
+        "sending": "正在发送运行请求…"
+      },
+      "enqueueHint": "添加到队列（在当前运行结束后执行）",
+      "runHint": "运行工作流（会使用 GPU）",
+      "queue": "队列",
+      "run": "运行",
+      "chooseMethod": "选择运行方式",
+      "chooseMethodHint": "选择运行方式",
+      "repeat": "重复运行",
+      "interrupt": "中断",
+      "interruptHint": "仅停止此任务",
+      "errors": {
+        "other": "{count} 个错误（打开错误标签页）"
+      },
+      "errorsHint": "存在错误。点击打开右侧栏的错误标签页",
+      "panel": "运行控件",
+      "move": "移动运行控件",
+      "moveHint": "拖动以移动（使用键盘时按空格键抓取，再用方向键移动）"
+    },
+    "convertFailed": "无法转换为运行格式：{message}"
+  },
+  "queue": {
+    "dialog": {
+      "closeEsc": "关闭（Esc）",
+      "notFollowing": "不跟随",
+      "noImages": "没有图像"
+    },
+    "card": {
+      "openImage": "打开图像",
+      "openImageHint": "在查看器中打开图像",
+      "openLatest": "打开最新图像",
+      "openLatestHint": "在查看器中打开最新的图像",
+      "openDetailHint": "点击查看运行内容和结果",
+      "cancel": "从队列移除",
+      "cancelHint": "在运行前将此任务从队列中移除",
+      "nodeProgress": "{finished}/{total} 个节点"
+    },
+    "panel": {
+      "fetchFailed": "无法获取队列：{error}",
+      "empty": "队列为空",
+      "connectToShow": "连接后显示队列",
+      "others": "其他任务：运行中 {running}・等待 {pending}"
+    },
+    "session": {
+      "placeholder": "session: {id}",
+      "name": "会话名称",
+      "nameHint": "可以设置用于管理历史记录的标识。",
+      "off": "要命名会话，请在设置中开启运行记录。",
+      "rotate": "切换到下一个会话",
+      "rotateHint": "切换到下一个会话。"
+    },
+    "repeat": {
+      "untitled": "未命名",
+      "running": "重复运行中",
+      "count": "第 {count} 次",
+      "stop": "停止重复运行",
+      "stopHint": "不再提交下一个并结束重复运行（正在运行的继续执行）"
+    },
+    "detail": {
+      "title": "任务详情",
+      "fetchFailed": "无法获取详情：{error}",
+      "fromImage": "ComfyUI 历史记录中没有该任务，因此从生成图像中嵌入的内容读取",
+      "notFound": "ComfyUI 历史记录中没有该任务，也无法从生成图像中读取",
+      "imageWidth": "图像宽度",
+      "imageWidthHint": "左右拖动以调整图像宽度",
+      "newer": "较新的任务",
+      "newerHint": "较新的任务（←）",
+      "older": "较旧的任务",
+      "olderHint": "较旧的任务（→）",
+      "unknownWorkflow": "（工作流名称未知）",
+      "follow": "跟随新任务",
+      "following": "跟随中：任务结束后切换到该任务",
+      "openViewer": "在查看器中打开",
+      "openViewerHint": "从此图像切换到查看器",
+      "section": {
+        "models": "模型",
+        "prompts": "提示词",
+        "settingsTimed": "运行顺序、耗时与设置",
+        "settings": "设置（seed、steps 等）"
+      },
+      "role": {
+        "positive": "正向",
+        "negative": "负向"
+      }
+    },
+    "failure": {
+      "interruptedLabel": "中断详情",
+      "failedLabel": "失败详情",
+      "interruptedNode": "中断的节点",
+      "stoppedNode": "停止的节点",
+      "copyInterrupted": "复制中断详情",
+      "copyError": "复制错误详情",
+      "exception": "异常",
+      "unknownType": "（类型未知）",
+      "stepsHeading": "此前的处理（{order}）",
+      "orderObserved": "按运行顺序",
+      "orderDependency": "按连线推算的顺序",
+      "stoppedAs": "{node}（{state}）",
+      "interrupted": "中断",
+      "failed": "失败",
+      "dependencyNote": "ComfyUI 历史记录不保存运行顺序，因此按连线排列",
+      "cached": {
+        "other": "使用缓存的节点 {count} 个：{nodes}"
+      },
+      "notRun": {
+        "other": "未运行的节点 {count} 个"
+      },
+      "inputs": "停止时的输入",
+      "traceback": {
+        "other": "Traceback（{count} 层）"
+      },
+      "rejection": {
+        "label": "被拒绝的原因",
+        "heading": "运行未被接受",
+        "copy": "复制被拒绝的原因",
+        "notRun": "在进入 ComfyUI 队列之前被拒绝，因此没有运行"
+      },
+      "notes": {
+        "label": "运行注意事项",
+        "heading": "注意（转换为运行格式时）"
+      }
+    },
+    "copyText": {
+      "unknown": "（未知）",
+      "innerLabel": "#{label}（内部 #{id}）",
+      "headingLine": "{heading}：{node}",
+      "exception": "异常：{type}",
+      "orderDependency": "按依赖顺序",
+      "stepsHeading": "此前的处理（{order}）:",
+      "cached": "使用缓存的节点：{nodes}",
+      "notRun": "未运行的节点：{count} 个",
+      "inputs": "停止时的输入:",
+      "traceback": "Traceback:",
+      "rejection": "被拒绝的原因：{reason}"
+    },
+    "viewer": {
+      "title": "图像查看器",
+      "cannotOpenWindow": "无法打开独立窗口",
+      "imageMissing": "ComfyUI 上已不存在 {name}",
+      "allowInBrowser": "请在浏览器设置中允许",
+      "openWindow": "在独立窗口中打开",
+      "openWindowHint": "在独立窗口中打开",
+      "grid": {
+        "increase": "增加{label}",
+        "decrease": "减少{label}",
+        "title": "{label}：{value}（{hint}）",
+        "rows": "行",
+        "rowsHint": "纵向排列的张数",
+        "cols": "列",
+        "colsHint": "横向排列的张数"
+      },
+      "backToGrid": "返回网格",
+      "toFirst": "转到开头（共 {total} 张）",
+      "toFirstHint": "转到开头（最新）的页面",
+      "enlarge": "放大查看 {name}",
+      "noImagesToShow": "没有可显示的图像",
+      "newer": "较新",
+      "newerHint": "较新（←）",
+      "older": "较旧",
+      "olderHint": "较旧（→）",
+      "follow": "跟随新图像",
+      "fit": "适应屏幕",
+      "fitHint": "适应屏幕（f）",
+      "actualSize": "以实际尺寸查看",
+      "actualSizeHint": "以实际尺寸查看（f）",
+      "filter": {
+        "label": "显示的图像类型",
+        "all": "全部",
+        "temp": "temp",
+        "output": "output"
+      },
+      "followHint": "随新图像的添加向前推进",
+      "slideshow": {
+        "label": "幻灯片",
+        "title": "幻灯片：每 {seconds} 秒切换到较新的一页",
+        "unit": "秒"
+      }
+    }
+  },
+  "history": {
+    "card": {
+      "unnamed": "未命名",
+      "openImages": "打开 {name} 的图像",
+      "openImagesHint": "在查看器中打开此工作流的所有图像",
+      "openDetailHint": "打开此工作流运行的详情",
+      "noModel": "未知模型",
+      "dateRuns": "{date} / {runs} 次"
+    },
+    "detail": {
+      "title": "历史详情",
+      "runCount": "{count} 次",
+      "openWorkflow": "打开此工作流",
+      "openWorkflowHint": "打开所选运行的图像中嵌入的工作流",
+      "openFailed": "无法从此运行的图像读取工作流（没有 PNG、图像已删除或未嵌入工作流）。",
+      "notRestored": "无法还原此次运行的界面状态",
+      "newer": "较新的卡片",
+      "older": "较旧的卡片",
+      "runs": "运行",
+      "seeds": "种子 {seeds}",
+      "seedSection": "种子",
+      "seedNode": "节点 {id}",
+      "copyPrompt": "复制此提示词",
+      "nodeOnly": "节点 {id}",
+      "nodeLabel": "节点 {id} {name}",
+      "nodeLabelComment": "节点 {id} {name} / {comment}",
+      "images": "图像 {count} 张",
+      "kindModel": "模型",
+      "kindLora": "LoRA",
+      "kindOther": "其他",
+      "session": "session: {id}",
+      "sessionNamed": "{name}（{id}）",
+      "sessionLabel": "会话",
+      "typeLabel": "类型"
+    },
+    "panel": {
+      "notRecording": "运行历史已关闭。",
+      "fetchFailed": "无法读取历史：{error}",
+      "connectToShow": "连接后显示历史",
+      "loading": "正在读取…",
+      "empty": "尚无记录的运行",
+      "refresh": "重新读取历史",
+      "rangeAll": "全部",
+      "rangeUpTo": "{date} 及之前",
+      "rangeLabel": "回溯范围",
+      "enableRecording": "开启运行历史"
+    }
+  },
+  "llm": {
+    "side": {
+      "label": "对话设置",
+      "generation": "参数",
+      "prompt": "提示词",
+      "tabBoundary": "{name}标签页",
+      "settings": "设置",
+      "extension": "功能"
+    },
+    "connection": {
+      "baseUrl": "基础 URL",
+      "baseUrlHint": "填写到 /chat/completions 之前（通常以 /v1 结尾）",
+      "none": "未连接",
+      "apiKey": "API 密钥",
+      "showKey": "显示 API 密钥",
+      "hideKey": "隐藏 API 密钥",
+      "enterKey": "设置 API 密钥",
+      "keyEntered": "已设置",
+      "keyVerified": "API 密钥已验证",
+      "entryBlocked": "无法打开输入密钥的窗口。请允许此网站的弹出窗口，然后再按一次。",
+      "entryUnready": "尚未连接到网关。请稍候再按一次。如果一直如此，请重新加载页面。",
+      "noModels": "已连接 - 无模型列表（请输入模型名称）",
+      "noKey": "无 API 密钥",
+      "model": "模型",
+      "modelPlaceholder": "模型名称",
+      "connect": "连接",
+      "reconnect": "重新连接",
+      "connecting": "正在连接…",
+      "connected": {
+        "other": "已连接 - {count} 个模型"
+      },
+      "permissionNote": "如果浏览器请求访问本地网络的权限，请选择“允许”。",
+      "cloudNotice": "即将连接到外部云服务。连接前请确认以下几点：\n・你输入的内容和设置会发送到连接的服务。\n・连接的服务会按使用量收费。准确的费用请在提供方的页面上确认。一次操作可能发送多个请求。\n・请遵守连接服务的使用条款及相关法律法规。\n・对于因使用外部服务造成的损失，我方的责任依照使用条款第11条的规定。\n使用 API 密钥连接时的条件（使用条款 第5条）：\n・在可设置消费上限的连接目标，使用已设置上限的 API 密钥\n・不使用余额达到上限时自动充值的设置\n・为 API 密钥设置有效期，停用后在连接目标处作废\n如同意以上内容，请进行连接。",
+      "cloudTitle": "外部云服务连接注意事项",
+      "cloudAgree": "同意并连接",
+      "cloudCancel": "取消"
+    },
+    "generation": {
+      "set": "设置 {name}",
+      "reset": "取消设置 {name}",
+      "stopHint": "每行一个",
+      "compatHeading": "模型兼容",
+      "squash": "合并系统消息"
+    },
+    "prompt": {
+      "system": "系统提示词",
+      "none": "无",
+      "items": {
+        "main": "主要提示词",
+        "tone": "语气",
+        "rules": "任务说明与规则",
+        "examples": "示例",
+        "task": "随发言附加的指示",
+        "thinking": "思考步骤",
+        "format": "输出格式",
+        "jailbreak": "历史后置指令",
+        "nsfw": "辅助提示词",
+        "enhanceDefinitions": "增强定义",
+        "chatSummary": "会话摘要",
+        "chatHistory": "会话历史",
+        "currentInput": "发送消息",
+        "personaDescription": "用户设定描述",
+        "charDescription": "角色描述",
+        "charPersonality": "角色性格",
+        "scenario": "当前情景",
+        "dialogueExamples": "对话示例",
+        "additionalInfo": "附加词典",
+        "untitled": "未命名项目"
+      },
+      "prefill": "预填充",
+      "prefillHint": "让回复从这段文字之后接着写",
+      "source": {
+        "noPreset": "无预设",
+        "messages": {
+          "other": "历史 {count} 条"
+        },
+        "history": "历史 {kept} 条，排除 {dropped} 条"
+      },
+      "depth": "深度 {depth}",
+      "total": "合计约 {count} 个 token",
+      "totalOfLimit": "合计约 {count} / {limit} 个 token",
+      "limitDetail": "可发送上限 = 上下文长度 {context} − max_tokens {maxTokens}",
+      "limitDetailNoMax": "可发送上限 = 上下文长度 {context} − 回复预留 {reserve}（未设置 max_tokens）",
+      "lastActual": "上次发送 {count}",
+      "add": "添加项目",
+      "depthValue": "深度（从末尾数第几条）",
+      "content": "正文",
+      "locked": "不可移动的项目",
+      "reorder": "重新排列 {name}",
+      "preset": {
+        "overridden": "由 {name} 替换",
+        "choose": "（预设）",
+        "fromFile": "从文件打开…",
+        "notCard": "{name} 不是角色卡",
+        "changeImage": "更改 {name} 的图片",
+        "addImage": "选择头像图片",
+        "untitled": "新预设",
+        "nameField": "预设名称（按 Enter 保存）",
+        "save": "保存（覆盖）",
+        "saveAs": "另存为",
+        "createNew": "新建",
+        "remove": "删除 {name}",
+        "removeTitle": "删除预设"
+      },
+      "notes": {
+        "chatHistory": "对话消息（{count} 条）放在这里。",
+        "noPreset": "预设的这一栏放在这里。尚未链接预设。"
+      },
+      "preview": "显示要发送的原始数据",
+      "previewTitle": "要发送的内容",
+      "card": {
+        "variables": "变量·替换",
+        "variableName": "变量名",
+        "variableValue": "{name} 的值",
+        "removeVariable": "删除 {name}",
+        "addVariable": "添加变量",
+        "restoreVariable": "还原",
+        "restoreVariableHint": "将 {name} 替换为右侧文字发送给 LLM，在画面上还原为 {name} 显示",
+        "restoreVariableOf": "还原 {name}",
+        "restoreNameHint": "要以其他名字发送，请在下方添加以此名字为左侧的还原行",
+        "restoreNameExample": "红色水果A",
+        "restoreValueExample": "苹果",
+        "greeting": "初始消息",
+        "notes": "注释",
+        "lore": "个别附加词典",
+        "loreEnable": "在此对话中使用 {name}",
+        "respond": "设为聊天中的上一条回复"
+      },
+      "lore": {
+        "hits": {
+          "other": "追加信息 {count} 条"
+        },
+        "none": "暂无命中的条目",
+        "tip": {
+          "dictionary": "词典: {value}",
+          "trigger": "触发词: {value}",
+          "condition": "追加条件（{logic}）: {value}",
+          "content": "追加内容: {value}"
+        }
+      },
+      "rename": "项目名称",
+      "newItem": "新项目",
+      "copyOf": "{name} 的副本",
+      "renameHint": "双击或按 F2 可重命名",
+      "removeOf": "删除 {name}",
+      "disable": "暂时停用 {name}",
+      "enable": "重新启用 {name}",
+      "template": {
+        "choose": "系统提示词模板",
+        "name": "模板名称（按 Enter 保存）",
+        "overwrite": "保存 {name}（若改了名称也一并改名）",
+        "saveAs": "保存为新模板",
+        "saveAsName": "另存为",
+        "remove": "删除 {name}",
+        "removeTitle": "要删除模板吗？",
+        "removeDescription": "将删除模板“{name}”。此对话中的正文会保留。"
+      },
+      "tools": {
+        "count": {
+          "other": "{count} 个工作流"
+        }
+      },
+      "composition": {
+        "title": "提示词构成",
+        "expandAll": "全部展开",
+        "collapseAll": "收起"
+      }
+    },
+    "chat": {
+      "citations": "来源",
+      "log": "对话记录",
+      "input": "消息",
+      "inputPlaceholder": "消息（Enter 发送，Shift+Enter 换行）",
+      "send": "发送",
+      "stop": "停止",
+      "cannotSend": "请先选择连接配置和模型",
+      "chooseModel": "请先选择模型",
+      "setKeyFirst": "请先设置 API 密钥",
+      "aiNotice": "回复由 AI 生成，可能包含错误或不准确的内容。",
+      "attach": "附加图片",
+      "attachedImage": "已附加的图片 {index}",
+      "removeImage": "移除图片 {index}",
+      "sentImage": "已发送的图片 {index}",
+      "user": "你",
+      "assistant": "助手",
+      "copy": "复制",
+      "edit": "编辑",
+      "delete": "删除",
+      "regenerate": "重新生成",
+      "regenerateWithDraft": "按输入框的指示重写",
+      "rollback": "回滚",
+      "confirmRollback": {
+        "title": "回滚",
+        "description": "丢弃之后的对话，并将对话回滚到这里。"
+      },
+      "fork": "分叉到此处",
+      "forkName": "{name} 的分叉",
+      "previous": "上一个候选",
+      "next": "下一个候选",
+      "candidate": "候选 {index} / {count}",
+      "reasoning": "思考过程",
+      "comment": "注记",
+      "stopped": "已中断。",
+      "receiving": "接收中…",
+      "toolRunning": "正在运行工具",
+      "searchResults": {
+        "other": "搜索结果 {count} 条"
+      },
+      "retry": "重试",
+      "editField": "编辑消息",
+      "editHint": "Enter 保存，Esc 取消",
+      "empty": "发送消息即可开始对话。",
+      "untitled": "新对话",
+      "boundary": "对话",
+      "message": "{role}的消息",
+      "imageLink": "图片（不加载；点击在新标签页中打开）",
+      "copyCode": "复制代码",
+      "hello": "Hello"
+    },
+    "failure": {
+      "consent": "尚未同意外部云服务连接注意事项，因此没有发送。请在对话的设置标签页中同意。",
+      "unreachable": "服务器没有响应。请确认服务器正在运行、URL 和端口正确，并且没有拒绝浏览器的权限提示。",
+      "mixedContent": "此页面通过 https 打开，浏览器会阻止本机以外的 http 地址。请通过 http 打开此页面，或改用 https 地址。",
+      "auth": "服务器拒绝了 API 密钥（{status}）。请检查 API 密钥。",
+      "notFound": "该地址不存在。请检查基础 URL（是否包含 /v1）。",
+      "rejected": "服务器拒绝了请求：{message}",
+      "rejectedPlain": "服务器拒绝了请求（{status}）。",
+      "rateLimit": "服务器繁忙（429）。请稍后重试。",
+      "server": "服务器出错（{status}）。请查看服务器日志。",
+      "interrupted": "接收途中连接中断。已接收的内容已保留。",
+      "badResponse": "无法将服务器的响应解析为对话响应。",
+      "cors": "服务器有响应，但拒绝了来自此页面（{origin}）的请求（CORS）。请在服务器的启动命令中加入允许此页面的设置。",
+      "paused": "短时间内持续产生了大量请求和回复，因此已停止。请在确认中选择是否继续，然后重新发送。",
+      "tooLarge": "要发送的内容过大，未发送（估计超过 524,288 个令牌）。请减少历史记录或附加的内容。",
+      "timeout": "服务器未在限定时间内响应，已停止。已收到的内容会保留。请确认服务器正在运行且未过载，然后重试。",
+      "responseTooLarge": "收到的内容过大，已停止读取。已收到的内容会保留。"
+    },
+    "onboarding": {
+      "title": "连接 LLM",
+      "start": "1. 启动 LLM 服务器",
+      "startNote": "本地：请以允许来自此页面（{origin}）请求的设置启动服务器。",
+      "cloudNote": "云端：请使用服务签发的 API 密钥连接。",
+      "connect": "2. 连接",
+      "connectNote": "输入基础 URL（如有需要再输入 API 密钥），然后连接。",
+      "chooseModel": "3. 开始对话",
+      "startChat": "开始对话",
+      "launchUi": "启动界面",
+      "corsRequired": "CORS 设置：必需（{reason}）",
+      "corsRecommended": "CORS 设置：建议（{reason}）",
+      "corsUnavailable": "CORS 设置：不可用（{reason}）",
+      "corsNotNeeded": "CORS 设置：不需要（{reason}）",
+      "apiKeyRequired": "需要签发 API 密钥（{url}）",
+      "keyAdvice": "为防密钥泄露，建议设置有效期和速率限制",
+      "reasonOllama": "默认仅限 localhost",
+      "reasonLmStudio": "默认不允许；--cors 会允许所有页面。也可以在应用中通过 Developer → Enable CORS 开启",
+      "reasonLlamaCpp": "默认允许所有页面；旧版本可能无法使用 --cors-origins",
+      "reasonVllm": "默认不允许",
+      "modelRequired": "模型：需要指定（只提供启动时的那一个模型）"
+    },
+    "modelPicker": {
+      "title": "选择模型",
+      "placeholder": "选择模型",
+      "open": "模型：{name}（选择）",
+      "directories": "模型目录",
+      "decideToolbar": "确定模型",
+      "decide": "使用所选模型",
+      "pickPrompt": "请从列表中选择模型",
+      "filterToolbar": "筛选模型",
+      "filterLabel": "筛选模型",
+      "filterPlaceholder": "按名称筛选，或输入模型名称",
+      "list": "模型列表",
+      "useTyped": "使用“{name}”",
+      "noModels": "没有模型列表（请输入模型名称）",
+      "noMatch": "没有匹配的模型",
+      "truncated": "列表过长，只显示前 10,000 个模型。未列出的模型可以输入名称使用。",
+      "row": {
+        "perMillion": "{name} ${usd}/1M",
+        "usd": "{name} ${usd}",
+        "variable": "{name} 不固定"
+      },
+      "sort": {
+        "name": "名称",
+        "price": "费用",
+        "created": "日期"
+      },
+      "info": {
+        "title": "模型信息",
+        "reasoning": "思考",
+        "reasoningMandatory": "必需（思考模型）",
+        "reasoningOn": "支持（默认开启）",
+        "reasoningOff": "支持（默认关闭）",
+        "reasoningSupported": "支持",
+        "reasoningNone": "不支持",
+        "efforts": "强度：{efforts}（默认 {effort}）",
+        "pricing": "费用",
+        "pricingNote": "通过 API 获取的参考信息（请在官方网站确认准确金额后再使用）",
+        "perMillion": "${usd} / 1M token",
+        "usd": "${usd}",
+        "tier": "条件：{conditions}",
+        "modalities": "输入 → 输出",
+        "modalitiesValue": "{inputs} → {outputs}",
+        "benchmarks": "基准测试",
+        "description": "说明",
+        "close": "关闭模型信息",
+        "others": "其他字段",
+        "variable": "不固定（由路由选择）"
+      }
+    },
+    "import": {
+      "failed": "无法读取对话文件：{name}",
+      "done": {
+        "other": "已导入 {count} 个对话"
+      },
+      "skipped": {
+        "other": "{count} 个无法读取的对话已跳过。"
+      },
+      "dropped": {
+        "other": "已舍弃 {count} 个工具调用、图片或附件。"
+      },
+      "full": "浏览器存储空间已满，导入中途停止。请删除不需要的对话。"
+    },
+    "library": {
+      "today": "今天",
+      "yesterday": "昨天",
+      "week": "7 天内",
+      "older": "更早",
+      "confirmDelete": {
+        "title": "要删除此对话吗？",
+        "description": "将删除“{name}”。此操作无法撤销。如果它已在标签页中打开，该标签页也会关闭。"
+      },
+      "confirmClear": {
+        "title": "要清空此对话吗？",
+        "description": "将删除“{name}”中的所有消息和摘要。名称和设置会保留，对话也会留在列表中。此操作无法撤销。"
+      },
+      "openElsewhere": "此对话已在其他浏览器标签页中打开。请先在那里关闭。",
+      "missing": "找不到此对话。它可能已在其他地方被删除。",
+      "failed": "操作失败。请检查连接后重试。",
+      "busyElsewhere": "此对话已在其他浏览器标签页中打开，无法在此处更改。",
+      "busyStreaming": "正在接收回复。请先停止后再清空。",
+      "full": "目标位置空间不足。请删除不需要的对话。",
+      "broken": "此对话已损坏，无法打开。请从对话列表的菜单中导出或清空它。",
+      "loadFailed": "无法加载对话。请重新加载页面。"
+    },
+    "place": {
+      "both": "已备份到 ComfyUI",
+      "needComfy": "连接 ComfyUI 后即可使用。",
+      "backupOnly": "仅在 ComfyUI 备份中（打开时复制到浏览器）"
+    },
+    "limits": {
+      "heading": "会话上限",
+      "maxSize": "每个会话的上限（对话文本）",
+      "logWindow": "一次渲染的消息数",
+      "messages": "条",
+      "near": "此对话已有 {size} MB。超过 {max} MB 后将无法在此对话中发送。",
+      "full": "此对话已超过 {max} MB 的上限，无法再发送。请在新对话中继续。"
+    },
+    "backup": {
+      "toggle": "备份到 ComfyUI",
+      "hint": "各类信息都保存在浏览器中，清除缓存或自动整理会导致其丢失。为妥善保存，请随时进行外部保存等操作。",
+      "restored": "已从 ComfyUI 备份恢复（新增 {added} 项，更新 {updated} 项）。",
+      "restoreFailed": "无法读取 ComfyUI 备份。",
+      "heading": "浏览器数据管理",
+      "confirm": {
+        "title": "要将备份写入 ComfyUI 吗？",
+        "description": "对话、预设、系统提示词模板、追加词典和头像的备份将写入所连接 ComfyUI 的用户文件夹（kisara/）。\n在共享的 ComfyUI 上，其管理员和其他用户可能能够读取这些备份。\n即使清除浏览器数据，备份也会保留在 ComfyUI 中。\n请仅在只有你自己使用的 ComfyUI 上启用。",
+        "enable": "启用"
+      },
+      "manage": "存储管理",
+      "toggleHint": "在 ComfyUI 的用户文件夹（kisara/）中保存对话内容和预设的副本。"
+    },
+    "storage": {
+      "title": "存储管理",
+      "reload": "重新读取",
+      "loading": "正在读取…",
+      "usage": "本站约使用 {usage}（上限 {quota}）。",
+      "persisted": "浏览器不会自动清除这些数据。",
+      "notPersisted": "空间不足时，浏览器可能会自动清除这些数据。",
+      "count": "{count} 项",
+      "size": "约 {size}",
+      "clear": "删除",
+      "clearFailed": "无法删除。",
+      "clearAll": "全部删除",
+      "pendingReload": "重新加载页面后，清除的内容才会反映到界面上。",
+      "reloadPage": "重新加载",
+      "overview": "全部",
+      "categories": "类别",
+      "itemsToolbar": "类别操作",
+      "items": "内容",
+      "empty": "没有内容。",
+      "notConnected": "未连接",
+      "browserTotal": "浏览器合计",
+      "backupTotal": "备份合计",
+      "backupOnly": "仅在备份中",
+      "rollback": "从备份恢复“{name}”",
+      "group": {
+        "llm": "LLM",
+        "comfy": "ComfyUI"
+      },
+      "column": {
+        "category": "类别",
+        "count": "项数",
+        "size": "大小",
+        "browser": "浏览器",
+        "backup": "备份",
+        "comfy": "ComfyUI"
+      },
+      "area": {
+        "local": "localStorage",
+        "localHint": "设置、同意记录等本应用的小型项目，每个键一项。",
+        "session": "sessionStorage",
+        "sessionHint": "关闭浏览器标签页时会被清除，因此此处不提供删除。"
+      },
+      "table": {
+        "objectInfo": "节点定义",
+        "objectInfoHint": "从 ComfyUI 读取的节点定义，每个连接目标一项。",
+        "session": "编辑工作流",
+        "sessionHint": "每个工作流标签页的内容、最后保存的标签页顺序和编辑标记。",
+        "chat": "对话",
+        "chatHint": "每个对话的消息、附加图片和单独追加词典等，包括对话列表。",
+        "preset": "预设",
+        "presetHint": "已保存预设的文本字段和单独追加词典（图片在头像中）。",
+        "systemPrompt": "系统模板",
+        "systemPromptHint": "模板的名称、正文和生成设置。",
+        "dictionary": "追加词典",
+        "dictionaryHint": "全局追加词典及其条目。",
+        "avatar": "头像",
+        "avatarHint": "预设使用的头像图片。",
+        "playbook": "行动手册",
+        "playbookHint": "复制并修改的行动手册。"
+      },
+      "cache": {
+        "semanticModels": "嵌入模型",
+        "semanticModelsHint": "为近似匹配下载的嵌入模型和运行组件。"
+      },
+      "backup": {
+        "notConnected": "连接 ComfyUI 后即可查看备份。",
+        "failed": "无法读取备份。"
+      },
+      "key": {
+        "settings": "设置",
+        "settingsHint": "连接目标、显示设置、列宽、URL 历史等设置。",
+        "terms": "同意记录",
+        "termsHint": "已同意的使用条款等的版本和时间。",
+        "profiles": "LLM 连接",
+        "profilesHint": "基础 URL 和默认模型。不保存 API 密钥。",
+        "locale": "界面语言",
+        "localeHint": "所选的界面语言。",
+        "clientId": "通知连接标识符",
+        "clientIdHint": "此标签页接收 ComfyUI 通知所用的标识符。",
+        "tabLayout": "标签页顺序",
+        "tabLayoutHint": "此浏览器标签页中打开的标签页顺序和所选标签页。",
+        "pastSessions": "以前使用的会话",
+        "pastSessionsHint": "此浏览器标签页以前使用的会话（显示在任务列中）。",
+        "tasks": "运行记录（旧版本）",
+        "tasksHint": "旧版本留下的 ComfyUI 运行记录。当前版本不再读写，可以删除。"
+      },
+      "apply": "应用",
+      "applyHint": "恢复并删除已标记的项目。",
+      "unmark": "取消删除",
+      "deleteBackup": "删除“{name}”的备份",
+      "unmarkBackup": "取消删除“{name}”的备份",
+      "takeBackup": "获取备份",
+      "takeBackupLabel": "将“{name}”备份到 ComfyUI",
+      "backupTaken": "已备份“{name}”。",
+      "backupTakeFailed": "无法备份“{name}”。",
+      "breadcrumb": "当前位置",
+      "indexedDb": "IndexedDB",
+      "leadToolbar": "应用和文件夹",
+      "unrollback": "取消恢复“{name}”",
+      "summaryBackup": "（备份 {figures}）",
+      "comfyBackup": "Comfy 备份",
+      "raw": "“{name}”的原始数据",
+      "rawBackup": "“{name}”的备份原始数据",
+      "rawFailed": "无法读取。",
+      "rawTruncated": "内容较长，仅显示前 {count} 个字符。",
+      "export": "导出",
+      "exportFailed": "无法导出。",
+      "openFile": "打开文件",
+      "openFileHint": "打开导出的文件并显示在备份列中（关闭对话框后丢弃）",
+      "closeFile": "停用文件",
+      "openFailed": "无法将此文件读取为该类别的导出。",
+      "summaryFile": "（文件 {figures}）",
+      "fileOnly": "仅在文件中",
+      "rawFile": "“{name}”的文件原始数据",
+      "fileRestored": "已从文件恢复 {count} 项。",
+      "fileRestoreFailed": "有些项目无法从文件恢复（格式无法读取）。",
+      "restoreTooLarge": "有 {count} 个项目过大，未恢复（对话以设置中的对话上限为准，头像 20 MB，其他 32 MB）。",
+      "cleanup": {
+        "heading": "清理",
+        "none": "没有在浏览器中已无原件的备份。",
+        "orphans": "在浏览器中已无原件的备份：{figures}",
+        "hint": "应用后将删除 ComfyUI 中的文件。想保留的请在各类别的列表中取消标记。",
+        "mark": "标记删除",
+        "unmark": "取消标记",
+        "notice": {
+          "title": "清理",
+          "description": "仍有旧的备份数据。要查看吗？",
+          "confirm": "查看",
+          "later": "稍后"
+        }
+      },
+      "userFiles": {
+        "history": "运行记录",
+        "historyHint": "KisaraUI 写入 ComfyUI 用户文件夹的运行记录（kisara/history）。",
+        "notes": "模型备注",
+        "notesHint": "保存在 ComfyUI 用户文件夹中的模型备注（kisara/notes）。",
+        "styles": "样式",
+        "stylesHint": "保存在 ComfyUI 用户文件夹中的样式（kisara/styles）。",
+        "tags": "标签词典",
+        "tagsHint": "保存在 ComfyUI 用户文件夹中的标签词典，以及 pysssss 的覆盖（kisara/tags）。",
+        "notConnected": "连接 ComfyUI 后可查看用户文件夹的内容。",
+        "failed": "无法读取用户文件夹。"
+      }
+    },
+    "avatarPicker": {
+      "title": "头像图片",
+      "delete": "删除图片",
+      "notImage": "非图片文件未添加。",
+      "none": "无"
+    },
+    "image": {
+      "label": "预设图片",
+      "hint": "拖动可移到对话栏左侧、右侧、对话栏上方、消息栏上方或对话栏背景",
+      "place": {
+        "left": "对话栏左侧",
+        "right": "对话栏右侧",
+        "top": "对话栏上方",
+        "aboveInput": "消息栏上方",
+        "background": "对话栏背景"
+      },
+      "frameSize": "图片大小 {width} × {height}",
+      "frameHint": "拖动可调整宽高（也可用方向键）",
+      "show": "显示头像",
+      "choose": "选择图片",
+      "clear": "移除图片",
+      "focusPoint": "中心点（横 {x}%、纵 {y}%。用方向键移动）",
+      "move": "移动头像",
+      "heading": "头像"
+    },
+    "save": {
+      "fullBrowser": "浏览器存储空间已满，无法保存此对话。在删除不需要的对话之前，发送已暂停。",
+      "tidy": "整理对话",
+      "unsavedBrowser": "此对话未能保存，仅保留在当前页面中。",
+      "nearFull": "浏览器存储空间即将用尽。请删除不需要的对话。",
+      "waitingComfy": "此对话保存在 {url} 的 ComfyUI 中。连接后即可打开。"
+    },
+    "sidebar": {
+      "label": "对话列表",
+      "newChat": "新对话",
+      "openFile": "从文件打开",
+      "openFileTitle": "导入导出的对话，或从角色卡开始新对话",
+      "list": "显示对话列表",
+      "empty": "发送过消息的对话会显示在这里。",
+      "place": "对话保存位置",
+      "rename": "重命名",
+      "duplicate": "复制对话",
+      "clear": "清空对话",
+      "copyName": "{name} 的副本",
+      "export": "导出",
+      "menu": "{name} 的菜单",
+      "renameField": "对话名称",
+      "delete": "删除",
+      "openTab": "在其他标签页中打开",
+      "openTabOf": "在其他标签页中打开 {name}"
+    },
+    "dictionary": {
+      "name": "名称",
+      "scanDepth": "触发检索范围",
+      "scanDepthBefore": "历史",
+      "scanDepthHint": "条以内（另含最新的用户输入）",
+      "filterToolbar": "筛选条目",
+      "filterLabel": "筛选条目",
+      "filterPlaceholder": "按关键词或正文筛选",
+      "noMatch": "没有匹配的条目",
+      "more": {
+        "other": "还有 {count} 个。筛选后显示"
+      },
+      "addEntry": "添加",
+      "removeEntry": "删除条目",
+      "content": "追加内容",
+      "depthValue": "位置",
+      "role": "发言者",
+      "enabled": "启用",
+      "noKeys": "无触发词",
+      "trigger": "触发词",
+      "condition": "附加条件",
+      "placement": "插入位置",
+      "reorder": "重新排列 {name}",
+      "placeDictionary": "附加词典",
+      "placeHistoryStart": "历史开头",
+      "placeHistoryEnd": "历史末尾",
+      "details": "附加条件与追加内容",
+      "triggerHint": "用逗号分隔多个。* 表示总是加入",
+      "probability": "触发率",
+      "logicLabel": "附加条件逻辑",
+      "logic": {
+        "or": "OR",
+        "and": "AND",
+        "nor": "NOR",
+        "nand": "NAND",
+        "rag": "语义近似"
+      },
+      "conditionHint": {
+        "or": "用逗号分隔。其中任一同时出现时加入",
+        "and": "用逗号分隔。全部同时出现时加入",
+        "nor": "用逗号分隔。都未出现时加入",
+        "nand": "用逗号分隔。并非全部出现时加入",
+        "rag": "输入按相似度匹配的自然语言文本。触发词将被忽略"
+      },
+      "export": "导出为 JSON",
+      "deleteMessage": "将删除“{name}”。此操作无法撤销。",
+      "deleteTitle": "要删除词典吗？",
+      "reservedName": "以 {prefix} 开头的名称为应用保留，不能使用。"
+    },
+    "extension": {
+      "playbook": {
+        "title": "行动手册",
+        "hint": "在按既定步骤推进对话的行动手册中，选择要在选择处显示的项目。",
+        "show": "在选择处显示 {name}"
+      },
+      "comfy": {
+        "title": "Comfy Workflow",
+        "hint": "LLM 可以调用下面的工作流。运行前会请你确认。",
+        "skipConfirm": "运行前不进行确认",
+        "bypassTitle": "跳过工作流运行确认",
+        "bypassConfirm": "我已了解",
+        "bypassNotice": "运行工作流前将不再显示确认对话框，因此可能会在无意中执行工作流处理。此外，由于故障可能会发出异常的运行请求，给系统或 GPU 带来异常负载。\n如果使用云服务，还会消耗费用或积分。\n\n由于可能引发包括但不限于上述的意外行为或情况，建议每次都进行确认。如果在了解风险的前提下仍要关闭运行前确认，请按“我已了解”。",
+        "argGuide": "通用附加指示",
+        "argGuidePlaceholder": "例：prompt 用逗号分隔的英文标签书写",
+        "empty": "还没有工作流。",
+        "add": "添加",
+        "refresh": "刷新",
+        "loading": "正在读取…",
+        "remove": "移除 {name}",
+        "view": "查看 {name} 的设置"
+      },
+      "problem": {
+        "noTool": "此工作流没有从 LLM 调用的设置。",
+        "badName": "功能名中有不能使用的字符。",
+        "duplicate": "与其他工作流同名，因此不发送。",
+        "unreadable": "无法读取文件。",
+        "noDefinitions": "未连接 ComfyUI，无法读取。",
+        "tabClosed": "标签页已关闭，且没有保存位置。"
+      },
+      "dictionary": {
+        "title": "动态附加词典",
+        "hint": "根据指定条件自动附加追加信息。",
+        "empty": "还没有附加词典。可以导入世界书 JSON 或术语与定义的表格。",
+        "import": "打开 JSON",
+        "create": "新建",
+        "newName": "新词典",
+        "entries": {
+          "other": "{count} 个条目"
+        },
+        "enable": "在所有对话中启用 {name}",
+        "view": "编辑 {name}",
+        "imported": {
+          "other": "已导入“{name}”（{count} 个条目）。"
+        },
+        "existing": "“{name}”已导入过，已启用。",
+        "failed": "无法读取“{name}”（{reason}）。",
+        "problem": {
+          "format": "既不是世界书 JSON，也不是 CSV/TSV 表格",
+          "empty": "没有条目",
+          "size": "文件太大（上限 32 MB）"
+        }
+      },
+      "picker": {
+        "title": "添加工作流",
+        "none": "没有打开可调用的工作流。",
+        "ok": "确定",
+        "view": "查看 {name} 的设置"
+      },
+      "semantic": {
+        "title": "近似判定",
+        "hint": "为追加条件的判定添加语义近似，在含义相近时插入。会占用数十 MB 的存储和内存。",
+        "loading": "正在加载模型（{percent}%）",
+        "ready": "已加载: {name}（{size}MB）",
+        "stored": "已保存: {name}（{size}MB）",
+        "remove": "删除 {name}",
+        "failed": "无法加载模型（{reason}）",
+        "retry": "重试",
+        "confirmTitle": "启用近似判定？",
+        "confirmDescription": "将下载适合当前语言设置的嵌入模型并保存在浏览器中。除占用存储外，启用期间内存占用也会增加。",
+        "confirmModel": "{name}（{size}MB）",
+        "confirmModelUnknown": "{name}（大小未知）",
+        "confirmRuntime": "运行组件 ONNX Runtime・Transformers.js（{size}MB）",
+        "confirm": "启用"
+      }
+    },
+    "tool": {
+      "card": "工作流调用 {name}",
+      "writeReply": "让它写正文",
+      "writeReplyHint": "此回复没有正文。保留调用，让 LLM 在此回复中写出正文",
+      "receiving": "正在生成提示词",
+      "waiting": "等待批准",
+      "invalid": "无法运行",
+      "declined": "已拒绝",
+      "queued": "正在生成图像",
+      "queuedProgress": "正在生成图像（{value}/{max}）",
+      "replyText": "LLM 的回复",
+      "done": "完成",
+      "noImages": "已完成（没有符合的图像）",
+      "failed": "失败",
+      "unknown": "不明",
+      "run": "批准",
+      "runAgain": "重新运行",
+      "generate": "运行工作流",
+      "noTools": "没有可调用的工作流（在扩展标签页中选择）",
+      "running": "正在运行",
+      "generating": "正在让 LLM 调用工作流",
+      "argument": "{name} 的值",
+      "decline": "拒绝",
+      "openImage": "打开 {name}",
+      "notConnected": "未连接 ComfyUI。",
+      "openFailed": "无法打开工作流。",
+      "noImage": "没有“{name}”的图片。",
+      "uploadFailed": "无法将图片放到 ComfyUI 上。",
+      "submitFailed": "ComfyUI 未接受运行。请查看队列中的任务。",
+      "interrupted": "运行已被停止。",
+      "unknownResult": "无法确认结果（ComfyUI 中没有该运行的记录）。重新连接后会再次确认。",
+      "problem": {
+        "unknownTool": "没有此名称的工作流。",
+        "json": "参数的格式无法读取。",
+        "missing": "缺少参数：{name}",
+        "unknown": "未知参数：{name}",
+        "type": "类型不符：{name}",
+        "range": "超出范围：{name}",
+        "choice": "不在选项中：{name}"
+      },
+      "summary": "{state} : Comfy Workflow - {name}",
+      "imageLoading": "正在读取图像",
+      "imageOffline": "{name}（连接 ComfyUI 后显示）",
+      "imageMissing": "{name}（ComfyUI 上已不存在）"
+    },
+    "sentRequest": {
+      "open": "显示已发送的原始数据",
+      "title": "已发送的内容",
+      "choose": "要显示的请求",
+      "candidate": "候选 {index} · {time}",
+      "copy": "复制已发送的原始数据"
+    },
+    "stats": {
+      "title": "响应信息",
+      "toggle": "查看响应信息",
+      "tokens": "Token",
+      "tokensValue": "输入 {prompt} / 输出 {completion}",
+      "cacheRead": "缓存读取",
+      "cacheWrite": "缓存写入",
+      "cacheValue": "{value} 个 token",
+      "speed": "吞吐量",
+      "speedValue": "{value} token/秒",
+      "time": "时间",
+      "timeValue": "{value} 秒",
+      "cost": "费用",
+      "costValue": "${usd}（参考）",
+      "searches": "网页搜索",
+      "fetches": "网页抓取",
+      "toolCalls": "工具调用",
+      "countValue": {
+        "other": "{count} 次"
+      }
+    },
+    "webSearch": {
+      "off": "网页工具：关闭",
+      "search": "网页搜索与抓取：开启",
+      "confirmTitle": "要开启网页搜索吗",
+      "confirmDescription": "模型判断需要时，会向所连接的云服务请求网页搜索或页面抓取。\n搜索、抓取等每项操作都会在令牌之外另行收取规定的额外费用。\n\n部分网页的实际文字量可能远超其外观，抓取时可能消耗大量令牌；反复抓取页面也可能导致高额的 API 使用费。\n\n使用时请在连接目标处设置消费上限和速率限制，并通过在连接目标处确认使用情况和计费状态等本应用以外的方式，自行负责管理。\n\n通过网页搜索抓取的页面内容会混入回复并进入对话。请勿在启用了网页搜索的对话中输入泄露后会造成困扰的信息。",
+      "enable": "开启",
+      "cancel": "取消"
+    },
+    "settings": {
+      "embeddingModel": "嵌入模型",
+      "webSearch": "网页搜索",
+      "webTool": "使用工具",
+      "engineOff": "禁用",
+      "engineAuto": "自动",
+      "engineExa": "Exa",
+      "engineParallel": "Parallel",
+      "enginePerplexity": "Perplexity",
+      "engineMode": "{engine} - {mode}",
+      "webSearchHint": "仅在连接 OpenRouter 时使用"
+    },
+    "summary": {
+      "field": "摘要内容",
+      "run": "生成摘要",
+      "running": "正在生成摘要…",
+      "unavailable": "没有可压缩的消息（最新 4 条保持原样）",
+      "trimmed": {
+        "other": "为了不超过上限，排除了最早的 {count} 条历史后发送。生成摘要后即可不排除地发送。"
+      },
+      "nearLimit": "即将达到可发送上限。生成摘要后，无需排除旧历史即可继续。",
+      "count": {
+        "other": "摘要 {count} 条"
+      }
+    },
+    "advisor": {
+      "open": "与 LLM 商量提示词构成",
+      "title": "构成商量",
+      "close": "关闭",
+      "end": "结束构成商量",
+      "width": "构成商量",
+      "input": "商量的内容",
+      "placeholder": "请写下想要的构成用途",
+      "streaming": "接收中…",
+      "noModel": "未选择运行模型",
+      "empty": "尚未商量",
+      "pending": "正在写方案…",
+      "invalid": "无法读取此方案",
+      "apply": "应用",
+      "applied": "已应用",
+      "revert": "撤销",
+      "nothing": "此方案中没有可应用的部分",
+      "untitled": "构成方案",
+      "targets": {
+        "main": "主提示词",
+        "item": "项目「{name}」",
+        "newItem": "新项目「{name}」",
+        "prefill": "预填充",
+        "character": "卡片字段「{field}」",
+        "removeItem": "删除项目「{name}」",
+        "dictionaryEntry": "个别追加词典的条目「{keys}」",
+        "dictionaryEntryIn": "个别追加词典「{dictionary}」的条目「{keys}」"
+      },
+      "fields": {
+        "name": "助手名",
+        "description": "角色描述",
+        "personality": "性格摘要",
+        "scenario": "当前情景",
+        "mesExample": "对话示例",
+        "firstMes": "初始消息"
+      },
+      "constant": "始终插入",
+      "context": "发送的附加信息",
+      "summary": "摘要",
+      "nearLimit": "即将达到可发送的上限。总结后可以继续，回复不会中途截断。",
+      "overLimit": "已超过可发送的上限，回复中途截断或无法发送。总结后可以继续。",
+      "greeting": {
+        "blank": "制作规定智能体行为的提示词构成。\n也可以切换此消息，按照既定用途进行讨论。",
+        "work": "制作用于调研、设计等工作的构成。\n请告诉我用途、回答的详细程度和输出形式（列表、表格、代码）。",
+        "story": "一起制作共同写故事的构成。由我作为叙述者写叙述文。\n请告诉我类型与文风、主要人物、开场情景等。",
+        "roleplay": "制作与设定好的角色进行角色扮演对话的构成。\n请告诉我登场人物的性格与特点、世界观和开场情景。",
+        "game": "制作以游戏主持人身份推进文字游戏的构成。\n请告诉我规则与世界观、角色和推进方式（选项、判定）。"
+      },
+      "record": {
+        "label": "放入已决定的内容",
+        "dictionary": "请把目前决定的内容放进词典。",
+        "composition": "请把目前决定的内容放进提示构成。"
+      }
+    },
+    "landing": {
+      "title": "对话（LLM）",
+      "summary": "连接本机的 LLM 服务器或外部云服务进行对话。",
+      "start": "使用 LLM",
+      "localName": "LLM 服务器",
+      "localVia": "HTTP（直接）",
+      "cloudName": "外部云服务（如 OpenRouter）",
+      "cloudVia": "HTTPS（直接）",
+      "cloudDetail": "API 密钥只从本设备发送到该服务。费用由该服务收取。",
+      "noteCors": "许多本地 LLM 服务器默认会指示浏览器不处理来自不同 URL 的请求，因此需要通过 CORS 许可设置添加例外。",
+      "noteCorsScope": "建议将 CORS 许可设置限制为只允许本页面的 URL。如果无法限制，请另行确认外部网络无法连接到 LLM 服务器。",
+      "noteListen": "CORS 许可设置并不允许来自其他电脑或互联网的网络访问。那需要扩大监听地址以在网络上公开，风险非常高，除非您具备充分的知识和明确的意图，否则请避免。",
+      "noteSend": "输入的内容和设置会发送到连接的服务器或服务。",
+      "noteCost": "外部云服务按使用量收费。首次连接前，会显示注意事项全文并请求您的同意。",
+      "noteKey": "API 密钥只在页面打开期间持有，不会保存在浏览器中。如需保存，请使用浏览器的密码管理功能。"
+    },
+    "budget": {
+      "title": "要继续向 LLM 发送吗？",
+      "description": "最近 {minutes} 分钟内，输入约 {input} 个令牌，输出约 {output} 个令牌，远超人能阅读的量。在继续之前，不会发送新的请求。如果这不是预期的行为，请在服务提供方确认使用情况和速率限制。",
+      "resume": "继续",
+      "keepStopped": "保持停止"
+    },
+    "playbook": {
+      "title": "行动手册",
+      "chosen": "已选择",
+      "start": "使用行动手册",
+      "close": "关闭",
+      "phases": "阶段",
+      "outline": "大纲",
+      "replace": "替换",
+      "itemTitle": "标题",
+      "itemBody": "内容",
+      "currentMark": "当前条目",
+      "makeCurrent": "将“{title}”设为当前条目",
+      "standing": "随时",
+      "remove": "移除行动手册",
+      "removeNamed": "移除 {name}",
+      "row": "行动手册",
+      "frame": {
+        "playbook": "剧本",
+        "role": "角色",
+        "phase": "阶段",
+        "picked": "选中的候选"
+      },
+      "builtin": {
+        "story": {
+          "name": "情节推进",
+          "description": "在一次商讨中从前提定到各段并写入大纲，选择按情节写还是只定走向，再一段一段地写下去。",
+          "role": "你是与用户一起写故事的合著者。{{user}} 是故事的主人公，既不是用户，也不是你对话的对象。遵循商量中决定的写法。若是按情节写的故事，遵守已定的设定和情节，不添加情节中没有的大事件。若是只定了走向的故事，朝着当前启用段的目的前进，自由安排过程和内容，并加入意料之外的事件和人物的选择。无论哪种，都不与目前的正文和词典中的事实矛盾，把结局交给用户，不要收束故事。需要用户判断的地方，不要写，而是询问。不属于正文的内容（对用户指示的回复、接下来的展开方案、提问）请用 <comment> 标签括起来，与正文分开。",
+          "phases": {
+            "writing": {
+              "name": "情节推进",
+              "goal": "请在子会话中创建情节，然后选择要写作的章。"
+            }
+          },
+          "actions": {
+            "makePlan": {
+              "name": "商量情节",
+              "greeting": "我们将依次决定故事从前提到各段的内容。\n首先请选择写法：按情节写（为每段定下详细情节），或只定走向（各段只有目的，内容在每次写作时交给对方）。\n同时请告诉我类型、氛围，以及想写的场景或人物的线索。如果有想用的故事结构（起承转合、三幕、英雄之旅等），也请告诉我。",
+              "instruction": "这是决定情节的商量。按下面的顺序，每个步骤提出方案，用户应用后再进入下一步。\n{{user}} 是故事的主角，不是与叙述者对话的对象。不要写对 {{user}} 说话的条目，也不要把故事写成与 {{user}} 的对话。\n0. 写法：请用户决定按情节写还是只定走向。若未决定，各用一行说明适合的情况（按情节写：想先定好结构再写时；只定走向：想享受意外展开时）并询问。把决定的写法作为个别追加辞典的常驻条目（注释为“写法”）。\n1. 前提：根据线索，提出 3～4 个方向不同的故事前提（每个 1 句，含主角 {{user}}、愿望和核心冲突），请用户选择。不要写结局。选定的前提写成个别附加词典的常驻条目。\n2. 人物与舞台：主角是 {{user}}，不要另设主角。设计另外 2～4 个主要人物（姓名、角色、愿望、弱点、一句说话示例）和舞台（地点、时代、规则）。舞台写成个别附加词典的常驻条目，人物写成以姓名为关键词的条目。不使用当前状况栏。\n3. 大纲：按用户选择的故事结构（没有则用起承转合）给出大纲各段，确认每段的目的和段末发生的变化。若只定走向，就把商定的各段逐一写成大纲的段，到此结束。此时每段正文只写该段的状况、目的和段末发生的变化，不写段内发生的事件。\n4. 情节（仅按情节写时）：为每段给出 2〜4 个细分情节的候选，请用户选择。把选定的情节按写作顺序逐一写成大纲的段。不写最后一段的结局，由用户决定。"
+            },
+            "revise": {
+              "name": "校对上一条回复",
+              "instruction": "请以编辑的身份重读上一段正文，只修改需要修改的地方，写出修改后的正文。检查点：是否达到当前启用段的情节或目的、按情节写的故事是否添加了情节中没有的事件、与人物设定的矛盾、陈词滥调、不必要的说明、过度修饰的文字、同一词语的重复、结尾的习惯、时态和语气的偏差。不需要修改的句子一字不改，不要加说明或开场白，只写正文。\n<comment>请不要把这段作为发言发送。请按重新生成的图标，把它用作重新生成的指示。</comment>"
+            },
+            "deepen": {
+              "name": "深入",
+              "instruction": "不要进入下一段的事件，也不要了结任何事，请停留在当前场景并加以深化。用感官细节、停顿和人物的内心让场景的质感更浓，并把紧张感、情绪或利害关系提高一级。不只利用人物之间的互动，也利用地点、时间的限制和周围发生的事。"
+            },
+            "shake": {
+              "name": "制造波折",
+              "instruction": "请在当前的进展中加入一个让事情不顺利的因素：朝着本段目的的尝试失败、意外的事件，或人物的犹豫，三者之一。不要了结它。"
+            },
+            "shift": {
+              "name": "切换",
+              "instruction": "保持本段的目的不变，切换场景（地点、时间）或叙述人物的视角后继续。请用一句话交代切换。"
+            },
+            "widen": {
+              "name": "展开",
+              "instruction": "保持故事的走向和本段的目的不变，为流程增加变化。通过朝同一目的的另一种做法、其他人物的参与或场景中的小事件之一，展现与之前不同的形态。不要加入新的障碍或转折，并以至少有一件事与之前不同的状态结束。"
+            },
+            "close": {
+              "name": "走向收尾",
+              "instruction": "请朝着收束当前段的方向写。为了自然地衔接下一段（{{nextStep}}），请把故事收拢到场景的告一段落。还不要写下一段的事件。"
+            }
+          },
+          "continue": "请以相同的文体和视角接着写上一段正文。遵循商量中决定的写法，不要超出当前启用段的情节或目的。"
+        },
+        "roleplay": {
+          "name": "角色扮演",
+          "description": "在一次商量中确定舞台、关系和大的走向，再以 {{char}} 的身份按段互动。",
+          "role": "你以 {{char}} 的身份和 {{user}} 演绎场景。不写 {{user}} 的台词、行动和心情。保持描述和对话示例的语气，朝着启用的段的目的推动场景，但不抢在 {{user}} 的选择之前。",
+          "phases": {
+            "prepare": {
+              "name": "准备",
+              "goal": "请在子会话中决定舞台、{{char}} 与 {{user}} 的关系以及大流程的各段。"
+            },
+            "scene": {
+              "name": "场景",
+              "goal": "请在大纲中选择要推进的段，然后发送对 {{char}} 说的话。想推动场景时请使用命令。"
+            },
+            "closing": {
+              "name": "收场",
+              "goal": "请用命令“结束场景”结束该段的交流，再用“检查语气”检查语气和流程。"
+            }
+          },
+          "actions": {
+            "makePlan": {
+              "name": "确定舞台与走向",
+              "greeting": "我们按顺序确定角色扮演的舞台、{{char}} 与 {{user}} 的关系和大的走向。\n请告诉我世界观和想开始的状况的线索。",
+              "instruction": "这是本剧本的准备阶段。按下面的顺序，每个步骤提出方案，用户应用后再进入下一步。\n1. 开场：根据线索，提出 3 个氛围不同的开场状况，请用户选择。\n2. 舞台与关系：确定舞台、{{char}} 与 {{user}} 的关系、{{char}} 现在想要的东西和 {{char}} 隐瞒的事。人物写进卡片栏，舞台和关系写成个别附加词典的常驻条目，隐瞒的事写成以相关词为关键词的条目。不使用当前状况栏。\n3. 大走向：把互动推进的走向分成 3～5 段列出，把确认的段逐一做成大纲的段。第一段的正文写开场状况。段的正文只写该段的状况、{{char}} 与 {{user}} 的关系如何变化，以及 {{char}} 行为的倾向。不决定 {{user}} 的行动，也不写结局。"
+            },
+            "moveIdeas": {
+              "name": "行动候选",
+              "instruction": "给出 3 个带编号、每个 1 行的 {{char}} 接下来可能采取的行动候选，方向彼此不同。不要写台词或正文。"
+            },
+            "closeScene": {
+              "name": "结束场景",
+              "instruction": "以达到启用的段的目的的方式，描写 {{char}} 为这个场景收尾的言行。给 {{user}} 留出回应的余地。"
+            },
+            "checkVoice": {
+              "name": "检查语气",
+              "instruction": "对照描述和对话示例检查 {{char}} 上一句发言，只用列表列出语气和性格的偏差。不要写改好的发言。"
+            }
+          },
+          "continue": "以 {{char}} 的身份，接着刚才的走向继续演。加入 1 个稍微接近启用的段的目的的言行，在 {{user}} 容易回应的地方停下。"
+        },
+        "ideas": {
+          "name": "策划",
+          "description": "在商量中确定思考的框架，大量提出方向不同的方案，用反驳加以动摇，再归纳成主题并筛选。",
+          "role": "你是 {{user}} 的策划伙伴。明确表达意见，质疑前提，引入其他领域的例子。不事事附和，不被第一个方案牵着走，不过早因可行性否掉方案。决定的是 {{user}}。",
+          "phases": {
+            "frame": {
+              "name": "确定框架",
+              "goal": "请在子会话中整理要思考的事、契机、限制和想要的结果，并把提出方案的视角写入大纲。"
+            },
+            "diverge": {
+              "name": "发散",
+              "goal": "请在大纲中选择视角，用命令“提出方案”朝不同方向大量提出方案。提完后请进入下一个视角。"
+            },
+            "provoke": {
+              "name": "动摇",
+              "goal": "请用命令“反驳”“逆向思考”反驳方案，找出隐藏的前提。"
+            },
+            "converge": {
+              "name": "收敛",
+              "goal": "请用命令“归纳主题”整理方案，再用“筛选”缩减到 2〜3 个。"
+            },
+            "capture": {
+              "name": "记下",
+              "goal": "请用命令“记下”写出决定的事、要确认的事和留下的问题。"
+            }
+          },
+          "actions": {
+            "shapeFrame": {
+              "name": "整理框架与视角",
+              "greeting": "我们将决定企划的框架和提出方案的视角。\n请告诉我想思考的题目，以及关于契机、限制和想要的结果已知的内容。",
+              "instruction": "这是本剧本决定框架的阶段。按下列顺序，逐个阶段提出方案，用户采纳后再进入下一步。\n1. 框架：就用户的题目整理“要思考的事”“契机”“已知的事”“限制”“想要的结果”，不足之处用最多 5 个容易回答的问题补齐。把整理好的框架作为个别追加辞典的常驻条目。\n2. 视角：给出 3〜5 个互不重叠的提出方案的切入点（使用者、技术、费用、时机、其他领域等），把商定的视角逐一写成大纲的段。每段正文写从该视角要问的问题（例：“若费用降到十分之一，要放弃什么”）。"
+            },
+            "generate": {
+              "name": "提出方案",
+              "instruction": "沿着框架和当前启用段的视角，给出 8 个带编号的方案。每个方案第 1 行写简短名称，冒号后用 1 句话写内容。规模、做法和时机彼此不同。先不要评价好坏。"
+            },
+            "objections": {
+              "name": "反驳",
+              "instruction": "以严厉评论家的身份，为目前的每个方案各写 1 条反驳。然后列出多数方案暗含的 3 个前提，指出最危险的一个。"
+            },
+            "reverse": {
+              "name": "逆向思考",
+              "instruction": "列出 5 个让这个问题更糟的方法，再给出把每个方法反过来的带编号方案。"
+            },
+            "themes": {
+              "name": "归纳主题",
+              "instruction": "把目前的方案按相似的归纳成主题。在每个主题下列出方案，并为每个方案各写 1 行“对用户的效果”“实现难易”“与目的的契合”“依据的强度”。"
+            },
+            "narrow": {
+              "name": "筛选",
+              "instruction": "根据评估，给出最多 3 个带编号的推荐方案。每个方案第 1 行写名称，冒号后写推荐理由。接着写出最大的未知点，以及最便宜的确认方法。"
+            },
+            "capture": {
+              "name": "记下",
+              "instruction": "针对选定的方案，用列表写出“已决定的事”“要确认的前提”“留下的问题”“下一步要做的事”“有意排除的方案及理由”。"
+            }
+          },
+          "continue": "接着刚才的内容，提出还没出现过的方案或视角。"
+        },
+        "research": {
+          "name": "调查",
+          "description": "在商量中按不同观点确定问题并做成段，逐个问题收集已知信息，标注可信度后汇总，再逐条核实主张。",
+          "role": "你是协助 {{user}} 调研的调查员。区分已知的事和推测，不确定的就写不确定。不编造出处。{{user}} 贴了资料时优先使用。",
+          "phases": {
+            "questions": {
+              "name": "观点与问题",
+              "goal": "请在子会话中把要调查的题目按视角拆成问题，并写入大纲。"
+            },
+            "gather": {
+              "name": "收集",
+              "goal": "请在大纲中选择要调查的问题，用命令“回答”收集已知的内容。贴上资料发送，即可提取与问题相关的事实。"
+            },
+            "summarize": {
+              "name": "汇总",
+              "goal": "请用命令“汇总”，根据整个大纲的问题和收集的内容回答最初的题目。"
+            },
+            "verify": {
+              "name": "核实",
+              "goal": "请用命令“核实主张”逐条核实总结中的主张。"
+            }
+          },
+          "actions": {
+            "makeQuestions": {
+              "name": "确定观点与问题",
+              "greeting": "我们把调研题目按观点拆成问题。\n请告诉我想调研的题目，以及想知道的理由或用途。",
+              "instruction": "这是本剧本的观点与问题阶段。针对题目从不同立场提出 4～6 个观点，每个观点列出该立场的人会问的 2～4 个问题，请用户选择。把选定的问题按调研顺序逐一做成大纲的段。段的正文写观点、问题和回答所需的粒度。"
+            },
+            "answer": {
+              "name": "回答",
+              "instruction": "回答启用的段的问题。先用列表写“已知的事”，再单独写“推测”，最后写“不确定的事和需要补充调研的事”。用了 {{user}} 贴的资料时，注明是哪份资料。"
+            },
+            "summarize": {
+              "name": "汇总",
+              "instruction": "根据目前的回答，汇总对最初题目的回答。按重要程度写 5～8 条发现，每条写 1 句主张、依据和可信度。矛盾不要强行解决，照原样列出，最后写出留下的问题。"
+            },
+            "verify": {
+              "name": "核实主张",
+              "instruction": "针对上一份汇总中的每条主张，提出 1 个用来核实其是否正确的问题，并在不看汇总的情况下回答。回答与汇总矛盾的主张要标出。"
+            }
+          },
+          "continue": "就启用的段的问题，继续写还没写到的内容。"
+        },
+        "document": {
+          "name": "写文档",
+          "description": "在一次商量中确定从材料、读者到章节骨架的全部内容并做成段，逐节写，再以不了解背景的读者身份检验。",
+          "role": "你是和 {{user}} 一起写文档的合著者。写作时心里装着读者，以及读后希望发生的事。不懂的地方不靠推测填补，而是提问。",
+          "phases": {
+            "prepare": {
+              "name": "准备",
+              "goal": "请在子会话中收集文档的种类、读者、希望引起的结果和材料，并把章节的骨架写入大纲。"
+            },
+            "sections": {
+              "name": "逐节写",
+              "goal": "请在大纲中选择要写的节，用命令“写这一节”写出来。要写入的内容可以用“内容候选”选择。"
+            },
+            "readerTest": {
+              "name": "读者检验",
+              "goal": "请用命令“提出读者的问题”，以不了解前提的读者身份寻找漏洞，再用“通读检查”对照整个大纲检查。"
+            }
+          },
+          "actions": {
+            "makePlan": {
+              "name": "确定从材料到骨架",
+              "greeting": "我们收集文档的材料，并确定到章节骨架为止的内容。\n请告诉我文档的类型、读者和读后希望发生的事，并贴上手头的材料。",
+              "instruction": "这是本剧本的准备阶段。按下面的顺序，每个步骤提出方案，用户应用后再进入下一步。\n1. 材料：阅读贴来的材料，简短概括“类型”“读者”“读后希望发生的事”“限制”，并就缺少的部分提出 5～10 个能简短回答的问题。把概括好的材料作为放在历史之前的项目提出方案。\n2. 骨架：根据材料列出章节骨架并达成一致，再把各节按写作顺序逐一做成大纲的段。段的正文写该节所属章的目的、该节要传达的内容和希望读者记住的东西。先不写正文。"
+            },
+            "writeSection": {
+              "name": "写这一节",
+              "instruction": "写启用的段的节的正文。有选中的候选就只用它们，没有就从材料中选。用词与前面的节保持一致。"
+            },
+            "contentIdeas": {
+              "name": "内容候选",
+              "instruction": "给出 8 个带编号、每个 1 行的可放进启用的段的节的内容候选。先列材料中有的，材料中没有的注明“材料中没有”排在后面。"
+            },
+            "readerQuestions": {
+              "name": "提出读者的问题",
+              "instruction": "列出 5～10 个初次阅读本文档的人可能会问的带编号问题，并只根据文档正文逐一回答。答不上的问题、容易误解的地方和矛盾要标出。"
+            },
+            "reviewAll": {
+              "name": "通读检查",
+              "instruction": "通读目前的正文，用列表列出走向的断裂、重复、矛盾和空洞的句子。只指出要改的地方。"
+            }
+          },
+          "continue": "继续写启用的段的节。用词与前面的段落保持一致。"
+        }
+      },
+      "shared": {
+        "twist": {
+          "name": "改变走向",
+          "instruction": "在接下来的正文中，安排 1 个改变目前走向的事件。不要与目前的正文和已定的设定矛盾。"
+        },
+        "accident": {
+          "name": "偶然事件",
+          "instruction": "在接下来的正文中，加入 1 个谁也没想到的小小偶然事件。"
+        },
+        "assumptions": {
+          "name": "质疑前提",
+          "instruction": "指出上一轮交流中被当作理所当然的 1 个前提，并写出如果它不成立会有什么改变。"
+        },
+        "plain": {
+          "name": "通俗地重说",
+          "instruction": "不用专业术语，用简短的句子把上一个回答重新说一遍。"
+        },
+        "changeScene": {
+          "name": "换场景",
+          "instruction": "转换时间或地点，从新的场景开始。先用 1 句话交代转换，再继续。"
+        }
+      },
+      "kind": {
+        "decide": "确定",
+        "proceed": "推进",
+        "close": "收束"
+      },
+      "candidates": "候选",
+      "candidatesFailed": "无法从此回复中读取候选",
+      "pickAndSend": "用选中的候选{name}",
+      "pickOne": "选择「{title}」",
+      "untitled": "（无标题）",
+      "builtinGroup": "标准",
+      "ownGroup": "我的",
+      "ownEmpty": "复制后创建，会显示在这里",
+      "allHidden": "已在功能标签中全部隐藏",
+      "menu": "{name} 的菜单",
+      "copy": "复制并创建",
+      "edit": "编辑",
+      "delete": "删除",
+      "deleteTitle": "删除行动手册？",
+      "deleteBody": "将从我的列表中删除「{name}」。正在使用它的对话会保留副本继续使用。",
+      "editor": {
+        "title": "行动手册",
+        "whole": "整体",
+        "name": "名称",
+        "description": "说明",
+        "role": "角色文本（助手要做和不做的事）",
+        "phaseName": "阶段名称",
+        "phaseKind": "类型",
+        "goal": "目的（一行）",
+        "actions": "操作",
+        "addPhase": "阶段",
+        "removePhase": "删除此阶段",
+        "addAction": "操作",
+        "removeAction": "删除操作「{name}」",
+        "reorder": "重新排列「{name}」",
+        "actionName": "操作名称",
+        "actionKind": "类型",
+        "kinds": {
+          "send": "发送",
+          "consult": "打开构成商量",
+          "next": "下一段"
+        },
+        "instruction": "指示正文",
+        "use": "回复的用途",
+        "uses": {
+          "none": "无",
+          "send": "附上候选发送"
+        },
+        "sendTo": "发送用的操作",
+        "noSendTo": "发送用的操作已不存在",
+        "copyName": "{name}（副本）",
+        "scope": {
+          "decide": "在构成商量中进行。对话中只发送阶段文字",
+          "proceed": "在对话中进行。发送：阶段文字、启用的段",
+          "close": "在对话中进行。发送：阶段文字、启用的段（全部显示后为全部）"
+        },
+        "greeting": "商量的开场文字",
+        "guide": "交给商量的要点",
+        "writesOutline": "让它把每段的提示写进大纲",
+        "advisor": "构成商量的用途",
+        "advisors": {
+          "blank": "新建",
+          "work": "作业",
+          "story": "共写故事",
+          "roleplay": "角色扮演",
+          "game": "游戏主持"
+        },
+        "continue": "继续的指示",
+        "outlineView": "大纲",
+        "outlineViews": {
+          "single": "选一个",
+          "multi": "可选多个",
+          "readonly": "只读"
+        },
+        "revise": "放进输入框（按重新生成改写上一段正文）"
+      },
+      "continueSend": "续写",
+      "directionMark": "指示",
+      "phasePrev": "上一阶段",
+      "phaseNext": "下一阶段",
+      "count": "{i}/{n}",
+      "pickCancel": "取消",
+      "cardWidth": "卡片",
+      "subSession": "打开子会话",
+      "pickStep": "启用{title}",
+      "directionBox": "指示",
+      "directionRemove": "移除指示",
+      "commands": "命令",
+      "stepPrev": "上一条目",
+      "stepNext": "下一条目",
+      "picked": "已选择 {i}/{n}",
+      "fold": "折叠行动手册",
+      "unfold": "展开行动手册",
+      "rowSummary": "{name}：{phase}",
+      "stepAt": "{i}/{n} {title}",
+      "noNextStep": "接下来的发展",
+      "noteBox": "注记（不发送）",
+      "noteRemove": "移除注记"
+    },
+    "received": {
+      "open": "显示已接收的原始数据",
+      "title": "已接收的内容",
+      "copy": "复制已接收的原始数据",
+      "truncated": "内容过大，已省略中间部分"
+    }
+  },
+  "gateway": {
+    "entry": {
+      "title": "设置 API 密钥",
+      "submit": "连接",
+      "invalidUrl": "请输入以 http:// 或 https:// 开头的基础 URL。",
+      "noOpener": "请从 KisaraUI 的界面打开此窗口。",
+      "checking": "正在确认连接…",
+      "verified": "连接已成功完成。",
+      "authFailed": "API 密钥认证失败。",
+      "verifyFailed": "无法确认连接。",
+      "back": "返回",
+      "close": "关闭"
+    }
+  }
+}

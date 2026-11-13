@@ -1,0 +1,554 @@
+/* クラスを探すのは src だけ（index.html・demo.html には無い）。既定のままだとリポジトリ全体を読み、
+   設計書（.md）を直すたびに開発サーバがページを丸ごと読み直させる */
+@import 'tailwindcss' source('../');
+@import 'tw-animate-css';
+@import 'shadcn/tailwind.css';
+@import '@fontsource-variable/geist';
+
+@custom-variant dark (&:is(.dark *));
+/* マウスなどで操作し、縦に余裕のある画面（スマホ・タブレットを除く）。はじめの画面の頭を固定する */
+@custom-variant roomy (@media (hover: hover) and (pointer: fine) and (min-height: 600px));
+
+/* ───────────────────────────── */
+/* デザイントークン                  */
+/* スロット型ごとの配色は接続線・チップ・変数ボックスで共有する（色の唯一の置き場） */
+/* ───────────────────────────── */
+
+/*
+ * スロット型の配色。**`static` が必須**。
+ * 素の `@theme` は「クラスとして使われている変数」しか CSS に出さないため、
+ * `var(--color-slot-*)` を JS 側から参照しているだけの色が消え、
+ * stroke が `none` になって接続線が描かれなくなる。
+ */
+@theme static {
+  /*
+   * 値は**接続先 ComfyUI の既定パレット（NODE_SLOT）と同じ**。
+   * 同じ型が本家と違う色に見えると、行き来したときに線を追い直すことになる。
+   */
+  --color-slot-clip: #ffd500;
+  --color-slot-clip-vision: #a8dadc;
+  --color-slot-clip-vision-output: #ad7452;
+  --color-slot-conditioning: #ffa931;
+  --color-slot-control-net: #6ee7b7;
+  --color-slot-image: #64b5f6;
+  --color-slot-latent: #ff9cf9;
+  --color-slot-mask: #81c784;
+  --color-slot-model: #b39ddb;
+  --color-slot-style-model: #c2ffae;
+  --color-slot-vae: #ff6e6e;
+  --color-slot-noise: #b0b0b0;
+  --color-slot-guider: #66ffff;
+  --color-slot-sampler: #ecb4b4;
+  --color-slot-sigmas: #cdffcd;
+  --color-slot-taesd: #dcc274;
+  /* 本家が色を持たない型は、本家の線の既定色に落ちる */
+  --color-slot-default: #99aa99;
+
+  /* 知らせ（トースト）の成功の色。失敗は destructive を使う */
+  --color-success: oklch(0.62 0.15 150);
+  /* 知らせ（トースト）の地。白い文字で 4.5:1 を保つ濃さ（WCAG 1.4.3）。白地に 90% で重ねても 5:1 */
+  --color-toast-success: oklch(0.48 0.13 150);
+  --color-toast-error: oklch(0.5 0.19 27.325);
+  /* エラーのタブの注意だけのときの下線 */
+  --color-warning: oklch(0.86 0.16 92);
+  /* 複数行の入力の、確定していない打ちかけの枠 */
+  --color-edited: oklch(0.7 0.13 250);
+
+  /* 揃える寸法。列の上端の基準線・列の下端（会話の入力欄の下）・本体と列の間の余白
+     （アプリ入力のカードの左）。複数の列が同じ値で揃えるので、部品に数を写さずここを引く */
+  --spacing-column-top: 0.5rem;
+  --spacing-column-bottom: 18px;
+  --spacing-column-gutter: 15px;
+
+  /* 文字の小さい段。欄の名前・番号・注記。行の高さは引き継ぐ（指定しない） */
+  --text-2xs: 11px;
+  --text-3xs: 10px;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+@theme inline {
+  --font-heading: var(--font-sans);
+  --font-sans: 'Geist Variable', sans-serif;
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-band: var(--band);
+  --color-logo-top: var(--logo-top);
+  --color-logo-bottom: var(--logo-bottom);
+  --color-figure-bg: var(--figure-bg);
+  --color-figure-ink: var(--figure-ink);
+  --color-figure-muted: var(--figure-muted);
+  --color-figure-box: var(--figure-box);
+  --color-figure-line: var(--figure-line);
+  --color-figure-device: var(--figure-device);
+  --color-figure-device-line: var(--figure-device-line);
+  --color-figure-browser: var(--figure-browser);
+  --color-figure-host: var(--figure-host);
+  --color-figure-cloud: var(--figure-cloud);
+  --color-figure-local: var(--figure-local);
+  --color-figure-host-ink: var(--figure-host-ink);
+  --color-figure-cloud-ink: var(--figure-cloud-ink);
+  --color-figure-local-ink: var(--figure-local-ink);
+  --color-figure-arrow: var(--figure-arrow);
+  --color-figure-grid: var(--figure-grid);
+  --color-switch-on: var(--switch-on);
+  --color-tool-active: var(--tool-active);
+  --color-pane: var(--pane);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --color-foreground: var(--foreground);
+  --color-background: var(--background);
+  /* 角の丸みは 1 つの値に揃える。段を持たせず、どの名前でも同じ丸みにする。
+     全体が丸い形（rounded-full）はこの対象ではない */
+  --radius: var(--radius-base);
+  --radius-xs: var(--radius-base);
+  --radius-sm: var(--radius-base);
+  --radius-md: var(--radius-base);
+  --radius-lg: var(--radius-base);
+  --radius-xl: var(--radius-base);
+  --radius-2xl: var(--radius-base);
+  --radius-3xl: var(--radius-base);
+  --radius-4xl: var(--radius-base);
+}
+
+/* `.theme-light` は配色の組に関わらずライトの組で描く枠（はじめの画面のシステム構成）。トークンを入れ直す */
+.theme-light,
+:root {
+  color-scheme: light;
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: oklch(0.205 0 0);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.97 0 0);
+  /* 補助の文字（WCAG 1.4.3）。band の地でも 4.5:1 を保つ濃さ */
+  --muted-foreground: oklch(0.48 0 0);
+  /* 動かない行の帯。muted より濃い灰色 */
+  --band: oklch(0.9 0 0);
+  /* 入れ切りのスイッチの入（WCAG 1.4.11）。橙は白地で 1.9:1 なので、ライトでは濃くする */
+  --switch-on: oklch(0.6 0.15 60);
+  /* 有効な道具のアイコンの青（地を塗らずに見分ける） */
+  --tool-active: oklch(0.55 0.2 257);
+  /* 列の中身の欄の地（右の列・会話の一覧）。白地で見分けられる濃さにする */
+  --pane: oklch(0.955 0 0);
+  /* はじめの画面の地。ロゴの紺を暗く、白を少し明るくし（ロゴの縁がわずかに見えるように）、
+     境から下をこの組の地に近い色にする。補助の文字はこの地で 4.5:1 を保つ濃さ */
+  --logo-top: #1b2e4d;
+  --logo-bottom: #fbf5f5;
+  --logo-muted-foreground: oklch(0.48 0 0);
+  /* 接続の経路の図。ロゴの色から取り、配色の組に関わらず白地の図にする
+     （.dark では替えない）。文字は紺、補助の文字も白地と箱の地で 4.5:1 を保つ */
+  --figure-bg: #fcf8f8;
+  --figure-ink: #254067;
+  --figure-muted: #4a5d78;
+  --figure-box: #ffffff;
+  --figure-line: #aac8e3;
+  --figure-device: #eef4fa;
+  --figure-device-line: #6690bf;
+  --figure-browser: #dbe8f3;
+  --figure-host: #c25d5c;
+  --figure-cloud: #b28680;
+  --figure-local: #4a6d9c;
+  /* 手描き風の図で、丸を置かずに描くアイコンの濃い色（白系の地で 3:1 以上） */
+  --figure-host-ink: #ac3031;
+  --figure-cloud-ink: #7f524c;
+  --figure-local-ink: #2f4f7f;
+  --figure-arrow: #6690bf;
+  /* スケッチ風の図の方眼の線 */
+  --figure-grid: #e6edf5;
+  /* スケッチ風の図の地（方眼）と、ブラウザの箱の斜線 */
+  --figure-paper:
+    linear-gradient(var(--figure-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--figure-grid) 1px, transparent 1px);
+  --figure-hatch: repeating-linear-gradient(
+    -45deg,
+    var(--figure-browser) 0 5px,
+    transparent 5px 10px
+  );
+  /* 無効（バイパス・ミュート）のカード。本体は地を抜いて斜めの縞を敷き、
+     見出しの帯は半透明で沈める。どちらも淡くして、補助の文字と 4.5:1 を保つ */
+  --off-band: oklch(0 0 0 / 3%);
+  --off-stripe: oklch(0 0 0 / 3%);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  /* 焦点の輪（WCAG 1.4.11）。白地・muted の地で 3:1 以上 */
+  --ring: oklch(0.556 0 0);
+  --chart-1: oklch(0.87 0 0);
+  --chart-2: oklch(0.556 0 0);
+  --chart-3: oklch(0.439 0 0);
+  --chart-4: oklch(0.371 0 0);
+  --chart-5: oklch(0.269 0 0);
+  /* 角の丸み（8px）。`rounded` を含むすべての丸みがこの値になる（ボタンだけは下の半分） */
+  --radius-base: 0.5rem;
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: oklch(0.205 0 0);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.97 0 0);
+  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-ring: oklch(0.556 0 0);
+}
+
+.dark {
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.205 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.922 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --band: oklch(0.33 0 0);
+  --switch-on: var(--color-slot-conditioning);
+  --tool-active: oklch(0.72 0.15 250);
+  --pane: oklch(0.269 0 0 / 60%);
+  --logo-top: #fbf5f5;
+  --logo-bottom: #1b2e4d;
+  /* 紺の地では背景の絵の明るい線が文字に重なり、灰色では 2:1 まで落ちる。絵を薄めた上で文字の色にする
+     （WCAG 1.4.3） */
+  --logo-muted-foreground: var(--foreground);
+  --off-band: oklch(1 0 0 / 3%);
+  --off-stripe: oklch(1 0 0 / 3%);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  /* 焦点の輪。地・card・band で 3:1 以上 */
+  --ring: oklch(0.65 0 0);
+  --chart-1: oklch(0.87 0 0);
+  --chart-2: oklch(0.556 0 0);
+  --chart-3: oklch(0.439 0 0);
+  --chart-4: oklch(0.371 0 0);
+  --chart-5: oklch(0.269 0 0);
+  --sidebar: oklch(0.205 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.65 0 0);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  html {
+    @apply font-sans;
+  }
+}
+
+/* ───────────────────────────── */
+/* ネイティブの選択の一覧（<select> の <option>）                       */
+/* 項目は文字の色だけを <select> から受け継ぎ、一覧の背景はブラウザの既定（白）のまま残る。 */
+/* ダークでは白地に明るい文字になるので、背景と文字を同じ組のトークンで揃える */
+/* ───────────────────────────── */
+
+@layer base {
+  option,
+  optgroup {
+    background-color: var(--popover);
+    color: var(--popover-foreground);
+  }
+}
+
+/* ───────────────────────────── */
+/* ボタンの丸み                      */
+/* ボタンは全体の半分（4px）。丸みの名前はどれも --radius-base を引くので、ここで差し替える。 */
+/* 全体が丸い形（rounded-full）は変わらない */
+/* ───────────────────────────── */
+
+@layer base {
+  button {
+    --radius-base: 0.25rem;
+    /* 名前付きの値を直接引く箇所（shadcn/ui の Button）も同じ丸みにする */
+    --radius: var(--radius-base);
+    --radius-md: var(--radius-base);
+  }
+}
+
+/* ───────────────────────────── */
+/* スクロールバー                    */
+/* 溝は出さず、つまみだけを細く見せる（列ごとにスクロールするので数が多い） */
+/* ───────────────────────────── */
+
+@layer base {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track,
+  ::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 9999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--muted-foreground);
+  }
+}
+
+/* ───────────────────────────── */
+/* 送りのモーション                  */
+/* ビューワーで画像が入れ替わるとき、送った向きから滑り込ませる。 */
+/* 新しい画像が出たときは**左から**入る（並びの先頭が左のため）。 */
+/* 入れ替わりは重ねて行い、**古い方は反対側へ送り出す**。 */
+/* ───────────────────────────── */
+
+@keyframes kisara-slide-from-left {
+  from {
+    transform: translateX(-3%);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+@keyframes kisara-slide-from-right {
+  from {
+    transform: translateX(3%);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+@keyframes kisara-slide-out-left {
+  from {
+    transform: none;
+    opacity: 1;
+  }
+  to {
+    transform: translateX(-3%);
+    opacity: 0;
+  }
+}
+
+@keyframes kisara-slide-out-right {
+  from {
+    transform: none;
+    opacity: 1;
+  }
+  to {
+    transform: translateX(3%);
+    opacity: 0;
+  }
+}
+
+.kisara-slide-from-left {
+  animation: kisara-slide-from-left 360ms ease-out;
+}
+
+.kisara-slide-from-right {
+  animation: kisara-slide-from-right 360ms ease-out;
+}
+
+.kisara-slide-out-left {
+  animation: kisara-slide-out-left 360ms ease-out forwards;
+}
+
+.kisara-slide-out-right {
+  animation: kisara-slide-out-right 360ms ease-out forwards;
+}
+
+/* 追従の押しのけ。枠ごとに --kx / --ky（枠の数）を持ち、枠の大きさと隙間（gap-1）を掛ける */
+@keyframes kisara-push-in {
+  from {
+    transform: translate(
+      calc(var(--kx, 0) * (100% + 0.25rem)),
+      calc(var(--ky, 0) * (100% + 0.25rem))
+    );
+  }
+  to {
+    transform: none;
+  }
+}
+
+@keyframes kisara-push-out {
+  from {
+    transform: none;
+  }
+  to {
+    transform: translate(
+      calc(var(--kx, 0) * (100% + 0.25rem)),
+      calc(var(--ky, 0) * (100% + 0.25rem))
+    );
+  }
+}
+
+.kisara-push-in {
+  animation: kisara-push-in 360ms ease-out;
+}
+
+.kisara-push-out {
+  animation: kisara-push-out 360ms ease-out forwards;
+}
+
+/* 足したカードの滑り込みと、消すカードの抜け出し。 */
+/* パラメータのチップも同じ動き（距離だけ短い）。 */
+/* 並べ替えが使う transform と重ならないよう translate で動かす。 */
+/* 長さの正は src/lib/motion.ts の MOTION_MS（CSS からは読めないので同じ値を書く） */
+:root {
+  --kisara-motion: 300ms;
+}
+
+@keyframes kisara-card-enter {
+  from {
+    translate: var(--kisara-swipe, 48px) 0;
+    opacity: 0;
+  }
+  to {
+    translate: none;
+    opacity: 1;
+  }
+}
+
+@keyframes kisara-card-leave {
+  from {
+    translate: none;
+    opacity: 1;
+  }
+  to {
+    translate: var(--kisara-swipe, 48px) 0;
+    opacity: 0;
+  }
+}
+
+.kisara-card-enter,
+.kisara-chip-enter {
+  animation: kisara-card-enter var(--kisara-motion) ease-out;
+}
+
+/* 抜けている間は触れない（消える途中のものを操作させない） */
+.kisara-card-leave,
+.kisara-chip-leave {
+  animation: kisara-card-leave var(--kisara-motion) ease-in forwards;
+  pointer-events: none;
+}
+
+.kisara-chip-enter,
+.kisara-chip-leave {
+  --kisara-swipe: 24px;
+}
+
+/*
+ * アバターの中央点を決めたときの、押した所へ縮んで留まる輪。
+ * 外から押した所へ収束し、少し沈んで戻る（ピンを留める）、そのまま薄れて消える
+ */
+@keyframes kisara-tap {
+  0% {
+    transform: translate(-50%, -50%) scale(1.8);
+    opacity: 0;
+  }
+  55% {
+    transform: translate(-50%, -50%) scale(0.35);
+    opacity: 1;
+  }
+  70% {
+    transform: translate(-50%, -50%) scale(0.5);
+    opacity: 1;
+  }
+  85% {
+    transform: translate(-50%, -50%) scale(0.4);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(0.4);
+    opacity: 0;
+  }
+}
+
+.kisara-tap {
+  animation: kisara-tap 550ms cubic-bezier(0.2, 0, 0, 1) forwards;
+}
+
+/* 会話の入力欄が中央から下へ移る動き。位置の補間はブラウザの View Transitions */
+::view-transition-group(chat-composer) {
+  animation-duration: 320ms;
+  animation-timing-function: cubic-bezier(0.2, 0, 0, 1);
+}
+
+/* 動きを減らす設定を尊重する */
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none;
+  }
+
+  .kisara-card-enter,
+  .kisara-card-leave,
+  .kisara-chip-enter,
+  .kisara-chip-leave,
+  .kisara-push-in,
+  .kisara-push-out,
+  .kisara-slide-from-left,
+  .kisara-slide-from-right,
+  .kisara-slide-out-left,
+  .kisara-slide-out-right {
+    animation: none;
+  }
+
+  /* 輪は消えたときに外すので、動きを止めずにすぐ終える */
+  .kisara-tap {
+    animation-duration: 1ms;
+  }
+}
