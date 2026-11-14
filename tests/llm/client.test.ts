@@ -212,6 +212,27 @@ describe('API キーの確かめ', () => {
   });
 });
 
+describe('転送', () => {
+  const cloud = { baseUrl: 'https://openrouter.ai/api/v1' };
+  const redirected = (): Response => {
+    const response = new Response(null);
+    Object.defineProperty(response, 'type', { value: 'opaqueredirect' });
+    return response;
+  };
+
+  it('キーを付けた要求は転送をたどらず、転送が返ったら転送の失敗にする', async () => {
+    const keyed = client(redirected, 'http:', { [cloud.baseUrl]: 'sk-or-1' });
+    expect(await keyed.port.listModels(cloud)).toMatchObject({ failure: { kind: 'redirect' } });
+    expect(keyed.calls[0]?.init.redirect).toBe('manual');
+  });
+
+  it('キーを付けない要求は転送をたどる', async () => {
+    const plain = client(() => Response.json({ data: [] }));
+    await plain.port.listModels(cloud);
+    expect(plain.calls[0]?.init.redirect).toBeUndefined();
+  });
+});
+
 describe('Chat Completions の受け取り', () => {
   it('SSE の delta を順に渡し、[DONE] で終える', async () => {
     const { calls, port } = client(() =>

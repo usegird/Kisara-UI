@@ -10,7 +10,7 @@ import {
 } from '@/graph/tag-complete';
 import type { IndexedTag } from '@/graph/tag-dictionary';
 import { caretRectOf, type CaretRect } from '@/lib/caret-rect';
-import { insertAtCaret } from '@/lib/insert-at-caret';
+import { insertAtCaret, isQuietInput } from '@/lib/insert-at-caret';
 import { useTagsStore } from '@/store/use-tags-store';
 
 // ─────────────────────────────
@@ -104,7 +104,9 @@ export function useTagComplete(enabled: boolean): TagComplete {
   /** 今のキャレットで出し直す。出せなければ閉じる */
   const update = (field: HTMLTextAreaElement, forced: boolean): void => {
     fieldRef.current = field;
-    const token = enabled && !composing.current ? tokenOf(field) : null;
+    // 打った語ではない差し込み（Lora・落とした文字）の間は出さない
+    const quiet = composing.current || isQuietInput(field);
+    const token = enabled && !quiet ? tokenOf(field) : null;
     if (token !== null && dismissed.current !== token.word) dismissed.current = null;
     const how = { forced, dismissed: dismissed.current };
     setOpen(token === null ? null : openAt(field, token, merged, how));

@@ -7,7 +7,8 @@ import { useModelFiles } from '@/hooks/flow/use-model-files';
 import { useTabState } from '@/hooks/flow/use-tab-state';
 import { useTextFieldWhile } from '@/hooks/flow/use-text-field-focus';
 import { t } from '@/i18n';
-import { insertAtCaret, type TextField } from '@/lib/insert-at-caret';
+import type { TextField } from '@/lib/insert-at-caret';
+import { placeEntry } from '@/lib/insert-motion';
 
 // ─────────────────────────────
 // 差し込みのアイコンから Lora を選んで入れる手続き。Lora を選ぶダイアログには値と手続きだけを渡す
@@ -21,7 +22,7 @@ function acceptTarget(field: TextField): boolean {
 
 /** 差し込み先が無いときの案内 */
 function noTarget(): string {
-  return t('insertBar.lora.noTarget');
+  return t('insertBar.noTarget');
 }
 
 /** Lora を選ぶダイアログへ渡す開閉・一覧・差し込みの手続き */
@@ -36,7 +37,10 @@ interface LoraInsert {
   readonly onRefresh: () => void;
   readonly placeBlocked: string | null;
   readonly drag: LoraDragText;
-  readonly onPlace: (value: string) => Promise<string | null>;
+  /** 選んだ Lora を入れる。`origin` は押したカード（入れた位置まで札を飛ばす） */
+  readonly onPlace: (value: string, origin?: DOMRect | null) => Promise<string | null>;
+  /** 差し込み先の欄（挿入位置のアイコンを重ねる）。無ければ null */
+  readonly target: HTMLTextAreaElement | null;
   /** 情報の語・メモをそのまま入れる */
   readonly onInsertText: (text: string) => void;
   readonly finalFocus: React.RefObject<HTMLElement | null>;
@@ -75,15 +79,16 @@ export function useLoraInsert(): LoraInsert {
     onRefresh: () => models.refresh(LORA_FOLDER),
     placeBlocked: target === null ? noTarget() : null,
     drag,
-    onPlace: async (value) => {
+    onPlace: async (value, origin = null) => {
       const result = await loraText(LORA_FOLDER, value);
       if ('error' in result) return result.error;
-      if (target === null || !insertAtCaret(target, result.text)) return noTarget();
-      return null;
+      if (target === null) return noTarget();
+      return placeEntry(target, result.text, origin) ? null : noTarget();
     },
     onInsertText: (text) => {
-      if (target !== null) insertAtCaret(target, text);
+      if (target !== null) placeEntry(target, text, null);
     },
     finalFocus,
+    target: target instanceof HTMLTextAreaElement ? target : null,
   };
 }

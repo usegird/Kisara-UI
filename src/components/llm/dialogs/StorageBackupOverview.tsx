@@ -1,14 +1,24 @@
+import { cva } from 'class-variance-authority';
+import { Trash2 } from 'lucide-react';
+
 import {
   allBackupsOf,
   backupsOf,
   figures,
+  formatSavedTime,
+  itemName,
   type Entry,
 } from '@/components/llm/dialogs/storage-entries';
-import { markKey, type Mark, type Marks } from '@/components/llm/dialogs/storage-marks';
-import { BUTTON } from '@/components/llm/dialogs/storage-style';
+import {
+  markKey,
+  staleMarkOf,
+  type Mark,
+  type Marks,
+  type StaleBackup,
+} from '@/components/llm/dialogs/storage-marks';
+import { BUTTON, deleteIcon, MARKED } from '@/components/llm/dialogs/storage-style';
 import { t } from '@/i18n';
 import { formatBytes } from '@/lib/text';
-import { orphanBackups } from '@/store/persist/storage-backups';
 import { totalOf, type StorageItem } from '@/store/persist/storage-usage';
 
 // ─────────────────────────────
@@ -16,13 +26,24 @@ import { totalOf, type StorageItem } from '@/store/persist/storage-usage';
 // 印はダイアログが持ち、ここは描いて押したことを返すだけ。
 // ─────────────────────────────
 
+/** クリーンアップの 1 件の名前。削除の印を付けたら取り消し線 */
+const staleName = cva('min-w-0 flex-1 truncate', { variants: { marked: MARKED } });
+
+/** クリーンアップの 1 件の時刻・大きさ。削除の印を付けたら取り消し線 */
+const staleFact = cva('text-muted-foreground whitespace-nowrap tabular-nums', {
+  variants: { marked: MARKED },
+});
+
 /** Comfy バックアップの props */
 export interface BackupOverviewProps {
   readonly entries: readonly Entry[];
   readonly connected: boolean;
+  /** クリーンアップの対象。読んでいる・つないでいなければ null */
+  readonly stale: readonly StaleBackup[] | null;
   readonly marks: Marks;
+  readonly busy: boolean;
   readonly onSelect: (id: string) => void;
-  readonly onToggleAll: (targets: readonly Mark[]) => void;
+  readonly onToggle: (mark: Mark) => void;
 }
 
 /**
@@ -32,9 +53,11 @@ export interface BackupOverviewProps {
 export function BackupOverview({
   entries,
   connected,
+  stale,
   marks,
+  busy,
   onSelect,
-  onToggleAll,
+  onToggle,
 }: BackupOverviewProps): React.ReactElement {
   const backed = entries.filter((entry) => entry.backup !== null);
   const all = allBackupsOf(entries);
@@ -80,59 +103,119 @@ export function BackupOverview({
           })}
         </tbody>
       </table>
-      {connected && all !== null ? (
-        <Cleanup entries={backed} marks={marks} onToggleAll={onToggleAll} />
+      {connected && stale !== null ? (
+        <Cleanup stale={stale} marks={marks} busy={busy} onToggle={onToggle} />
       ) : null}
     </div>
   );
 }
 
 /**
- * Comfy バックアップの表の下のクリーンアップ。ブラウザに元の無いバックアップの
- * 件数と大きさを出し、すべてに削除の印を付ける（全部に付いていれば外す）。消すのは「適用」
+ * Comfy バックアップを選んでいるときの帯の「全て削除」。クリーンアップの対象すべてに削除の印を付ける
+ * （全部に付いていれば外す）。消すのは「適用」
  */
-function Cleanup({
-  entries,
+export function CleanupHeader({
+  stale,
   marks,
+  busy,
   onToggleAll,
 }: {
-  readonly entries: readonly Entry[];
+  readonly stale: readonly StaleBackup[];
   readonly marks: Marks;
+  readonly busy: boolean;
   readonly onToggleAll: (targets: readonly Mark[]) => void;
 }): React.ReactElement {
-  const orphans = entries.flatMap((entry) =>
-    orphanBackups(backupsOf(entry) ?? [], entry.items).map((item) => ({ entry, item })),
+  const targets = stale.map(staleMarkOf);
+  const allMarked = targets.length > 0 && targets.every((mark) => marks.has(markKey(mark)));
+  const onClearAllClick = (): void => onToggleAll(targets);
+  return (
+    <button
+      type="button"
+      className={BUTTON}
+      disabled={busy || targets.length === 0}
+      aria-pressed={allMarked}
+      onClick={onClearAllClick}
+    >
+      {t('llm.storage.clearAll')}
+    </button>
   );
-  const targets: Mark[] = orphans.map(({ entry, item }) => ({
-    entryId: entry.id,
-    side: 'backup',
-    key: item.key,
-  }));
-  const marked = targets.length > 0 && targets.every((mark) => marks.has(markKey(mark)));
-  const onMarkClick = (): void => onToggleAll(targets);
+}
+
+/** Comfy バックアップの表の下のクリーンアップ。説明と、対象の 1 件ずつ */
+function Cleanup({
+  stale,
+  marks,
+  busy,
+  onToggle,
+}: {
+  readonly stale: readonly StaleBackup[];
+  readonly marks: Marks;
+  readonly busy: boolean;
+  readonly onToggle: (mark: Mark) => void;
+}): React.ReactElement {
   return (
     <section className="flex flex-col gap-1" aria-labelledby="storage-cleanup-heading">
       <h3 id="storage-cleanup-heading" className="font-medium">
         {t('llm.storage.cleanup.heading')}
       </h3>
-      <p>
-        {orphans.length === 0
-          ? t('llm.storage.cleanup.none')
-          : t('llm.storage.cleanup.orphans', {
-              figures: figures(orphans.map(({ item }) => item)),
-            })}
-      </p>
-      {orphans.length === 0 ? null : (
-        <>
-          <p className="text-muted-foreground">{t('llm.storage.cleanup.hint')}</p>
-          <div>
-            <button type="button" className={BUTTON} onClick={onMarkClick}>
-              {marked ? t('llm.storage.cleanup.unmark') : t('llm.storage.cleanup.mark')}
-            </button>
-          </div>
-        </>
+      <p className="text-muted-foreground">{t('llm.storage.cleanup.description')}</p>
+      {stale.length === 0 ? (
+        <p>{t('llm.storage.cleanup.none')}</p>
+      ) : (
+        <ul>
+          {stale.map((target) => (
+            <StaleRow
+              key={markKey(staleMarkOf(target))}
+              target={target}
+              marks={marks}
+              busy={busy}
+              onToggle={onToggle}
+            />
+          ))}
+        </ul>
       )}
     </section>
+  );
+}
+
+/** クリーンアップの 1 件。種類・名前・時刻・大きさと削除アイコン */
+function StaleRow({
+  target,
+  marks,
+  busy,
+  onToggle,
+}: {
+  readonly target: StaleBackup;
+  readonly marks: Marks;
+  readonly busy: boolean;
+  readonly onToggle: (mark: Mark) => void;
+}): React.ReactElement {
+  const { entry, item } = target;
+  const mark = staleMarkOf(target);
+  const marked = marks.has(markKey(mark));
+  const name = itemName(item);
+  const label = t(marked ? 'llm.storage.unmarkBackup' : 'llm.storage.deleteBackup', { name });
+  const onDeleteClick = (): void => onToggle(mark);
+  return (
+    <li className="flex items-center gap-2 border-t py-1 leading-[22px]">
+      <span className="text-muted-foreground shrink-0">{entry.label}</span>
+      <span className={staleName({ marked })} title={item.key}>
+        {name}
+      </span>
+      <span className={staleFact({ marked })}>{formatSavedTime(item.updatedAt)}</span>
+      <span className={staleFact({ marked })}>{formatBytes(item.bytes)}</span>
+      <button
+        type="button"
+        className={deleteIcon({ marked })}
+        disabled={busy}
+        aria-pressed={marked}
+        aria-label={label}
+        title={label}
+        onClick={onDeleteClick}
+      >
+        <Trash2 className="size-4" aria-hidden />
+      </button>
+    </li>
   );
 }
 

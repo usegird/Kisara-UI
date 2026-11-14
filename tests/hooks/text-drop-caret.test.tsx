@@ -3,7 +3,12 @@ import { act, cleanup, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 
 import { useTextDropCaret } from '@/hooks/ui/use-text-drop-caret';
-import { beginTextDrag, endTextDrag, TEXT_DRAG_TYPE } from '@/lib/text-drag-session';
+import {
+  beginTextDrag,
+  endTextDrag,
+  INSERT_CARET_MARK,
+  TEXT_DRAG_TYPE,
+} from '@/lib/text-drag-session';
 
 // ─────────────────────────────
 // 文字のドラッグの落とし先。目印の付いたドラッグだけを受け持ち、
@@ -35,6 +40,30 @@ function dragEvent(type: 'dragover' | 'drop', types: readonly string[]): Event {
 }
 
 describe('文字のドラッグの落とし先', () => {
+  it('挿入位置のアイコンの上なら、その下の欄へ落とせる', () => {
+    render(<Host />);
+    const field = screen.getByLabelText<HTMLTextAreaElement>('欄');
+    const marker = document.createElement('span');
+    marker.setAttribute(INSERT_CARET_MARK, '');
+    document.body.append(marker);
+    // jsdom は位置で要素を探せないので、アイコンの下に欄がある形を与える
+    Object.defineProperty(document, 'elementsFromPoint', {
+      configurable: true,
+      value: () => [marker, field, document.body],
+    });
+    beginTextDrag({ resolve: () => Promise.resolve({ text: '' }) });
+
+    const over = dragEvent('dragover', [TEXT_DRAG_TYPE]);
+    act(() => {
+      marker.dispatchEvent(over);
+    });
+    expect(over.defaultPrevented).toBe(true);
+    expect(document.activeElement).toBe(field);
+
+    Reflect.deleteProperty(document, 'elementsFromPoint');
+    marker.remove();
+  });
+
   it('重ねると欄に焦点を当て、落ちたら文字を作ってキャレットの位置へ入れる', async () => {
     render(<Host />);
     const field = screen.getByLabelText<HTMLTextAreaElement>('欄');
@@ -61,7 +90,7 @@ describe('文字のドラッグの落とし先', () => {
       field.dispatchEvent(drop);
     });
     expect(drop.defaultPrevented).toBe(true);
-    await waitFor(() => expect(field.value).toBe('aXb'));
+    await waitFor(() => expect(field.value).toBe('aX\nb'));
   });
 
   it('目印の無いドラッグと、画面の中の欄には触れない', () => {

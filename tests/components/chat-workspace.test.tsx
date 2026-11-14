@@ -11,12 +11,14 @@ import { useLlmConnectDialogStore } from '@/store/use-llm-connect-dialog-store';
 import { useLlmKeysStore } from '@/store/use-llm-keys-store';
 import { useLlmProfilesStore } from '@/store/use-llm-profiles-store';
 import { useSettingsStore } from '@/store/use-settings-store';
+import { useTermsStore } from '@/store/use-terms-store';
 
 import { stubMissingDom } from '../helpers/dom';
 import { LEAK_ALLOWANCE, LEAK_ROUNDS, leakWatch } from '../helpers/leak';
 import {
   chat,
   chatMessage,
+  fakeKeyPort,
   fakeLlmPort,
   modelList,
   profile,
@@ -40,13 +42,7 @@ beforeEach(() => {
 });
 
 /** キーの無いゲートウェイの窓口（入力の窓だけ差し替える） */
-const NO_KEYS: LlmKeyPort = {
-  keyedUrls: () => [],
-  subscribe: () => () => undefined,
-  openEntry: () => 'unready',
-  onKeySet: () => () => undefined,
-  reportVerified: () => undefined,
-};
+const NO_KEYS: LlmKeyPort = fakeKeyPort();
 
 /** 選んでいる接続の設定がつながっていると確かめた状態にする */
 function connected(): void {
@@ -413,6 +409,22 @@ describe('会話の画面', () => {
 
     act(() => useLlmKeysStore.setState({ keyed: [base] }));
     expect(screen.queryByTitle('先に API キーをセットしてください')).toBeNull();
+  });
+
+  it('外部の接続先で注意に合意していなければ、鍵を押すと先に注意を出し、合意したら窓を開く', () => {
+    const openEntry = vi.fn<LlmKeyPort['openEntry']>(() => 'opened');
+    installLlmKeyPort({ ...NO_KEYS, openEntry });
+    const base = 'https://openrouter.ai/api/v1';
+    useLlmProfilesStore.setState({ profiles: [profile({ baseUrl: base })] });
+    useLlmKeysStore.setState({ keyed: [] });
+    useTermsStore.setState({ cloud: null });
+    connected();
+    useChatStore.getState().put('c1', chat());
+    render(<ChatWorkspace chatId="c1" />);
+    fireEvent.click(screen.getByTitle('先に API キーをセットしてください'));
+    expect(openEntry).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole('button', { name: '同意して接続' }));
+    expect(openEntry).toHaveBeenCalledWith(base);
   });
 
   it('キーの要らない設定でも、キーが断られたら送るボタンを鍵にする', () => {

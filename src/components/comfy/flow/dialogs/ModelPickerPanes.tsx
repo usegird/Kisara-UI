@@ -125,7 +125,8 @@ export interface CardGridProps {
   readonly onClear: () => void;
   /** 末尾に足す余白（下に重ねた情報の高さ）。0 なら足さない */
   readonly bottomInset: number;
-  readonly onPlace: (value: string) => void;
+  /** 決める。`origin` は押したカードの場所 */
+  readonly onPlace: (value: string, origin: DOMRect) => void;
   readonly drag: ModelCardDrag | undefined;
 }
 
@@ -186,7 +187,8 @@ export function CardGrid({
           {visible.slice(0, shownCount).map((item) => {
             const onCardSelect = (picked: ModelItem, point: Point): void =>
               onSelect(picked.value, point);
-            const onCardPlace = (picked: ModelItem): void => onPlace(picked.value);
+            const onCardPlace = (picked: ModelItem, origin: DOMRect): void =>
+              onPlace(picked.value, origin);
             return (
               <ModelCard
                 key={item.value}

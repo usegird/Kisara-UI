@@ -63,5 +63,9 @@ export interface ModelPickerDialogProps {
    * 返すのは選択肢の文字列そのもの（区切り文字が環境で揺れるので、一覧側の表記に置き換えると
    * 実行時に解決できなくなる）
    */
-  readonly onPlace: (value: string) => PlaceResult | Promise<PlaceResult>;
+  readonly onPlace: (value: string, origin: DOMRect | null) => PlaceResult | Promise<PlaceResult>;
+  /**
+   * 帯の決定の右に置くもの（差し込み先が無いときの挿入位置のアイコン）。無ければ置かない
+   */
+  readonly decideAside?: React.ReactNode | undefined;
 }

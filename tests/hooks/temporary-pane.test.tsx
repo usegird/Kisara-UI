@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { useTemporaryPane } from '@/hooks/ui/use-temporary-pane';
 import { useSettingsStore } from '@/store/use-settings-store';
@@ -81,6 +81,62 @@ describe('閉じる', () => {
     fireEvent.keyDown(screen.getByRole('button', { name: '中' }), { key: 'Enter' });
     expect(stateText()).toBe('shown');
     fireEvent.keyDown(screen.getByRole('button', { name: '中' }), { key: 'Escape' });
+    expect(stateText()).toBe('hidden');
+  });
+});
+
+describe('幅で決める既定のピン止め', () => {
+  /** 枠の幅の知らせを手で起こすための ResizeObserver の代わり */
+  let notify: ((width: number) => void) | null = null;
+  class FakeResizeObserver {
+    constructor(callback: ResizeObserverCallback) {
+      notify = (width) =>
+        callback(
+          [{ contentRect: { width } } as ResizeObserverEntry],
+          this as unknown as ResizeObserver,
+        );
+    }
+    observe(): void {}
+    disconnect(): void {
+      notify = null;
+    }
+  }
+
+  function WidePane(): React.ReactElement {
+    const { state, cycle, attachFrame } = useTemporaryPane(PIN_KEY, 800);
+    return (
+      <div ref={attachFrame}>
+        <p data-testid="state">{state}</p>
+        <button type="button" data-directory-toggle onClick={cycle}>
+          切り替え
+        </button>
+      </div>
+    );
+  }
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    notify = null;
+  });
+
+  it('一度も切り替えていなければ、枠が 800px 以上の間だけピン止めで出す', () => {
+    vi.stubGlobal('ResizeObserver', FakeResizeObserver);
+    render(<WidePane />);
+    expect(stateText()).toBe('hidden');
+    act(() => notify?.(900));
+    expect(stateText()).toBe('pinned');
+    act(() => notify?.(799));
+    expect(stateText()).toBe('hidden');
+  });
+
+  it('切り替えたら、幅に関わらずその設定に従う', () => {
+    vi.stubGlobal('ResizeObserver', FakeResizeObserver);
+    render(<WidePane />);
+    act(() => notify?.(900));
+    // ピン止めから押すと、やめる（隠す）を残す
+    fireEvent.click(screen.getByRole('button', { name: '切り替え' }));
+    expect(useSettingsStore.getState().dialogPanePins[PIN_KEY]).toBe(false);
+    act(() => notify?.(1200));
     expect(stateText()).toBe('hidden');
   });
 });

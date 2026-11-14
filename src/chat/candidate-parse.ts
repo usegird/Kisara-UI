@@ -32,6 +32,7 @@ const FAILURE_KINDS: readonly LlmFailureKind[] = [
   'mixed-content',
   'auth',
   'not-found',
+  'redirect',
   'rejected',
   'rate-limit',
   'server',

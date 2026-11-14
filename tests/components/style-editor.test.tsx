@@ -93,7 +93,9 @@ describe('編集', () => {
 
     fireEvent.click(screen.getByLabelText('肯定の文面をキャレット位置に取り込む'));
 
-    expect(field.value).toBe('head: 1girl, solotail');
+    // 末尾に改行を足し、キャレットは入れた文字の先頭に戻す
+    expect(field.value).toBe('head: 1girl, solo\ntail');
+    expect(field.selectionStart).toBe(6);
 
     field.remove();
   });
@@ -254,7 +256,7 @@ describe('編集', () => {
     fireEvent.focusIn(field);
     fireEvent.doubleClick(screen.getByRole('button', { name: 'anima' }));
 
-    expect(field.value).toBe('a:1girl, solob');
+    expect(field.value).toBe('a:1girl, solo\nb');
 
     field.remove();
   });

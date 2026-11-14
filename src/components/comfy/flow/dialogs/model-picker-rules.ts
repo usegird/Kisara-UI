@@ -18,6 +18,9 @@ import type { DragTextResult } from '@/lib/text-drag-session';
 // 値から導く（状態は持たず、ダイアログが結果を使う）。
 // ─────────────────────────────
 
+/** 選んでいるカード（押したカードの無い決定で、札を飛ばす起点） */
+const SELECTED_CARD = '[data-model-card][aria-pressed="true"]';
+
 /** 情報の列の既定の大きさ（右なら幅、下なら高さ） */
 export const INFO_SIZE = { right: 320, bottom: 280 } as const;
 
@@ -115,6 +118,14 @@ export function leadWidthOf(pinned: boolean, width: number): number | undefined 
 export function decideTitleOf(item: ModelItem | null, blocked: string | null): string {
   if (item === null) return t('modelPicker.nothingSelected');
   return blocked ?? t('modelPicker.decide.title', { name: item.label });
+}
+
+/**
+ * 格子の中の選んでいるカードの場所（入れた位置まで札を飛ばす起点）。決めたその場で 1 回だけ読み、持たない。
+ * 選んでいるカードが描かれていなければ null
+ */
+export function selectedCardRectIn(grid: HTMLElement | null): DOMRect | null {
+  return grid?.querySelector(SELECTED_CARD)?.getBoundingClientRect() ?? null;
 }
 
 /** 押した所で情報を隠すか。格子と情報の外（列の境目を除く） */

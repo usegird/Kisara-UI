@@ -1,4 +1,6 @@
-import type { Entry } from '@/components/llm/dialogs/storage-entries';
+import { allBackupsOf, backupsOf, type Entry } from '@/components/llm/dialogs/storage-entries';
+import { isStaleBackup, orphanBackups } from '@/store/persist/storage-backups';
+import type { StorageItem } from '@/store/persist/storage-usage';
 
 // ─────────────────────────────
 // ストレージの管理の印の付け方。削除・戻すの印を付け外し、種類ごとに数える（描かない）。
@@ -61,6 +63,36 @@ export function markCounts(
     if (present.has(mark.key)) minus += 1;
   }
   return { plus, minus };
+}
+
+/** クリーンアップの対象の 1 件と、その種類 */
+export interface StaleBackup {
+  readonly entry: Entry;
+  readonly item: StorageItem;
+}
+
+/**
+ * クリーンアップの対象（ブラウザに元の無い、30 日より前のバックアップ）。読めなかった種類は除く。
+ * つないでいない・読んでいる種類が 1 つでもあれば null
+ */
+export function staleBackupsOf(
+  entries: readonly Entry[],
+  connected: boolean,
+  now: number,
+): StaleBackup[] | null {
+  if (!connected || allBackupsOf(entries) === null) return null;
+  return entries
+    .filter((entry) => entry.backup !== null)
+    .flatMap((entry) =>
+      orphanBackups(backupsOf(entry) ?? [], entry.items)
+        .filter((item) => isStaleBackup(item, now))
+        .map((item) => ({ entry, item })),
+    );
+}
+
+/** クリーンアップの 1 件の削除の印（その種類のバックアップの欄の印と同じ） */
+export function staleMarkOf({ entry, item }: StaleBackup): Mark {
+  return { entryId: entry.id, side: 'backup', key: item.key };
 }
 
 /** ブラウザの削除と戻すは片方だけ。付ける印と入れ替わる相手 */

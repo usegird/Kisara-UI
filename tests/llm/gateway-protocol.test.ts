@@ -23,6 +23,11 @@ describe('本体からの要求を読む', () => {
       baseUrl: BASE,
     });
     expect(parseHostMessage({ type: 'abort', id: 2 })).toEqual({ type: 'abort', id: 2 });
+    expect(parseHostMessage({ type: 'forget', baseUrl: BASE })).toEqual({
+      type: 'forget',
+      baseUrl: BASE,
+    });
+    expect(parseHostMessage({ type: 'forget', baseUrl: 1 })).toBeNull();
     expect(parseHostMessage({ type: 'request', id: 3, op: 'other', baseUrl: BASE })).toBeNull();
     expect(parseHostMessage({ type: 'request', op: 'checkKey', baseUrl: BASE })).toBeNull();
   });

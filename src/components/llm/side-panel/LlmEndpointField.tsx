@@ -3,16 +3,14 @@ import { useEffect, useRef, useState } from 'react';
 
 import { profileForConnect, sameBaseUrl } from '@/chat/connection-profile';
 import { formatLlmFailure } from '@/components/llm/message/failure-text';
-import { ConfirmDialog } from '@/components/ui/confirm-dialog';
+import { useCloudConsent, type CloudConsent } from '@/components/llm/side-panel/use-cloud-consent';
 import { HistoryCombobox } from '@/components/ui/history-combobox';
 import { t, type MessageKey } from '@/i18n';
-import { isRemoteHost } from '@/lib/remote-host';
 import type { LlmKeyEntryResult } from '@/port/llm-port';
 import { llmKeyPort } from '@/store/ports/llm-key-port';
 import { hasLlmKey, hasLlmKeyNow, isKeyMissing, useLlmKeysStore } from '@/store/use-llm-keys-store';
 import { useLlmProfilesStore } from '@/store/use-llm-profiles-store';
 import { useSettingsStore } from '@/store/use-settings-store';
-import { cloudAgreed, useTermsStore } from '@/store/use-terms-store';
 
 // ─────────────────────────────
 // LLM のベース URL の欄と接続（再接続）のボタンと、API キーの入力の窓を開くボタン。
@@ -83,17 +81,13 @@ export function LlmEndpointField({
   // 履歴はつながったベース URL だけ（最後につないだものが先頭）
   const urls = useSettingsStore((state) => state.llmUrlHistory);
 
-  // 私的なアドレスの外に初めてつなぐ前の、注意への合意の確認
-  const [askingCloud, setAskingCloud] = useState(false);
+  // 私的なアドレスの外に初めて送る前の、注意への合意の確認（接続とキーの入力の窓の両方）
+  const consent = useCloudConsent();
 
   const connect = (): void => {
     const url = draft.trim();
     if (url.length === 0) return;
-    if (isRemoteHost(url) && !cloudAgreed()) {
-      setAskingCloud(true);
-      return;
-    }
-    connectTo(url);
+    consent.confirmFor(url, () => connectTo(url));
   };
 
   const connectTo = (url: string): void => {
@@ -151,20 +145,8 @@ export function LlmEndpointField({
         </button>
         {status}
       </div>
-      <KeyEntry baseUrl={draft} />
-      <ConfirmDialog
-        open={askingCloud}
-        title={t('llm.connection.cloudTitle')}
-        description={t('llm.connection.cloudNotice')}
-        confirmLabel={t('llm.connection.cloudAgree')}
-        cancelLabel={t('llm.connection.cloudCancel')}
-        onConfirm={() => {
-          setAskingCloud(false);
-          useTermsStore.getState().acceptCloud();
-          connectTo(draft.trim());
-        }}
-        onCancel={() => setAskingCloud(false)}
-      />
+      <KeyEntry baseUrl={draft} confirmFor={consent.confirmFor} />
+      {consent.dialog}
     </form>
   );
 }
@@ -252,7 +234,14 @@ export function LlmConnectionError({
  * API キーの入力の窓を開くボタンと、キーの状況。窓を開けなかったときはその旨を出す。
  * キーそのものは出さない（本体は持たない）
  */
-function KeyEntry({ baseUrl }: { readonly baseUrl: string }): React.ReactElement {
+function KeyEntry({
+  baseUrl,
+  confirmFor,
+}: {
+  readonly baseUrl: string;
+  /** 外部クラウド接続の注意に合意してから続ける（キーを入れると確かめに送るため） */
+  readonly confirmFor: CloudConsent['confirmFor'];
+}): React.ReactElement {
   const keyed = useLlmKeysStore((state) => hasLlmKey(state.keyed, baseUrl));
   // そのキーでつながった（OpenRouter はキーの確かめも通った）ら、キーが通ると分かっている
   const connected = useLlmProfilesStore((state) =>
@@ -263,8 +252,8 @@ function KeyEntry({ baseUrl }: { readonly baseUrl: string }): React.ReactElement
   // 窓を開けた結果は、このボタンだけの状態
   const [entry, setEntry] = useState<LlmKeyEntryResult>('opened');
   const onEnterClick = (): void => {
-    // ポップアップは利用者の操作の中でしか開けないので、押した手続きの中で開く
-    setEntry(llmKeyPort().openEntry(baseUrl));
+    // ポップアップは利用者の操作の中でしか開けないので、押した手続き（合意を押した手続き）の中で開く
+    confirmFor(baseUrl, () => setEntry(llmKeyPort().openEntry(baseUrl)));
   };
   return (
     <div className="flex flex-wrap items-center gap-2">
@@ -277,9 +266,18 @@ function KeyEntry({ baseUrl }: { readonly baseUrl: string }): React.ReactElement
         {t('llm.connection.enterKey')}
       </button>
       {keyed ? (
-        <p role="status" className={notice({ tone: 'connected' })}>
-          {t(connected ? 'llm.connection.keyVerified' : 'llm.connection.keyEntered')}
-        </p>
+        <>
+          <p role="status" className={notice({ tone: 'connected' })}>
+            {t(connected ? 'llm.connection.keyVerified' : 'llm.connection.keyEntered')}
+          </p>
+          <button
+            type="button"
+            className="hover:bg-accent rounded-md border px-3 py-1"
+            onClick={() => llmKeyPort().forgetKey(baseUrl)}
+          >
+            {t('llm.connection.removeKey')}
+          </button>
+        </>
       ) : null}
       {entry === 'opened' ? null : (
         <p role="alert" className={notice({ tone: 'failed' })}>

@@ -13,6 +13,7 @@ const NO_GATEWAY: LlmKeyPort = {
   openEntry: () => 'unready',
   onKeySet: () => () => undefined,
   reportVerified: () => undefined,
+  forgetKey: () => undefined,
 };
 
 let current: LlmKeyPort = NO_GATEWAY;

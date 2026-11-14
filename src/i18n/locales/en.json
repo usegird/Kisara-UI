@@ -324,6 +324,7 @@
       "checkpoints": "Model"
     },
     "title": "Choose {kind}",
+    "close": "Close {kind} picker",
     "refresh": {
       "label": "Reload {kind} list",
       "title": "Reload the list (not updated automatically)"
@@ -440,12 +441,14 @@
   "insertBar": {
     "label": "Insert",
     "waiting": "Loading list",
+    "noTarget": "Choose where to insert before choosing, or drop the icon",
+    "caretMarker": "Insertion point (drag to move it to another position or field)",
+    "caretHandle": "Drop on a multiline field to insert there",
     "lora": {
       "title": "Choose a Lora and insert it at the caret",
       "label": "Insert Lora",
       "triggersFailed": "Could not get the frequent training words: {message}",
-      "memoFailed": "Could not get the notes: {message}",
-      "noTarget": "Place the caret in a multiline field outside this panel, then press (you can also drag and drop)"
+      "memoFailed": "Could not get the notes: {message}"
     },
     "style": {
       "title": "Open the style editor (confirm or double-click to insert at the caret)",
@@ -1525,6 +1528,7 @@
       "enterKey": "Set API key",
       "keyEntered": "Key set",
       "keyVerified": "API key verified",
+      "removeKey": "Remove API key",
       "entryBlocked": "Couldn't open the key window. Allow pop-ups for this site, then press it again.",
       "entryUnready": "Not connected to the gateway yet. Wait a moment and press it again. If this keeps happening, reload the page.",
       "noModels": "Connected - no model list (type the model name)",
@@ -1735,6 +1739,7 @@
       "mixedContent": "This page is served over https, so the browser blocks http addresses other than this computer. Open this page over http, or use an https address.",
       "auth": "The server refused the API key ({status}). Check the API key.",
       "notFound": "Nothing was found at this address. Check the base URL (with or without /v1).",
+      "redirect": "The server redirected to another URL. The API key is not sent there; enter the redirect target as the base URL.",
       "rejected": "The server rejected the request: {message}",
       "rejectedPlain": "The server rejected the request ({status}).",
       "rateLimit": "The server is busy (429). Wait a moment and try again.",
@@ -2002,11 +2007,8 @@
       "restoreTooLarge": "{count} items were not restored because they are too large (chats: the chat size limit in settings; avatars: 20 MB; others: 32 MB).",
       "cleanup": {
         "heading": "Cleanup",
-        "none": "There are no backups whose original is gone from the browser.",
-        "orphans": "Backups whose original is gone from the browser: {figures}",
-        "hint": "Applying deletes the files in ComfyUI. Unmark any you want to keep in each category.",
-        "mark": "Mark for deletion",
-        "unmark": "Remove marks",
+        "description": "Backups not in the browser that are 30 days old or older",
+        "none": "No matching backups.",
         "notice": {
           "title": "Cleanup",
           "description": "Old backup data remains. Do you want to review it?",

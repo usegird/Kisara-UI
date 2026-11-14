@@ -12,7 +12,7 @@ import { DIALOG_ICON_CLASS } from '@/components/ui/dialog';
  */
 export const RIGHT_MIN = 386;
 
-/** 文字のボタン（読み込み直す・エクスポート・全て削除・クリーンアップ） */
+/** 文字のボタン（読み込み直す・エクスポート・全て削除） */
 export const BUTTON =
   'hover:bg-muted shrink-0 rounded-md border px-2 py-0.5 text-xs disabled:opacity-40';
 

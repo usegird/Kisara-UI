@@ -28,6 +28,10 @@ export interface LlmKeyPort {
   readonly onKeySet: (listener: (baseUrl: string) => void) => () => void;
   /** 入ったキーを確かめた結果を、そのキーを入れた窓へ返す */
   readonly reportVerified: (baseUrl: string, outcome: LlmKeyOutcome) => void;
+  /**
+   * そのベース URL のキーをゲートウェイから外す。外れたらキーのある先の知らせが来る
+   */
+  readonly forgetKey: (baseUrl: string) => void;
 }
 
 /** キーの入力の窓を開いた結果 */
@@ -210,6 +214,10 @@ export type LlmFailureKind =
   | 'mixed-content'
   | 'auth'
   | 'not-found'
+  /**
+   * キーを付けた要求に転送が返った（キーを転送先へ渡さないので、たどらない）
+   */
+  | 'redirect'
   | 'rejected'
   | 'rate-limit'
   | 'server'

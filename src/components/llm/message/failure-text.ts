@@ -15,6 +15,7 @@ const PLAIN_FAILURE_TEXT: Readonly<
   unreachable: 'llm.failure.unreachable',
   'mixed-content': 'llm.failure.mixedContent',
   'not-found': 'llm.failure.notFound',
+  redirect: 'llm.failure.redirect',
   'rate-limit': 'llm.failure.rateLimit',
   interrupted: 'llm.failure.interrupted',
   'bad-response': 'llm.failure.badResponse',

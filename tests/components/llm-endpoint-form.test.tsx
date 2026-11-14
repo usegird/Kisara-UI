@@ -11,8 +11,9 @@ import { installLlmKeyPort } from '@/store/ports/llm-key-port';
 import { installLlmPort } from '@/store/ports/llm-port';
 import { useLlmKeysStore } from '@/store/use-llm-keys-store';
 import { useLlmProfilesStore } from '@/store/use-llm-profiles-store';
+import { cloudAgreed, useTermsStore } from '@/store/use-terms-store';
 
-import { fakeLlmPort, profile } from '../helpers/llm';
+import { fakeKeyPort, fakeLlmPort, profile } from '../helpers/llm';
 
 // ─────────────────────────────
 // 接続の欄は API キーを受けず、ゲートウェイの入力の窓を開く。打った値は送るまで接続の設定に書かない
@@ -25,13 +26,7 @@ let openEntry: ReturnType<typeof vi.fn<LlmKeyPort['openEntry']>>;
 beforeEach(() => {
   installLlmPort(fakeLlmPort());
   openEntry = vi.fn<LlmKeyPort['openEntry']>(() => 'opened');
-  installLlmKeyPort({
-    keyedUrls: () => [],
-    subscribe: () => () => undefined,
-    openEntry,
-    onKeySet: () => () => undefined,
-    reportVerified: () => undefined,
-  });
+  installLlmKeyPort(fakeKeyPort({ openEntry }));
   useLlmProfilesStore.setState({
     profiles: [profile({ id: 'p1', baseUrl: '' }), profile({ id: 'cloud', baseUrl: OPENROUTER })],
     checks: {},
@@ -57,6 +52,21 @@ describe('API キーの入れ方', () => {
     fireEvent.click(enterButton());
     expect(openEntry).toHaveBeenCalledWith(OPENROUTER);
     expect(screen.queryByRole('alert')).toBeNull();
+  });
+
+  it('外部クラウド接続の注意に合意していなければ、先に注意を出し、合意したら窓を開く', () => {
+    useTermsStore.setState({ cloud: null });
+    render(<LlmEndpointField profileId="p1" onProfile={() => undefined} />);
+    fireEvent.change(urlField(), { target: { value: OPENROUTER } });
+    fireEvent.click(enterButton());
+    expect(openEntry).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole('button', { name: 'やめる' }));
+    expect(openEntry).not.toHaveBeenCalled();
+
+    fireEvent.click(enterButton());
+    fireEvent.click(screen.getByRole('button', { name: '同意して接続' }));
+    expect(openEntry).toHaveBeenCalledWith(OPENROUTER);
+    expect(cloudAgreed()).toBe(true);
   });
 
   it('ポップアップを止められたら、許可を求める', () => {
@@ -89,6 +99,18 @@ describe('API キーの入れ方', () => {
     act(() => useLlmProfilesStore.setState({ checks: { cloud: ok } }));
     expect(screen.getByText('API キー検証済み')).toBeTruthy();
     expect(screen.queryByText('設定済')).toBeNull();
+  });
+
+  it('キーがあるときだけ消すボタンを出し、押すと欄のベース URL のキーを外させる', () => {
+    const forgetKey = vi.fn<LlmKeyPort['forgetKey']>();
+    installLlmKeyPort(fakeKeyPort({ forgetKey }));
+    useLlmKeysStore.setState({ keyed: [] });
+    render(<LlmEndpointField profileId="p1" onProfile={() => undefined} />);
+    fireEvent.change(urlField(), { target: { value: OPENROUTER } });
+    expect(screen.queryByRole('button', { name: 'API キーを消す' })).toBeNull();
+    act(() => useLlmKeysStore.setState({ keyed: [OPENROUTER] }));
+    fireEvent.click(screen.getByRole('button', { name: 'API キーを消す' }));
+    expect(forgetKey).toHaveBeenCalledWith(OPENROUTER);
   });
 
   it('送ったら同じ URL の設定を選び、キーを入れたかを書く', () => {

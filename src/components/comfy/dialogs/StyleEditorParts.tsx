@@ -10,7 +10,7 @@ import { textDragProps } from '@/components/ui/text-drag';
 import type { Style } from '@/graph/styles';
 import { useTextFieldWhile } from '@/hooks/flow/use-text-field-focus';
 import { t, type MessageKey } from '@/i18n';
-import { insertAtCaret } from '@/lib/insert-at-caret';
+import { placeEntry } from '@/lib/insert-motion';
 import { useStylesStore } from '@/store/use-styles-store';
 
 // ─────────────────────────────
@@ -118,10 +118,9 @@ export function StyleList({ styles, selected, field, onPick }: StyleListProps): 
             // 押すと焦点はここへ移るが、差し込み先は開いてから最後に入った欄のまま
             // （既定を止めると掴めなくなる）
             onClick={() => onPick(style.name)}
-            onDoubleClick={() => {
-              if (field !== null && style.prompt.length > 0) {
-                insertAtCaret(field, style.prompt);
-              }
+            onDoubleClick={(event) => {
+              if (field === null) return;
+              placeEntry(field, style.prompt, event.currentTarget.getBoundingClientRect());
             }}
           >
             {style.name}

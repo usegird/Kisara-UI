@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import {
   applyMarks,
   openStorageFile,
+  readRemoteLists,
   takeEntryBackup,
   toastApplied,
 } from '@/components/llm/dialogs/storage-actions';
@@ -17,13 +18,14 @@ import {
   type UserFileLists,
 } from '@/components/llm/dialogs/storage-entries';
 import {
+  staleBackupsOf,
   toggleMarks,
   withoutReferenceMarks,
   type Mark,
   type Marks,
 } from '@/components/llm/dialogs/storage-marks';
 import { RIGHT_MIN } from '@/components/llm/dialogs/storage-style';
-import { BackupOverview } from '@/components/llm/dialogs/StorageBackupOverview';
+import { BackupOverview, CleanupHeader } from '@/components/llm/dialogs/StorageBackupOverview';
 import { EntryHeader, ItemList } from '@/components/llm/dialogs/StorageItemList';
 import {
   CategoryNav,
@@ -135,6 +137,8 @@ function StorageBody({ start }: { readonly start: string }): React.ReactElement 
   const [marks, setMarks] = useState<Marks>(new Map());
   const [reloadNeeded, setReloadNeeded] = useState(false);
   const [busy, setBusy] = useState(false);
+  // 30 日より前かを決める時刻。開いている間は動かさない（描くたびに対象が入れ替わらないように）
+  const [openedAt] = useState(Date.now);
   // 開いたエクスポートのファイル（種類ごと）。中身はダイアログを閉じると捨てる
   const [files, setFiles] = useState<ReadonlyMap<string, OpenedFile>>(new Map());
   const refresh = (): void => setRevision((value) => value + 1);
@@ -154,22 +158,12 @@ function StorageBody({ start }: { readonly start: string }): React.ReactElement 
   useEffect(() => {
     if (!connected) return undefined;
     let alive = true;
-    void Promise.all(
-      BACKUP_KINDS.map(async (kind) => {
-        const items = await listBackups(kind).catch(() => 'failed' as const);
-        return [kind, items ?? 'failed'] as const;
-      }),
-    ).then((entries) => {
-      if (alive) setBackups(Object.fromEntries(entries));
+    void readRemoteLists(BACKUP_KINDS, listBackups).then((found) => {
+      if (alive) setBackups(found);
     });
     // ユーザーフォルダの物も同じ時機に読む
-    void Promise.all(
-      USER_FILE_KINDS.map(async (kind) => {
-        const items = await listUserFileItems(kind).catch(() => 'failed' as const);
-        return [kind, items ?? 'failed'] as const;
-      }),
-    ).then((entries) => {
-      if (alive) setUserFiles(Object.fromEntries(entries));
+    void readRemoteLists(USER_FILE_KINDS, listUserFileItems).then((found) => {
+      if (alive) setUserFiles(found);
     });
     return () => {
       alive = false;
@@ -178,6 +172,7 @@ function StorageBody({ start }: { readonly start: string }): React.ReactElement 
 
   const entries = buildEntries({ usage, connected, backups, userFiles, files });
   const entry = entries.find((item) => item.id === selected);
+  const stale = staleBackupsOf(entries, connected, openedAt);
 
   const choose = (id: string): void => {
     setSelected(id);
@@ -276,9 +271,11 @@ function StorageBody({ start }: { readonly start: string }): React.ReactElement 
         <BackupOverview
           entries={entries}
           connected={connected}
+          stale={stale}
           marks={marks}
+          busy={busy}
           onSelect={choose}
-          onToggleAll={toggle}
+          onToggle={toggleOne}
         />
       );
     }
@@ -291,6 +288,15 @@ function StorageBody({ start }: { readonly start: string }): React.ReactElement 
         onSelect={choose}
       />
     );
+  };
+
+  /** 帯の種類ごとのボタン。種類はエクスポート・全て削除、Comfy バックアップはクリーンアップの全て削除 */
+  const header = (): React.ReactNode => {
+    if (entry !== undefined) {
+      return <EntryHeader entry={entry} marks={marks} busy={busy} onToggleAll={toggle} />;
+    }
+    if (selected !== COMFY_BACKUP || stale === null) return null;
+    return <CleanupHeader stale={stale} marks={marks} busy={busy} onToggleAll={toggle} />;
   };
 
   const nav = <CategoryNav entries={entries} selected={selected} marks={marks} onSelect={choose} />;
@@ -312,11 +318,7 @@ function StorageBody({ start }: { readonly start: string }): React.ReactElement 
         onDirectory={cycle}
         path={pathOf(selected, entries)}
         onSelect={choose}
-        header={
-          entry === undefined ? null : (
-            <EntryHeader entry={entry} marks={marks} busy={busy} onToggleAll={toggle} />
-          )
-        }
+        header={header()}
         onReload={refresh}
       />
 

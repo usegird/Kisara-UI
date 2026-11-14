@@ -1,4 +1,4 @@
-import { truncate } from '@/lib/text';
+import { createTextChip } from '@/lib/insert-motion';
 import { beginTextDrag, TEXT_DRAG_TYPE, type DragTextResult } from '@/lib/text-drag-session';
 
 // ─────────────────────────────
@@ -6,8 +6,8 @@ import { beginTextDrag, TEXT_DRAG_TYPE, type DragTextResult } from '@/lib/text-d
 // 落とし先の欄でキャレットを見せて入れるのは `useTextDropCaret`。
 // ─────────────────────────────
 
-/** 札に出す文字の上限（長い文面は末尾を省く） */
-const LABEL_MAX = 40;
+/** 写させる間だけ札を置く、画面の外の位置（px） */
+const OFF_SCREEN = -9999;
 /** 札を指先からずらす量（px）。負の値で指先の右下に出る（指先の真下はキャレットのために空ける） */
 const OFFSET = -12;
 
@@ -17,13 +17,10 @@ const OFFSET = -12;
  * ブラウザは渡した瞬間の見た目を写すので、写したら外す
  */
 function dragLabel(event: React.DragEvent<HTMLElement>, text: string): void {
-  const doc = event.currentTarget.ownerDocument;
-  const label = doc.createElement('div');
-  label.textContent = truncate(text, LABEL_MAX, { singleLine: false });
-  label.className =
-    'bg-popover text-popover-foreground fixed top-0 -left-[9999px] rounded border px-1.5 ' +
-    'py-0.5 font-mono text-xs whitespace-nowrap shadow';
-  doc.body.append(label);
+  const label = createTextChip(event.currentTarget.ownerDocument, text);
+  // 画面の外に置いて写させる（見えるところに一瞬出さない）
+  label.style.left = `${String(OFF_SCREEN)}px`;
+  event.currentTarget.ownerDocument.body.append(label);
   event.dataTransfer.setDragImage(label, OFFSET, OFFSET);
   globalThis.setTimeout(() => label.remove(), 0);
 }
@@ -64,4 +61,14 @@ export function textDragProps(text: string): {
     onDragStart: (event) =>
       startTextDrag(event, { label: text, text, resolve: () => Promise.resolve({ text }) }),
   };
+}
+
+/**
+ * 挿入位置のアイコンを掴む。文字は入れず、落とした欄と位置を差し込み先にする（欄に重ねている間と落ちたときに
+ * キャレットを置くのは `useTextDropCaret` で、そこで焦点が移って差し込み先が変わる）。指先にはアイコンが付いてくる
+ */
+export function startCaretDrag(event: React.DragEvent<HTMLElement>): void {
+  event.dataTransfer.setData(TEXT_DRAG_TYPE, '');
+  event.dataTransfer.effectAllowed = 'copy';
+  beginTextDrag({ resolve: () => Promise.resolve({ text: '' }) });
 }

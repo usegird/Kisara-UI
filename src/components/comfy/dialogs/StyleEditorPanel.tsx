@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-import { acceptInsertTarget } from '@/components/comfy/dialogs/insert-target';
+import { acceptInsertTarget, textAreaOf } from '@/components/comfy/dialogs/insert-target';
 import { InsertButton } from '@/components/comfy/dialogs/InsertButton';
 import {
   RefreshStylesButton,
@@ -11,6 +11,7 @@ import {
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { PaneCloseButton } from '@/components/ui/decide-button';
 import { DialogToolbar } from '@/components/ui/dialog-toolbar';
+import { InsertCaretAside, InsertTargetSubtitle } from '@/components/ui/insert-caret-marker';
 import { PanelHeader } from '@/components/ui/panel-header';
 import { SearchField } from '@/components/ui/search-field';
 import { SidePane } from '@/components/ui/side-pane';
@@ -113,6 +114,7 @@ export function StyleEditorPanel(): React.ReactElement | null {
   const [pending, setPending] = useState<PendingMove | null>(null);
   const [deleting, setDeleting] = useState(false);
   const field = useTextFieldWhile(acceptInsertTarget, editing !== null);
+  const blocked = field === null ? t('insertBar.noTarget') : null;
   const refresh = useStylesStore((state) => state.refresh);
   const closeRequested = useStylesStore((state) => state.closeRequested);
   const clearCloseRequest = useStylesStore((state) => state.clearCloseRequest);
@@ -204,7 +206,7 @@ export function StyleEditorPanel(): React.ReactElement | null {
       {/* 見出しの帯はダイアログと同じ */}
       <PanelHeader
         title={t('styles.title')}
-        subtitle={subtitleOf(selected, dirty)}
+        subtitle={<InsertTargetSubtitle subtitle={subtitleOf(selected, dirty)} blocked={blocked} />}
         onClose={() => request('close', null)}
         closeLabel={t('styles.close')}
         actions={
@@ -237,6 +239,7 @@ export function StyleEditorPanel(): React.ReactElement | null {
                 label={t('styles.insertNegative')}
                 field={field}
               />
+              <InsertCaretAside field={textAreaOf(field)} />
               <PaneCloseButton label={t('styles.close')} onClick={() => request('close', null)} />
             </DialogToolbar>
           }

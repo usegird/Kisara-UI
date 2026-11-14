@@ -9,6 +9,44 @@ export type TextField = HTMLInputElement | HTMLTextAreaElement;
 /** 差し込み元の画面（スタイルの編集・ワイルドカード）に付ける目印。この中の欄は差し込み先にしない */
 export const INSERT_SOURCE_MARK = 'data-insert-source';
 
+/** 打った語ではない差し込みをしている最中の欄（入力の知らせは同期で届くので、その間だけ入れる） */
+const quietFields = new WeakSet<TextField>();
+
+/**
+ * 打った語ではない文字（選んだ Lora・落とした文字）として差し込む。タグの補完はこの入力では出さない
+ */
+export function insertQuietly(element: TextField, text: string): boolean {
+  quietFields.add(element);
+  try {
+    return insertAtCaret(element, text);
+  } finally {
+    quietFields.delete(element);
+  }
+}
+
+/**
+ * 差し込みの画面（Lora・スタイル・ワイルドカード）から 1 件を入れる。末尾に改行を足し（入れる文字が
+ * 改行で終わっていれば足さない）、キャレットは入れた文字の先頭に戻す。入れた先頭の位置と入れた文字を
+ * 返し、入れられなければ null
+ */
+export function insertEntry(
+  element: TextField,
+  text: string,
+): { readonly start: number; readonly text: string } | null {
+  if (text.length === 0) return null;
+  const entry = text.endsWith('\n') ? text : `${text}\n`;
+  // 選んでいる範囲は置き換わるので、入った文字はその先頭から始まる
+  const start = element.selectionStart ?? element.value.length;
+  if (!insertQuietly(element, entry)) return null;
+  element.setSelectionRange(start, start);
+  return { start, text: entry };
+}
+
+/** いま届いている入力の知らせが、打った語ではない差し込みによるものか */
+export function isQuietInput(element: TextField): boolean {
+  return quietFields.has(element);
+}
+
 /** 文字を打てる欄か。押しボタンや選択肢は対象にしない */
 export function isTextField(element: Element | null): element is TextField {
   if (element instanceof HTMLTextAreaElement) return true;

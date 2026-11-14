@@ -39,6 +39,8 @@ const HTTP_NOT_FOUND = 404;
 const HTTP_TOO_MANY_REQUESTS = 429;
 /** これ以上の状態は接続先の側の失敗 */
 const HTTP_SERVER_ERROR = 500;
+/** `redirect: 'manual'` で転送が返ったときの応答の種類 */
+const OPAQUE_REDIRECT = 'opaqueredirect';
 
 /** 差し替えられる `fetch`（テストでは作り物を渡す） */
 export type FetchLike = (input: string, init: RequestInit) => Promise<Response>;
@@ -124,8 +126,12 @@ async function send(
   if (base === null) return { failure: fail('not-found') };
   const url = toUrl(base);
   if (isMixedContent(url, options.pageProtocol())) return { failure: fail('mixed-content') };
+  // キーを付けた要求は転送をたどらない。別のオリジンへの転送で認証のヘッダーを外すかはブラウザの版に任されるため
+  const keyed = keyFor(options, endpoint).length > 0;
   try {
-    return { response: await options.fetch(url, init) };
+    if (!keyed) return { response: await options.fetch(url, init) };
+    const response = await options.fetch(url, { ...init, redirect: 'manual' });
+    return response.type === OPAQUE_REDIRECT ? { failure: fail('redirect') } : { response };
   } catch {
     if (limit?.expired() === true) return { failure: fail('timeout') };
     if (init.signal?.aborted === true) return { failure: fail('stopped') };

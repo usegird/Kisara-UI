@@ -7,7 +7,7 @@ import { installLlmPort } from '@/store/ports/llm-port';
 import { isKeyMissing, useLlmKeysStore } from '@/store/use-llm-keys-store';
 import { useLlmProfilesStore } from '@/store/use-llm-profiles-store';
 
-import { fakeLlmPort, profile } from '../helpers/llm';
+import { fakeKeyPort, fakeLlmPort, profile } from '../helpers/llm';
 
 // ─────────────────────────────
 // ゲートウェイの窓口の受け口。キーが入ったら確かめて、結果を返す。
@@ -19,16 +19,15 @@ describe('キーが入ったとき', () => {
     useLlmProfilesStore.setState({ profiles: [], checks: {} });
     let keySet: (baseUrl: string) => void = () => undefined;
     const reportVerified = vi.fn<LlmKeyPort['reportVerified']>();
-    installLlmKeyPort({
-      keyedUrls: () => [],
-      subscribe: () => () => undefined,
-      openEntry: () => 'opened',
-      onKeySet: (listener) => {
-        keySet = listener;
-        return () => undefined;
-      },
-      reportVerified,
-    });
+    installLlmKeyPort(
+      fakeKeyPort({
+        onKeySet: (listener) => {
+          keySet = listener;
+          return () => undefined;
+        },
+        reportVerified,
+      }),
+    );
     keySet('http://x/v1');
     await vi.waitFor(() => expect(reportVerified).toHaveBeenCalledWith('http://x/v1', 'ok'));
   });
@@ -64,16 +63,15 @@ describe('読み込み直した直後', () => {
 
     let keyed: readonly string[] = [];
     let changed: () => void = () => undefined;
-    installLlmKeyPort({
-      keyedUrls: () => keyed,
-      subscribe: (listener) => {
-        changed = listener;
-        return () => undefined;
-      },
-      openEntry: () => 'opened',
-      onKeySet: () => () => undefined,
-      reportVerified: () => undefined,
-    });
+    installLlmKeyPort(
+      fakeKeyPort({
+        keyedUrls: () => keyed,
+        subscribe: (listener) => {
+          changed = listener;
+          return () => undefined;
+        },
+      }),
+    );
     keyed = [LOCAL];
     changed();
     changed();

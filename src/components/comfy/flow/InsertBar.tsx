@@ -4,6 +4,7 @@ import { useState } from 'react';
 
 import { ModelPickerDialog } from '@/components/comfy/flow/dialogs/ModelPickerDialog';
 import type { WorkflowToolDialogProps } from '@/components/comfy/flow/dialogs/WorkflowToolDialog';
+import { InsertCaretHandle, InsertCaretMarker } from '@/components/ui/insert-caret-marker';
 import { lazyPart } from '@/components/ui/lazy-part';
 import { LORA_FOLDER } from '@/graph/model-files';
 import { isToolName, readWorkflowTool } from '@/graph/workflow-tool';
@@ -148,7 +149,9 @@ export function InsertBar(): React.ReactElement {
         onInsertText={lora.onInsertText}
         onPlace={lora.onPlace}
         finalFocus={lora.finalFocus}
+        decideAside={lora.target === null ? <InsertCaretHandle /> : null}
       />
+      {loraOpen && lora.target !== null ? <InsertCaretMarker field={lora.target} /> : null}
 
       {/* 既存の編集の画面を重ねて開く（ほかの埋め込みはダイアログの枠が閉じる）。
           開いている間に押し直すと閉じる（直しかけがあれば画面が確かめる） */}

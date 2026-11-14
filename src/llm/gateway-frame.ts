@@ -62,12 +62,23 @@ export function serveGateway(options: GatewayFrameOptions): void {
 
   const send = (message: GatewayMessage): void => host?.postMessage(message);
   const sendKeys = (): void => send({ type: 'keys', urls: [...keys.keys()] });
+  const saveKeys = (): void =>
+    options.storage.setItem(KEYS_STORAGE_NAME, JSON.stringify(Object.fromEntries(keys)));
 
   const onHostMessage = (data: unknown): void => {
     const message = parseHostMessage(data);
     if (message === null) return;
     if (message.type === 'abort') {
       running.get(message.id)?.abort();
+      return;
+    }
+    if (message.type === 'forget') {
+      // 本体が求めても、できるのはキーを使えなくすることだけ（キーは渡さない）
+      const base = normalizeLlmBaseUrl(message.baseUrl);
+      if (base === null || !keys.delete(base)) return;
+      entries.delete(base);
+      saveKeys();
+      sendKeys();
       return;
     }
     if (message.type === 'verified') {
@@ -114,7 +125,7 @@ export function serveGateway(options: GatewayFrameOptions): void {
     const base = key === null ? null : normalizeLlmBaseUrl(key.baseUrl);
     if (key === null || base === null) return;
     keys.set(base, key.key);
-    options.storage.setItem(KEYS_STORAGE_NAME, JSON.stringify(Object.fromEntries(keys)));
+    saveKeys();
     if (isEntryWindow(event.source)) entries.set(base, event.source);
     // 本体がキーのある先を知ってから確かめるよう、一覧を先に送る
     sendKeys();

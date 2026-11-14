@@ -5,6 +5,7 @@ import { flushSync } from 'react-dom';
 import { isStreaming } from '@/chat/edit';
 import { LlmModelButton } from '@/components/llm/dialogs/LlmModelDialog';
 import { composerInputId } from '@/components/llm/playbook/use-playbook-action';
+import { useCloudConsent, type CloudConsent } from '@/components/llm/side-panel/use-cloud-consent';
 import { ChatSaveNotice } from '@/components/llm/workspace/ChatSaveNotice';
 import {
   AttachedImages,
@@ -65,6 +66,8 @@ export function ChatComposer({ chatId }: ChatComposerProps): React.ReactElement 
   // モデルを選ぶダイアログ。モデルの欄と送るボタン（モデルを選んでいない間）の両方から開く
   const [modelOpen, setModelOpen] = useState(false);
   const { profileId } = useLlmTarget();
+  // 鍵のアイコンでキーの入力の窓を開く前の、外部クラウド接続の注意への合意の確認
+  const consent = useCloudConsent();
 
   // 本文が 4 行以上（折り返しを含む）になったら、下に 5px の余白を足す。3 行までは最小の高さに収まり
   // 高さが変わらないので、高さが変わったときだけ数え直す（打った・消した・幅が変わった）。
@@ -110,7 +113,7 @@ export function ChatComposer({ chatId }: ChatComposerProps): React.ReactElement 
     // つないでいない間は接続の案内、つながっていてモデルを選んでいない間はモデルを選ぶダイアログを出す
     if (sendState === 'connect' && !empty) useLlmConnectDialogStore.getState().open();
     if (sendState === 'model' && !empty) setModelOpen(true);
-    if (sendState === 'key' && !empty) openKeyEntry(profileId);
+    if (sendState === 'key' && !empty) openKeyEntry(profileId, consent.confirmFor);
     if (!sendable) return;
     const first = (useChatStore.getState().chats[chatId]?.messages.length ?? 0) === 0;
     if (first && typeof document.startViewTransition === 'function') {
@@ -219,8 +222,9 @@ export function ChatComposer({ chatId }: ChatComposerProps): React.ReactElement 
                 onStop={onStop}
                 onSend={send}
                 onChooseModel={() => setModelOpen(true)}
-                onSetKey={() => openKeyEntry(profileId)}
+                onSetKey={() => openKeyEntry(profileId, consent.confirmFor)}
               />
+              {consent.dialog}
             </div>
           </div>
         </div>
@@ -268,11 +272,13 @@ function ComposerModel({
  * 選んでいる接続の設定の API キーの入力の窓を開く。開けなければ（ゲートウェイがまだ・ポップアップを止められた）
  * 接続の案内を出し、そこで理由を見せる
  */
-function openKeyEntry(profileId: string | null): void {
+function openKeyEntry(profileId: string | null, confirmFor: CloudConsent['confirmFor']): void {
   const profile = useLlmProfilesStore.getState().profiles.find((item) => item.id === profileId);
   if (profile === undefined || profile.baseUrl.trim().length === 0) return;
-  // ポップアップは利用者の操作の中でしか開けないので、押した手続き（Enter を含む）の中で開く
-  if (llmKeyPort().openEntry(profile.baseUrl) !== 'opened') {
-    useLlmConnectDialogStore.getState().open();
-  }
+  // ポップアップは利用者の操作の中でしか開けないので、押した手続き（Enter・合意を押したのを含む）の中で開く
+  confirmFor(profile.baseUrl, () => {
+    if (llmKeyPort().openEntry(profile.baseUrl) !== 'opened') {
+      useLlmConnectDialogStore.getState().open();
+    }
+  });
 }

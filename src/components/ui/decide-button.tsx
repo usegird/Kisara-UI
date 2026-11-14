@@ -19,7 +19,8 @@ export interface DecideButtonProps {
   /** 指したときの説明。押せないときは理由を渡す */
   readonly title: string;
   readonly disabled: boolean;
-  readonly onClick: () => void;
+  /** 押した手続き。差し込みはボタンの位置から札を飛ばすので押した知らせを受け取れる */
+  readonly onClick: (event: React.MouseEvent<HTMLButtonElement>) => void;
   /** ボタンの文字。既定は「決定」 */
   readonly caption?: string | undefined;
   /**

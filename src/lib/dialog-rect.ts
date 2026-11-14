@@ -291,15 +291,18 @@ export type PaneDock = 'right' | 'bottom';
 /** 列ごとの置き場。キーは `ダイアログの名前:列の名前` */
 export type PaneDocks = Readonly<Record<string, PaneDock>>;
 
-/** ピン止めした列（ダイアログの列ごと。モデル選びのディレクトリ）。ピン止めしたものだけを持つ */
-export type PanePins = Readonly<Record<string, true>>;
+/**
+ * ピン止めの切り替え（ダイアログの列ごと。モデル選びのディレクトリ）。ピン止めした・やめたを持ち、
+ * 切り替えていない列は持たない（その列の既定は画面が決める）
+ */
+export type PanePins = Readonly<Record<string, boolean>>;
 
-/** ピン止めの保存値を読み戻す。`true` 以外の項目は捨てる */
+/** ピン止めの保存値を読み戻す。真偽でない項目は捨てる */
 export function normalizePanePins(value: unknown): PanePins {
   if (typeof value !== 'object' || value === null) return {};
-  const pins: Record<string, true> = {};
+  const pins: Record<string, boolean> = {};
   for (const [key, pinned] of Object.entries(value as Record<string, unknown>)) {
-    if (pinned === true) setOwn(pins, key, true);
+    if (typeof pinned === 'boolean') setOwn(pins, key, pinned);
   }
   return pins;
 }

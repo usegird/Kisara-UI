@@ -2,7 +2,7 @@ import { cva } from 'class-variance-authority';
 import { RefreshCw } from 'lucide-react';
 import { useState } from 'react';
 
-import { acceptInsertTarget } from '@/components/comfy/dialogs/insert-target';
+import { acceptInsertTarget, textAreaOf } from '@/components/comfy/dialogs/insert-target';
 import { InsertButton } from '@/components/comfy/dialogs/InsertButton';
 import { arrowSelect } from '@/components/ui/arrow-select';
 import { CopyButton } from '@/components/ui/copy-button';
@@ -10,6 +10,7 @@ import { PaneCloseButton } from '@/components/ui/decide-button';
 import { DIALOG_ICON_CLASS } from '@/components/ui/dialog';
 import { DialogToolbar } from '@/components/ui/dialog-toolbar';
 import { DirectoryList } from '@/components/ui/directory-list';
+import { InsertCaretAside, InsertTargetSubtitle } from '@/components/ui/insert-caret-marker';
 import { PanelHeader } from '@/components/ui/panel-header';
 import { refreshIcon } from '@/components/ui/refresh-icon';
 import { SearchField } from '@/components/ui/search-field';
@@ -18,7 +19,7 @@ import { textDragProps } from '@/components/ui/text-drag';
 import { wildcardDirectory, wildcardLabel, wildcardPath } from '@/graph/wildcards';
 import { useTextFieldWhile } from '@/hooks/flow/use-text-field-focus';
 import { t } from '@/i18n';
-import { insertAtCaret } from '@/lib/insert-at-caret';
+import { placeEntry } from '@/lib/insert-motion';
 import { directoryTree, isUnderDirectory } from '@/lib/path-tree';
 import { guardPress } from '@/lib/press-guard';
 import { matchesAnyTerm, rankBySearch, searchTerms } from '@/lib/search-terms';
@@ -69,7 +70,12 @@ export function WildcardPanel(): React.ReactElement | null {
       {/* 見出しの帯はスタイルの編集と同じ */}
       <PanelHeader
         title={t('wildcards.title')}
-        subtitle={selected ?? t('wildcards.pickPrompt')}
+        subtitle={
+          <InsertTargetSubtitle
+            subtitle={selected ?? t('wildcards.pickPrompt')}
+            blocked={field === null ? t('insertBar.noTarget') : null}
+          />
+        }
         onClose={close}
         closeLabel={t('wildcards.close')}
         actions={
@@ -96,6 +102,7 @@ export function WildcardPanel(): React.ReactElement | null {
           toolbar={
             <DialogToolbar label={t('wildcards.decideToolbar')}>
               <InsertButton text={selected ?? ''} label={t('wildcards.insert')} field={field} />
+              <InsertCaretAside field={textAreaOf(field)} />
               <PaneCloseButton label={t('wildcards.close')} onClick={close} />
             </DialogToolbar>
           }
@@ -150,8 +157,9 @@ export function WildcardPanel(): React.ReactElement | null {
                       // 押すと焦点はここへ移るが、差し込み先は開いてから最後に入った欄のまま
                       // （既定を止めると掴めなくなる）
                       onClick={() => setSelected(name)}
-                      onDoubleClick={() => {
-                        if (field !== null) insertAtCaret(field, name);
+                      onDoubleClick={(event) => {
+                        if (field === null) return;
+                        placeEntry(field, name, event.currentTarget.getBoundingClientRect());
                       }}
                     >
                       <span className="truncate">{wildcardLabel(name)}</span>

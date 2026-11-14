@@ -14,3 +14,8 @@ export { INSERT_SOURCE_MARK };
 export function acceptInsertTarget(field: TextField): boolean {
   return field instanceof HTMLTextAreaElement && field.closest(`[${INSERT_SOURCE_MARK}]`) === null;
 }
+
+/** 差し込み先を複数行の欄として返す（`acceptInsertTarget` が通すのは複数行の欄だけ） */
+export function textAreaOf(field: TextField | null): HTMLTextAreaElement | null {
+  return field instanceof HTMLTextAreaElement ? field : null;
+}

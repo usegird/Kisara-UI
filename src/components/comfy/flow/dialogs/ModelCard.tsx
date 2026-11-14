@@ -45,7 +45,8 @@ export interface ModelCardProps {
   /** 押した。`point` は押した所（キーボードならカードの中心）。情報が覆うかの判断に使う */
   readonly onSelect: (item: ModelItem, point: Point) => void;
   /** ダブルクリック・選んでいるときの Enter。配置のボタンと同じ */
-  readonly onPlace: (item: ModelItem) => void;
+  /** 決める（ダブルクリック・Enter）。`origin` は押したカードの場所（札を飛ばす起点） */
+  readonly onPlace: (item: ModelItem, origin: DOMRect) => void;
   readonly drag?: ModelCardDrag | undefined;
 }
 
@@ -77,6 +78,7 @@ export function ModelCard({
         type="button"
         className="hover:bg-accent flex min-h-0 w-full flex-1 flex-col text-left"
         title={item.path}
+        data-model-card=""
         aria-pressed={selected}
         // ダブルクリックの 2 回目の押下は選び直さない（押し直しで外す動きと重ねない）
         onClick={(event) => {
@@ -89,12 +91,12 @@ export function ModelCard({
               : { x: event.clientX, y: event.clientY };
           onSelect(item, point);
         }}
-        onDoubleClick={() => onPlace(item)}
+        onDoubleClick={(event) => onPlace(item, event.currentTarget.getBoundingClientRect())}
         // 選んでいるカードの Enter は決定（押し直しで外す動きにしない）。選んでいなければ押下で選ぶ
         onKeyDown={(event) => {
           if (event.key !== 'Enter' || !selected || isComposingKey(event)) return;
           event.preventDefault();
-          onPlace(item);
+          onPlace(item, event.currentTarget.getBoundingClientRect());
         }}
       >
         <span className="bg-muted relative flex min-h-0 w-full flex-1 items-center justify-center">

@@ -1,7 +1,6 @@
 import type { StateCreator } from 'zustand';
 
 import { normalizePaneSize } from '@/lib/dialog-rect';
-import { omitKey } from '@/lib/own-key';
 import { normalizeChatCardWidth } from '@/store/settings-fields/chat-card-width';
 import { normalizeChatSidebarWidth } from '@/store/settings-fields/chat-sidebar-width';
 import { normalizePromptAdvisorWidth } from '@/store/settings-fields/prompt-advisor-width';
@@ -53,12 +52,9 @@ export const createSettingsPanelsSlice: StateCreator<
     })),
   setDialogPaneDock: (key, dock) =>
     set((state) => ({ dialogPaneDocks: { ...state.dialogPaneDocks, [key]: dock } })),
+  // やめたことも残す（切り替えていない列の既定と分ける）
   setDialogPanePin: (key, pinned) =>
-    set((state) => ({
-      dialogPanePins: pinned
-        ? { ...state.dialogPanePins, [key]: true }
-        : omitKey(state.dialogPanePins, key),
-    })),
+    set((state) => ({ dialogPanePins: { ...state.dialogPanePins, [key]: pinned } })),
   setSidePanelDock: setterOf(set, 'sidePanelDock'),
   setTaskDetailImageRatio: normalizingSetterOf(set, 'taskDetailImageRatio'),
   setSidePanelHeight: normalizingSetterOf(set, 'sidePanelHeight'),

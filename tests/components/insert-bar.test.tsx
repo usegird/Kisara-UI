@@ -200,7 +200,10 @@ describe('差し込みのアイコン', () => {
         within(dialog).getByRole('button', { name: 'フォルダのピン止めをやめる（隠す）' }),
       );
       expect(directoryList()).toBeNull();
-      expect(useSettingsStore.getState().dialogPanePins).toEqual({});
+      // やめたことも残す（切り替えていないときの既定と分ける）
+      expect(useSettingsStore.getState().dialogPanePins).toEqual({
+        'lora-insert:directory': false,
+      });
     });
 
     it('Esc は選んでいれば選択を外し、選んでいなければ閉じる', async () => {
@@ -232,7 +235,7 @@ describe('差し込みのアイコン', () => {
 
       const place = within(dialog).getByRole<HTMLButtonElement>('button', { name: /を決定する$/ });
       expect(place.disabled).toBe(true);
-      expect(place.title).toContain('キャレット');
+      expect(place.title).toBe('挿入先を選択してから選択するか、アイコンをドロップしてください');
 
       // 開いたまま外の欄に入れば、そこが差し込み先になる
       // 開いたまま外の欄を押せば（閉じない）、そこが差し込み先になる
@@ -243,6 +246,46 @@ describe('差し込みのアイコン', () => {
       fireEvent.click(field);
       await waitFor(() => expect(place.disabled).toBe(false));
       expect(screen.queryByRole('dialog')).not.toBeNull();
+    });
+
+    it('差し込み先が無ければ見出しに理由と帯にアイコンを出し、アイコンを欄へ落とすと差し込み先になる', async () => {
+      readyWithLoras();
+      render(
+        <>
+          <textarea aria-label="複数行" defaultValue="ab" />
+          <InsertBar />
+        </>,
+      );
+      const dialog = await openLora();
+      const reason = '挿入先を選択してから選択するか、アイコンをドロップしてください';
+      expect(within(dialog).getByText(reason)).toBeTruthy();
+      const handle = within(dialog).getByTitle('複数行の入力欄へ落とすと、そこを挿入先にします');
+      fireEvent.dragStart(handle, { dataTransfer: { setData: () => undefined } });
+
+      const field = screen.getByLabelText<HTMLTextAreaElement>('複数行');
+      for (const type of ['dragover', 'drop'] as const) {
+        const event = new Event(type, { bubbles: true, cancelable: true });
+        Object.defineProperty(event, 'dataTransfer', {
+          value: { types: [TEXT_DRAG_TYPE], dropEffect: 'none' },
+        });
+        act(() => {
+          field.dispatchEvent(event);
+        });
+      }
+
+      // 文字は入れず、落とした欄が差し込み先になる（理由と帯のアイコンが消え、欄に印が付く）
+      await waitFor(() => expect(within(dialog).queryByText(reason)).toBeNull());
+      expect(field.value).toBe('ab');
+      expect(within(dialog).queryByTitle(/^複数行の入力欄へ落とすと/)).toBeNull();
+      expect(screen.getByTitle('挿入位置（掴んでほかの位置・欄へ動かせます）')).toBeTruthy();
+    });
+
+    it('挿入位置のアイコンは開いている間だけ出す', async () => {
+      const { dialog } = await openWithField();
+      const marker = '挿入位置（掴んでほかの位置・欄へ動かせます）';
+      expect(screen.getByTitle(marker)).toBeTruthy();
+      fireEvent.click(within(dialog).getByRole('button', { name: 'Loraを選ぶ画面を閉じる' }));
+      await waitFor(() => expect(screen.queryByTitle(marker)).toBeNull());
     });
 
     /** 差し込み先の欄にキャレットを置いてから開き、b を選ぶ */
@@ -272,26 +315,28 @@ describe('差し込みのアイコン', () => {
       expect(screen.queryByRole('dialog')).not.toBeNull();
       expect(within(dialog).queryByLabelText('モデルの情報')).not.toBeNull();
 
-      // 見出しの帯の × で閉じる（操作の帯には × を置かない）
-      expect(within(dialog).queryByRole('button', { name: 'Loraを選ぶ画面を閉じる' })).toBeNull();
-      fireEvent.click(within(dialog).getByRole('button', { name: '閉じる' }));
+      // 操作の帯の左のまとまりの右端の × でも閉じる
+      fireEvent.click(within(dialog).getByRole('button', { name: 'Loraを選ぶ画面を閉じる' }));
       await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
     });
 
-    it('決定は差し込み先へ入れて閉じる', async () => {
+    it('決定は差し込み先へ入れ、閉じずに続けて選べる', async () => {
       const { field, dialog } = await openWithField();
       fireEvent.click(within(dialog).getByRole('button', { name: /を決定する$/ }));
 
-      await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
-      expect(field.value).toContain('<lora:');
+      await waitFor(() => expect(field.value).toContain('<lora:'));
+      expect(screen.queryByRole('dialog')).not.toBeNull();
+      // 末尾に改行を足し、キャレットは入れた文字の先頭に戻す
+      expect(field.value.endsWith('\n')).toBe(true);
+      expect(field.selectionStart).toBe(0);
     });
 
-    it('カードのダブルクリックも入れて閉じる', async () => {
+    it('カードのダブルクリックも入れて閉じない', async () => {
       const { field, dialog } = await openWithField();
       fireEvent.doubleClick(within(dialog).getByTitle('b.safetensors'));
 
-      await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
-      expect(field.value).toContain('<lora:');
+      await waitFor(() => expect(field.value).toContain('<lora:'));
+      expect(screen.queryByRole('dialog')).not.toBeNull();
     });
 
     it('選んでいるカードの Enter は決定と同じ。選んでいなければ決めない', async () => {
@@ -304,8 +349,8 @@ describe('差し込みのアイコン', () => {
 
       fireEvent.click(card, { detail: 1 });
       fireEvent.keyDown(card, { key: 'Enter' });
-      await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
-      expect(field.value).toContain('<lora:');
+      await waitFor(() => expect(field.value).toContain('<lora:'));
+      expect(screen.queryByRole('dialog')).not.toBeNull();
     });
 
     it('情報は少し待って格子に重ねて出す', async () => {

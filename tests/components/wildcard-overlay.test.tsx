@@ -73,7 +73,8 @@ describe('ワイルドカードの画面', () => {
     fireEvent.focusIn(field);
     fireEvent.doubleClick(screen.getByRole('button', { name: '__animal__' }));
 
-    expect(field.value).toBe('a __animal__b');
+    expect(field.value).toBe('a __animal__\nb');
+    expect(field.selectionStart).toBe(2);
     field.remove();
   });
 
@@ -100,7 +101,30 @@ describe('ワイルドカードの画面', () => {
     fireEvent.click(screen.getByRole('button', { name: '__weather__' }));
     fireEvent.click(screen.getByLabelText('ワイルドカードをキャレット位置に取り込む'));
 
-    expect(field.value).toBe('__weather__');
+    expect(field.value).toBe('__weather__\n');
+    field.remove();
+  });
+
+  it('差し込み先が無ければ見出しに理由を赤で出し、帯に挿入位置のアイコンを置く', async () => {
+    open();
+    await show();
+    expect(
+      screen.getByText('挿入先を選択してから選択するか、アイコンをドロップしてください'),
+    ).not.toBeNull();
+    expect(screen.getByTitle('複数行の入力欄へ落とすと、そこを挿入先にします')).not.toBeNull();
+  });
+
+  it('差し込み先があれば欄のキャレットにアイコンを重ね、帯には置かない', async () => {
+    open();
+    const field = document.createElement('textarea');
+    document.body.append(field);
+    await show();
+
+    field.focus();
+    fireEvent.focusIn(field);
+
+    expect(await screen.findByTitle('挿入位置（掴んでほかの位置・欄へ動かせます）')).not.toBeNull();
+    expect(screen.queryByTitle('複数行の入力欄へ落とすと、そこを挿入先にします')).toBeNull();
     field.remove();
   });
 });

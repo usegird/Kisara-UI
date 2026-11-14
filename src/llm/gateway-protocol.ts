@@ -44,7 +44,11 @@ export type HostMessage =
     }
   | { readonly type: 'abort'; readonly id: number }
   /** 入ったキーを確かめた結果。ゲートウェイはそのキーを送った入力の窓へ返す */
-  | { readonly type: 'verified'; readonly baseUrl: string; readonly outcome: LlmKeyOutcome };
+  | { readonly type: 'verified'; readonly baseUrl: string; readonly outcome: LlmKeyOutcome }
+  /**
+   * そのベース URL のキーを外す
+   */
+  | { readonly type: 'forget'; readonly baseUrl: string };
 
 /** ゲートウェイから本体へ（MessageChannel） */
 export type GatewayMessage =
@@ -111,6 +115,9 @@ export function parseHostMessage(value: unknown): HostMessage | null {
     const outcome = keyOutcomeOf(value.outcome);
     if (typeof value.baseUrl !== 'string' || outcome === null) return null;
     return { type: 'verified', baseUrl: value.baseUrl, outcome };
+  }
+  if (value.type === 'forget') {
+    return typeof value.baseUrl === 'string' ? { type: 'forget', baseUrl: value.baseUrl } : null;
   }
   if (typeof value.id !== 'number') return null;
   const { id } = value;

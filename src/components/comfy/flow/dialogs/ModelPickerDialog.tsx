@@ -12,6 +12,7 @@ import {
   INFO_SIZE,
   insertPropsOf,
   leadWidthOf,
+  selectedCardRectIn,
   selectionOnToggle,
   SORT_LABELS,
 } from '@/components/comfy/flow/dialogs/model-picker-rules';
@@ -25,6 +26,7 @@ import {
 import { folderLabel } from '@/components/comfy/flow/model-folder-label';
 import { DialogFrame } from '@/components/ui/dialog';
 import { EDGE_OVERLAY_DELAY, edgeOverlayCoversPoint } from '@/components/ui/edge-overlay';
+import { InsertTargetSubtitle } from '@/components/ui/insert-caret-marker';
 import { PickerBand } from '@/components/ui/picker-band';
 import { usePaneSize } from '@/components/ui/side-pane';
 import {
@@ -44,6 +46,11 @@ import { useSettingsStore } from '@/store/use-settings-store';
 // モデルを選ぶダイアログ。種別を問わず同じ画面で選び、選んだ値を呼び出し元へ返す。
 // 呼び出し元の部品・ストアは知らず、受け取るのは値と手続きだけ。
 // ─────────────────────────────
+
+/**
+ * 一度もピン止めを切り替えていないとき、ディレクトリをピン止めで出す枠の幅（px）
+ */
+const PIN_FROM_WIDTH = 800;
 
 /** モデルの一覧をディレクトリ・カードの格子・情報の列で見せ、選んだ値を `onPlace` へ返す */
 export function ModelPickerDialog({
@@ -66,6 +73,7 @@ export function ModelPickerDialog({
   onRefresh,
   onInsertText,
   onPlace,
+  decideAside,
 }: ModelPickerDialogProps): React.ReactElement {
   // 開け閉ては基盤の Trigger に任せ、こちらで押下から状態を作らない（a11y の部品を自作しない）。
   // 呼び出し元が `open` を渡したときだけ、開け閉てをそちらに任せる
@@ -99,7 +107,8 @@ export function ModelPickerDialog({
     overlay: directoryBox,
     closesOnPointer: directoryClosesOn,
     closesOnKey: directoryClosesOnKey,
-  } = useTemporaryPane(`${dialogId}:directory`);
+    attachFrame,
+  } = useTemporaryPane(`${dialogId}:directory`, PIN_FROM_WIDTH);
   const directoryWidth = usePaneSize(`${dialogId}:left`);
   const pickDirectory = (next: string): void => {
     setDirectory(next);
@@ -163,18 +172,16 @@ export function ModelPickerDialog({
   };
 
   /**
-   * 選んだ値を呼び出し元へ返す。使えなければ閉じずに理由を出す。
-   * 取り込み（`close` が false）は使えても閉じず、情報も出したままにする
+   * 選んだ値を呼び出し元へ返す。使えなければ理由を出す。閉じるのはパラメータへ書いたときだけで、
+   * 差し込みは続けて選べるように開いたままにする。取り込み（`keepInfo`）は情報も出したままにする
    */
-  const place = (picked: string, close = true): void => {
-    if (close) hideInfo();
-    if (placeBlocked !== null) {
-      setNotice(placeBlocked);
-      return;
-    }
-    void Promise.resolve(onPlace(picked)).then((error) => {
+  const place = (picked: string, origin: DOMRect | null, keepInfo = false): void => {
+    if (!keepInfo) hideInfo();
+    // 押せない理由は見出しに出しているので、帯には重ねて出さない
+    if (placeBlocked !== null) return;
+    void Promise.resolve(onPlace(picked, origin)).then((error) => {
       setNotice(error);
-      if (error === null && close) setOpen(false);
+      if (error === null && placeMode === 'set') setOpen(false);
     });
   };
 
@@ -202,7 +209,7 @@ export function ModelPickerDialog({
 
   const infoItem = infoShown ? selectedItem : null;
   const onInfoPlace = (): void => {
-    if (infoItem !== null) place(infoItem.value, false);
+    if (infoItem !== null) place(infoItem.value, selectedCardRectIn(infoArea.current), true);
   };
   const infoPane =
     infoItem === null ? null : (
@@ -239,12 +246,12 @@ export function ModelPickerDialog({
     if (closingInfo) hideInfo();
   };
   const onDecide = (): void => {
-    if (selectedItem !== null) place(selectedItem.value);
+    if (selectedItem !== null) place(selectedItem.value, selectedCardRectIn(infoArea.current));
   };
   const onSort = (key: ModelSortKey, next: boolean): void => setModelSort({ key, ascending: next });
-  const onCardPlace = (picked: string): void => {
+  const onCardPlace = (picked: string, origin: DOMRect): void => {
     setSelected(picked);
-    place(picked);
+    place(picked, origin);
   };
 
   return (
@@ -259,7 +266,7 @@ export function ModelPickerDialog({
       finalFocus={finalFocus}
       trigger={trigger}
       title={t('modelPicker.title', { kind })}
-      subtitle={subtitle}
+      subtitle={<InsertTargetSubtitle subtitle={subtitle} blocked={placeBlocked} />}
       actions={
         // 右端: 取り直し、その右に閉じる（枠が置く）
         <RefreshButton
@@ -272,6 +279,7 @@ export function ModelPickerDialog({
     >
       {/* 格子と情報の外（帯・ディレクトリ）を押したら情報を隠す。列の境目は大きさを変えるだけ */}
       <div
+        ref={attachFrame}
         className="flex min-h-0 flex-1 flex-col"
         onKeyDownCapture={onKeyDownCapture}
         onPointerDown={onPointerDown}
@@ -284,6 +292,8 @@ export function ModelPickerDialog({
           decideDisabled={!canDecide(selectedItem, placeBlocked)}
           decideIcon={placeMode}
           onDecide={onDecide}
+          decideAside={decideAside}
+          close={{ label: t('modelPicker.close', { kind }), onClose: () => setOpen(false) }}
           directory={{ state: directoryState, onToggle: cycleDirectory }}
           leadWidth={leadWidthOf(pinned, directoryWidth)}
           filterToolbar={t('modelPicker.filter.toolbar', { kind })}

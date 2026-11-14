@@ -1,6 +1,7 @@
 import { DecideButton } from '@/components/ui/decide-button';
 import { t } from '@/i18n';
-import { insertAtCaret, type TextField } from '@/lib/insert-at-caret';
+import type { TextField } from '@/lib/insert-at-caret';
+import { placeEntry } from '@/lib/insert-motion';
 
 // ─────────────────────────────
 // 取り込みの決定（スタイルの編集・ワイルドカード）。差し込み先の決まりは `insert-target.ts`。
@@ -31,8 +32,8 @@ export function InsertButton({
       caption={caption}
       title={t(field === null ? 'comfy.insert.noFieldTitle' : 'comfy.insert.title')}
       disabled={field === null || text.length === 0}
-      onClick={() => {
-        if (field !== null) insertAtCaret(field, text);
+      onClick={(event) => {
+        if (field !== null) placeEntry(field, text, event.currentTarget.getBoundingClientRect());
       }}
     />
   );

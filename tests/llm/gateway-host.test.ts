@@ -99,6 +99,8 @@ describe('要求の振り分け', () => {
     await vi.waitFor(() =>
       expect(sent).toEqual([{ type: 'verified', baseUrl: BASE, outcome: 'auth' }]),
     );
+    host.keys.forgetKey(BASE);
+    await vi.waitFor(() => expect(sent.at(-1)).toEqual({ type: 'forget', baseUrl: BASE }));
   });
 
   it('生成は届いたものを渡し、止めたらゲートウェイに止める知らせを送る', async () => {

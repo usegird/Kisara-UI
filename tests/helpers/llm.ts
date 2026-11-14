@@ -15,6 +15,7 @@ import type {
   ChatRequestMessage,
   ChatStreamEvent,
   GenerationParams,
+  LlmKeyPort,
   LlmPort,
   LlmResult,
   ModelDetails,
@@ -119,6 +120,19 @@ export function modelDetails(patch: Partial<ModelDetails> = {}): ModelDetails {
 /** 文脈長のわからないモデルの一覧 */
 export function modelList(ids: readonly string[]): ModelList {
   return { ids, contexts: {}, details: {}, serverContext: null, truncated: false };
+}
+
+/** キーの無いゲートウェイの窓口。使う項目だけを差し替える */
+export function fakeKeyPort(patch: Partial<LlmKeyPort> = {}): LlmKeyPort {
+  return {
+    keyedUrls: () => [],
+    subscribe: () => () => undefined,
+    openEntry: () => 'unready',
+    onKeySet: () => () => undefined,
+    reportVerified: () => undefined,
+    forgetKey: () => undefined,
+    ...patch,
+  };
 }
 
 /** 呼び出し側が手で流して終える窓口。止めると `stopped` で終わる */

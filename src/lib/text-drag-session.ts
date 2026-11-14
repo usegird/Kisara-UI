@@ -8,6 +8,12 @@ import { INSERT_SOURCE_MARK } from '@/lib/insert-at-caret';
 /** ドラッグに付ける目印。これが付いたものだけを受け持つ（他のドラッグはブラウザに任せる） */
 export const TEXT_DRAG_TYPE = 'application/x-kisara-text';
 
+/**
+ * 欄のキャレットに重ねる挿入位置のアイコンの目印。重ねている間はキャレットを指先へ動かすので、アイコンが
+ * 指先の真下に来る。その上でも下の欄へ落とせるよう、落とし先の見張りが下の欄を探す
+ */
+export const INSERT_CARET_MARK = 'data-insert-caret';
+
 /** 落とされたときに作った文字か、作れなかった理由 */
 export type DragTextResult = { readonly text: string } | { readonly error: string };
 

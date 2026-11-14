@@ -183,7 +183,7 @@ describe('左の列', () => {
     expect(useSettingsStore.getState().dialogPanePins['llm-storage:directory']).toBe(true);
     expect(within(dialog).getByRole('navigation', { name: '種類' })).toBeTruthy();
     fireEvent.click(within(dialog).getByRole('button', { name: /ピン止めをやめる/ }));
-    expect(useSettingsStore.getState().dialogPanePins['llm-storage:directory']).toBeUndefined();
+    expect(useSettingsStore.getState().dialogPanePins['llm-storage:directory']).toBe(false);
     expect(within(dialog).queryByRole('navigation', { name: '種類' })).toBeNull();
   });
 });
@@ -546,17 +546,48 @@ describe('ユーザーフォルダの物', () => {
   });
 });
 describe('クリーンアップ', () => {
-  it('Comfy バックアップの下に元の無いバックアップを数え、印を付けて適用でまとめて消す', async () => {
+  it('元の無い古いバックアップを並べ、帯の「全て削除」で印を付けて適用でまとめて消す', async () => {
     const removed = backupTemplates();
     const dialog = await openDialog();
     await choose(dialog, 'Comfy バックアップ');
     const section = await within(dialog).findByRole('region', { name: 'クリーンアップ' });
-    expect(within(section).getByText(/^ブラウザに元の無いバックアップ: 2 件/)).toBeTruthy();
-    fireEvent.click(within(section).getByRole('button', { name: '削除の印を付ける' }));
-    // もう一度押すと外せる
-    expect(within(section).getByRole('button', { name: '印を外す' })).toBeTruthy();
+    expect(within(section).getByText('ブラウザ側に無い30日以前のバックアップデータ')).toBeTruthy();
+    expect(within(section).getAllByRole('listitem')).toHaveLength(2);
+    const clearAll = within(dialog).getByRole('button', { name: '全て削除' });
+    fireEvent.click(clearAll);
+    expect(clearAll).toHaveProperty('ariaPressed', 'true');
+    expect(
+      within(section).getByRole('button', { name: '「One」のバックアップの削除を取り消す' }),
+    ).toBeTruthy();
     await apply(dialog);
     expect(removed.sort()).toEqual(['system-prompts/t1', 'system-prompts/t2']);
+  });
+
+  it('30 日より前でない物は並べず、1 件ずつの削除アイコンでも印を付けられる', async () => {
+    const removed: string[] = [];
+    installComfyPort({
+      ...port,
+      library: {
+        ...port.library,
+        list: () =>
+          Promise.resolve([
+            { v: 1, id: 't1', name: 'Old', content: 'a', createdAt: 1, updatedAt: 1 },
+            { v: 1, id: 't2', name: 'New', content: 'b', createdAt: 1, updatedAt: Date.now() },
+          ]),
+        remove: (_baseUrl, kind, id) => {
+          removed.push(`${kind}/${id}`);
+          return Promise.resolve();
+        },
+      },
+    });
+    connectComfy();
+    const dialog = await openDialog();
+    await choose(dialog, 'Comfy バックアップ');
+    const section = await within(dialog).findByRole('region', { name: 'クリーンアップ' });
+    expect(within(section).queryByText('New')).toBeNull();
+    fireEvent.click(within(section).getByRole('button', { name: '「Old」のバックアップを削除' }));
+    await apply(dialog);
+    expect(removed).toEqual(['system-prompts/t1']);
   });
 
   it('古いバックアップの知らせの「確認する」で、Comfy バックアップの場所を開く', async () => {

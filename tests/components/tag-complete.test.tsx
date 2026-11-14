@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { TagCompleteList } from '@/components/comfy/flow/TagCompleteList';
 import { indexTags } from '@/graph/tag-dictionary';
 import { useTagComplete } from '@/hooks/flow/use-tag-complete';
+import { insertAtCaret, insertQuietly } from '@/lib/insert-at-caret';
 import { useTagsStore } from '@/store/use-tags-store';
 
 import { tagEntry } from '../helpers/tags';
@@ -63,6 +64,18 @@ describe('タグ補完', () => {
       'long_hair900',
       'blue_hair10',
     ]);
+  });
+
+  it('打った語ではない差し込み（Lora・落とした文字）では出さない', () => {
+    render(<Field />);
+    field().focus();
+    insertQuietly(field(), 'hair');
+    expect(field().value).toBe('hair');
+    expect(screen.queryByRole('listbox')).toBeNull();
+
+    // 同じ文字でも打てば出す
+    insertAtCaret(field(), ', hair');
+    expect(screen.queryByRole('listbox')).not.toBeNull();
   });
 
   it('↓ で選び、Enter で語を置き換えて , を足す', () => {

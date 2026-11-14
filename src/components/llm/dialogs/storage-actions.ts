@@ -23,7 +23,7 @@ import {
   restoreStorageRaw,
   scanStorageExport,
 } from '@/store/persist/storage-export';
-import { deleteStorageItem } from '@/store/persist/storage-usage';
+import { deleteStorageItem, type StorageItem } from '@/store/persist/storage-usage';
 
 // ─────────────────────────────
 // ストレージの管理の手続き。印を付けた物をまとめて行い、結果を知らせる。ファイルの書き出しと読み込み、
@@ -211,4 +211,22 @@ async function fileValues(
     if (values !== null) found.set(entryId, values);
   }
   return found;
+}
+
+/**
+ * 種類ごとの一覧を並べて読む（接続先の控え・ユーザーフォルダの物）。読めなかった種類は 'failed'
+ */
+export async function readRemoteLists<K extends string>(
+  kinds: readonly K[],
+  read: (kind: K) => Promise<StorageItem[] | null>,
+): Promise<Partial<Record<K, readonly StorageItem[] | 'failed'>>> {
+  const entries = await Promise.all(
+    kinds.map(async (kind) => {
+      const items = await read(kind).catch(() => 'failed' as const);
+      return [kind, items ?? 'failed'] as const;
+    }),
+  );
+  const lists: Partial<Record<K, readonly StorageItem[] | 'failed'>> = {};
+  for (const [kind, items] of entries) lists[kind] = items;
+  return lists;
 }

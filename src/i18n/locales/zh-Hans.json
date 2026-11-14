@@ -323,6 +323,7 @@
       "checkpoints": "模型"
     },
     "title": "选择{kind}",
+    "close": "关闭{kind}选择",
     "refresh": {
       "label": "重新获取{kind}列表",
       "title": "重新获取列表（不会自动更新）"
@@ -439,12 +440,14 @@
   "insertBar": {
     "label": "插入",
     "waiting": "正在加载列表",
+    "noTarget": "请先选择插入位置再选择，或拖放图标",
+    "caretMarker": "插入位置（可拖动到其他位置或输入框）",
+    "caretHandle": "拖放到多行输入框，即以该处为插入位置",
     "lora": {
       "title": "选择 Lora 并插入到光标位置",
       "label": "插入 Lora",
       "triggersFailed": "无法获取训练中的高频词：{message}",
-      "memoFailed": "无法获取备注：{message}",
-      "noTarget": "请先将光标置于此面板外的多行输入框中再按下（也可以拖放插入）"
+      "memoFailed": "无法获取备注：{message}"
     },
     "style": {
       "title": "打开样式编辑界面（确定或双击插入到光标位置）",
@@ -1516,6 +1519,7 @@
       "enterKey": "设置 API 密钥",
       "keyEntered": "已设置",
       "keyVerified": "API 密钥已验证",
+      "removeKey": "删除 API 密钥",
       "entryBlocked": "无法打开输入密钥的窗口。请允许此网站的弹出窗口，然后再按一次。",
       "entryUnready": "尚未连接到网关。请稍候再按一次。如果一直如此，请重新加载页面。",
       "noModels": "已连接 - 无模型列表（请输入模型名称）",
@@ -1722,6 +1726,7 @@
       "mixedContent": "此页面通过 https 打开，浏览器会阻止本机以外的 http 地址。请通过 http 打开此页面，或改用 https 地址。",
       "auth": "服务器拒绝了 API 密钥（{status}）。请检查 API 密钥。",
       "notFound": "该地址不存在。请检查基础 URL（是否包含 /v1）。",
+      "redirect": "服务器重定向到了另一个 URL。API 密钥不会发送到那里，请将重定向目标填为基础 URL。",
       "rejected": "服务器拒绝了请求：{message}",
       "rejectedPlain": "服务器拒绝了请求（{status}）。",
       "rateLimit": "服务器繁忙（429）。请稍后重试。",
@@ -1986,11 +1991,8 @@
       "restoreTooLarge": "有 {count} 个项目过大，未恢复（对话以设置中的对话上限为准，头像 20 MB，其他 32 MB）。",
       "cleanup": {
         "heading": "清理",
-        "none": "没有在浏览器中已无原件的备份。",
-        "orphans": "在浏览器中已无原件的备份：{figures}",
-        "hint": "应用后将删除 ComfyUI 中的文件。想保留的请在各类别的列表中取消标记。",
-        "mark": "标记删除",
-        "unmark": "取消标记",
+        "description": "浏览器中没有的、30 天以前的备份数据",
+        "none": "没有符合条件的备份。",
         "notice": {
           "title": "清理",
           "description": "仍有旧的备份数据。要查看吗？",

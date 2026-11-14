@@ -2,7 +2,7 @@ import { cva } from 'class-variance-authority';
 import { Folder, Pin, PinOff } from 'lucide-react';
 
 import { CardHeightField } from '@/components/ui/card-height-field';
-import { DecideButton } from '@/components/ui/decide-button';
+import { DecideButton, PaneCloseButton } from '@/components/ui/decide-button';
 import { DIALOG_ICON_CLASS } from '@/components/ui/dialog-header';
 import { DialogToolbar } from '@/components/ui/dialog-toolbar';
 import { SearchField } from '@/components/ui/search-field';
@@ -44,6 +44,8 @@ export interface PickerBandProps<K extends string> {
   /** `insert` は外の欄へ差し込む、`set` はパラメータへ書く */
   readonly decideIcon: 'set' | 'insert';
   readonly onDecide: () => void;
+  /** 決定のすぐ右に置くもの（差し込み先が無いときの挿入位置のアイコン）。無ければ置かない */
+  readonly decideAside?: React.ReactNode | undefined;
   /** ディレクトリの切り替え。渡さなければ出さない */
   readonly directory?:
     | {
@@ -53,6 +55,8 @@ export interface PickerBandProps<K extends string> {
     | undefined;
   /** 決定のまとまりの右に置くもの（アップロードなど） */
   readonly actions?: React.ReactNode | undefined;
+  /** 左のまとまりの右端の閉じる ×。渡さなければ置かない */
+  readonly close?: { readonly label: string; readonly onClose: () => void } | undefined;
   /**
    * 左のまとまりの幅（px）。ピン止めした左の列の幅と境目の線を足したもの。
    * 渡すと絞り込みがその位置から始まる。渡さなければ中身の幅
@@ -81,8 +85,10 @@ export function PickerBand<K extends string>({
   decideDisabled,
   decideIcon,
   onDecide,
+  decideAside,
   directory,
   actions,
+  close,
   leadWidth,
   filterToolbar,
   filterLabel,
@@ -111,8 +117,15 @@ export function PickerBand<K extends string>({
             disabled={decideDisabled}
             onClick={onDecide}
           />
-          {directory === undefined ? null : <DirectoryToggle {...directory} />}
+          {decideAside}
           {actions}
+          {/* フォルダの切り替えは右へ寄せ、閉じる × の左隣に置く */}
+          <span className="ml-auto flex shrink-0 items-center gap-2">
+            {directory === undefined ? null : <DirectoryToggle {...directory} />}
+            {close === undefined ? null : (
+              <PaneCloseButton label={close.label} onClick={close.onClose} />
+            )}
+          </span>
         </DialogToolbar>
       </div>
       <div className="min-w-0 shrink-[0.001] grow basis-auto">

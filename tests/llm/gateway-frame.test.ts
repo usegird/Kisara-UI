@@ -109,6 +109,21 @@ describe('キーを受ける', () => {
   });
 });
 
+describe('キーを外す', () => {
+  it('本体が求めたベース URL のキーを外し、置き場から消して一覧を送り直す', async () => {
+    const gateway = setup();
+    const host = gateway.connect();
+    gateway.putKey(GATEWAY);
+    host.postMessage({ type: 'forget', baseUrl: 'https://other.example/v1' });
+    host.postMessage({ type: 'forget', baseUrl: `${BASE}/` });
+    await vi.waitFor(() => expect(gateway.received.at(-1)).toEqual({ type: 'keys', urls: [] }));
+    expect(gateway.keyOf.current(BASE)).toBe('');
+    expect(setup(gateway.storage).keyOf.current(BASE)).toBe('');
+    // 無い先を外せと言われても一覧は送り直さない
+    expect(gateway.received.filter((message) => message.type === 'keys')).toHaveLength(3);
+  });
+});
+
 describe('要求を受ける', () => {
   it('キーを入れた接続先への要求だけを送り、ほかは送らずに認証の失敗を返す', async () => {
     const gateway = setup();

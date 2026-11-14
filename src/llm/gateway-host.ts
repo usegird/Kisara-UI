@@ -164,6 +164,7 @@ function createKeyPort(
       return () => book.keySet.delete(listener);
     },
     reportVerified: (baseUrl, outcome) => post({ type: 'verified', baseUrl, outcome }),
+    forgetKey: (baseUrl) => post({ type: 'forget', baseUrl }),
   };
 }
 
