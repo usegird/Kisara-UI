@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import a1111 from '@/graph/builtin/a1111-txt2img.json';
+import sdxl from '@/graph/builtin/sdxl-a1111.json';
 import { bypassStateOf, disabledNodeIdsOf, setNodesBypassed } from '@/graph/node-bypass';
 import { parseWorkflow } from '@/graph/normalize';
 import { NODE_MODE, type Workflow } from '@/graph/types';
@@ -8,9 +8,10 @@ import { NODE_MODE, type Workflow } from '@/graph/types';
 import { node } from '../helpers/workflow';
 
 const HIRES = [7, 8];
+const ADETAILER = [10, 11];
 
 function builtin(): Workflow {
-  return parseWorkflow(structuredClone(a1111));
+  return setNodesBypassed(parseWorkflow(structuredClone(sdxl)), [...HIRES, ...ADETAILER], true);
 }
 
 describe('bypassStateOf', () => {

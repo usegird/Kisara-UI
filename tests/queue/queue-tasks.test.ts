@@ -295,7 +295,7 @@ describe('キュー列の組み立て', () => {
           success: false,
           startedAt: null,
           finishedAt: null,
-          error: { kind: 'error', line: 'CUDA out of memory' },
+          error: { kind: 'error', line: 'CUDA out of memory', nodeId: null },
           session: null,
         },
       ],
@@ -343,7 +343,7 @@ describe('受理されなかった実行', () => {
       success: false,
       rejection: {
         reason: 'Prompt outputs failed validation',
-        nodes: [{ nodeId: '7', classType: 'Encode', messages: [message] }],
+        nodes: [{ nodeId: '7', classType: 'Encode', messages: [message], inputNames: [null] }],
       },
     });
 

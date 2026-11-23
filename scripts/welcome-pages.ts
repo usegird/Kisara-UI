@@ -20,7 +20,7 @@ import type { Plugin } from 'vite';
 import { lookupEntry } from '../src/i18n/catalog-shape.ts';
 import { LOCALES, SOURCE_LOCALE } from '../src/i18n/locales.ts';
 import { fillWelcome } from '../src/welcome/fill.ts';
-import { welcomePathOf } from '../src/welcome/paths.ts';
+import { buildRobots, buildSeoHead, buildSitemap, normalizeSiteUrl } from '../src/welcome/seo.ts';
 
 const ICONS: Readonly<Record<string, LucideIcon>> = {
   'app-window': AppWindow,
@@ -64,6 +64,11 @@ export function welcomePages(root: string, siteUrl: string | undefined): Plugin 
           const source = fillPage(root, html, code, siteUrl);
           this.emitFile({ type: 'asset', fileName: `${code}/index.html`, source });
         }
+        const site = normalizeSiteUrl(siteUrl);
+        this.emitFile({ type: 'asset', fileName: 'robots.txt', source: buildRobots(site) });
+        if (site !== null) {
+          this.emitFile({ type: 'asset', fileName: 'sitemap.xml', source: buildSitemap(site) });
+        }
       },
     },
   };
@@ -93,18 +98,7 @@ export function fillPage(
   });
   return filled
     .replace(SOURCE_HTML_LANG, `<html lang="${code}">`)
-    .replace('</head>', `${alternateLinks(siteUrl)}</head>`);
-}
-
-function alternateLinks(siteUrl: string | undefined): string {
-  if (siteUrl === undefined || siteUrl.length === 0) return '';
-  const base = siteUrl.replace(/\/$/, '');
-  const links = LOCALES.map(
-    ({ code }) =>
-      `<link rel="alternate" hreflang="${code}" href="${base}${welcomePathOf(code)}" />`,
-  );
-  links.push(`<link rel="alternate" hreflang="x-default" href="${base}/" />`);
-  return links.join('');
+    .replace('</head>', `${buildSeoHead(normalizeSiteUrl(siteUrl), code)}</head>`);
 }
 
 function readCatalog(root: string, code: string): unknown {

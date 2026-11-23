@@ -1,3 +1,4 @@
+import { normalizeExpressionLabel } from '@/chat/avatar-expression';
 import type {
   Candidate,
   CandidateEnd,
@@ -225,7 +226,14 @@ export function parseCandidate(raw: unknown): Candidate | null {
     ...(trimmed === null || trimmed <= 0 ? {} : { trimmed: Math.trunc(trimmed) }),
     ...(images.length === 0 ? {} : { images }),
     ...parseRevision(raw.revision),
+    ...parseExpression(raw.expression),
   };
+}
+
+function parseExpression(raw: unknown): { expression: string } | Record<string, never> {
+  if (typeof raw !== 'string') return {};
+  const expression = normalizeExpressionLabel(raw);
+  return expression === null ? {} : { expression };
 }
 
 function parseRevision(raw: unknown): { revision: CandidateRevision } | Record<string, never> {

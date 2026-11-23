@@ -89,9 +89,9 @@ export function AppShell({
           {t('app.skipToMain')}
         </a>
         <div className={column({ dock })}>
-          <header className="flex h-8 items-start gap-2 pl-4">
+          <header className="flex h-8 items-start gap-2 pl-3">
             <div className="pt-1">{current.navToggle}</div>
-            <h1 className="shrink-0 pt-[5.6px] pr-[52px] font-semibold">
+            <h1 className="shrink-0 pt-[5.6px] pr-[56px] font-semibold">
               <a href={welcomeHref()} title={t('app.welcome.open')}>
                 KisaraUI
               </a>

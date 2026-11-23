@@ -23,7 +23,6 @@ export interface DictionaryDraft {
   readonly rows: readonly TagRowDraft[];
   readonly exists: boolean;
   readonly changed: boolean;
-  readonly removed: boolean;
 }
 
 export interface Draft {
@@ -55,13 +54,12 @@ export function startDraft(view: TagView, sources: TagSources): Draft {
     rows: item.entries.map(rowOfEntry),
     exists: true,
     changed: false,
-    removed: false,
   }));
   const hasDefault = dictionaries.some((item) => isDefaultDictionary(item.name));
   const fallback = { name: DEFAULT_DICTIONARY, rows: [], exists: false, changed: false };
   return {
     view,
-    dictionaries: hasDefault ? dictionaries : [{ ...fallback, removed: false }, ...dictionaries],
+    dictionaries: hasDefault ? dictionaries : [fallback, ...dictionaries],
     pysssssRows: new Map(),
     blank: emptyRow(),
     baseDictionaries: sources.dictionaries,
@@ -70,9 +68,7 @@ export function startDraft(view: TagView, sources: TagSources): Draft {
 }
 
 export function isDirty(draft: Draft): boolean {
-  return (
-    draft.pysssssRows.size > 0 || draft.dictionaries.some((item) => item.changed || item.removed)
-  );
+  return draft.pysssssRows.size > 0 || draft.dictionaries.some((item) => item.changed);
 }
 
 export function changePysssssRow(
@@ -139,32 +135,12 @@ export function toggleRow(draft: Draft, id: number): Draft {
   );
 }
 
-export function toggleDictionary(draft: Draft, name: string): Draft {
-  const key = dictionaryKey(name);
-  const target = findDraft(draft.dictionaries, name);
-  if (target === undefined) return draft;
-  if (!target.exists && !isDefaultDictionary(name)) {
-    const viewing = draft.view.kind === 'dictionary' && dictionaryKey(draft.view.name) === key;
-    return {
-      ...draft,
-      view: viewing ? { kind: 'all' } : draft.view,
-      dictionaries: draft.dictionaries.filter((item) => item !== target),
-    };
-  }
-  return {
-    ...draft,
-    dictionaries: draft.dictionaries.map((item) =>
-      item === target ? { ...item, removed: !item.removed } : item,
-    ),
-  };
-}
-
 export function addDictionary(draft: Draft, name: string): Draft | DictionaryNameError {
   const named = draft.dictionaries.map((item) => ({ name: item.name, entries: [] }));
   const failure = checkDictionaryName(named, name);
   if (failure !== null) return failure;
   const trimmed = name.trim();
-  const added = { name: trimmed, rows: [], exists: false, changed: true, removed: false };
+  const added = { name: trimmed, rows: [], exists: false, changed: true };
   return {
     ...draft,
     view: { kind: 'dictionary', name: trimmed },
@@ -178,17 +154,13 @@ export function changesOf(
 ): TagChanges | DuplicateTag {
   const written: TagDictionary[] = [];
   for (const item of draft.dictionaries) {
-    if (item.removed || !item.changed) continue;
+    if (!item.changed) continue;
     const entries = entriesOf(item.rows);
     const tag = findDuplicateTag(entries);
     if (tag !== null) return { dictionary: item.name, tag };
     written.push({ name: item.name, entries });
   }
-  return {
-    dictionaries: written,
-    removed: draft.dictionaries.filter((item) => item.removed).map((item) => item.name),
-    overrides: overridesOf(draft, pysssss),
-  };
+  return { dictionaries: written, overrides: overridesOf(draft, pysssss) };
 }
 
 export function entriesOf(rows: readonly TagRowDraft[]): TagEntry[] {

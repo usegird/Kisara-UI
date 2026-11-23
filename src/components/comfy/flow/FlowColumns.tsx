@@ -20,7 +20,7 @@ import type { NodeEditing } from '@/hooks/flow/use-node-editing';
 import { t } from '@/i18n';
 import { useGraphStore } from '@/store/use-graph-store';
 
-const APP_DIVIDER_OFFSET = -16;
+const APP_DIVIDER_OFFSET = -18;
 
 const APP_GAP_DIVIDER_OFFSET = 2;
 
@@ -163,7 +163,7 @@ export function CardColumn({
         </div>
       </div>
       {tools && !narrow ? (
-        <div className="absolute top-2.5 left-full z-20 ml-[3px]">
+        <div className="absolute top-0 left-full z-20 ml-[3px]">
           <div className="flex flex-col gap-0.5" style={{ zoom }}>
             <HiddenNodeToggles />
             <SortByProcessingButton />

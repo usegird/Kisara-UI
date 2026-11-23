@@ -162,8 +162,25 @@ describe('POST /prompt の検証エラー', () => {
         nodeId: '12',
         classType: 'UNETLoader',
         messages: ['必須入力がありません: model'],
+        inputNames: [null],
       },
     ]);
+  });
+
+  it('理由ごとに断られた入力の名前（extra_info.input_name）を同じ並びで持つ', () => {
+    const [error] = parsePromptErrors({
+      node_errors: {
+        '30:16': {
+          class_type: 'TextGenerate',
+          errors: [
+            { message: 'Value 8192 bigger than max of 4096', extra_info: { input_name: 'n' } },
+            { message: 'no name' },
+          ],
+        },
+      },
+    });
+
+    expect(error?.inputNames).toEqual(['n', null]);
   });
 
   it('node_errors が無ければ空', () => {
@@ -219,9 +236,11 @@ describe('履歴の失敗の 1 行', () => {
   });
 
   it('文にせず、例外の 1 行目か中断かを返す（文は画面の側が作る）', () => {
-    const failed = entry([['execution_error', { exception_message: 'OOM\ntrace' }]]);
+    const failed = entry([
+      ['execution_error', { exception_message: 'OOM\ntrace', node_id: '12:3' }],
+    ]);
     const stopped = entry([['execution_interrupted', {}]]);
-    expect(parseHistory(failed)[0]?.error).toEqual({ kind: 'error', line: 'OOM' });
-    expect(parseHistory(stopped)[0]?.error).toEqual({ kind: 'interrupted', line: null });
+    expect(parseHistory(failed)[0]?.error).toEqual({ kind: 'error', line: 'OOM', nodeId: '12:3' });
+    expect(parseHistory(stopped)[0]?.error).toMatchObject({ kind: 'interrupted', line: null });
   });
 });

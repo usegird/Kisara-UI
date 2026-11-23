@@ -169,8 +169,8 @@ export function NodeSearchDialog({
                 types={[...new Set([reference.type, ...types])]}
                 onChange={setReferenceType}
               />
-              <AnyTypeCheckbox checked={filters.anyType} onChange={setAnyType} />
               {searchInput}
+              <AnyTypeCheckbox checked={filters.anyType} onChange={setAnyType} />
             </div>
             <div className="flex min-h-0 flex-1">
               <ReferenceNodeNav
@@ -210,8 +210,8 @@ export function NodeSearchDialog({
                 types={types}
                 onChange={(output) => setFilters((previous) => ({ ...previous, output }))}
               />
-              <AnyTypeCheckbox checked={filters.anyType} onChange={setAnyType} />
               {searchInput}
+              <AnyTypeCheckbox checked={filters.anyType} onChange={setAnyType} />
             </div>
             <div className="flex min-h-0 flex-1">
               <CategoryNav

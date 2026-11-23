@@ -24,9 +24,13 @@ import { useWildcardsStore } from '@/store/use-wildcards-store';
 
 export interface ComfyWorkspaceProps {
   readonly templatesOpen: boolean;
+  readonly listShown: boolean;
 }
 
-export function ComfyWorkspace({ templatesOpen }: ComfyWorkspaceProps): React.ReactElement {
+export function ComfyWorkspace({
+  templatesOpen,
+  listShown,
+}: ComfyWorkspaceProps): React.ReactElement {
   const hasWorkflow = useGraphStore((state) => state.workflow !== null);
   const viewerOpen = useViewerStore((state) => state.mode === 'overlay');
   const detailOpen = useTaskDetailStore((state) => state.promptId !== null);
@@ -121,6 +125,7 @@ export function ComfyWorkspace({ templatesOpen }: ComfyWorkspaceProps): React.Re
         auto={!imageTab}
         pinned={!imageTab && !hasWorkflow}
         covered={templatesOpen}
+        listShown={listShown}
       />
     </div>
   );

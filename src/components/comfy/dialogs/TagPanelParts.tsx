@@ -40,7 +40,6 @@ export interface TagRowView {
   readonly tag: string;
   readonly aliases: readonly string[];
   readonly priority: number;
-  readonly struck: boolean;
 }
 
 export interface PysssssRowView {
@@ -204,13 +203,13 @@ export function ReadOnlyTagTable({ rows, sort, onSort }: ReadOnlyTableProps): Re
     <TagTable sort={sort} onSort={onSort}>
       {rows.map((row) => (
         <div key={row.key} role="row" className={TABLE_ROW}>
-          <span role="cell" className={cellText({ struck: row.struck, muted: row.struck })}>
+          <span role="cell" className={cellText({ struck: false, muted: false })}>
             {row.tag}
           </span>
-          <span role="cell" className={cellText({ struck: row.struck, muted: true })}>
+          <span role="cell" className={cellText({ struck: false, muted: true })}>
             {row.aliases.join(', ')}
           </span>
-          <span role="cell" className={cellText({ struck: row.struck, muted: true })}>
+          <span role="cell" className={cellText({ struck: false, muted: true })}>
             <span className="tabular-nums">{formatTagPriority(row.priority)}</span>
           </span>
           <span role="cell" />

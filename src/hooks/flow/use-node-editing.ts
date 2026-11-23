@@ -57,12 +57,13 @@ export interface NodeEditing {
   readonly pickReference: (slot: ReferenceSlot) => void;
   readonly connectChoice: ConnectChoice | null;
   readonly resolveConnect: (slot: number | null) => void;
+  readonly addEntrance: (nodeId: NodeId, widgetName: string) => void;
 }
 
 export function useNodeEditing(): NodeEditing {
   const connect = useGraphStore((state) => state.connect);
   const connectToWidget = useGraphStore((state) => state.connectToWidget);
-  const { commitValue, resizeText, needOptions } = useRowEditing();
+  const { commitValue, resizeText, needOptions, addEntrance } = useRowEditing();
   const place = useNodePlacement();
 
   const [search, setSearch] = useTabState<SearchMode | null>('flow.search', null);
@@ -133,5 +134,6 @@ export function useNodeEditing(): NodeEditing {
     pickDefinition,
     connectChoice: pending,
     resolveConnect,
+    addEntrance,
   };
 }

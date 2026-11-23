@@ -6,7 +6,9 @@ import { EMPTY_CHARACTER } from '@/chat/card';
 import type { Avatar } from '@/chat/types';
 import { AvatarPickerDialog } from '@/components/llm/dialogs/AvatarPickerDialog';
 import { DialogTrigger } from '@/components/ui/dialog';
+import { buildPng, createZtxtChunk } from '@/lib/png-chunks';
 import { memoryTable } from '@/store/persist/chat-repo';
+import { useAvatarExpressionsStore } from '@/store/use-avatar-expressions-store';
 import { installAvatarTable, useAvatarsStore } from '@/store/use-avatars-store';
 import { installPresetTable, usePresetsStore } from '@/store/use-presets-store';
 import { useSettingsStore } from '@/store/use-settings-store';
@@ -30,6 +32,7 @@ beforeEach(() => {
     loaded: true,
   });
   usePresetsStore.setState({ presets: {}, loaded: true });
+  useAvatarExpressionsStore.setState({ reads: {}, marks: {} });
 });
 
 afterEach(() => {
@@ -70,15 +73,92 @@ describe('なし', () => {
 });
 
 describe('消す', () => {
-  it('確かめずに表から消し、使っているプリセットのリンクは変えない', async () => {
+  it('確かめてから表から消し、使っているプリセットのリンクは変えない', async () => {
     const used = usePresetsStore.getState().add('P', EMPTY_CHARACTER, 'a1', []);
     open();
     fireEvent.click(await screen.findByTitle('Alice'));
     fireEvent.click(screen.getByRole('button', { name: '画像を消す' }));
-    expect(screen.queryByRole('alertdialog')).toBeNull();
+    const confirm = await screen.findByRole('alertdialog');
+    expect(confirm.textContent).toContain('Alice');
+    fireEvent.click(screen.getByRole('button', { name: 'キャンセル' }));
+    expect(useAvatarsStore.getState().avatars.a1).toBeDefined();
+    fireEvent.click(screen.getByRole('button', { name: '画像を消す' }));
+    fireEvent.click(await screen.findByRole('button', { name: '削除する' }));
     expect(useAvatarsStore.getState().avatars.a1).toBeUndefined();
     await waitFor(() => expect(screen.queryByTitle('Alice')).toBeNull());
     expect(usePresetsStore.getState().presets[used.id]?.imageId).toBe('a1');
+  });
+});
+
+describe('カードの操作', () => {
+  it('名前の右端の鉛筆で名前を変え、空ならやめる。「なし」には鉛筆も表情のアイコンも出さない', async () => {
+    open();
+    await screen.findByTitle('Alice');
+    expect(screen.queryByRole('button', { name: 'なし の名前を変える' })).toBeNull();
+    expect(screen.getAllByRole('button', { name: /の表情を編集$/u })).toHaveLength(2);
+    fireEvent.click(screen.getByRole('button', { name: 'Alice の名前を変える' }));
+    const field = screen.getByRole('textbox', { name: 'Alice の名前を変える' });
+    fireEvent.change(field, { target: { value: ' ' } });
+    fireEvent.keyDown(field, { key: 'Enter' });
+    expect(useAvatarsStore.getState().avatars.a1?.name).toBe('Alice');
+    fireEvent.change(field, { target: { value: ' Carol ' } });
+    fireEvent.keyDown(field, { key: 'Enter' });
+    expect(useAvatarsStore.getState().avatars.a1?.name).toBe('Carol');
+  });
+
+  it('表情のアイコンは、表情差分を持つアバターではいつも出し、持たなければ指したときだけ出す', async () => {
+    const withExpressions = new Blob(
+      [
+        buildPng([
+          { type: 'IHDR', data: new Uint8Array(13) },
+          await createZtxtChunk('kisara-expressions', '{}'),
+          { type: 'IEND', data: new Uint8Array(0) },
+        ]),
+      ],
+      { type: 'image/png' },
+    );
+    useAvatarsStore.setState({
+      avatars: {
+        a1: { ...avatar('a1', 'Alice'), image: withExpressions },
+        a2: avatar('a2', 'Bob'),
+      },
+    });
+    open();
+    const alice = await screen.findByRole('button', { name: 'Alice の表情を編集' });
+    await waitFor(() => expect(alice.className).not.toContain('opacity-0'));
+    expect(screen.getByRole('button', { name: 'Bob の表情を編集' }).className).toContain(
+      'opacity-0',
+    );
+  });
+
+  it('名前を変えても並べ直さず、開き直すと名前順に並べる', async () => {
+    open();
+    await screen.findByTitle('Alice');
+    const names = (): string[] =>
+      screen
+        .getAllByRole('button', { pressed: false })
+        .map((card) => card.getAttribute('title') ?? '')
+        .filter((title) => title === 'Bob' || title === 'Alice' || title === 'Zed');
+    expect(names()).toEqual(['Alice', 'Bob']);
+    fireEvent.click(screen.getByRole('button', { name: 'Alice の名前を変える' }));
+    const field = screen.getByRole('textbox', { name: 'Alice の名前を変える' });
+    fireEvent.change(field, { target: { value: 'Zed' } });
+    fireEvent.keyDown(field, { key: 'Enter' });
+    expect(names()).toEqual(['Zed', 'Bob']);
+    fireEvent.keyDown(screen.getByRole('dialog'), { key: 'Escape' });
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+    fireEvent.click(screen.getByRole('button', { name: '開く' }));
+    await screen.findByTitle('Zed');
+    expect(names()).toEqual(['Bob', 'Zed']);
+  });
+
+  it('名前の欄の Esc は欄だけを閉じ、ダイアログは閉じない', async () => {
+    open();
+    fireEvent.click(await screen.findByRole('button', { name: 'Bob の名前を変える' }));
+    const field = screen.getByRole('textbox', { name: 'Bob の名前を変える' });
+    fireEvent.keyDown(field, { key: 'Escape' });
+    expect(screen.queryByRole('textbox', { name: 'Bob の名前を変える' })).toBeNull();
+    expect(screen.getByRole('dialog')).toBeTruthy();
   });
 });
 

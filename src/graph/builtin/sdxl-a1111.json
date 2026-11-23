@@ -1,6 +1,6 @@
 {
-  "last_node_id": 12,
-  "last_link_id": 23,
+  "last_node_id": 16,
+  "last_link_id": 31,
   "nodes": [
     {
       "id": 1,
@@ -48,7 +48,7 @@
         "Node name for S&R": "CheckpointLoaderSimple"
       },
       "widgets_values": [
-        ""
+        "sd_xl_base_1.0.safetensors"
       ]
     },
     {
@@ -87,7 +87,41 @@
         "Node name for S&R": "CLIPSetLastLayer"
       },
       "widgets_values": [
-        -1
+        -2
+      ]
+    },
+    {
+      "id": 15,
+      "type": "StringConcatenate",
+      "pos": [
+        0,
+        382
+      ],
+      "size": [
+        400,
+        220
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "STRING",
+          "type": "STRING",
+          "links": [
+            30
+          ]
+        }
+      ],
+      "title": "Quality tags + Prompt",
+      "properties": {
+        "Node name for S&R": "StringConcatenate"
+      },
+      "widgets_values": [
+        "masterpiece, best quality, amazing quality, very aesthetic, highres, absurdres",
+        "",
+        ", "
       ]
     },
     {
@@ -95,14 +129,14 @@
       "type": "ImpactWildcardEncode",
       "pos": [
         0,
-        382
+        642
       ],
       "size": [
         400,
         260
       ],
       "flags": {},
-      "order": 2,
+      "order": 3,
       "mode": 0,
       "inputs": [
         {
@@ -114,6 +148,14 @@
           "name": "clip",
           "type": "CLIP",
           "link": 3
+        },
+        {
+          "name": "populated_text",
+          "type": "STRING",
+          "widget": {
+            "name": "populated_text"
+          },
+          "link": 30
         }
       ],
       "outputs": [
@@ -160,7 +202,7 @@
       "widgets_values": [
         "",
         "",
-        "populate",
+        "fixed",
         "Select the LoRA to add to the text",
         "Select the Wildcard to add to the text",
         0,
@@ -168,24 +210,66 @@
       ]
     },
     {
+      "id": 16,
+      "type": "StringConcatenate",
+      "pos": [
+        0,
+        942
+      ],
+      "size": [
+        400,
+        220
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "STRING",
+          "type": "STRING",
+          "links": [
+            31
+          ]
+        }
+      ],
+      "title": "Quality tags + Negative prompt",
+      "properties": {
+        "Node name for S&R": "StringConcatenate"
+      },
+      "widgets_values": [
+        "worst quality, low quality, bad quality, lowres, jpeg artifacts, blurry, watermark, signature, text",
+        "",
+        ", "
+      ]
+    },
+    {
       "id": 4,
       "type": "CLIPTextEncode",
       "pos": [
         0,
-        682
+        1202
       ],
       "size": [
         400,
         160
       ],
       "flags": {},
-      "order": 3,
+      "order": 5,
       "mode": 0,
       "inputs": [
         {
           "name": "clip",
           "type": "CLIP",
           "link": 4
+        },
+        {
+          "name": "text",
+          "type": "STRING",
+          "widget": {
+            "name": "text"
+          },
+          "link": 31
         }
       ],
       "outputs": [
@@ -213,14 +297,14 @@
       "type": "EmptyLatentImage",
       "pos": [
         0,
-        948
+        1468
       ],
       "size": [
         400,
         130
       ],
       "flags": {},
-      "order": 4,
+      "order": 6,
       "mode": 0,
       "inputs": [],
       "outputs": [
@@ -247,14 +331,14 @@
       "type": "KSampler",
       "pos": [
         0,
-        1118
+        1638
       ],
       "size": [
         400,
         270
       ],
       "flags": {},
-      "order": 5,
+      "order": 7,
       "mode": 0,
       "inputs": [
         {
@@ -283,7 +367,8 @@
           "name": "LATENT",
           "type": "LATENT",
           "links": [
-            9
+            9,
+            24
           ],
           "slot_index": 0
         }
@@ -296,8 +381,8 @@
         "randomize",
         20,
         7,
-        "dpmpp_2m",
-        "karras",
+        "euler_ancestral",
+        "simple",
         1
       ]
     },
@@ -306,15 +391,15 @@
       "type": "LatentUpscaleBy",
       "pos": [
         0,
-        1494
+        2014
       ],
       "size": [
         400,
         100
       ],
       "flags": {},
-      "order": 6,
-      "mode": 4,
+      "order": 8,
+      "mode": 0,
       "inputs": [
         {
           "name": "samples",
@@ -345,15 +430,15 @@
       "type": "KSampler",
       "pos": [
         0,
-        1634
+        2154
       ],
       "size": [
         400,
         270
       ],
       "flags": {},
-      "order": 7,
-      "mode": 4,
+      "order": 9,
+      "mode": 0,
       "inputs": [
         {
           "name": "model",
@@ -381,7 +466,7 @@
           "name": "LATENT",
           "type": "LATENT",
           "links": [
-            14
+            25
           ],
           "slot_index": 0
         }
@@ -395,9 +480,52 @@
         "randomize",
         20,
         7,
-        "dpmpp_2m",
-        "karras",
+        "euler_ancestral",
+        "simple",
         0.7
+      ]
+    },
+    {
+      "id": 13,
+      "type": "ComfySwitchNode",
+      "pos": [
+        0,
+        2464
+      ],
+      "size": [
+        400,
+        80
+      ],
+      "flags": {},
+      "order": 10,
+      "mode": 0,
+      "title": "Enable Hires. fix",
+      "inputs": [
+        {
+          "name": "on_false",
+          "type": "LATENT",
+          "link": 24
+        },
+        {
+          "name": "on_true",
+          "type": "LATENT",
+          "link": 25
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "LATENT",
+          "links": [
+            26
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ComfySwitchNode"
+      },
+      "widgets_values": [
+        false
       ]
     },
     {
@@ -405,20 +533,20 @@
       "type": "VAEDecode",
       "pos": [
         0,
-        1954
+        2594
       ],
       "size": [
         400,
         50
       ],
       "flags": {},
-      "order": 8,
+      "order": 11,
       "mode": 0,
       "inputs": [
         {
           "name": "samples",
           "type": "LATENT",
-          "link": 14
+          "link": 26
         },
         {
           "name": "vae",
@@ -431,7 +559,8 @@
           "name": "IMAGE",
           "type": "IMAGE",
           "links": [
-            16
+            16,
+            27
           ],
           "slot_index": 0
         }
@@ -446,15 +575,15 @@
       "type": "UltralyticsDetectorProvider",
       "pos": [
         0,
-        2100
+        2740
       ],
       "size": [
         400,
         80
       ],
       "flags": {},
-      "order": 9,
-      "mode": 4,
+      "order": 12,
+      "mode": 0,
       "inputs": [],
       "outputs": [
         {
@@ -476,7 +605,7 @@
         "Node name for S&R": "UltralyticsDetectorProvider"
       },
       "widgets_values": [
-        ""
+        "bbox/face_yolov8m.pt"
       ]
     },
     {
@@ -484,15 +613,15 @@
       "type": "FaceDetailer",
       "pos": [
         0,
-        2220
+        2860
       ],
       "size": [
         400,
         700
       ],
       "flags": {},
-      "order": 10,
-      "mode": 4,
+      "order": 13,
+      "mode": 0,
       "inputs": [
         {
           "name": "image",
@@ -559,7 +688,7 @@
           "name": "image",
           "type": "IMAGE",
           "links": [
-            23
+            28
           ],
           "slot_index": 0
         },
@@ -605,8 +734,8 @@
         "randomize",
         20,
         7,
-        "dpmpp_2m",
-        "karras",
+        "euler_ancestral",
+        "simple",
         0.4,
         5,
         true,
@@ -630,24 +759,67 @@
       ]
     },
     {
+      "id": 14,
+      "type": "ComfySwitchNode",
+      "pos": [
+        0,
+        3600
+      ],
+      "size": [
+        400,
+        80
+      ],
+      "flags": {},
+      "order": 14,
+      "mode": 0,
+      "title": "Enable ADetailer",
+      "inputs": [
+        {
+          "name": "on_false",
+          "type": "IMAGE",
+          "link": 27
+        },
+        {
+          "name": "on_true",
+          "type": "IMAGE",
+          "link": 28
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output",
+          "type": "IMAGE",
+          "links": [
+            29
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ComfySwitchNode"
+      },
+      "widgets_values": [
+        false
+      ]
+    },
+    {
       "id": 12,
       "type": "SaveImage",
       "pos": [
         0,
-        2970
+        3730
       ],
       "size": [
         400,
         270
       ],
       "flags": {},
-      "order": 11,
+      "order": 15,
       "mode": 0,
       "inputs": [
         {
           "name": "images",
           "type": "IMAGE",
-          "link": 23
+          "link": 29
         }
       ],
       "outputs": [
@@ -772,14 +944,6 @@
       "LATENT"
     ],
     [
-      14,
-      8,
-      0,
-      9,
-      0,
-      "LATENT"
-    ],
-    [
       15,
       1,
       2,
@@ -844,12 +1008,68 @@
       "BBOX_DETECTOR"
     ],
     [
-      23,
+      24,
+      6,
+      0,
+      13,
+      0,
+      "LATENT"
+    ],
+    [
+      25,
+      8,
+      0,
+      13,
+      1,
+      "LATENT"
+    ],
+    [
+      26,
+      13,
+      0,
+      9,
+      0,
+      "LATENT"
+    ],
+    [
+      27,
+      9,
+      0,
+      14,
+      0,
+      "IMAGE"
+    ],
+    [
+      28,
       11,
+      0,
+      14,
+      1,
+      "IMAGE"
+    ],
+    [
+      29,
+      14,
       0,
       12,
       0,
       "IMAGE"
+    ],
+    [
+      30,
+      15,
+      0,
+      3,
+      2,
+      "STRING"
+    ],
+    [
+      31,
+      16,
+      0,
+      4,
+      1,
+      "STRING"
     ]
   ],
   "groups": [
@@ -873,7 +1093,7 @@
         -10,
         336,
         420,
-        516
+        1036
       ],
       "color": "#8A8",
       "font_size": 24,
@@ -884,7 +1104,7 @@
       "title": "Generation",
       "bounding": [
         -10,
-        902,
+        1422,
         420,
         496
       ],
@@ -897,9 +1117,9 @@
       "title": "Hires. fix",
       "bounding": [
         -10,
-        1448,
+        1968,
         420,
-        466
+        586
       ],
       "color": "#b58b2a",
       "font_size": 24,
@@ -910,9 +1130,9 @@
       "title": "ADetailer",
       "bounding": [
         -10,
-        2054,
+        2694,
         420,
-        876
+        996
       ],
       "color": "#a1309b",
       "font_size": 24,
@@ -924,16 +1144,15 @@
     "linearData": {
       "inputs": [
         [
-          1,
-          "ckpt_name"
+          15,
+          "string_b",
+          {
+            "height": 172
+          }
         ],
         [
-          3,
-          "wildcard_text"
-        ],
-        [
-          4,
-          "text"
+          16,
+          "string_b"
         ],
         [
           5,
@@ -944,16 +1163,8 @@
           "height"
         ],
         [
-          5,
-          "batch_size"
-        ],
-        [
           6,
           "sampler_name"
-        ],
-        [
-          6,
-          "scheduler"
         ],
         [
           6,
@@ -961,11 +1172,15 @@
         ],
         [
           6,
-          "cfg"
+          "scheduler"
         ],
         [
           6,
-          "seed"
+          "cfg"
+        ],
+        [
+          13,
+          "switch"
         ],
         [
           7,
@@ -974,15 +1189,36 @@
         [
           8,
           "denoise"
+        ],
+        [
+          14,
+          "switch"
         ]
       ],
       "outputs": []
     },
     "kisara": {
       "widths": {
-        "5:width": 4,
-        "5:height": 4,
-        "5:batch_size": 4
+        "5:width": 6,
+        "5:height": 6,
+        "6:sampler_name": 8,
+        "6:scheduler": 8,
+        "6:steps": 4,
+        "6:cfg": 4
+      },
+      "values": {
+        "13": {
+          "switch": false
+        },
+        "14": {
+          "switch": false
+        },
+        "15": {
+          "string_b": "from behind, over-the-shoulder shot, cowboy shot, a young hero in blue tunic and light armor filling the foreground, back view, sword raised high, round shield on the left arm, red cape fluttering, facing a colossal dark dragon across a ruined castle throne room, the dragon towering with spread wings, glowing eyes and fire in its mouth, embers and torchlight, dramatic confrontation, epic fantasy battle, retro role-playing game mood, cinematic lighting"
+        },
+        "16": {
+          "string_b": "bad anatomy, deformed hands, extra fingers"
+        }
       }
     }
   },

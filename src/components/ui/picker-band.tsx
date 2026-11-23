@@ -30,6 +30,7 @@ export interface PickerBandProps<K extends string> {
   readonly decideTitle: string;
   readonly decideDisabled: boolean;
   readonly decideIcon: 'set' | 'insert';
+  readonly decideCaption?: string | undefined;
   readonly onDecide: () => void;
   readonly directory?:
     | {
@@ -58,6 +59,7 @@ export function PickerBand<K extends string>({
   decideTitle,
   decideDisabled,
   decideIcon,
+  decideCaption,
   onDecide,
   directory,
   actions,
@@ -84,6 +86,7 @@ export function PickerBand<K extends string>({
           <DecideButton
             label={decideLabel}
             icon={decideIcon}
+            caption={decideCaption}
             title={decideTitle}
             disabled={decideDisabled}
             onClick={onDecide}

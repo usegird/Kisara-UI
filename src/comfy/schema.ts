@@ -52,15 +52,22 @@ export function parsePromptErrors(raw: unknown): PromptNodeError[] {
   for (const [nodeId, entry] of Object.entries(raw.node_errors)) {
     if (!isRecord(entry)) continue;
 
-    const messages = (isUnknownArray(entry.errors) ? entry.errors : []).flatMap((item) => {
+    const items = (isUnknownArray(entry.errors) ? entry.errors : []).flatMap((item) => {
       if (!isRecord(item)) return [];
       const message = stringOr(item.message, null);
       const details = stringOr(item.details, null);
       if (message === null) return [];
-      return [details === null || details.length === 0 ? message : `${message}: ${details}`];
+      const text = details === null || details.length === 0 ? message : `${message}: ${details}`;
+      const extra = isRecord(item.extra_info) ? item.extra_info : {};
+      return [{ text, inputName: stringOr(extra.input_name, null) }];
     });
 
-    errors.push({ nodeId, classType: stringOr(entry.class_type), messages });
+    errors.push({
+      nodeId,
+      classType: stringOr(entry.class_type),
+      messages: items.map((item) => item.text),
+      inputNames: items.map((item) => item.inputName),
+    });
   }
   return errors;
 }
@@ -224,9 +231,11 @@ function failureOf(
 
 function failureLine(failure: RunFailure | null): HistoryFailureLine | null {
   if (failure === null) return null;
-  if (failure.kind === 'interrupted') return { kind: 'interrupted', line: null };
+  if (failure.kind === 'interrupted') {
+    return { kind: 'interrupted', line: null, nodeId: failure.nodeId };
+  }
   const first = failure.message?.split('\n').find((line) => line.trim().length > 0);
-  return { kind: 'error', line: first?.trim() ?? failure.exceptionType };
+  return { kind: 'error', line: first?.trim() ?? failure.exceptionType, nodeId: failure.nodeId };
 }
 
 export function historyEntryNodes(entry: unknown): Readonly<Record<string, unknown>> | null {

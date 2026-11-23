@@ -422,6 +422,9 @@
     }
   },
   "imagePicker": {
+    "card": {
+      "rename": "{name} の名前を変える"
+    },
     "kind": "画像",
     "title": "画像を選ぶ",
     "refresh": {
@@ -605,9 +608,9 @@
       "loadingMore": "読み込み中… {shown} / {total}",
       "builtinCategory": "KisaraUI",
       "builtin": {
-        "a1111Txt2img": {
-          "title": "txt2img（A1111 風）",
-          "description": "Stable Diffusion web UI と同じ並びの画像生成。プロンプトに LoRA とワイルドカード、Hires. fix と ADetailer のグループ（初めはバイパス）。Impact Pack が要ります（ADetailer は Impact Subpack も）"
+        "sdxlA1111": {
+          "title": "SDXL (A1111 like)",
+          "description": "Stable Diffusion web UI と同じ並びの画像生成。プロンプトに LoRA とワイルドカード、Hires. fix と ADetailer は If/Else Switch で入り切り（初めは切ってあります）。If/Else Switch のある ComfyUI と、Impact Pack・Impact Subpack が要ります"
         }
       }
     },
@@ -777,10 +780,10 @@
     "addDictionary": "辞書を足す",
     "addDictionaryTitle": "名前を入れて空の辞書を足します（確定で書きます）",
     "dictionaryName": "辞書の名前",
-    "removeDictionary": "{name} を消す",
-    "removeDictionaryTitle": "辞書に取り消し線を引きます。確定でファイルを消します",
-    "restoreDictionary": "{name} を戻す",
-    "restoreDictionaryTitle": "辞書の取り消し線を外します",
+    "disableDictionary": "{name} を無効にする",
+    "disableDictionaryTitle": "この辞書を補完に使いません。ファイルは残します",
+    "enableDictionary": "{name} を有効に戻す",
+    "enableDictionaryTitle": "この辞書をまた補完に使います",
     "errors": {
       "duplicateTag": "同じタグが 2 行あります: {name}",
       "notLoaded": "辞書をまだ読み終えていません。読み直してからもう一度試してください",
@@ -958,6 +961,8 @@
       "noOutput": "実行対象の出力ノードがありません",
       "unknownClass": "ノード定義が見つかりません（未導入のカスタムノード？）: {type}",
       "unresolvedWidgets": "パラメータの位置対応を解決できないため、既定値で実行します（想定 {expected} 個 / 実際 {actual} 個）",
+      "outerValueUnresolved": "subgraph の外側の欄のどの値が {name} のものか決められないため、このノードを送りませんでした",
+      "appendedDefaults": "保存の後でノードに足された欄を既定値で実行します: {names}",
       "missingInput": "必須入力 \"{name}\" が未接続です",
       "brokenNode": "読めない形のノードのため実行の形に変えられません: {message}",
       "danglingReference": "入力 \"{name}\" の接続先（{source}）が実行対象に含まれていません",
@@ -1108,7 +1113,6 @@
       "toggleParamsTitle": "クリックでパラメータの表示を切り替え",
       "missingDefinition": "ノード定義が見つかりません（未接続、またはこの ComfyUI に未導入のカスタムノード）",
       "noServerDefinition": "接続先に定義がないノードです（画面操作用のノードなど）。実行には関与しません",
-      "unresolved": "このノードのパラメータ位置を解決できないため読み取り専用です",
       "menu": "{name} のメニュー",
       "settingsTitle": "フローに出していない設定（大きさ・ピン留め）",
       "settings": "詳細設定…",
@@ -1121,6 +1125,8 @@
     "row": {
       "insertBeforeLabel": "{name} の手前にノードを追加",
       "insertBeforeTitle": "この入力の手前にノードを追加",
+      "addEntrance": "{name} を subgraph の入口にする",
+      "addEntranceTitle": "この欄を入口にする（subgraph のカードの欄で決める）",
       "addAppInput": "{name} をアプリ入力にする",
       "removeAppInput": "{name} をアプリ入力から外す",
       "appInputOnTitle": "アプリ入力（App Mode）の対象です。編集は左の列で行います",
@@ -1130,8 +1136,8 @@
       "dragLinkLabel": "{name} の接続元を別の行へもつなぐ",
       "unconnected": "未接続",
       "unconnectedRequired": "未接続（必須）",
-      "unknownName": "パラメータ名を特定できません",
-      "unknownNameTitle": "ノード定義が無いため名前を特定できていません（読み取り専用）"
+      "readOnly": "(編集非対応) {value}",
+      "readOnlyEmpty": "(編集非対応)"
     },
     "list": {
       "nodeLabel": "ノード {index}（{name}）",
@@ -1182,8 +1188,6 @@
       "close": "subgraph {name} をカードに戻す",
       "closeTitle": "1 枚のカードに戻す",
       "closeMenu": "カードに戻す",
-      "collapse": "subgraph {name} を閉じて折りたたむ",
-      "collapseTitle": "閉じて、折りたたんだカードにする",
       "uses": "×{count}",
       "usesTitle": "{count} か所で使っています。中の変更はすべてに効きます",
       "toGroup": "グループに変換",
@@ -1277,7 +1281,7 @@
       "socketDown": "送っていません: ComfyUI の通知が切断されています。先に「再接続」を押してください"
     },
     "report": {
-      "innerLine": "（内側 #{id}）{text}",
+      "fieldLine": "{field}：{text}",
       "rejected": "受け付けられませんでした: {reason}",
       "missingDefinition": "ノード定義が見つかりません: {classType}（接続先の ComfyUI に未導入か、ノード定義の更新が必要です）",
       "missingDefinitionDisabled": "{classType} の定義が見つかりません（無効化しているので実行には含みません）",
@@ -1285,7 +1289,12 @@
       "parallelEdit": "「{name}」は、ほかのブラウザのタブでも編集されています（最後の編集 {time}）",
       "untitledTab": "名称未設定",
       "noIssues": "問題はありません",
-      "missingModel": "モデルが接続先の ComfyUI にありません: {name}",
+      "dismiss": "閉じる",
+      "reveal": "{name} へ移動",
+      "revealTitle": "カードの列をこのノードへ送ります",
+      "missingModel": "{name}が接続先に見つかりませんでした",
+      "movedToFolder": "ルートディレクトリに存在しなかったため、{path}に変更しました",
+      "modelElsewhere": "接続先ではこのモデルは別の名前です: {actual}（欄は {name}）。欄で選び直してください",
       "model": {
         "place": "置き場: models/{directory}/",
         "openSource": "取得先を開く",
@@ -2050,7 +2059,8 @@
       "cleanup": {
         "heading": "クリーンアップ",
         "description": "ブラウザ側に無い30日以前のバックアップデータ",
-        "none": "該当するバックアップはありません。"      },
+        "none": "該当するバックアップはありません。"
+      },
       "userFiles": {
         "history": "実行の記録",
         "historyHint": "KisaraUI が ComfyUI のユーザーフォルダに書く実行の記録（kisara/history）。",
@@ -2067,6 +2077,8 @@
     "avatarPicker": {
       "title": "アバターの画像",
       "delete": "画像を消す",
+      "deleteTitle": "アバターの画像を消しますか？",
+      "deleteMessage": "「{name}」をアバターの画像から消します。使っているプリセットと会話はリンクを残し、バックアップから同じ画像を戻すとまた出ます。",
       "notImage": "画像でないファイルは足しませんでした。",
       "none": "なし"
     },
@@ -2226,7 +2238,7 @@
       },
       "semantic": {
         "title": "近似判定",
-        "hint": "追加条件の判定条件に、意味が近い場合に差し込みを行う意味近似を追加します。容量とメモリを数十MB消費します。",
+        "hint": "動的辞書の追加条件の判定や、表情判定に意味的近似による判定を行えるようにします。",
         "loading": "モデルを読み込んでいます（{percent}%）",
         "ready": "ロード済: {name}({size}MB)",
         "stored": "保存済: {name}({size}MB)",
@@ -2800,6 +2812,45 @@
       "title": "受け取った中身",
       "copy": "受け取った生データを写す",
       "truncated": "大きいので間を省いています"
+    },
+    "expression": {
+      "open": "表情",
+      "removeTitle": "表情を消しますか？",
+      "removeMessage": "表情「{name}」をアバターから消します。",
+      "openFor": "{name} の表情を編集",
+      "band": {
+        "decide": "表情を決定",
+        "decideTitle": "{name} を会話の今の表情にして閉じます（ダブルクリック・Enter でも決まります）",
+        "decideUnavailable": "会話のアバターから開いたときに、今の表情を決められます",
+        "toolbar": "表情の決定",
+        "filterToolbar": "表情の絞り込み",
+        "filterLabel": "表情を絞り込む"
+      },
+      "setDefault": "{name} を既定にする",
+      "isDefault": "{name} は既定の表情",
+      "replaceImage": "{name} の画像を替える",
+      "remove": "消す",
+      "addFiles": "ファイルを追加",
+      "drop": "落として表情を取り込む",
+      "unreadable": "このアバターの表情は読めません。",
+      "problem": {
+        "empty": "ラベルを入れてください。",
+        "tooLong": "40 字までにしてください。",
+        "duplicate": "ほかの表情と同じラベルです。"
+      },
+      "skipped": "飛ばしたもの: {names}",
+      "nothingImported": "取り込める表情がありませんでした。",
+      "saveFailed": "表情を保存できませんでした。",
+      "card": {
+        "title": "表情",
+        "hint": "会話のアバターの表情を、応答に合わせて切り替えます。",
+        "method": "決め方",
+        "tool": "ツール",
+        "semantic": "近似判定",
+        "toolHint": "LLM が応答と一緒に表情を選びます。ツールの呼び出しに対応したモデルが要ります。",
+        "semanticHint": "受け取った応答とラベルの意味の近さで選びます。",
+        "needSemantic": "近似判定のカードを有効にすると使えます。"
+      }
     }
   },
   "gateway": {

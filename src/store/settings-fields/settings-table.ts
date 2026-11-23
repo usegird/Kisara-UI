@@ -1,3 +1,4 @@
+import { normalizeExpressionMethod } from '@/chat/expression-tool';
 import { parseParams } from '@/chat/file';
 import { parseUnitLink } from '@/chat/prompt-parse';
 import {
@@ -118,6 +119,7 @@ const SETTINGS_FIELDS: { readonly [K in PersistedKey]: SettingsField<PersistedSe
     initial: DEFAULT_LORA_COPY_FORMAT,
     read: (raw) => stringOr(raw, DEFAULT_LORA_COPY_FORMAT),
   },
+  tagSourcesOff: { initial: [], read: normalizeDictionaryIds },
   recordRunHistory: { initial: false, read: isTrue },
   runHistoryLimit: { initial: RUN_HISTORY_LIMIT_DEFAULT, read: normalizeRunHistoryLimit },
   safeguards: { initial: DEFAULT_SAFEGUARDS, read: normalizeSafeguards, store: safeguardOverrides },
@@ -162,6 +164,8 @@ const SETTINGS_FIELDS: { readonly [K in PersistedKey]: SettingsField<PersistedSe
   llmSystemPrompt: { initial: '', read: textOf },
   llmSystemTemplate: { initial: null, read: parseUnitLink },
   chatShowAvatar: { initial: true, read: isNotFalse },
+  chatExpression: { initial: false, read: isTrue },
+  chatExpressionMethod: { initial: 'tool', read: normalizeExpressionMethod },
   chatTabsFirst: { initial: true, read: isNotFalse },
   chatImagePlace: { initial: 'right', read: normalizeChatImagePlace },
   chatImageWidth: {

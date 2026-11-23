@@ -102,10 +102,12 @@ describe('実行の失敗の 1 行', () => {
     expect(formatRunError('CUDA out of memory')).toBe('CUDA out of memory');
     expect(formatRunError(null)).toBe(t('api.run.error'));
     expect(formatHistoryFailure(null)).toBeNull();
-    expect(formatHistoryFailure({ kind: 'interrupted', line: null })).toBe(
+    expect(formatHistoryFailure({ kind: 'interrupted', line: null, nodeId: null })).toBe(
       t('api.run.interrupted'),
     );
-    expect(formatHistoryFailure({ kind: 'error', line: null })).toBe(t('api.run.error'));
-    expect(formatHistoryFailure({ kind: 'error', line: 'boom' })).toBe('boom');
+    expect(formatHistoryFailure({ kind: 'error', line: null, nodeId: null })).toBe(
+      t('api.run.error'),
+    );
+    expect(formatHistoryFailure({ kind: 'error', line: 'boom', nodeId: null })).toBe('boom');
   });
 });

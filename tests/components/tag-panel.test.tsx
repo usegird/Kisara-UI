@@ -99,7 +99,6 @@ describe('タグ辞書の画面', () => {
         { name: 'KisaraUI', entries: [{ tag: 'cat', kind: '', priority: 0, aliases: [] }] },
         { name: 'mine', entries: [] },
       ],
-      removed: [],
       overrides: null,
     });
   });
@@ -181,7 +180,7 @@ describe('タグ辞書の画面', () => {
     expect(order()).toEqual(['long_hair', 'smile']);
   });
 
-  it('一覧の最下部で辞書を足し、辞書の削除は確定で消す', async () => {
+  it('一覧の最下部で辞書を足し、確定で書く', async () => {
     const { commit } = open();
     await show();
 
@@ -194,15 +193,28 @@ describe('タグ辞書の画面', () => {
     fireEvent.keyDown(name, { key: 'Enter' });
     expect(tagInputs()).toHaveLength(1);
 
-    fireEvent.click(screen.getByRole('button', { name: 'mine を消す' }));
-    expect(screen.getByRole('button', { name: 'mine を戻す' })).not.toBeNull();
-
     await confirm();
     expect(commit).toHaveBeenCalledWith(base, {
       dictionaries: [{ name: 'extra', entries: [] }],
-      removed: ['mine'],
       overrides: null,
     });
+  });
+
+  it('辞書と pysssss は無効にでき、取り消し線を引く。確定を待たずに設定へ入れ、ファイルは消さない', async () => {
+    useSettingsStore.setState({ tagSourcesOff: [] });
+    const { commit } = open();
+    await show();
+
+    fireEvent.click(screen.getByRole('button', { name: 'mine を無効にする' }));
+    fireEvent.click(screen.getByRole('button', { name: 'pysssss を無効にする' }));
+    expect(screen.getByText('mine').className).toContain('line-through');
+    expect(useSettingsStore.getState().tagSourcesOff).toEqual(['dictionary:mine', 'pysssss']);
+    expect(confirmButton().disabled).toBe(true);
+
+    fireEvent.click(screen.getByRole('button', { name: 'mine を有効に戻す' }));
+    expect(useSettingsStore.getState().tagSourcesOff).toEqual(['pysssss']);
+    expect(commit).not.toHaveBeenCalled();
+    useSettingsStore.setState({ tagSourcesOff: [] });
   });
 
   it('直しかけがあれば、閉じる前に確かめる', async () => {

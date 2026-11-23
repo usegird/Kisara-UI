@@ -11,6 +11,7 @@ import {
   serializeTagRows,
   setOverride,
   tagKey,
+  tagSourceKey,
 } from '@/graph/tag-dictionary';
 
 import { tagEntry as entry } from '../helpers/tags';
@@ -70,6 +71,23 @@ describe('mergeTags', () => {
     const long = merged.find((tag) => tag.key === 'long hair');
     expect(long?.source).toBe('a');
     expect(merged.map((tag) => tag.key).sort()).toEqual(['cat', 'long hair', 'smile']);
+  });
+
+  it('無効にした辞書と pysssss は合わせない（後ろの出どころの同じタグが採られる）', () => {
+    const sources = {
+      pysssss,
+      dictionaries: [{ name: 'A', entries: [entry('smile', 1), entry('cat', 3)] }],
+      overrides: [],
+    };
+    const withoutA = mergeTags(sources, new Set([tagSourceKey('a')]));
+    expect(withoutA.find((tag) => tag.key === 'smile')?.source).toBeNull();
+    expect(withoutA.some((tag) => tag.key === 'cat')).toBe(false);
+    const withoutPysssss = mergeTags(sources, new Set([tagSourceKey(null)]));
+    expect(withoutPysssss.map((tag) => tag.key).sort()).toEqual(['cat', 'smile']);
+  });
+
+  it('pysssss の鍵は、同じ名前の辞書の鍵と重ならない', () => {
+    expect(tagSourceKey('pysssss')).not.toBe(tagSourceKey(null));
   });
 
   it('上書きは pysssss の同じ鍵の行を置き換え、消す印の行は外す', () => {

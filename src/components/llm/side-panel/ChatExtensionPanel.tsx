@@ -3,6 +3,8 @@ import { Info, RefreshCw, X } from 'lucide-react';
 import { useState } from 'react';
 
 import { DictionaryCard } from '@/components/llm/dictionary/DictionaryCard';
+import { SemanticCard } from '@/components/llm/dictionary/SemanticCard';
+import { ExpressionCard } from '@/components/llm/expression/ExpressionCard';
 import { PlaybookSettingsCard } from '@/components/llm/playbook/PlaybookSettingsCard';
 import { CARD_BODY } from '@/components/llm/side-panel/extension-card';
 import { TabPicker } from '@/components/llm/side-panel/TabPicker';
@@ -47,6 +49,8 @@ export function ChatExtensionPanel(): React.ReactElement {
     <div className="flex flex-col gap-3 p-2">
       <ComfyToolsCard />
       <DictionaryCard />
+      <SemanticCard />
+      <ExpressionCard />
       <PlaybookSettingsCard />
     </div>
   );

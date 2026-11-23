@@ -15,6 +15,7 @@ export interface QueueSnapshot {
 export interface HistoryFailureLine {
   readonly kind: 'error' | 'interrupted';
   readonly line: string | null;
+  readonly nodeId: string | null;
 }
 
 export interface HistoryEntry {

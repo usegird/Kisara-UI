@@ -21,3 +21,16 @@ function snapshot(): boolean {
 export function useNarrowScreen(): boolean {
   return useSyncExternalStore(subscribe, snapshot, () => false);
 }
+
+function subscribeResize(onChange: () => void): () => void {
+  globalThis.addEventListener('resize', onChange);
+  return () => globalThis.removeEventListener('resize', onChange);
+}
+
+export function useNarrowerThan(width: number): boolean {
+  return useSyncExternalStore(
+    subscribeResize,
+    () => typeof window !== 'undefined' && window.innerWidth < width,
+    () => false,
+  );
+}

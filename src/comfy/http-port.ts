@@ -62,7 +62,6 @@ import {
   fetchPysssssOverrides,
   fetchPysssssTags,
   fetchTagDictionaries,
-  removeTagDictionary,
   savePysssssOverrides,
   saveTagDictionary,
 } from '@/comfy/tags';
@@ -125,7 +124,6 @@ export function createHttpPort(): ComfyPort {
         saveTagDictionary(baseUrl, dictionary, overwrite, options),
       saveOverrides: (baseUrl, overrides, options) =>
         savePysssssOverrides(baseUrl, overrides, options),
-      removeDictionary: (baseUrl, name, options) => removeTagDictionary(baseUrl, name, options),
     },
     runHistory: {
       list: (baseUrl, options) => listRunHistoryFiles(baseUrl, options),

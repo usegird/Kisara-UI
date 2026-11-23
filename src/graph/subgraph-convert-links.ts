@@ -184,7 +184,7 @@ function objectLink(
   };
 }
 
-function uniqueName(name: string, taken: readonly string[]): string {
+export function uniqueName(name: string, taken: readonly string[]): string {
   if (!taken.includes(name)) return name;
   let at = 1;
   while (taken.includes(`${name}_${String(at)}`)) at += 1;

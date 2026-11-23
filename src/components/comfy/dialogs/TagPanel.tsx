@@ -74,8 +74,9 @@ export function TagPanel(): React.ReactElement {
             }}
             dictionaries={draft.dictionaries}
             canWrite={store.loaded && !busy}
+            off={panel.sourcesOff}
             onSelect={panel.selectView}
-            onToggle={panel.toggleDictionary}
+            onToggle={panel.toggleSource}
             onAdd={panel.addDictionary}
           />
         </SidePane>

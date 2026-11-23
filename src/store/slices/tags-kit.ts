@@ -14,7 +14,6 @@ export type TagCommitFailure = DictionaryNameError | 'not-loaded';
 
 export interface TagChanges {
   readonly dictionaries: readonly TagDictionary[];
-  readonly removed: readonly string[];
   readonly overrides: readonly TagEntry[] | null;
 }
 
@@ -30,13 +29,6 @@ export function planCommit(
   changes: TagChanges,
 ): readonly WriteStep[] | DictionaryNameError {
   const steps: WriteStep[] = [];
-  for (const name of changes.removed) {
-    if (findDictionary(state, name) === undefined) continue;
-    steps.push({
-      run: () => port.removeDictionary(baseUrl, name, {}),
-      apply: (sources) => ({ ...sources, dictionaries: without(sources.dictionaries, name) }),
-    });
-  }
   for (const dictionary of changes.dictionaries) {
     const overwrite =
       isDefaultDictionary(dictionary.name) || findDictionary(state, dictionary.name) !== undefined;

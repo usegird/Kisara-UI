@@ -10,10 +10,10 @@ interface BuiltinWorkflow {
 
 const BUILTIN_WORKFLOWS: readonly BuiltinWorkflow[] = [
   {
-    name: 'kisara-a1111-txt2img',
-    title: 'comfy.template.builtin.a1111Txt2img.title',
-    description: 'comfy.template.builtin.a1111Txt2img.description',
-    load: () => import('@/graph/builtin/a1111-txt2img.json').then((module) => module.default),
+    name: 'kisara-sdxl-a1111',
+    title: 'comfy.template.builtin.sdxlA1111.title',
+    description: 'comfy.template.builtin.sdxlA1111.description',
+    load: () => import('@/graph/builtin/sdxl-a1111.json').then((module) => module.default),
   },
 ];
 

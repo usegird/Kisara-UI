@@ -422,6 +422,9 @@
     }
   },
   "imagePicker": {
+    "card": {
+      "rename": "重命名 {name}"
+    },
     "kind": "图像",
     "title": "选择图像",
     "refresh": {
@@ -605,9 +608,9 @@
       "loadingMore": "加载中… {shown} / {total}",
       "builtinCategory": "KisaraUI",
       "builtin": {
-        "a1111Txt2img": {
-          "title": "txt2img（A1111 风格）",
-          "description": "与 Stable Diffusion web UI 相同布局的文生图。提示词中可用 LoRA 和通配符，带 Hires. fix 与 ADetailer 分组（初始为绕过）。需要 Impact Pack（ADetailer 还需要 Impact Subpack）"
+        "sdxlA1111": {
+          "title": "SDXL (A1111 like)",
+          "description": "与 Stable Diffusion web UI 相同布局的文生图。提示词中可用 LoRA 和通配符，Hires. fix 与 ADetailer 用 If/Else Switch 开关（初始为关闭）。需要带 If/Else Switch 的 ComfyUI，以及 Impact Pack 和 Impact Subpack"
         }
       }
     },
@@ -777,10 +780,10 @@
     "addDictionary": "添加词典",
     "addDictionaryTitle": "输入名称以添加空词典（确认时写入）",
     "dictionaryName": "词典名称",
-    "removeDictionary": "删除 {name}",
-    "removeDictionaryTitle": "给此词典加删除线。确认时删除其文件",
-    "restoreDictionary": "恢复 {name}",
-    "restoreDictionaryTitle": "去掉此词典的删除线",
+    "disableDictionary": "停用 {name}",
+    "disableDictionaryTitle": "补全时不再使用此词典。文件会保留",
+    "enableDictionary": "重新启用 {name}",
+    "enableDictionaryTitle": "补全时再次使用此词典",
     "errors": {
       "duplicateTag": "同一标签出现了两次：{name}",
       "notLoaded": "词典尚未读取完毕。请重新读取后再试",
@@ -958,6 +961,8 @@
       "noOutput": "没有可运行的输出节点",
       "unknownClass": "找不到节点定义（未安装的自定义节点？）：{type}",
       "unresolvedWidgets": "无法解析参数的位置对应，将使用默认值运行（预期 {expected} 个 / 实际 {actual} 个）",
+      "outerValueUnresolved": "无法确定子图外侧字段中哪个值属于 {name}，因此未发送此节点",
+      "appendedDefaults": "保存后为该节点新增的字段将以默认值运行：{names}",
       "missingInput": "必需输入“{name}”未连接",
       "brokenNode": "节点格式无法读取，无法转换为运行格式：{message}",
       "danglingReference": "输入“{name}”的连接源（{source}）不在运行对象中",
@@ -1108,7 +1113,6 @@
       "toggleParamsTitle": "点击切换参数显示",
       "missingDefinition": "找不到节点定义（未连接，或此 ComfyUI 未安装该自定义节点）",
       "noServerDefinition": "服务器上没有此节点的定义（例如仅用于界面操作的节点）。不参与执行",
-      "unresolved": "无法解析此节点的参数位置，因此为只读",
       "menu": "{name} 的菜单",
       "settingsTitle": "未在流程中显示的设置（尺寸、固定）",
       "settings": "详细设置…",
@@ -1121,6 +1125,8 @@
     "row": {
       "insertBeforeLabel": "在 {name} 之前添加节点",
       "insertBeforeTitle": "在此输入之前添加节点",
+      "addEntrance": "将 {name} 设为子图的入口",
+      "addEntranceTitle": "将此字段设为入口（在子图卡片上设置）",
       "addAppInput": "将 {name} 设为应用输入",
       "removeAppInput": "将 {name} 从应用输入中移除",
       "appInputOnTitle": "这是应用输入（App Mode）项。请在左侧栏中编辑",
@@ -1130,8 +1136,8 @@
       "dragLinkLabel": "将 {name} 的来源也连接到其他行",
       "unconnected": "未连接",
       "unconnectedRequired": "未连接（必需）",
-      "unknownName": "无法确定参数名",
-      "unknownNameTitle": "由于没有节点定义，无法确定名称（只读）"
+      "readOnly": "(不可编辑) {value}",
+      "readOnlyEmpty": "(不可编辑)"
     },
     "list": {
       "nodeLabel": "节点 {index}（{name}）",
@@ -1182,8 +1188,6 @@
       "close": "将 subgraph {name} 恢复为卡片",
       "closeTitle": "恢复为一张卡片",
       "closeMenu": "恢复为卡片",
-      "collapse": "收起 subgraph {name} 并折叠卡片",
-      "collapseTitle": "收起并折叠为小卡片",
       "uses": "×{count}",
       "usesTitle": "在 {count} 处使用。内部的更改会应用到所有位置",
       "toGroup": "转换为分组",
@@ -1277,7 +1281,7 @@
       "socketDown": "未发送：ComfyUI 的通知已断开。请先按“重新连接”"
     },
     "report": {
-      "innerLine": "（内部 #{id}）{text}",
+      "fieldLine": "{field}：{text}",
       "rejected": "未被接受：{reason}",
       "missingDefinition": "找不到节点定义：{classType}（所连接的 ComfyUI 未安装该节点，或需要更新节点定义）",
       "missingDefinitionDisabled": "找不到 {classType} 的定义（已禁用，不参与运行）",
@@ -1285,7 +1289,12 @@
       "parallelEdit": "“{name}”也正在其他浏览器标签页中编辑（最后编辑 {time}）",
       "untitledTab": "未命名",
       "noIssues": "没有问题",
-      "missingModel": "所连接的 ComfyUI 中没有该模型：{name}",
+      "dismiss": "关闭",
+      "reveal": "跳到 {name}",
+      "revealTitle": "将卡片列滚动到此节点",
+      "missingModel": "在所连接的 ComfyUI 中未找到 {name}",
+      "movedToFolder": "根目录中不存在，已改为 {path}",
+      "modelElsewhere": "所连接的 ComfyUI 中该模型的名称不同：{actual}（字段为 {name}）。请在字段中重新选择",
       "model": {
         "place": "放置位置：models/{directory}/",
         "openSource": "打开下载页面",
@@ -2050,7 +2059,8 @@
       "cleanup": {
         "heading": "清理",
         "description": "浏览器中没有的、30 天以前的备份数据",
-        "none": "没有符合条件的备份。"      },
+        "none": "没有符合条件的备份。"
+      },
       "userFiles": {
         "history": "运行记录",
         "historyHint": "KisaraUI 写入 ComfyUI 用户文件夹的运行记录（kisara/history）。",
@@ -2067,6 +2077,8 @@
     "avatarPicker": {
       "title": "头像图片",
       "delete": "删除图片",
+      "deleteTitle": "删除此头像图片？",
+      "deleteMessage": "将从头像图片中删除“{name}”。使用它的预设和对话会保留链接，从备份恢复同一图片后会再次显示。",
       "notImage": "非图片文件未添加。",
       "none": "无"
     },
@@ -2226,7 +2238,7 @@
       },
       "semantic": {
         "title": "近似判定",
-        "hint": "为追加条件的判定添加语义近似，在含义相近时插入。会占用数十 MB 的存储和内存。",
+        "hint": "使动态词典的追加条件判定和表情判定可以使用语义近似判定。",
         "loading": "正在加载模型（{percent}%）",
         "ready": "已加载: {name}（{size}MB）",
         "stored": "已保存: {name}（{size}MB）",
@@ -2800,6 +2812,45 @@
       "title": "已接收的内容",
       "copy": "复制已接收的原始数据",
       "truncated": "内容过大，已省略中间部分"
+    },
+    "expression": {
+      "open": "表情",
+      "removeTitle": "删除此表情？",
+      "removeMessage": "将从头像中删除表情“{name}”。",
+      "openFor": "编辑 {name} 的表情",
+      "band": {
+        "decide": "确定表情",
+        "decideTitle": "将 {name} 设为对话的当前表情并关闭（双击或按 Enter 也可确定）",
+        "decideUnavailable": "从对话头像打开时可设定当前表情",
+        "toolbar": "确定表情",
+        "filterToolbar": "筛选表情",
+        "filterLabel": "筛选表情"
+      },
+      "setDefault": "将 {name} 设为默认",
+      "isDefault": "{name} 是默认表情",
+      "replaceImage": "替换 {name} 的图片",
+      "remove": "删除",
+      "addFiles": "添加文件",
+      "drop": "拖放以导入表情",
+      "unreadable": "无法读取此头像的表情。",
+      "problem": {
+        "empty": "请输入标签。",
+        "tooLong": "请不超过 40 个字符。",
+        "duplicate": "已有其他表情使用此标签。"
+      },
+      "skipped": "已跳过: {names}",
+      "nothingImported": "没有可导入的表情。",
+      "saveFailed": "无法保存表情。",
+      "card": {
+        "title": "表情",
+        "hint": "根据回复切换对话头像的表情。",
+        "method": "选择方式",
+        "tool": "工具",
+        "semantic": "近似判定",
+        "toolHint": "LLM 在回复时一并选择表情。需要支持工具调用的模型。",
+        "semanticHint": "根据收到的回复与各标签的语义接近程度选择。",
+        "needSemantic": "启用近似判定卡片后即可使用。"
+      }
     }
   },
   "gateway": {

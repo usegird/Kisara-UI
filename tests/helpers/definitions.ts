@@ -37,3 +37,22 @@ export function definitionMap(...definitions: readonly NodeDefinition[]): NodeDe
 export function matchesFilters(definition: NodeDefinition, filters: SearchFilters): boolean {
   return searchDefinitions(definitionMap(definition), '', { filters }).length > 0;
 }
+
+export function switchNodeRaw(): Record<string, unknown> {
+  const template = { template_id: 'switch', allowed_types: '*' };
+  return {
+    input: {
+      required: { switch: ['BOOLEAN', {}] },
+      optional: {
+        on_false: ['COMFY_MATCHTYPE_V3', { lazy: true, template }],
+        on_true: ['COMFY_MATCHTYPE_V3', { lazy: true, template }],
+      },
+    },
+    input_order: { required: ['switch'], optional: ['on_false', 'on_true'] },
+    output: ['COMFY_MATCHTYPE_V3'],
+    output_name: ['output'],
+    output_matchtypes: ['switch'],
+    name: 'ComfySwitchNode',
+    display_name: 'If/Else Switch',
+  };
+}

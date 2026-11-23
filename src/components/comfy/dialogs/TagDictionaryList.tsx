@@ -1,11 +1,11 @@
 import { cva } from 'class-variance-authority';
-import { Lock, Plus, RotateCcw, Trash2 } from 'lucide-react';
+import { Ban, Lock, Plus, RotateCcw } from 'lucide-react';
 import { useState } from 'react';
 
 import type { DictionaryDraft } from '@/components/comfy/dialogs/tag-panel-draft';
 import { arrowSelect } from '@/components/ui/arrow-select';
 import { field } from '@/components/ui/field';
-import { isDefaultDictionary } from '@/graph/tag-dictionary';
+import { tagSourceKey } from '@/graph/tag-dictionary';
 import { t } from '@/i18n';
 import { isComposingKey } from '@/lib/text-entry';
 
@@ -20,7 +20,7 @@ const dictionaryItem = cva(
 );
 
 const itemName = cva('flex min-w-0 flex-1 items-center gap-1 truncate', {
-  variants: { removed: { true: 'text-muted-foreground line-through', false: '' } },
+  variants: { off: { true: 'text-muted-foreground line-through', false: '' } },
 });
 
 export type TagView =
@@ -33,8 +33,9 @@ interface DictionaryListProps {
   readonly totals: { readonly all: number; readonly pysssss: number | null };
   readonly dictionaries: readonly DictionaryDraft[];
   readonly canWrite: boolean;
+  readonly off: readonly string[];
   readonly onSelect: (view: TagView) => void;
-  readonly onToggle: (name: string) => void;
+  readonly onToggle: (name: string | null) => void;
   readonly onAdd: (name: string) => string | null;
 }
 
@@ -43,10 +44,12 @@ export function DictionaryList({
   totals,
   dictionaries,
   canWrite,
+  off,
   onSelect,
   onToggle,
   onAdd,
 }: DictionaryListProps): React.ReactElement {
+  const isOff = (name: string | null): boolean => off.includes(tagSourceKey(name));
   const item = (target: TagView, label: React.ReactNode, count: number) => (
     <button
       type="button"
@@ -71,24 +74,33 @@ export function DictionaryList({
         <li key={`d:${dictionary.name}`} className="group/item flex items-center gap-0.5">
           {item(
             { kind: 'dictionary', name: dictionary.name },
-            <span className={itemName({ removed: dictionary.removed })}>
+            <span className={itemName({ off: isOff(dictionary.name) })}>
               {dictionary.changed ? `${dictionary.name} *` : dictionary.name}
             </span>,
             dictionary.rows.filter((row) => !row.removed).length,
           )}
-          <DictionaryToggle dictionary={dictionary} canWrite={canWrite} onToggle={onToggle} />
+          <SourceToggle
+            label={dictionary.name}
+            off={isOff(dictionary.name)}
+            onClick={() => onToggle(dictionary.name)}
+          />
         </li>
       ))}
       {totals.pysssss === null ? null : (
-        <li className="flex">
+        <li className="group/item flex items-center gap-0.5">
           {item(
             { kind: 'pysssss' },
-            <span className={itemName()}>
+            <span className={itemName({ off: isOff(null) })}>
               {t('tags.pysssss')}
               <Lock className="size-3 shrink-0" aria-label={t('tags.readOnly')} />
             </span>,
             totals.pysssss,
           )}
+          <SourceToggle
+            label={t('tags.pysssss')}
+            off={isOff(null)}
+            onClick={() => onToggle(null)}
+          />
         </li>
       )}
       <li>
@@ -98,26 +110,23 @@ export function DictionaryList({
   );
 }
 
-function DictionaryToggle({
-  dictionary,
-  canWrite,
-  onToggle,
+function SourceToggle({
+  label,
+  off,
+  onClick,
 }: {
-  readonly dictionary: DictionaryDraft;
-  readonly canWrite: boolean;
-  readonly onToggle: (name: string) => void;
-}): React.ReactElement | null {
-  if (!dictionary.exists && isDefaultDictionary(dictionary.name)) return null;
-  const { removed, name } = dictionary;
-  const Icon = removed ? RotateCcw : Trash2;
+  readonly label: string;
+  readonly off: boolean;
+  readonly onClick: () => void;
+}): React.ReactElement {
+  const Icon = off ? RotateCcw : Ban;
   return (
     <button
       type="button"
       className={ITEM_ICON}
-      disabled={!canWrite}
-      aria-label={t(removed ? 'tags.restoreDictionary' : 'tags.removeDictionary', { name })}
-      title={t(removed ? 'tags.restoreDictionaryTitle' : 'tags.removeDictionaryTitle')}
-      onClick={() => onToggle(name)}
+      aria-label={t(off ? 'tags.enableDictionary' : 'tags.disableDictionary', { name: label })}
+      title={t(off ? 'tags.enableDictionaryTitle' : 'tags.disableDictionaryTitle')}
+      onClick={onClick}
     >
       <Icon className="size-3.5" aria-hidden />
     </button>

@@ -20,7 +20,8 @@ import {
   type Workflow,
   type WorkflowNode,
 } from '@/graph/types';
-import { resolveWidgetValues, widgetValueEntries } from '@/graph/widgets';
+import type { WidgetSlot } from '@/graph/widget-slots';
+import { resolveWidgetValues, widgetValueEntries, widgetValueList } from '@/graph/widgets';
 import { t } from '@/i18n';
 
 export const CONTROL_AFTER_GENERATE = 'control_after_generate';
@@ -84,7 +85,9 @@ function inputRows(state: NodeRowsState, input: NodeDefinition['inputs'][number]
     type: input.type,
     kind,
     required: input.required,
-    value: widgets.ok ? widgets.byInput.get(input.name) : undefined,
+    value: widgets.ok
+      ? widgets.byInput.get(input.name)
+      : positionalValueOf(node, widgets.slots, input.name),
     source,
     options: input.options,
     target: edit.target,
@@ -115,6 +118,16 @@ function widgetEditOf(
     height: input.config.multiline === true ? state.textHeight : null,
     imageUpload: isImageUpload(input.config),
   };
+}
+
+function positionalValueOf(
+  node: WorkflowNode,
+  slots: readonly WidgetSlot[],
+  inputName: string,
+): unknown {
+  const index = slots.findIndex((slot) => slot.kind === 'value' && slot.input === inputName);
+  const values = widgetValueList(node);
+  return index >= 0 && index < values.length ? values[index] : undefined;
 }
 
 function rowKindOf(source: RowSource | null, isWidget: boolean, resolved: boolean): NodeRowKind {

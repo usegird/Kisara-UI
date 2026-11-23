@@ -69,6 +69,7 @@ export interface PromptNodeError {
   readonly nodeId: string;
   readonly classType: string;
   readonly messages: readonly string[];
+  readonly inputNames: readonly (string | null)[];
 }
 
 export interface RunFailureInput {

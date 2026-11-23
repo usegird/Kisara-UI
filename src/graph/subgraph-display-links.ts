@@ -1,4 +1,4 @@
-import { linkIndex, readLink } from '@/graph/link-read';
+import { readLink } from '@/graph/link-read';
 import {
   nodeInputs,
   nodeOutputs,
@@ -23,43 +23,20 @@ export interface OpenLevel {
   readonly links: readonly ResolvedLink[];
 }
 
-function resolver(
-  workflow: Workflow,
+function innerOriginOf(
   levels: ReadonlyMap<NodeId, OpenLevel>,
-): {
-  readonly outerSource: (instanceId: NodeId, inputName: string) => End | null;
-  readonly innerOrigin: (instanceId: NodeId, slot: number) => End | null;
-} {
-  const rootById = new Map(workflow.nodes.map((node) => [node.id, node]));
-  const rootLinks = linkIndex(workflow.links);
-  const LIMIT = 16;
-
-  const outerSource = (instanceId: NodeId, inputName: string, depth = 0): End | null => {
-    if (depth > LIMIT) return null;
-    const input = nodeInputs(rootById.get(instanceId)).find((slot) => slot.name === inputName);
-    const link = input === undefined || input.link === null ? undefined : rootLinks.get(input.link);
-    if (!link) return null;
-    return levels.has(link.originId)
-      ? innerOrigin(link.originId, link.originSlot, depth + 1)
-      : { id: link.originId, slot: link.originSlot };
-  };
-
-  const innerOrigin = (instanceId: NodeId, slot: number, depth = 0): End | null => {
-    const open = levels.get(instanceId);
-    if (!open || depth > LIMIT) return null;
-    const link = open.links.find(
-      (candidate) =>
-        candidate.targetId === SUBGRAPH_IO_NODE_ID.output && candidate.targetSlot === slot,
-    );
-    if (!link) return null;
-    if (link.originId !== SUBGRAPH_IO_NODE_ID.input) {
-      return { id: link.originId, slot: link.originSlot };
-    }
-    const name = open.definition.inputs?.[link.originSlot]?.name;
-    return name === undefined ? null : outerSource(instanceId, name, depth + 1);
-  };
-
-  return { outerSource, innerOrigin };
+  instanceId: NodeId,
+  slot: number,
+): End | null {
+  const open = levels.get(instanceId);
+  if (!open) return null;
+  const link = open.links.find(
+    (candidate) =>
+      candidate.targetId === SUBGRAPH_IO_NODE_ID.output && candidate.targetSlot === slot,
+  );
+  if (!link) return null;
+  if (link.originId === SUBGRAPH_IO_NODE_ID.input) return { id: instanceId, slot: link.originSlot };
+  return { id: link.originId, slot: link.originSlot };
 }
 
 function rerouted(link: ResolvedLink, origin: End): WorkflowLink {
@@ -70,30 +47,27 @@ export function displayLinks(
   workflow: Workflow,
   levels: ReadonlyMap<NodeId, OpenLevel>,
 ): WorkflowLink[] {
-  const { outerSource, innerOrigin } = resolver(workflow, levels);
   const result: WorkflowLink[] = [];
 
   for (const raw of workflow.links) {
     const link = readLink(raw);
-    if (!link || levels.has(link.targetId)) continue;
+    if (!link) continue;
     if (!levels.has(link.originId)) {
       result.push(raw);
       continue;
     }
-    const origin = innerOrigin(link.originId, link.originSlot);
+    const origin = innerOriginOf(levels, link.originId, link.originSlot);
     if (origin) result.push(rerouted(link, origin));
   }
 
   for (const [instanceId, open] of levels) {
     for (const link of open.links) {
       if (link.targetId === SUBGRAPH_IO_NODE_ID.output) continue;
-      if (link.originId !== SUBGRAPH_IO_NODE_ID.input) {
-        result.push(rerouted(link, { id: link.originId, slot: link.originSlot }));
-        continue;
-      }
-      const name = open.definition.inputs?.[link.originSlot]?.name;
-      const origin = name === undefined ? null : outerSource(instanceId, name);
-      if (origin) result.push(rerouted(link, origin));
+      const origin =
+        link.originId === SUBGRAPH_IO_NODE_ID.input
+          ? { id: instanceId, slot: link.originSlot }
+          : { id: link.originId, slot: link.originSlot };
+      result.push(rerouted(link, origin));
     }
   }
   return result;

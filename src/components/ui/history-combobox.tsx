@@ -23,6 +23,9 @@ export interface HistoryComboboxProps {
   readonly className?: string | undefined;
   readonly bare?: boolean | undefined;
   readonly actions?: readonly HistoryComboboxAction[] | undefined;
+  readonly autoFocus?: boolean | undefined;
+  readonly onBlur?: (() => void) | undefined;
+  readonly onEscape?: (() => void) | undefined;
 }
 
 interface HistoryComboboxAction {
@@ -66,8 +69,12 @@ export function HistoryCombobox({
   className,
   bare = false,
   actions = [],
+  autoFocus,
+  onBlur,
+  onEscape,
 }: HistoryComboboxProps): React.ReactElement {
   const [typed, setTyped] = useState(false);
+  const [open, setOpen] = useState(false);
   const [highlighted, setHighlighted] = useState<string | undefined>(undefined);
   const query = value.trim().toLowerCase();
   const matched =
@@ -75,6 +82,13 @@ export function HistoryCombobox({
   const actionValues = actions.map((_, index) => `${ACTION_PREFIX}${index}`);
   const all = [...items, ...actionValues];
   const shown = [...matched, ...actionValues];
+  const escapeClosed = (event: React.KeyboardEvent): boolean => {
+    if (event.key !== 'Escape' || open || onEscape === undefined) return false;
+    event.preventDefault();
+    event.stopPropagation();
+    onEscape();
+    return true;
+  };
 
   return (
     <div className={cn('relative inline-flex min-w-0 items-center', className)}>
@@ -83,8 +97,9 @@ export function HistoryCombobox({
         filteredItems={[...shown]}
         value={value}
         openOnInputClick
-        onOpenChange={(open) => {
-          if (open) setTyped(false);
+        onOpenChange={(next) => {
+          setOpen(next);
+          if (next) setTyped(false);
         }}
         onValueChange={(next, details) => {
           const index = actionIndex(next);
@@ -105,7 +120,10 @@ export function HistoryCombobox({
           title={title}
           spellCheck={false}
           autoComplete="off"
+          autoFocus={autoFocus}
+          onBlur={onBlur}
           onKeyDown={(event) => {
+            if (escapeClosed(event)) return;
             if (event.key === 'Tab' && !event.shiftKey && value.length === 0 && example) {
               event.preventDefault();
               if (!insertAtCaret(event.currentTarget, example)) onValueChange(example);

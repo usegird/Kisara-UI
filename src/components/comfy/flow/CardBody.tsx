@@ -76,6 +76,7 @@ type CardBodyProps = Pick<
   readonly anchors: AnchorRegistry | null;
   readonly bodyRef: React.Ref<HTMLDivElement>;
   readonly definitionsLoaded: boolean;
+  readonly outputChips: boolean;
 };
 
 export function CardBody({
@@ -83,6 +84,7 @@ export function CardBody({
   anchors,
   bodyRef,
   definitionsLoaded,
+  outputChips,
   onCommit,
   onNeedOptions,
   onDisconnect,
@@ -111,7 +113,7 @@ export function CardBody({
         </div>
       ) : null}
 
-      <CardFooter view={view} onAddAfter={onAddAfter} />
+      <CardFooter view={view} chips={outputChips} onAddAfter={onAddAfter} />
     </div>
   );
 }
@@ -159,14 +161,17 @@ function BodyNote({
       </p>
     );
   }
-  if (!view.unresolved) return null;
-  return <p className="text-destructive px-3 py-2 text-xs">{t('flow.card.unresolved')}</p>;
+  return null;
 }
 
 function CardFooter({
   view,
+  chips,
   onAddAfter,
-}: { readonly view: NodeView } & Pick<CardActions, 'onAddAfter'>): React.ReactElement | null {
+}: { readonly view: NodeView; readonly chips: boolean } & Pick<
+  CardActions,
+  'onAddAfter'
+>): React.ReactElement | null {
   const anchors = useContext(AnchorContext);
   const { chipOutputs: vertical, roomy } = useContext(FlowLookContext);
   if (view.outputs.length === 0) return null;
@@ -174,8 +179,8 @@ function CardFooter({
   return (
     <div className={cardFooter({ roomy })}>
       <div className={footerChips({ vertical })}>
-        <OutputChips view={view} onAddAfter={onAddAfter} />
-        {vertical ? null : (
+        {chips ? <OutputChips view={view} onAddAfter={onAddAfter} /> : null}
+        {vertical && chips ? null : (
           <span
             ref={anchors?.register(outputAnchorKey(view.id))}
             className="size-2.5 shrink-0 rounded-full"

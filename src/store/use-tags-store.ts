@@ -16,6 +16,7 @@ import {
   type TagCommitFailure,
   type WriteStep,
 } from '@/store/slices/tags-kit';
+import { useSettingsStore } from '@/store/use-settings-store';
 
 export type { TagChanges, TagCommitFailure } from '@/store/slices/tags-kit';
 
@@ -59,7 +60,11 @@ function withSources(state: TagSources, patch: Partial<TagSources>): Partial<Tag
     overrides: state.overrides,
     ...patch,
   };
-  return { ...patch, merged: mergeTags(sources) };
+  return { ...patch, merged: mergeTags(sources, sourcesOff()) };
+}
+
+function sourcesOff(): ReadonlySet<string> {
+  return new Set(useSettingsStore.getState().tagSourcesOff);
 }
 
 function panelActions(
@@ -158,10 +163,14 @@ const portTags: TagsPort = {
   fetchOverrides: (...args) => comfyPort().tags.fetchOverrides(...args),
   saveDictionary: (...args) => comfyPort().tags.saveDictionary(...args),
   saveOverrides: (...args) => comfyPort().tags.saveOverrides(...args),
-  removeDictionary: (...args) => comfyPort().tags.removeDictionary(...args),
 };
 
 export const useTagsStore = createTagsStore(portTags);
+
+useSettingsStore.subscribe((state, previous) => {
+  if (state.tagSourcesOff === previous.tagSourcesOff) return;
+  useTagsStore.setState((tags) => withSources(tags, {}));
+});
 
 registerTabScopedValue('tagPanel', {
   current: () => (useTagsStore.getState().panelOpen ? true : null),

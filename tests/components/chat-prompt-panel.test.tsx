@@ -5,6 +5,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { appendTurn } from '@/chat/edit';
 import { applyStreamEvents, finishStream } from '@/chat/stream-receive';
 import { ChatPromptPanel } from '@/components/llm/side-panel/ChatPromptPanel';
+import { useAvatarExpressionsStore } from '@/store/use-avatar-expressions-store';
 import { useChatSidePanelStore } from '@/store/use-chat-side-panel-store';
 import { useChatStore } from '@/store/use-chat-store';
 import { useSettingsStore } from '@/store/use-settings-store';
@@ -202,5 +203,38 @@ describe('ChatPromptPanel のすべて開く・すべて閉じる', () => {
     expect(closed).toEqual([]);
     fireEvent.click(screen.getByRole('button', { name: '閉じる' }));
     expect(opened()).toBe(0);
+  });
+});
+
+describe('ChatPromptPanel の表情のツール', () => {
+  it('表情をツールで決めるときだけ、送る tools の行として表情の行を出す', () => {
+    const image = new Blob(['x'], { type: 'image/png' });
+    useAvatarExpressionsStore.setState({
+      reads: {
+        av: {
+          hash: 'h',
+          read: {
+            kind: 'ok',
+            set: {
+              defaultLabel: 'neutral',
+              items: [
+                { label: 'neutral', image },
+                { label: 'joy', image },
+              ],
+            },
+          },
+        },
+      },
+    });
+    setChat({ ...answered, imageId: 'av' });
+    useSettingsStore.setState({ chatExpression: true, chatExpressionMethod: 'semantic' });
+    render(<ChatPromptPanel chatId="c1" />);
+    expect(screen.queryByText('set_expression')).toBeNull();
+    act(() => {
+      useSettingsStore.setState({ chatExpressionMethod: 'tool' });
+    });
+    expect(screen.getByText('set_expression')).toBeTruthy();
+    useSettingsStore.setState({ chatExpression: false, chatExpressionMethod: 'tool' });
+    useAvatarExpressionsStore.setState({ reads: {} });
   });
 });

@@ -8,11 +8,11 @@ import {
   clampPercent,
   FOCUS_KEY_STEP,
   frameShape,
+  frameStyle,
   ghostToolsRow,
   handle,
   HANDLE_SIGN,
   HANDLES,
-  sideFrameWidth,
   WHEEL_TO_LOG,
   type HandleAt,
 } from '@/components/llm/workspace/chat-image-style';
@@ -21,15 +21,9 @@ import { useDragFrom } from '@/hooks/ui/use-drag-from';
 import { t } from '@/i18n';
 import { panPercent, panReset, panTo } from '@/lib/pan';
 import { KEYBOARD_RESIZE_STEP } from '@/lib/resize-step';
-import { CHAT_MIN_HEIGHT } from '@/store/settings-fields/chat-image';
 import { useSettingsStore } from '@/store/use-settings-store';
 
-const CHAT_TOP_ROOM = 8;
-
 const TAP_TOLERANCE = 4;
-
-const CHAT_LOG_WIDTH = 780;
-const GHOST_MIN = 64;
 
 export interface ImageFrameProps {
   readonly chatId: string;
@@ -54,11 +48,7 @@ export function ImageFrame({ chatId, url, side }: ImageFrameProps): React.ReactE
     readonly y: number;
     readonly key: number;
   } | null>(null);
-  const room = `(100cqh - ${String(CHAT_MIN_HEIGHT + CHAT_TOP_ROOM)}px)`;
   const ghost = url === null;
-  const limit = !side
-    ? `100%, max(48px, calc(${room} * ${String(width)} / ${String(height)}))`
-    : `max(${String(GHOST_MIN)}px, calc((100cqw - ${String(CHAT_LOG_WIDTH)}px) / 2))`;
   const onImageKeyDown = (event: React.KeyboardEvent<HTMLImageElement>): void => {
     const delta = FOCUS_KEY_STEP[event.key];
     if (delta === undefined) return;
@@ -100,11 +90,7 @@ export function ImageFrame({ chatId, url, side }: ImageFrameProps): React.ReactE
     <div
       ref={setNodeRef}
       className={frameShape({ ghost })}
-      style={{
-        width: side && !ghost ? sideFrameWidth(width, height) : `min(${String(width)}px, ${limit})`,
-        aspectRatio: `${String(width)} / ${String(height)}`,
-        maxHeight: side && ghost ? '100%' : undefined,
-      }}
+      style={frameStyle({ side, ghost, width, height })}
       role="group"
       aria-label={label}
       {...{ [WHEEL_TO_LOG]: '' }}

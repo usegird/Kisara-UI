@@ -157,6 +157,7 @@ export interface InputDefinition {
   readonly options: readonly unknown[] | null;
   readonly config: Readonly<Record<string, unknown>>;
   readonly branches?: readonly InputBranch[];
+  readonly matchType?: string;
 }
 
 export interface InputBranch {
@@ -167,6 +168,7 @@ export interface InputBranch {
 export interface OutputDefinition {
   readonly name: string;
   readonly type: string;
+  readonly matchType?: string;
 }
 
 export interface NodeDefinition {

@@ -29,6 +29,13 @@ export function sortImageItems(items: readonly ImageItem[], ascending: boolean):
   return [...items].sort((left, right) => left.path.localeCompare(right.path) * direction);
 }
 
+export function keepImageOrder(items: readonly ImageItem[], order: readonly string[]): ImageItem[] {
+  const at = new Map(order.map((value, index) => [value, index]));
+  const known = items.filter((item) => at.has(item.value));
+  known.sort((left, right) => (at.get(left.value) ?? 0) - (at.get(right.value) ?? 0));
+  return [...known, ...items.filter((item) => !at.has(item.value))];
+}
+
 export function filterImageItems(items: readonly ImageItem[], query: string): ImageItem[] {
   const terms = searchTerms(query);
   const matched = items.filter((item) => matchesAnyTerm(item.path, terms));

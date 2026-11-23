@@ -60,6 +60,12 @@ export const centerOnCursor: Modifier = ({ activatorEvent, draggingNodeRect, tra
 export const collision: CollisionDetection = (args) =>
   args.pointerCoordinates === null ? closestCenter(args) : pointerWithin(args);
 
+export type PreviewSlot = 'outer' | 'top' | 'aboveInput' | 'background';
+
+export function previewSlotOf(place: ChatImagePlace): PreviewSlot {
+  return place === 'left' || place === 'right' ? 'outer' : place;
+}
+
 function placeAt(x: number, y: number): ChatImagePlace {
   if (x < 0) return 'left';
   if (x > 0) return 'right';

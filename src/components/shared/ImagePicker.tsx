@@ -1,13 +1,14 @@
-import { cva } from 'class-variance-authority';
 import { CaseSensitive } from 'lucide-react';
 import { useMemo, useRef, useState } from 'react';
 
+import { carriesFiles, dropOverlay } from '@/components/shared/file-drop';
 import { ImageGrid } from '@/components/shared/ImageGrid';
 import { UploadButton } from '@/components/shared/ImageUploadButton';
 import { DialogFrame } from '@/components/ui/dialog';
 import { PickerBand } from '@/components/ui/picker-band';
-import { filterImageItems, sortImageItems, type ImageItem } from '@/graph/image-options';
+import { filterImageItems, type ImageItem } from '@/graph/image-options';
 import type { UploadOutcome } from '@/hooks/comfy/use-image-upload';
+import { orderedImageItems, useFrozenOrder } from '@/hooks/ui/use-frozen-order';
 import { useIncrementalList } from '@/hooks/ui/use-incremental-list';
 import { t } from '@/i18n';
 import { CARD_LIST_STEP } from '@/store/settings-fields/card-size';
@@ -16,15 +17,6 @@ import { useSettingsStore } from '@/store/use-settings-store';
 interface Notice {
   readonly text: string;
   readonly failed: boolean;
-}
-
-const dropOverlay = cva(
-  `border-primary bg-primary/5 text-primary pointer-events-none absolute inset-2 z-10 flex
-    items-center justify-center rounded-md border-2 border-dashed text-sm`,
-);
-
-function carriesFiles(event: React.DragEvent): boolean {
-  return event.dataTransfer.types.includes('Files');
 }
 
 export const NONE_IMAGE = '\u0000none';
@@ -50,6 +42,8 @@ export interface ImagePickerProps {
   readonly bandActions?: (selection: ImagePickerSelection) => React.ReactNode;
   readonly onPlace: (value: string) => void;
   readonly noneLabel?: string | undefined;
+  readonly cardActions?: ((item: ImageItem) => React.ReactNode) | undefined;
+  readonly onRename?: ((item: ImageItem, name: string) => boolean) | undefined;
 }
 
 export function ImagePicker({
@@ -67,6 +61,8 @@ export function ImagePicker({
   bandActions,
   onPlace,
   noneLabel,
+  cardActions,
+  onRename,
 }: ImagePickerProps): React.ReactElement {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
@@ -76,17 +72,21 @@ export function ImagePicker({
   const [dropping, setDropping] = useState(false);
   const fileInput = useRef<HTMLInputElement>(null);
 
+  const ascending = useSettingsStore((state) => state.imageSortAscending);
+  const frozen = useFrozenOrder(items, ascending, onRename !== undefined);
   const [wasOpen, setWasOpen] = useState(open);
   if (open !== wasOpen) {
     setWasOpen(open);
     setNotice(null);
     setDropping(false);
     setReveal(null);
-    if (open) setSelected(initialSelectionOf(value, noneLabel));
+    if (open) {
+      setSelected(initialSelectionOf(value, noneLabel));
+      frozen.reset();
+    }
   }
 
   const height = useSettingsStore((state) => state.modelCardHeight);
-  const ascending = useSettingsStore((state) => state.imageSortAscending);
   const setAscending = useSettingsStore((state) => state.setImageSortAscending);
   const none = useMemo(
     (): ImageItem | null =>
@@ -96,9 +96,9 @@ export function ImagePicker({
   const visible = useMemo(
     () => [
       ...(none === null ? [] : [none]),
-      ...filterImageItems(sortImageItems(items, ascending), query),
+      ...filterImageItems(orderedImageItems(items, ascending, frozen.order), query),
     ],
-    [none, items, ascending, query],
+    [none, items, ascending, query, frozen.order],
   );
   const selectedItem = useMemo(
     () => selectedItemOf(selected, none, items),
@@ -147,6 +147,7 @@ export function ImagePicker({
         className="relative flex min-h-0 flex-1 flex-col"
         onKeyDownCapture={(event) => {
           if (event.key !== 'Escape' || selected === null) return;
+          if (event.target instanceof Element && event.target.closest('[data-card-rename]')) return;
           setSelected(null);
           event.preventDefault();
           event.stopPropagation();
@@ -222,6 +223,13 @@ export function ImagePicker({
           onSelect={(item) => setSelected(item.value === selected ? null : item.value)}
           onClear={() => setSelected(null)}
           onPlace={(item) => place(item.value)}
+          cardActions={
+            cardActions === undefined
+              ? undefined
+              : (item) => (item.value === NONE_IMAGE ? null : cardActions(item))
+          }
+          onRename={onRename}
+          canRename={(item) => item.value !== NONE_IMAGE}
         />
         {dropping ? <div className={dropOverlay()}>{t('imagePicker.upload.drop')}</div> : null}
       </div>

@@ -1,3 +1,4 @@
+import { normalizeExpressionLabel } from '@/chat/avatar-expression';
 import { parseCandidate, parseSummary } from '@/chat/candidate-parse';
 import { parseCharacterFields } from '@/chat/card';
 import { parseLorebooks } from '@/chat/dictionary';
@@ -5,7 +6,7 @@ import { parseChatPlaybook, parseInstruction } from '@/chat/playbook-parse';
 import { compositionOf, parsePersona, parseUnitLink } from '@/chat/prompt-parse';
 import { pickGenerationParams } from '@/chat/request';
 import { settleInterrupted } from '@/chat/stream-receive';
-import type { Chat, ChatMessage } from '@/chat/types';
+import type { Chat, ChatExpressionChoice, ChatMessage } from '@/chat/types';
 import { clamp } from '@/lib/clamp';
 import { finiteNumber, isRecord, isUnknownArray, stringOr } from '@/lib/guards';
 import type { GenerationParams } from '@/port/llm-port';
@@ -86,12 +87,21 @@ export function parseIntactChat(raw: unknown): Chat | null {
 
 export function refsOf(
   raw: Readonly<Record<string, unknown>> | null | undefined,
-): Pick<Chat, 'lorebooks' | 'imageId'> {
+): Pick<Chat, 'lorebooks' | 'imageId' | 'expression'> {
   const imageId =
     typeof raw?.imageId === 'string' || raw?.imageId === null ? raw.imageId : undefined;
   const lorebooks = parseLorebooks(raw?.lorebooks);
+  const expression = parseExpressionChoice(raw?.expression);
   return {
     ...(lorebooks === null ? {} : { lorebooks }),
     ...(imageId === undefined ? {} : { imageId }),
+    ...(expression === null ? {} : { expression }),
   };
+}
+
+function parseExpressionChoice(raw: unknown): ChatExpressionChoice | null {
+  if (!isRecord(raw) || typeof raw.label !== 'string') return null;
+  const label = normalizeExpressionLabel(raw.label);
+  if (label === null) return null;
+  return { label, after: typeof raw.after === 'string' ? raw.after : null };
 }

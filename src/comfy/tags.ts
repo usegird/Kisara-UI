@@ -1,4 +1,4 @@
-import { deleteRequest, fetchText, postText, type RequestOptions } from '@/comfy/client';
+import { fetchText, postText, type RequestOptions } from '@/comfy/client';
 import { pysssssTagsUrl, userdataItemUrl, userdataWriteUrl } from '@/comfy/endpoints';
 import { isNotFound } from '@/comfy/request-error';
 import { listUserdataPaths } from '@/comfy/userdata';
@@ -79,17 +79,4 @@ export async function savePysssssOverrides(
 ): Promise<void> {
   const path = `${KISARA_TAGS_DIR}/${PYSSSSS_OVERRIDE_FILE}`;
   await postText(userdataWriteUrl(baseUrl, path, true), serializeTagRows(overrides), options);
-}
-
-export async function removeTagDictionary(
-  baseUrl: string,
-  name: string,
-  options: RequestOptions = {},
-): Promise<void> {
-  const url = userdataItemUrl(baseUrl, `${KISARA_TAGS_DIR}/${tagDictionaryPath(name)}`);
-  try {
-    await deleteRequest(url, options);
-  } catch (error) {
-    if (!isNotFound(error)) throw error;
-  }
 }

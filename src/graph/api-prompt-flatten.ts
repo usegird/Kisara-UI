@@ -1,5 +1,6 @@
 import { linkIndex } from '@/graph/link-read';
 import { subgraphInputAt, subgraphMap } from '@/graph/subgraph';
+import { outerValueOf, type OuterValue } from '@/graph/subgraph-values';
 import {
   FRONTEND_ONLY_TYPES,
   isNoteType,
@@ -28,6 +29,7 @@ interface Level {
   readonly nodesById: Map<NodeId, WorkflowNode>;
   readonly links: Map<LinkId, ResolvedLink>;
   readonly boundary: ((walk: Walk, slot: number) => Source | null) | null;
+  readonly outerValue: ((slot: number) => OuterValue | null) | null;
   readonly subgraphs: ReadonlyMap<string, SubgraphDefinition>;
   readonly chain: readonly string[];
 }
@@ -38,6 +40,7 @@ export interface FlatNode {
   readonly level: Level;
   readonly definition: NodeDefinition | undefined;
   readonly sources: Map<string, Source>;
+  readonly outerValues: Map<string, OuterValue>;
 }
 
 interface Walk {
@@ -70,6 +73,7 @@ export function flattenWorkflow(workflow: Workflow, definitions: NodeDefinitionM
     nodesById: nodesById(workflow.nodes),
     links: linkIndex(workflow.links),
     boundary: null,
+    outerValue: null,
     subgraphs: subgraphMap(workflow),
     chain: [],
   });
@@ -78,7 +82,12 @@ export function flattenWorkflow(workflow: Workflow, definitions: NodeDefinitionM
     nodeInputs(entry.node).forEach((input, index) => {
       const walk = { childLevels: build.childLevels, seen: new Set<string>() };
       const source = resolveInput(walk, entry.level, entry.node, index);
-      if (source) entry.sources.set(input.name, source);
+      if (source) {
+        entry.sources.set(input.name, source);
+        return;
+      }
+      const outer = outerValueAt(entry.level, input.link);
+      if (outer) entry.outerValues.set(input.name, outer);
     });
   }
   return { flat: build.flat, cycles: build.cycles };
@@ -128,7 +137,7 @@ function buildLevel(build: Build, level: Level): void {
         continue;
       }
 
-      const child = createChildLevel(level, node, definition);
+      const child = createChildLevel(level, node, definition, build.definitions);
       build.childLevels.set(absoluteId(level, node.id), child);
       buildLevel(build, child);
       continue;
@@ -145,6 +154,7 @@ function buildLevel(build: Build, level: Level): void {
       level,
       definition: build.definitions.get(node.type),
       sources: new Map<string, Source>(),
+      outerValues: new Map<string, OuterValue>(),
     });
   }
 }
@@ -153,11 +163,13 @@ function createChildLevel(
   parent: Level,
   instance: WorkflowNode,
   definition: SubgraphDefinition,
+  definitions: NodeDefinitionMap,
 ): Level {
   return {
     prefix: `${absoluteId(parent, instance.id)}:`,
     nodesById: nodesById(definition.nodes),
     links: linkIndex(definition.links),
+    outerValue: (slot) => outerValueOf(instance, definition, slot, definitions),
     subgraphs: parent.subgraphs,
     chain: [...parent.chain, definition.id],
     boundary: (walk, slot) => {
@@ -185,6 +197,13 @@ function resolveInput(
   if (!link) return null;
 
   return resolveOutput(walk, level, link.originId, link.originSlot);
+}
+
+function outerValueAt(level: Level, linkId: LinkId | null | undefined): OuterValue | null {
+  if (linkId === null || linkId === undefined || !level.outerValue) return null;
+  const link = level.links.get(linkId);
+  if (link?.originId !== SUBGRAPH_IO_NODE_ID.input) return null;
+  return level.outerValue(link.originSlot);
 }
 
 function resolveSubgraphOutput(

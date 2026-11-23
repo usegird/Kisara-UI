@@ -423,6 +423,9 @@
     }
   },
   "imagePicker": {
+    "card": {
+      "rename": "Rename {name}"
+    },
     "kind": "Image",
     "title": "Choose an image",
     "refresh": {
@@ -610,9 +613,9 @@
       "loadingMore": "Loading… {shown} / {total}",
       "builtinCategory": "KisaraUI",
       "builtin": {
-        "a1111Txt2img": {
-          "title": "txt2img (A1111 style)",
-          "description": "Text to image laid out like the Stable Diffusion web UI. LoRA and wildcards in the prompt, Hires. fix and ADetailer groups (bypassed at first). Needs Impact Pack (ADetailer also needs Impact Subpack)"
+        "sdxlA1111": {
+          "title": "SDXL (A1111 like)",
+          "description": "Text to image laid out like the Stable Diffusion web UI. LoRA and wildcards in the prompt, and Hires. fix and ADetailer turned on and off with If/Else Switch (off at first). Needs a ComfyUI with If/Else Switch, Impact Pack and Impact Subpack"
         }
       }
     },
@@ -782,10 +785,10 @@
     "addDictionary": "Add dictionary",
     "addDictionaryTitle": "Enter a name to add an empty dictionary (written when you confirm)",
     "dictionaryName": "Dictionary name",
-    "removeDictionary": "Delete {name}",
-    "removeDictionaryTitle": "Strike out this dictionary. Its file is deleted when you confirm",
-    "restoreDictionary": "Restore {name}",
-    "restoreDictionaryTitle": "Remove the strikethrough from this dictionary",
+    "disableDictionary": "Disable {name}",
+    "disableDictionaryTitle": "Stop using this dictionary for completion. Its file is kept",
+    "enableDictionary": "Enable {name}",
+    "enableDictionaryTitle": "Use this dictionary for completion again",
     "errors": {
       "duplicateTag": "The same tag appears twice: {name}",
       "notLoaded": "The dictionaries are not loaded yet. Reload and try again",
@@ -963,6 +966,8 @@
       "noOutput": "There is no output node to run",
       "unknownClass": "Node definition not found (custom node not installed?): {type}",
       "unresolvedWidgets": "Could not match widget values to their positions, so defaults will be used (expected {expected}, got {actual})",
+      "outerValueUnresolved": "Could not tell which subgraph field value belongs to {name}, so this node was not sent",
+      "appendedDefaults": "Fields added to this node after the workflow was saved run with their defaults: {names}",
       "missingInput": "Required input \"{name}\" is not connected",
       "brokenNode": "Cannot convert an unreadable node for running: {message}",
       "danglingReference": "The source ({source}) of input \"{name}\" is not included in the run",
@@ -1113,7 +1118,6 @@
       "toggleParamsTitle": "Click to show or hide parameters",
       "missingDefinition": "Node definition not found (not connected, or a custom node not installed on this ComfyUI)",
       "noServerDefinition": "The server has no definition for this node (e.g. a UI-only node). It does not take part in execution.",
-      "unresolved": "Read-only: the parameter positions of this node can't be resolved",
       "menu": "Menu for {name}",
       "settingsTitle": "Settings not shown in the flow (size, pinned)",
       "settings": "Settings…",
@@ -1126,6 +1130,8 @@
     "row": {
       "insertBeforeLabel": "Add a node before {name}",
       "insertBeforeTitle": "Add a node before this input",
+      "addEntrance": "Make {name} an entrance of the subgraph",
+      "addEntranceTitle": "Make this field an entrance (set it from the subgraph card)",
       "addAppInput": "Add {name} to app inputs",
       "removeAppInput": "Remove {name} from app inputs",
       "appInputOnTitle": "This is an app input (App Mode). Edit it in the left column.",
@@ -1135,8 +1141,8 @@
       "dragLinkLabel": "Also connect the source of {name} to another row",
       "unconnected": "Not connected",
       "unconnectedRequired": "Not connected (required)",
-      "unknownName": "Can't identify the parameter name",
-      "unknownNameTitle": "The name can't be identified because there is no node definition (read-only)"
+      "readOnly": "(read-only) {value}",
+      "readOnlyEmpty": "(read-only)"
     },
     "list": {
       "nodeLabel": "Node {index} ({name})",
@@ -1187,8 +1193,6 @@
       "close": "Return subgraph {name} to a card",
       "closeTitle": "Return to a single card",
       "closeMenu": "Return to card",
-      "collapse": "Close subgraph {name} and fold the card",
-      "collapseTitle": "Close and fold into a small card",
       "uses": "×{count}",
       "usesTitle": "Used in {count} places. Changes inside apply to all of them",
       "toGroup": "Convert to group",
@@ -1282,7 +1286,7 @@
       "socketDown": "Not sent: disconnected from ComfyUI notifications. Press Reconnect first"
     },
     "report": {
-      "innerLine": "(inner #{id}) {text}",
+      "fieldLine": "{field}: {text}",
       "rejected": "Not accepted: {reason}",
       "missingDefinition": "Node definition not found: {classType} (not installed on the connected ComfyUI, or the node definitions need refreshing)",
       "missingDefinitionDisabled": "No definition for {classType} (disabled, so it is not part of the run)",
@@ -1290,7 +1294,12 @@
       "parallelEdit": "\"{name}\" is also being edited in another browser tab (last edit {time})",
       "untitledTab": "Untitled",
       "noIssues": "No issues",
-      "missingModel": "Model not found on the connected ComfyUI: {name}",
+      "dismiss": "Dismiss",
+      "reveal": "Scroll to {name}",
+      "revealTitle": "Scroll the card column to this node",
+      "missingModel": "{name} was not found on the connected ComfyUI",
+      "movedToFolder": "Not found in the root folder, so changed to {path}",
+      "modelElsewhere": "The connected ComfyUI has this model under another name: {actual} (the field says {name}). Pick it again in the field",
       "model": {
         "place": "Put it in: models/{directory}/",
         "openSource": "Open download page",
@@ -2066,7 +2075,8 @@
       "cleanup": {
         "heading": "Cleanup",
         "description": "Backups not in the browser that are 30 days old or older",
-        "none": "No matching backups."      },
+        "none": "No matching backups."
+      },
       "userFiles": {
         "history": "Run history",
         "historyHint": "Run records KisaraUI writes to the ComfyUI user folder (kisara/history).",
@@ -2083,6 +2093,8 @@
     "avatarPicker": {
       "title": "Avatar images",
       "delete": "Delete image",
+      "deleteTitle": "Delete this avatar image?",
+      "deleteMessage": "Delete “{name}” from the avatar images. Presets and chats that use it keep the link, and it comes back if you restore the same image from a backup.",
       "notImage": "Files that are not images were not added.",
       "none": "None"
     },
@@ -2245,7 +2257,7 @@
       },
       "semantic": {
         "title": "Similarity",
-        "hint": "Adds Semantic to the condition logic, inserting when the meaning is close. Uses tens of MB of storage and memory.",
+        "hint": "Lets the dynamic dictionary conditions and the expression choice use judgments by closeness in meaning.",
         "loading": "Loading the model ({percent}%)",
         "ready": "Loaded: {name} ({size}MB)",
         "stored": "Saved: {name} ({size}MB)",
@@ -2822,6 +2834,45 @@
       "title": "Received data",
       "copy": "Copy the received raw data",
       "truncated": "Shortened in the middle because it is large"
+    },
+    "expression": {
+      "open": "Expressions",
+      "removeTitle": "Delete this expression?",
+      "removeMessage": "Delete the expression “{name}” from the avatar.",
+      "openFor": "Edit expressions of {name}",
+      "band": {
+        "decide": "Set expression",
+        "decideTitle": "Make {name} the current expression of the chat and close (double-click or Enter also works)",
+        "decideUnavailable": "Open this from the chat avatar to set the current expression",
+        "toolbar": "Set expression",
+        "filterToolbar": "Filter expressions",
+        "filterLabel": "Filter expressions"
+      },
+      "setDefault": "Make {name} the default",
+      "isDefault": "{name} is the default",
+      "replaceImage": "Replace the image of {name}",
+      "remove": "Delete",
+      "addFiles": "Add files",
+      "drop": "Drop to import expressions",
+      "unreadable": "This avatar's expressions cannot be read.",
+      "problem": {
+        "empty": "Enter a label.",
+        "tooLong": "Use 40 characters or fewer.",
+        "duplicate": "Another expression already has this label."
+      },
+      "skipped": "Skipped: {names}",
+      "nothingImported": "No expressions could be read.",
+      "saveFailed": "Could not save the expressions.",
+      "card": {
+        "title": "Expressions",
+        "hint": "Switches the chat avatar's expression to match each reply.",
+        "method": "How to choose",
+        "tool": "Tool",
+        "semantic": "Similarity",
+        "toolHint": "The LLM chooses an expression along with its reply. Needs a model that supports tool calls.",
+        "semanticHint": "Chooses by how close the received reply is in meaning to each label.",
+        "needSemantic": "Turn on the similarity card to use this."
+      }
     }
   },
   "gateway": {

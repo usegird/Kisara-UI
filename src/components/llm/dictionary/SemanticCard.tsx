@@ -9,6 +9,7 @@ import {
   type SemanticModel,
 } from '@/chat/semantic-models';
 import { EmbeddingModelField } from '@/components/llm/dictionary/EmbeddingModelField';
+import { CARD_BODY } from '@/components/llm/side-panel/extension-card';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { smallButton } from '@/components/ui/small-button';
 import { PERCENT } from '@/components/ui/units';
@@ -49,7 +50,7 @@ function formatModelConfirm(model: SemanticModel): string {
     : t('llm.extension.semantic.confirmModel', { name: model.id, size: model.size });
 }
 
-export function SemanticToggle(): React.ReactElement {
+export function SemanticCard(): React.ReactElement {
   const enabled = useSettingsStore((state) => state.loreSemantic);
   const status = useSemanticStore((state) => state.status);
   const progress = useSemanticStore((state) => state.progress);
@@ -80,44 +81,46 @@ export function SemanticToggle(): React.ReactElement {
   };
 
   return (
-    <div className="flex flex-col gap-1 border-t pt-2">
-      <label className="flex items-center gap-1.5 text-xs font-medium">
+    <section className="flex flex-col gap-2 rounded-md border p-2" aria-labelledby="semantic">
+      <label className="flex items-center gap-1.5 text-sm font-medium">
         <input
           type="checkbox"
           checked={enabled}
           onChange={(event) => toggle(event.target.checked)}
         />
-        {t('llm.extension.semantic.title')}
+        <span id="semantic">{t('llm.extension.semantic.title')}</span>
       </label>
-      <p className="text-muted-foreground text-2xs">{t('llm.extension.semantic.hint')}</p>
-      {line.length > 0 ? (
-        <div className="flex flex-wrap items-center gap-2">
-          <p className={statusText({ failed: status === 'failed' })} role="status">
-            {line}
-          </p>
-          {status === 'failed' ? (
-            <button
-              type="button"
-              className={BUTTON}
-              onClick={guardPress('semantic-load', () => void useSemanticStore.getState().load())}
-            >
-              {t('llm.extension.semantic.retry')}
-            </button>
-          ) : null}
-        </div>
-      ) : null}
-      {stored.length === 0 ? null : (
-        <ul className="flex flex-col gap-0.5">
-          {stored.map((entry) => (
-            <StoredModelRow
-              key={entry.id}
-              entry={entry}
-              loaded={enabled && status === 'ready' && entry.id === loadedId}
-            />
-          ))}
-        </ul>
-      )}
-      <EmbeddingModelField />
+      <div className={CARD_BODY}>
+        <p className="text-muted-foreground text-2xs">{t('llm.extension.semantic.hint')}</p>
+        {line.length > 0 ? (
+          <div className="flex flex-wrap items-center gap-2">
+            <p className={statusText({ failed: status === 'failed' })} role="status">
+              {line}
+            </p>
+            {status === 'failed' ? (
+              <button
+                type="button"
+                className={BUTTON}
+                onClick={guardPress('semantic-load', () => void useSemanticStore.getState().load())}
+              >
+                {t('llm.extension.semantic.retry')}
+              </button>
+            ) : null}
+          </div>
+        ) : null}
+        {stored.length === 0 ? null : (
+          <ul className="flex flex-col gap-0.5">
+            {stored.map((entry) => (
+              <StoredModelRow
+                key={entry.id}
+                entry={entry}
+                loaded={enabled && status === 'ready' && entry.id === loadedId}
+              />
+            ))}
+          </ul>
+        )}
+        <EmbeddingModelField />
+      </div>
       <ConfirmDialog
         open={asking !== null}
         title={t('llm.extension.semantic.confirmTitle')}
@@ -136,7 +139,7 @@ export function SemanticToggle(): React.ReactElement {
           </div>
         )}
       </ConfirmDialog>
-    </div>
+    </section>
   );
 }
 

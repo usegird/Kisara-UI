@@ -18,6 +18,7 @@ import { planSend, ratioOf } from '@/chat/tokens';
 import { lastToolCalls } from '@/chat/tool-calls';
 import type { Chat, ConnectionProfile, ToolCallRecord, ToolCallState } from '@/chat/types';
 import type { ChatStreamEvent, LlmFailure, LlmResult } from '@/port/llm-port';
+import { decideExpressionLater, settleExpressionCalls } from '@/store/chat/expression-decide';
 import { currentLlmTarget, learnOverflow, type LlmTarget } from '@/store/chat/llm-target';
 import { llmPort } from '@/store/ports/llm-port';
 import { tagSentRequest } from '@/store/ports/llm-sent-log';
@@ -229,10 +230,15 @@ function finishReceived(
   const current = kit.get().chats[chatId];
   if (current === undefined) return;
   const check = (call: ToolCallRecord): ToolCallState => chatToolsOf().check(call, current);
-  kit.change(chatId, finishStream(current, result.ok ? null : result.failure, check));
+  const settled = settleExpressionCalls(sent.chat, current);
+  kit.change(chatId, finishStream(settled, result.ok ? null : result.failure, check));
   const finished = kit.get().chats[chatId];
   const last = finished?.messages.at(-1);
   if (finished === undefined || last === undefined) return;
+  decideExpressionLater(finished, (update) => {
+    const latest = kit.get().chats[chatId];
+    if (latest !== undefined) kit.change(chatId, update(latest));
+  });
   const before = new Set(lastToolCalls(sent.chat).map((call) => call.id));
   const waiting = lastToolCalls(finished).filter(
     (call) => call.state.kind === 'waiting' && !before.has(call.id),

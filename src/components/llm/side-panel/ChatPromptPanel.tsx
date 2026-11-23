@@ -15,9 +15,9 @@ import {
   PromptItemList,
   type ItemSummary,
 } from '@/components/llm/prompt/PromptItemList';
+import { PromptToolRows } from '@/components/llm/prompt/PromptToolRows';
 import { SUMMARY_KEY } from '@/components/llm/prompt/SummaryCard';
 import { SystemPromptCard } from '@/components/llm/prompt/SystemPromptCard';
-import { ToolsPromptCard } from '@/components/llm/prompt/ToolsPromptCard';
 import {
   DraftTokens,
   LastActual,
@@ -26,6 +26,7 @@ import {
 } from '@/components/llm/side-panel/ChatPromptParts';
 import {
   characterViewOf,
+  definitionTokensOf,
   isAdditionalInfo,
   isFilledItem,
   isOverLimit,
@@ -35,9 +36,11 @@ import {
   playbookRow,
   presetOf,
   summaryOf,
+  toolDefinitionsOf,
   toolTokensOf,
   type HistoryInput,
 } from '@/components/llm/side-panel/prompt-summary';
+import { useExpressionTool } from '@/components/llm/side-panel/use-expression-tool';
 import { useChatPlaybook } from '@/hooks/chat/use-chat-playbook';
 import { useInputLimit } from '@/hooks/chat/use-input-limit';
 import { usePromptHistory } from '@/hooks/chat/use-prompt-history';
@@ -57,6 +60,7 @@ import {
 } from '@/store/use-workflow-tools-store';
 
 const TOOLS_ID = ':tools';
+const EXPRESSION_TOOL_ID = ':expression-tool';
 
 const LINK = 'text-muted-foreground hover:text-foreground underline underline-offset-2';
 
@@ -94,6 +98,7 @@ export function ChatPromptPanel({
   };
   useExpandRequest(chatId, chat, setOpen);
   const semantic = useSemanticPreview(chatId);
+  const expressionTool = useExpressionTool(chat);
   if (chat === undefined) return null;
 
   const preset = presetOf(chat, presets);
@@ -113,7 +118,7 @@ export function ChatPromptPanel({
     : [];
   const estimate = estimateChat(chat, chat.prompt, sources, {
     limit,
-    tools: estimateTools(tools.map((item) => item.definition)),
+    tools: estimateTools(toolDefinitionsOf(tools, expressionTool)),
   });
   const lore: HistoryInput = {
     own: ownLore,
@@ -135,7 +140,8 @@ export function ChatPromptPanel({
       estimateMessage(JSON.stringify(item.definition), estimate.ratio),
     ]),
   );
-  const totalWithoutDraft = estimate.total + toolTokens;
+  const expressionTokens = definitionTokensOf(expressionTool, estimate.ratio);
+  const totalWithoutDraft = estimate.total + toolTokens + expressionTokens;
   const history = chat.prompt.items.find((item) => item.marker === 'chatHistory');
   if (history !== undefined) tokens.set(history.id, estimate.history);
   const lastOver = isOverLimit(estimate.lastActual, limit);
@@ -145,6 +151,7 @@ export function ChatPromptPanel({
       new Set([
         SYSTEM_PROMPT_ID,
         TOOLS_ID,
+        EXPRESSION_TOOL_ID,
         SUMMARY_KEY,
         PREFILL_KEY,
         ...chat.prompt.items.map((item) => item.id),
@@ -207,13 +214,17 @@ export function ChatPromptPanel({
 
         <PromptItemList
           tools={
-            toolsOn ? (
-              <ToolsPromptCard
-                tools={tools}
-                tokens={toolTokens}
-                toolTokens={eachToolTokens}
-                open={open.has(TOOLS_ID)}
-                onToggle={onToolsToggle}
+            toolsOn || expressionTool !== null ? (
+              <PromptToolRows
+                workflows={toolsOn ? tools : null}
+                workflowTokens={toolTokens}
+                eachWorkflowTokens={eachToolTokens}
+                expression={expressionTool}
+                expressionTokens={expressionTokens}
+                workflowOpen={open.has(TOOLS_ID)}
+                expressionOpen={open.has(EXPRESSION_TOOL_ID)}
+                onWorkflowToggle={onToolsToggle}
+                onExpressionToggle={() => toggle(EXPRESSION_TOOL_ID)}
               />
             ) : undefined
           }

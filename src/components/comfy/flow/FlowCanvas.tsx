@@ -4,6 +4,7 @@ import { useShallow } from 'zustand/react/shallow';
 
 import { AnchorContext } from '@/components/comfy/flow/anchor-context';
 import { DragEdgeScroll } from '@/components/comfy/flow/DragEdgeScroll';
+import { EntranceContext } from '@/components/comfy/flow/entrance-context';
 import { canvasFrame, columnRow, flowScroller } from '@/components/comfy/flow/flow-canvas-look';
 import {
   boxKey,
@@ -50,6 +51,8 @@ import { useDisplayGraph } from '@/hooks/flow/use-display-graph';
 import { useCardMotion } from '@/hooks/flow/use-flow-motion';
 import { useNodeEditing } from '@/hooks/flow/use-node-editing';
 import { useNodeViews } from '@/hooks/flow/use-node-views';
+import { useSubfolderFixes } from '@/hooks/flow/use-subfolder-fixes';
+import { useRevealRequest } from '@/hooks/run/use-reveal-request';
 import { useAnchorRegistry } from '@/hooks/ui/use-anchor-registry';
 import { useNarrowScreen } from '@/hooks/ui/use-narrow-screen';
 import { useReusedItems } from '@/hooks/ui/use-reused-items';
@@ -135,6 +138,7 @@ export function FlowCanvas(props: FlowCanvasProps): React.ReactElement {
     zoomBy,
   } = useFlowScrolling(anchors, dnd.draggingRoot);
 
+  useRevealRequest(revealCard);
   const actions = useCardActions(editing.setSearch, motion);
   useCardClipboard(actions.pasteCard);
   useCardShortcuts(actions.deleteSelected);
@@ -145,6 +149,7 @@ export function FlowCanvas(props: FlowCanvasProps): React.ReactElement {
   const views = useNodeViews();
   const allViews = useNodeViews({ includeHidden: true });
   useComboOptions(views);
+  useSubfolderFixes(views);
 
   const appInputs = useAppInputColumn(workflow, views, remeasure);
 
@@ -179,122 +184,124 @@ export function FlowCanvas(props: FlowCanvasProps): React.ReactElement {
     <RenderProbe id="FlowCanvas">
       <AnchorContext.Provider value={anchors}>
         <FlowLookContext.Provider value={look}>
-          <DndContext
-            sensors={dnd.sensors}
-            collisionDetection={dnd.collisionDetection}
-            accessibility={dragAccessibility()}
-            onDragMove={onDragMove}
-            onDragOver={dnd.onDragMove}
-            onDragStart={dnd.onDragStart}
-            onDragEnd={dnd.onDragEnd}
-            onDragCancel={dnd.onDragCancel}
-            autoScroll={dnd.dragging === null ? SORT_AUTO_SCROLL : false}
-          >
-            <LinkDragContext.Provider value={dnd.dragging !== null}>
-              <div className={canvasFrame({ narrow })} onClick={focusTappedField}>
-                <MissingDefinitionsNotice empty={definitions.size === 0} />
-                {narrow ? <ZoomButtons onZoom={onZoomCards} /> : null}
-                <div
-                  ref={attachScroller}
-                  className={flowScroller({ narrow })}
-                  {...(dragPan ? pan : NO_PAN)}
-                >
-                  <div ref={attachRow} className={columnRow({ narrow })} onWheel={forwardWheel}>
-                    <AppInputColumn
-                      narrow={narrow}
-                      width={columnWidths.app}
-                      zoom={zoom.app}
-                      attachScroll={attachAppScroll}
-                      resetKey={workflow}
-                      appInputs={appInputs}
-                      onNeedOptions={editing.needOptions}
-                      insertBar={insertBar}
-                      scrollbarLeft={appScrollbarLeft}
-                    />
-                    <AppGap
-                      narrow={narrow}
-                      appWidth={columnWidths.app}
-                      gapWidth={columnWidths.appGap}
-                      onResize={resizeColumn}
-                    />
-
-                    <CardColumn
-                      narrow={narrow}
-                      width={columnWidths.cards}
-                      zoom={zoom.cards}
-                      attachScroll={attachCardScroll}
-                      tools={cardTools}
-                    >
-                      <FlowCardList
-                        views={views}
-                        definitionsLoaded={definitions.size > 0}
-                        cardGroups={cardGroups}
-                        preview={preview}
-                        cardStates={cardStates}
-                        onCommit={editing.commitValue}
-                        onResizeText={editing.resizeText}
-                        onNeedOptions={editing.needOptions}
-                        onOpenSettings={nodeSettings ? editing.setSettingsFor : undefined}
-                        actions={actions}
-                        motion={motion}
-                        onToggleAppInput={appInputs.toggle}
-                        frames={display?.frames}
-                      />
-                    </CardColumn>
-                    <VariableSide
-                      narrow={narrow}
-                      widths={columnWidths}
-                      resetKey={workflow}
-                      onResize={resizeColumn}
-                    >
-                      <VariablePanel
-                        groups={groups}
-                        width={narrow ? undefined : columnWidths.variables}
+          <EntranceContext.Provider value={editing.addEntrance}>
+            <DndContext
+              sensors={dnd.sensors}
+              collisionDetection={dnd.collisionDetection}
+              accessibility={dragAccessibility()}
+              onDragMove={onDragMove}
+              onDragOver={dnd.onDragMove}
+              onDragStart={dnd.onDragStart}
+              onDragEnd={dnd.onDragEnd}
+              onDragCancel={dnd.onDragCancel}
+              autoScroll={dnd.dragging === null ? SORT_AUTO_SCROLL : false}
+            >
+              <LinkDragContext.Provider value={dnd.dragging !== null}>
+                <div className={canvasFrame({ narrow })} onClick={focusTappedField}>
+                  <MissingDefinitionsNotice empty={definitions.size === 0} />
+                  {narrow ? <ZoomButtons onZoom={onZoomCards} /> : null}
+                  <div
+                    ref={attachScroller}
+                    className={flowScroller({ narrow })}
+                    {...(dragPan ? pan : NO_PAN)}
+                  >
+                    <div ref={attachRow} className={columnRow({ narrow })} onWheel={forwardWheel}>
+                      <AppInputColumn
                         narrow={narrow}
-                        zoom={zoom.variables}
-                        attachScroll={attachVariableScroll}
-                        onHoldReady={holdVariables}
-                        groupOf={cardGroups.groupOf}
-                        groupParents={cardGroups.groupParents}
-                        groupLabels={cardGroups.groupLabels}
-                        onReveal={clickScroll ? revealCard : undefined}
-                        onRevealGroup={clickScroll ? revealGroup : undefined}
-                        onAddAfter={actions.addAfter}
+                        width={columnWidths.app}
+                        zoom={zoom.app}
+                        attachScroll={attachAppScroll}
+                        resetKey={workflow}
+                        appInputs={appInputs}
+                        onNeedOptions={editing.needOptions}
+                        insertBar={insertBar}
+                        scrollbarLeft={appScrollbarLeft}
                       />
-                    </VariableSide>
+                      <AppGap
+                        narrow={narrow}
+                        appWidth={columnWidths.app}
+                        gapWidth={columnWidths.appGap}
+                        onResize={resizeColumn}
+                      />
 
-                    <ConnectorLayer
-                      resetKey={workflow}
-                      boxes={boxes}
-                      appGroups={appInputs.groups}
-                      proxyRows={display?.proxyRows}
-                      onAlign={clickScroll ? align : undefined}
-                      onInsert={actions.insertBetween}
-                      onDisconnect={disconnectLinks}
-                      chipOutputs={chipOutputs}
-                      offscreenLines={offscreenLines}
-                    />
+                      <CardColumn
+                        narrow={narrow}
+                        width={columnWidths.cards}
+                        zoom={zoom.cards}
+                        attachScroll={attachCardScroll}
+                        tools={cardTools}
+                      >
+                        <FlowCardList
+                          views={views}
+                          definitionsLoaded={definitions.size > 0}
+                          cardGroups={cardGroups}
+                          preview={preview}
+                          cardStates={cardStates}
+                          onCommit={editing.commitValue}
+                          onResizeText={editing.resizeText}
+                          onNeedOptions={editing.needOptions}
+                          onOpenSettings={nodeSettings ? editing.setSettingsFor : undefined}
+                          actions={actions}
+                          motion={motion}
+                          onToggleAppInput={appInputs.toggle}
+                          frames={display?.frames}
+                        />
+                      </CardColumn>
+                      <VariableSide
+                        narrow={narrow}
+                        widths={columnWidths}
+                        resetKey={workflow}
+                        onResize={resizeColumn}
+                      >
+                        <VariablePanel
+                          groups={groups}
+                          width={narrow ? undefined : columnWidths.variables}
+                          narrow={narrow}
+                          zoom={zoom.variables}
+                          attachScroll={attachVariableScroll}
+                          onHoldReady={holdVariables}
+                          groupOf={cardGroups.groupOf}
+                          groupParents={cardGroups.groupParents}
+                          groupLabels={cardGroups.groupLabels}
+                          onReveal={clickScroll ? revealCard : undefined}
+                          onRevealGroup={clickScroll ? revealGroup : undefined}
+                          onAddAfter={actions.addAfter}
+                        />
+                      </VariableSide>
 
-                    <EmbedHost attachHost={setEmbedHost} style={overlayStyle} />
-                    <DragCover />
+                      <ConnectorLayer
+                        resetKey={workflow}
+                        boxes={boxes}
+                        appGroups={appInputs.groups}
+                        proxyRows={display?.proxyRows}
+                        onAlign={clickScroll ? align : undefined}
+                        onInsert={actions.insertBetween}
+                        onDisconnect={disconnectLinks}
+                        chipOutputs={chipOutputs}
+                        offscreenLines={offscreenLines}
+                      />
+
+                      <EmbedHost attachHost={setEmbedHost} style={overlayStyle} />
+                      <DragCover />
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <FlowPopups
-                editing={editing}
-                settingsNode={settingsNode}
-                views={views}
-                allViews={allViews}
-                definitions={definitions}
-                onSettingsChange={updateNodeSettings}
-                track={motion.track}
-              />
+                <FlowPopups
+                  editing={editing}
+                  settingsNode={settingsNode}
+                  views={views}
+                  allViews={allViews}
+                  definitions={definitions}
+                  onSettingsChange={updateNodeSettings}
+                  track={motion.track}
+                />
 
-              <DragEdgeScroll columns={scrollColumns} />
-              <FlowDragOverlay dragging={dnd.dragging} ghost={dnd.ghost} zoom={zoom.cards} />
-            </LinkDragContext.Provider>
-          </DndContext>
+                <DragEdgeScroll columns={scrollColumns} />
+                <FlowDragOverlay dragging={dnd.dragging} ghost={dnd.ghost} zoom={zoom.cards} />
+              </LinkDragContext.Provider>
+            </DndContext>
+          </EntranceContext.Provider>
         </FlowLookContext.Provider>
       </AnchorContext.Provider>
     </RenderProbe>

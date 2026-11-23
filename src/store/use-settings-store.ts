@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
+import type { ExpressionMethod } from '@/chat/expression-tool';
 import type { UnitLink } from '@/chat/types';
 import type { SearchEngine } from '@/chat/web-tools';
 import type { ModelSort } from '@/graph/model-files';
@@ -64,6 +65,7 @@ export interface SettingsState {
   readonly modelSort: ModelSort;
   readonly imageSortAscending: boolean;
   readonly loraCopyFormat: string;
+  readonly tagSourcesOff: readonly string[];
   readonly recordRunHistory: boolean;
   readonly runHistoryLimit: number;
   readonly safeguards: Safeguards;
@@ -108,6 +110,8 @@ export interface SettingsState {
   readonly llmSystemPrompt: string;
   readonly llmSystemTemplate: UnitLink | null;
   readonly chatShowAvatar: boolean;
+  readonly chatExpression: boolean;
+  readonly chatExpressionMethod: ExpressionMethod;
   readonly chatTabsFirst: boolean;
   readonly chatImagePlace: ChatImagePlace;
   readonly chatImageWidth: number;
@@ -132,6 +136,7 @@ export interface SettingsState {
   readonly setModelSort: (patch: Partial<ModelSort>) => void;
   readonly setImageSortAscending: (ascending: boolean) => void;
   readonly setLoraCopyFormat: (format: string) => void;
+  readonly setTagSourceOn: (key: string, on: boolean) => void;
   readonly setRecordRunHistory: (record: boolean) => void;
   readonly setRunHistoryLimit: (limit: number) => void;
   readonly moveControl: (from: FloatingPosition, dx: number, dy: number) => void;
@@ -189,6 +194,8 @@ export interface SettingsState {
   readonly setLlmSystemPrompt: (text: string) => void;
   readonly setLlmSystemTemplate: (template: UnitLink | null) => void;
   readonly setChatShowAvatar: (on: boolean) => void;
+  readonly setChatExpression: (on: boolean) => void;
+  readonly setChatExpressionMethod: (method: ExpressionMethod) => void;
   readonly setChatTabsFirst: (on: boolean) => void;
   readonly setChatImagePlace: (place: ChatImagePlace) => void;
   readonly setChatImageSize: (width: number, height: number) => void;

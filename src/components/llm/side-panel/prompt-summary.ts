@@ -20,6 +20,7 @@ import type { PlaybookPromptRow } from '@/components/llm/playbook/PlaybookPrompt
 import { loreRows, type AdditionalInfoInput } from '@/components/llm/prompt/additional-info-rows';
 import type { ItemSummary } from '@/components/llm/prompt/PromptItemList';
 import { t } from '@/i18n';
+import type { ToolDefinition } from '@/port/llm-port';
 import type { usePresetsStore } from '@/store/use-presets-store';
 import type { toChatTools } from '@/store/use-workflow-tools-store';
 
@@ -123,6 +124,18 @@ export function ownLoreOf(
 export function toolTokensOf(tools: ReturnType<typeof toChatTools>, ratio: number): number {
   if (tools.length === 0) return 0;
   return estimateMessage(JSON.stringify(tools.map((item) => item.definition)), ratio);
+}
+
+export function toolDefinitionsOf(
+  tools: ReturnType<typeof toChatTools>,
+  expression: ToolDefinition | null,
+): ToolDefinition[] {
+  const definitions = tools.map((item) => item.definition);
+  return expression === null ? definitions : [...definitions, expression];
+}
+
+export function definitionTokensOf(definition: ToolDefinition | null, ratio: number): number {
+  return definition === null ? 0 : estimateMessage(JSON.stringify(definition), ratio);
 }
 
 export function isOverLimit(lastActual: number | null, limit: number | null): boolean {

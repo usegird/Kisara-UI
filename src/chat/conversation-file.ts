@@ -44,6 +44,7 @@ function candidateRecord(messageId: string, candidate: Candidate): Record<string
     ...(candidate.sentEstimate === undefined ? {} : { sentEstimate: candidate.sentEstimate }),
     ...(candidate.trimmed === undefined ? {} : { trimmed: candidate.trimmed }),
     ...(candidate.images === undefined ? {} : { images: candidate.images }),
+    ...(candidate.expression === undefined ? {} : { expression: candidate.expression }),
   };
 }
 
@@ -104,6 +105,7 @@ export function toConversation(id: string, chat: Chat): Record<string, unknown> 
       ...(chat.lorebooks === undefined ? {} : { lorebooks: chat.lorebooks }),
       ...(chat.playbook === undefined ? {} : { playbook: chat.playbook }),
       ...(chat.imageId === undefined ? {} : { imageId: chat.imageId }),
+      ...(chat.expression === undefined ? {} : { expression: chat.expression }),
     },
   };
 }

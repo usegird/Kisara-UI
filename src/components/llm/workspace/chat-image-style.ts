@@ -2,11 +2,20 @@ import { cva } from 'class-variance-authority';
 
 import { PERCENT } from '@/components/ui/units';
 import type { MessageKey } from '@/i18n';
-import { CHAT_MIN_WIDTH, type ChatImagePlace } from '@/store/settings-fields/chat-image';
+import {
+  CHAT_MIN_HEIGHT,
+  CHAT_MIN_WIDTH,
+  type ChatImagePlace,
+} from '@/store/settings-fields/chat-image';
 
 const FOCUS_STEP = 5;
 
 const CHAT_SIDE_ROOM = 24;
+
+const CHAT_TOP_ROOM = 8;
+
+const CHAT_LOG_WIDTH = 780;
+const GHOST_MIN = 64;
 
 const WHEEL_LINE_HEIGHT = 16;
 
@@ -27,16 +36,35 @@ export const FOCUS_KEY_STEP: Readonly<Partial<Record<string, readonly [number, n
 
 export const WHEEL_TO_LOG = 'data-wheel-to-log';
 
+export const STACKED_ROW = `flex shrink-0 justify-center pt-2 pr-[calc(var(--chat-pad-r,0px)+1rem)]
+  pl-[calc(var(--chat-pad-l,0px)+1rem)]`;
+
+export const ZONE_FRAME = 'pointer-events-none absolute inset-0 z-30 flex';
+export const ZONE_SIDE_STYLE: Readonly<Record<'left' | 'right', React.CSSProperties>> = {
+  left: { position: 'relative', flex: '1 0 calc(var(--chat-pad-l, 0px) + 1rem)', minWidth: '40px' },
+  right: {
+    position: 'relative',
+    flex: '1 0 calc(var(--chat-pad-r, 0px) + 1rem)',
+    minWidth: '40px',
+  },
+};
+export const SIDE_ZONE_STYLE: React.CSSProperties = { top: '20%' };
+export const ZONE_CENTER_STYLE: React.CSSProperties = {
+  position: 'relative',
+  flex: '0 1 46rem',
+  minWidth: 0,
+};
+
 export const zone = cva(
-  'pointer-events-none absolute z-30 overflow-hidden rounded-lg border-2 border-dashed',
+  'pointer-events-none absolute overflow-hidden rounded-lg border-2 border-dashed',
   {
     variants: {
       place: {
-        left: 'top-column-top bottom-column-bottom left-2 w-1/5',
-        right: 'top-column-top right-2 bottom-column-bottom w-1/5',
-        top: 'top-column-top right-[22%] left-[22%] h-1/4',
-        aboveInput: 'right-[22%] bottom-column-bottom left-[22%] h-1/4',
-        background: 'top-[calc(25%+16px)] right-[22%] bottom-[calc(25%+16px)] left-[22%]',
+        left: 'bottom-column-bottom left-2 right-1',
+        right: 'bottom-column-bottom left-1 right-2',
+        top: 'top-column-top inset-x-0 h-1/4',
+        aboveInput: 'bottom-column-bottom inset-x-0 h-1/4',
+        background: 'top-[calc(25%+16px)] bottom-[calc(25%+16px)] inset-x-0',
       },
       over: {
         true: 'border-primary bg-primary/10',
@@ -58,8 +86,8 @@ export const sideArea = cva(
 export const sidePad = cva('', {
   variants: {
     place: {
-      left: 'md:[--chat-pad-l:calc(var(--chat-avatar-w)+0.5rem)]',
-      right: 'md:[--chat-pad-r:calc(var(--chat-avatar-w)+1rem)]',
+      left: 'md:[--chat-pad-l:calc(var(--chat-side-w)+0.5rem)]',
+      right: 'md:[--chat-pad-r:calc(var(--chat-side-w)+1rem)]',
       none: '',
     },
   },
@@ -129,8 +157,35 @@ export function padSide(
   return place === 'left' ? 'left' : 'right';
 }
 
-export function avatarWidth(width: number, height: number): React.CSSProperties {
-  return { '--chat-avatar-w': sideFrameWidth(width, height) } as React.CSSProperties;
+export function sidePadWidth(
+  byImage: boolean,
+  frame: { readonly width: number; readonly height: number },
+  cardWidth: number,
+): React.CSSProperties {
+  const width = byImage ? sideFrameWidth(frame.width, frame.height) : `${String(cardWidth)}px`;
+  return { '--chat-side-w': width } as React.CSSProperties;
+}
+
+export function frameStyle({
+  side,
+  ghost,
+  width,
+  height,
+}: {
+  readonly side: boolean;
+  readonly ghost: boolean;
+  readonly width: number;
+  readonly height: number;
+}): React.CSSProperties {
+  const room = `(100cqh - ${String(CHAT_MIN_HEIGHT + CHAT_TOP_ROOM)}px)`;
+  const limit = !side
+    ? `100%, max(48px, calc(${room} * ${String(width)} / ${String(height)}))`
+    : `max(${String(GHOST_MIN)}px, calc((100cqw - ${String(CHAT_LOG_WIDTH)}px) / 2))`;
+  return {
+    width: side && !ghost ? sideFrameWidth(width, height) : `min(${String(width)}px, ${limit})`,
+    aspectRatio: `${String(width)} / ${String(height)}`,
+    maxHeight: side && ghost ? '100%' : undefined,
+  };
 }
 
 export function sideFrameWidth(width: number, height: number): string {

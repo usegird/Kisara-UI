@@ -36,7 +36,7 @@ export function flowColumnWidthsOf({ columnWidths }: SettingsState): FlowColumnW
 
 const SIDE_ICON_WIDTH = 24;
 
-export const APP_ICON_GAP = 5;
+export const APP_ICON_GAP = 3;
 
 const APP_COLUMN_SHIFT = 9;
 
@@ -95,7 +95,7 @@ export function flowOptionsOf(props: FlowCanvasProps): FlowOptions {
     nodeSettings: props.nodeSettings ?? true,
     cardTools: props.cardTools ?? true,
     appImport: props.appImport ?? true,
-    appScrollbarLeft: props.appScrollbarLeft ?? true,
+    appScrollbarLeft: props.appScrollbarLeft ?? false,
     commentBelow: props.commentBelow ?? false,
     chipOutputs: props.chipOutputs ?? false,
     offscreenLines: props.offscreenLines ?? true,

@@ -19,9 +19,4 @@ export interface TagsPort {
     overrides: readonly TagEntry[],
     options?: RequestOptions,
   ) => Promise<void>;
-  readonly removeDictionary: (
-    baseUrl: string,
-    name: string,
-    options?: RequestOptions,
-  ) => Promise<void>;
 }

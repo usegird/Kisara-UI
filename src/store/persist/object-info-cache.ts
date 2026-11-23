@@ -1,9 +1,14 @@
-import type { InputDefinition, NodeDefinition, NodeDefinitionMap } from '@/graph/types';
+import type {
+  InputBranch,
+  InputDefinition,
+  NodeDefinition,
+  NodeDefinitionMap,
+} from '@/graph/types';
 import { isRecord, isUnknownArray } from '@/lib/guards';
 import { hostKeyOf } from '@/lib/remote-host';
 import { withAppStore } from '@/store/persist/app-db';
 
-const RECORD_VERSION = 5;
+const RECORD_VERSION = 7;
 
 export const definitionsKey = hostKeyOf;
 
@@ -52,7 +57,22 @@ function parseInput(raw: unknown): InputDefinition | null {
     isWidget: raw.isWidget === true,
     options: isUnknownArray(raw.options) ? raw.options : null,
     config: isRecord(raw.config) ? raw.config : {},
+    ...branchesOf(raw.branches),
+    ...matchTypeOf(raw.matchType),
   };
+}
+
+function branchesOf(raw: unknown): Pick<InputDefinition, 'branches'> {
+  if (!isUnknownArray(raw)) return {};
+  const branches: InputBranch[] = raw.flatMap((entry) => {
+    if (!isRecord(entry) || typeof entry.key !== 'string') return [];
+    const inputs = (isUnknownArray(entry.inputs) ? entry.inputs : []).flatMap((input) => {
+      const parsed = parseInput(input);
+      return parsed ? [parsed] : [];
+    });
+    return [{ key: entry.key, inputs }];
+  });
+  return { branches };
 }
 
 function parseDefinition(raw: unknown): NodeDefinition | null {
@@ -68,7 +88,7 @@ function parseDefinition(raw: unknown): NodeDefinition | null {
   const outputs = (isUnknownArray(raw.outputs) ? raw.outputs : []).flatMap((output) => {
     if (!isRecord(output)) return [];
     if (typeof output.name !== 'string' || typeof output.type !== 'string') return [];
-    return [{ name: output.name, type: output.type }];
+    return [{ name: output.name, type: output.type, ...matchTypeOf(output.matchType) }];
   });
 
   return {
@@ -164,4 +184,8 @@ export function createMemoryCache(): DefinitionCache {
       return Promise.resolve();
     },
   };
+}
+
+function matchTypeOf(raw: unknown): { readonly matchType?: string } {
+  return typeof raw === 'string' ? { matchType: raw } : {};
 }

@@ -29,6 +29,8 @@ const BOM = '﻿';
 const A1111_COLUMNS = 4;
 const DEFAULT_KIND = '0';
 const NO_ALIAS = 'null';
+const DICTIONARY_SOURCE_PREFIX = 'dictionary:';
+const PYSSSSS_SOURCE_KEY = 'pysssss';
 export const DELETED_KIND = 'deleted';
 export const DEFAULT_DICTIONARY = 'KisaraUI';
 
@@ -121,11 +123,15 @@ export function indexTags(entries: readonly TagEntry[], source: string | null): 
   }));
 }
 
-export function mergeTags(sources: TagSources): IndexedTag[] {
+export function mergeTags(sources: TagSources, off: ReadonlySet<string> = new Set()): IndexedTag[] {
   const byKey = new Map<string, IndexedTag>();
   const lists = [
-    ...sources.dictionaries.map((dictionary) => indexTags(dictionary.entries, dictionary.name)),
-    indexTags(applyOverrides(sources.pysssss ?? [], sources.overrides), null),
+    ...sources.dictionaries
+      .filter((dictionary) => !off.has(tagSourceKey(dictionary.name)))
+      .map((dictionary) => indexTags(dictionary.entries, dictionary.name)),
+    off.has(tagSourceKey(null))
+      ? []
+      : indexTags(applyOverrides(sources.pysssss ?? [], sources.overrides), null),
   ];
   for (const list of lists) {
     for (const tag of list) {
@@ -141,6 +147,10 @@ export function mergeTags(sources: TagSources): IndexedTag[] {
 
 export function dictionaryKey(name: string): string {
   return name.trim().toLowerCase();
+}
+
+export function tagSourceKey(name: string | null): string {
+  return name === null ? PYSSSSS_SOURCE_KEY : `${DICTIONARY_SOURCE_PREFIX}${dictionaryKey(name)}`;
 }
 
 export function isDefaultDictionary(name: string): boolean {

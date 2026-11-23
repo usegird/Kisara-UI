@@ -6,14 +6,24 @@ import { writeNodeSettings } from '@/graph/node-settings';
 import { advanceSeeds } from '@/graph/seed-control';
 import { writeSubgraphWidget } from '@/graph/subgraph';
 import { levelOfId } from '@/graph/subgraph-level';
-import type { NodeDefinition, NodeId, Workflow } from '@/graph/types';
+import { writeOuterValue } from '@/graph/subgraph-values';
+import {
+  subgraphDefinitions,
+  type NodeDefinition,
+  type NodeId,
+  type Workflow,
+} from '@/graph/types';
 import { writeWidgetValue } from '@/graph/widgets';
 import { createGraphKit } from '@/store/slices/graph-kit';
 import type { GraphState } from '@/store/use-graph-store';
 
 type GraphNodeValueActions = Pick<
   GraphState,
-  'setWidgetValue' | 'setProxyWidgetValue' | 'updateNodeSettings' | 'advanceSeeds'
+  | 'setWidgetValue'
+  | 'setProxyWidgetValue'
+  | 'setOuterWidgetValue'
+  | 'updateNodeSettings'
+  | 'advanceSeeds'
 >;
 
 interface WrittenLevel {
@@ -49,6 +59,29 @@ export const createGraphNodeValueSlice: StateCreator<GraphState, [], [], GraphNo
 
       const next = writeSubgraphWidget(workflow, target, value);
       if (!next) return false;
+
+      set({ workflow: next, dirty: true });
+      return true;
+    },
+
+    setOuterWidgetValue: (nodeId, slot, value) => {
+      const workflow = get().workflow;
+      if (!workflow) return false;
+
+      const definitions = subgraphDefinitions(workflow);
+      let written = false;
+      const next = inLevel(workflow, levelOfId(nodeId), (level) => {
+        const node = level.nodes.find((candidate) => candidate.id === nodeId);
+        const definition = definitions.find((sub) => sub.id === node?.type);
+        const updated = node && definition ? writeOuterValue(node, definition, slot, value) : null;
+        if (updated === null) return level;
+        written = true;
+        return {
+          ...level,
+          nodes: level.nodes.map((candidate) => (candidate.id === nodeId ? updated : candidate)),
+        };
+      });
+      if (!written) return false;
 
       set({ workflow: next, dirty: true });
       return true;

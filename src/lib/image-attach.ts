@@ -47,6 +47,24 @@ export async function shrinkImage(image: Blob, maxEdge = ATTACH_MAX_EDGE): Promi
   }
 }
 
+export async function toPngImage(image: Blob): Promise<Blob | null> {
+  if (image.type === 'image/png') return image;
+  if (typeof createImageBitmap !== 'function') return null;
+  const bitmap = await createImageBitmap(image).catch(() => null);
+  if (bitmap === null) return null;
+  try {
+    const canvas = document.createElement('canvas');
+    canvas.width = bitmap.width;
+    canvas.height = bitmap.height;
+    const context = canvas.getContext('2d');
+    if (context === null) return null;
+    context.drawImage(bitmap, 0, 0);
+    return await toBlob(canvas, 'image/png');
+  } finally {
+    bitmap.close();
+  }
+}
+
 export async function readAttachedImage(file: File): Promise<string | null> {
   if (!isImageFile(file) || isTooLarge(file, ATTACH_MAX_FILE_BYTES)) return null;
   const bitmap = await createImageBitmap(file).catch(() => null);

@@ -9,7 +9,6 @@ import {
   isDirty,
   pysssssRowOf,
   startDraft,
-  toggleDictionary,
   toggleRow,
   viewedDictionary,
   type Draft,
@@ -29,6 +28,7 @@ import {
   indexTags,
   overrideMap,
   tagKey,
+  tagSourceKey,
   type IndexedTag,
   type TagEntry,
   type TagSources,
@@ -53,6 +53,8 @@ export function useTagPanel() {
   const store = useTagsData(baseUrl);
   const commit = useTagsStore((state) => state.commit);
   const refresh = useTagsStore((state) => state.refresh);
+  const sourcesOff = useSettingsStore((state) => state.tagSourcesOff);
+  const setTagSourceOn = useSettingsStore((state) => state.setTagSourceOn);
 
   const [draft, setDraft] = useState(() => startDraft({ kind: 'all' }, store));
   const [query, setQuery] = useState('');
@@ -104,7 +106,11 @@ export function useTagPanel() {
     changeRow: (id: number, part: Partial<TagRowDraft>) =>
       edit((current) => changeRow(current, id, part)),
     toggleRow: (id: number) => edit((current) => toggleRow(current, id)),
-    toggleDictionary: (name: string) => edit((current) => toggleDictionary(current, name)),
+    sourcesOff,
+    toggleSource: (name: string | null) => {
+      const key = tagSourceKey(name);
+      setTagSourceOn(key, sourcesOff.includes(key));
+    },
     addDictionary: (name: string): string | null => {
       const next = addDictionary(draft, name);
       if (typeof next === 'string') return t(FAILURE_TEXT[next]);
@@ -159,21 +165,18 @@ function useCloseGuard(dirty: boolean) {
 
 function tableOf(draft: Draft, sources: Sources, query: string, sort: TagSort | null) {
   const viewed = viewedDictionary(draft);
-  if (viewed !== undefined && !viewed.removed) {
+  if (viewed !== undefined) {
     return { editable: editableRows(viewed.rows, query, sort), readOnly: null, pysssss: null };
   }
-  if (viewed === undefined && draft.view.kind === 'pysssss') {
+  if (draft.view.kind === 'pysssss') {
     return { editable: null, readOnly: null, pysssss: pysssssRows(draft, sources, query, sort) };
   }
-  const listed =
-    viewed === undefined ? sources.merged : indexTags(viewed.rows.map(entryOfRow), null);
-  const matched = sortedMatches(listed, query, sort, (tag) => tag.entry);
+  const matched = sortedMatches(sources.merged, query, sort, (tag) => tag.entry);
   const rows = matched.shown.map((tag) => ({
     key: tag.source === null ? tag.key : `${tag.source}:${tag.key}`,
     tag: tag.entry.tag,
     aliases: tag.entry.aliases,
     priority: tag.entry.priority,
-    struck: viewed !== undefined,
   }));
   return { editable: null, readOnly: { rows, total: matched.total }, pysssss: null };
 }

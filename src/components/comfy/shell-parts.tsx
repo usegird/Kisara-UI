@@ -73,7 +73,7 @@ function useComfyShellParts({ openOther }: ShellContext): ShellParts {
     onRename: setName,
     workspace: (
       <>
-        <ComfyWorkspace templatesOpen={io.templatesOpen} />
+        <ComfyWorkspace templatesOpen={io.templatesOpen} listShown={listShown} />
         {listShown ? (
           <WorkflowListDrawer
             baseUrl={baseUrl}

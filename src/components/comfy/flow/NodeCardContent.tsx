@@ -103,7 +103,7 @@ export function NodeCardContent({
 }: NodeCardBodyProps): React.ReactElement {
   const mode = modeVariant(view.mode);
   const anchors = useContext(AnchorContext);
-  const collapsed = view.collapsed || subgraphOpen;
+  const collapsed = view.collapsed;
   const fold = useCollapseMotion(collapsed, anchors?.remeasure ?? NO_REMEASURE);
   const picker = useColorPicker(view.id, onSettingsChange);
   const keyboardMenu = useKeyboardMenu();
@@ -173,6 +173,7 @@ export function NodeCardContent({
                 anchors={anchors}
                 bodyRef={fold.bodyRef}
                 definitionsLoaded={definitionsLoaded}
+                outputChips={!subgraphOpen}
                 onCommit={onCommit}
                 onNeedOptions={onNeedOptions}
                 onDisconnect={onDisconnect}

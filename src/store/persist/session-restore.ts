@@ -18,6 +18,7 @@ import {
 import { defaultSessionStore, getOrNull, type SessionStore } from '@/store/persist/session-store';
 import { useRunReportStore, type SaveNotice } from '@/store/use-run-report-store';
 import { clientIdReady, clientIdRenewed } from '@/store/use-settings-store';
+import { useSidePanelStore } from '@/store/use-side-panel-store';
 import {
   useTabsStore,
   whenSessionsClaimed,
@@ -201,9 +202,15 @@ export async function restoreSession(
     useTabsStore.getState().restore(tabs, kept.activeId, snapshots);
     if (!renew) void noticeOtherWriters(tabs, snapshots, written);
     await adoptQuietly(store, renew);
+    watchActiveReport();
     return true;
   }
 
   await adoptQuietly(store, renew);
+  watchActiveReport();
   return useTabsStore.getState().tabs.length > 1;
+}
+
+function watchActiveReport(): void {
+  useSidePanelStore.getState().watchReport(useTabsStore.getState().activeId);
 }

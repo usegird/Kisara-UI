@@ -7,7 +7,6 @@ import {
   reportDictionaryImport,
 } from '@/components/llm/dictionary/dictionary-files';
 import { DictionaryDialog } from '@/components/llm/dictionary/DictionaryDialog';
-import { SemanticToggle } from '@/components/llm/dictionary/SemanticToggle';
 import { CARD_BODY } from '@/components/llm/side-panel/extension-card';
 import { SMALL_ICON_BUTTON, smallButton } from '@/components/ui/small-button';
 import { t } from '@/i18n';
@@ -91,7 +90,6 @@ export function DictionaryCard(): React.ReactElement {
             {t('llm.extension.dictionary.import')}
           </button>
         </div>
-        <SemanticToggle />
       </div>
       {viewed === undefined ? null : (
         <DictionaryDialog

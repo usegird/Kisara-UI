@@ -15,6 +15,10 @@ const DESCRIPTION_LIMIT = 500;
 
 const DYNAMIC_COMBO_TYPE = 'COMFY_DYNAMICCOMBO_V3';
 
+const MATCH_TYPE = 'COMFY_MATCHTYPE_V3';
+
+const ANY_TYPE = '*';
+
 const BRANCH_SEPARATOR = '.';
 
 function parseInputSpec(
@@ -28,6 +32,7 @@ function parseInputSpec(
   const rawType: unknown = raw[0];
   const config = isRecord(raw[1]) ? raw[1] : {};
   if (rawType === DYNAMIC_COMBO_TYPE) return parseDynamicCombo(name, config, required, dropOptions);
+  if (rawType === MATCH_TYPE) return parseMatchType(name, config, required);
 
   let type: string;
   let options: readonly unknown[] | null = null;
@@ -75,6 +80,20 @@ function parseDynamicCombo(
   };
 }
 
+function parseMatchType(
+  name: string,
+  config: Record<string, unknown>,
+  required: boolean,
+): InputDefinition {
+  const template = isRecord(config.template) ? config.template : {};
+  const allowed = template.allowed_types;
+  const id = template.template_id;
+  const rest = Object.fromEntries(Object.entries(config).filter(([key]) => key !== 'template'));
+  const base = { name, required, isWidget: false, options: null, config: rest };
+  if (typeof id !== 'string' || typeof allowed !== 'string') return { ...base, type: ANY_TYPE };
+  return { ...base, type: allowed, matchType: id };
+}
+
 function parseGroups(
   input: Record<string, unknown>,
   inputOrder: Record<string, unknown> | null,
@@ -105,11 +124,15 @@ function inputNames(order: unknown, specs: Record<string, unknown>): string[] {
 function parseOutputs(entry: Record<string, unknown>): OutputDefinition[] {
   const types = isUnknownArray(entry.output) ? entry.output : [];
   const names = isUnknownArray(entry.output_name) ? entry.output_name : [];
+  const matchTypes = isUnknownArray(entry.output_matchtypes) ? entry.output_matchtypes : [];
 
   return types.map((rawType, index) => {
     const type = isUnknownArray(rawType) ? 'COMBO' : String(rawType);
     const rawName: unknown = names[index];
-    return { name: typeof rawName === 'string' ? rawName : type, type };
+    const name = typeof rawName === 'string' ? rawName : type;
+    const matchType: unknown = matchTypes[index];
+    if (typeof matchType === 'string') return { name, type: ANY_TYPE, matchType };
+    return { name, type };
   });
 }
 

@@ -83,6 +83,7 @@ export interface Candidate {
   readonly trimmed?: number | undefined;
   readonly images?: readonly string[] | undefined;
   readonly revision?: CandidateRevision | undefined;
+  readonly expression?: string | undefined;
 }
 
 export interface CandidateRevision {
@@ -187,6 +188,11 @@ export interface Preset {
   readonly updatedAt: number;
 }
 
+export interface ChatExpressionChoice {
+  readonly label: string;
+  readonly after: string | null;
+}
+
 export interface Chat {
   readonly name: string;
   readonly prompt: PromptComposition;
@@ -198,6 +204,7 @@ export interface Chat {
   readonly playbook?: ChatPlaybookRef | undefined;
   readonly lorebooks?: readonly OwnLorebook[] | undefined;
   readonly imageId?: string | null | undefined;
+  readonly expression?: ChatExpressionChoice | undefined;
   readonly createdAt: number;
   readonly updatedAt: number;
 }

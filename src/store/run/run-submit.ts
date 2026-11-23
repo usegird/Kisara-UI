@@ -165,6 +165,7 @@ function reportSubmitError(
     report.reject({
       reason,
       nodes: Object.fromEntries(rejection.nodeErrors.map((e) => [e.nodeId, e.messages])),
+      inputs: Object.fromEntries(rejection.nodeErrors.map((e) => [e.nodeId, e.inputNames])),
     });
     outcome.fail({ node: rejection.nodeErrors[0]?.nodeId ?? null, message: reason });
     outcome.log({ reason, nodes: rejection.nodeErrors }, sent);

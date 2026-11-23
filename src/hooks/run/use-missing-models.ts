@@ -4,6 +4,7 @@ import {
   missingModels,
   modelDirectories,
   workflowModels,
+  type MissingModel,
   type WorkflowModel,
 } from '@/graph/missing-models';
 import { useConnectionStore } from '@/store/use-connection-store';
@@ -11,7 +12,12 @@ import { useGraphStore } from '@/store/use-graph-store';
 import { useModelFilesStore } from '@/store/use-model-files-store';
 import { useSettingsStore } from '@/store/use-settings-store';
 
-export function useMissingModels(enabled: boolean): WorkflowModel[] {
+interface WorkflowModelCheck {
+  readonly named: readonly WorkflowModel[];
+  readonly missing: readonly MissingModel[];
+}
+
+export function useMissingModels(enabled: boolean): WorkflowModelCheck {
   const baseUrl = useSettingsStore((state) => state.baseUrl);
   const connected = useConnectionStore((state) => state.status === 'connected');
   const workflow = useGraphStore((state) => state.workflow);
@@ -28,8 +34,9 @@ export function useMissingModels(enabled: boolean): WorkflowModel[] {
     for (const folder of directoryKey.split('\n')) void ensure(baseUrl, folder);
   }, [active, baseUrl, directoryKey, ensure]);
 
-  return missingModels(models, (directory) => {
+  const missing = missingModels(models, (directory) => {
     const folder = folders.get(directory);
     return folder?.status === 'ready' ? folder.files.map((file) => file.name) : null;
   });
+  return { named: models, missing };
 }

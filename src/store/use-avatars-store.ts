@@ -39,6 +39,8 @@ interface AvatarsState {
   readonly ensure: () => Promise<void>;
   readonly add: (image: Blob, name: string) => Promise<Avatar>;
   readonly restore: (avatar: Avatar) => Promise<boolean>;
+  readonly replaceImage: (id: string, image: Blob) => Promise<void>;
+  readonly rename: (id: string, name: string) => boolean;
   readonly remove: (id: string) => void;
 }
 
@@ -81,6 +83,33 @@ export const useAvatarsStore = create<AvatarsState>()((set, get) => ({
     } catch {
       warnUnsaved('library');
     }
+    return true;
+  },
+
+  replaceImage: async (id, image) => {
+    const hash = await sha256Hex(image);
+    const current = get().avatars[id];
+    if (current === undefined) return;
+    const avatar: Avatar = { ...current, image, hash };
+    set({ avatars: { ...get().avatars, [id]: avatar } });
+    try {
+      await avatarTable.table().put(id, avatar);
+    } catch {
+      warnUnsaved('library');
+    }
+  },
+
+  rename: (id, raw) => {
+    const name = raw.trim();
+    const current = get().avatars[id];
+    if (current === undefined || name.length === 0) return false;
+    if (current.name === name) return true;
+    const avatar: Avatar = { ...current, name };
+    set({ avatars: { ...get().avatars, [id]: avatar } });
+    void avatarTable
+      .table()
+      .put(id, avatar)
+      .catch(() => warnUnsaved('library'));
     return true;
   },
 

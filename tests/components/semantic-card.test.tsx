@@ -2,7 +2,7 @@
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { SemanticToggle } from '@/components/llm/dictionary/SemanticToggle';
+import { SemanticCard } from '@/components/llm/dictionary/SemanticCard';
 import { installEmbeddingPort } from '@/store/ports/embedding-port';
 import { useSemanticStore } from '@/store/use-semantic-store';
 import { useSettingsStore } from '@/store/use-settings-store';
@@ -30,7 +30,7 @@ const modelRows = () => screen.queryAllByRole('listitem').map((row) => row.textC
 
 describe('近似判定のチェック', () => {
   it('モデルが無ければ、モデルと大きさを示して確かめ、やめれば有効にしない', () => {
-    render(<SemanticToggle />);
+    render(<SemanticCard />);
     fireEvent.click(toggle());
     expect(screen.getByText('sirasagi62/ruri-v3-30m-ONNX（37MB）')).toBeTruthy();
     expect(screen.getByText('実行の部品 ONNX Runtime・Transformers.js（14MB）')).toBeTruthy();
@@ -40,7 +40,7 @@ describe('近似判定のチェック', () => {
   });
 
   it('カードの一番下に埋め込みモデルの欄を置き、決めると設定に書く', () => {
-    const { container } = render(<SemanticToggle />);
+    const { container } = render(<SemanticCard />);
     const input = screen.getByRole('textbox', { name: '埋め込みモデル' });
     expect(container.firstElementChild?.lastElementChild?.contains(input)).toBe(true);
     fireEvent.change(input, { target: { value: ' org/model ' } });
@@ -49,7 +49,7 @@ describe('近似判定のチェック', () => {
   });
 
   it('有効にするとモデルを読み、切ると降ろすだけでモデルは残す', async () => {
-    render(<SemanticToggle />);
+    render(<SemanticCard />);
     fireEvent.click(toggle());
     fireEvent.click(screen.getByRole('button', { name: '有効にする' }));
     expect(useSettingsStore.getState().loreSemantic).toBe(true);
@@ -65,7 +65,7 @@ describe('近似判定のチェック', () => {
   it('置いてあるモデルなら確かめずに有効にし、× で消すと無効にする', async () => {
     const id = 'sirasagi62/ruri-v3-30m-ONNX';
     installEmbeddingPort((port = fakeEmbeddingPort(null, [{ id, bytes: 37 * 1024 * 1024 }])));
-    render(<SemanticToggle />);
+    render(<SemanticCard />);
     await waitFor(() => expect(modelRows()).toEqual(['保存済: ruri-v3-30m(37MB)']));
 
     fireEvent.click(toggle());
@@ -82,7 +82,7 @@ describe('近似判定のチェック', () => {
   it('読めなければ理由とやり直すを出す', async () => {
     installEmbeddingPort(fakeEmbeddingPort({ ok: false, message: 'offline' }));
     useSettingsStore.setState({ loreSemantic: true });
-    render(<SemanticToggle />);
+    render(<SemanticCard />);
     await useSemanticStore.getState().load();
     await waitFor(() => expect(screen.getByRole('status').textContent).toContain('offline'));
     expect(screen.getByRole('button', { name: 'やり直す' })).toBeTruthy();
@@ -90,7 +90,7 @@ describe('近似判定のチェック', () => {
 
   it('確かめの開け閉めを繰り返しても、閉じたダイアログを残さない', async () => {
     const leak = leakWatch();
-    render(<SemanticToggle />);
+    render(<SemanticCard />);
     for (let round = 0; round < LEAK_ROUNDS; round += 1) {
       await act(async () => {
         fireEvent.click(toggle());

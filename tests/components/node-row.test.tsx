@@ -108,13 +108,16 @@ describe('行の入口', () => {
     expect(screen.queryByRole('button', { name: /アプリ入力/ })).toBeNull();
   });
 
-  it('未接続の入力と、名前を特定できない値は注記で出す', () => {
+  it('未接続の入力と、直せない値は注記で出す（直せない値は印を添えて失敗の色）', () => {
     const { rerender } = render(
       <NodeRow nodeId={1} row={{ ...widgetRow, kind: 'socket', required: true }} />,
     );
     expect(screen.getByText('未接続（必須）')).toBeTruthy();
 
     rerender(<NodeRow nodeId={1} row={{ ...widgetRow, kind: 'unresolved', value: 42 }} />);
-    expect(screen.getByText('42')).toBeTruthy();
+    expect(screen.getByText('(編集非対応) 42').classList.contains('text-destructive')).toBe(true);
+
+    rerender(<NodeRow nodeId={1} row={{ ...widgetRow, kind: 'unresolved', value: undefined }} />);
+    expect(screen.getByText('(編集非対応)')).toBeTruthy();
   });
 });

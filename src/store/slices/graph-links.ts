@@ -4,14 +4,27 @@ import { appInputNames, removeAppInputs } from '@/graph/app-inputs';
 import { inLevel } from '@/graph/level-edit';
 import { addLink, removeLink, removeNodeKeepingLinks, withWidgetInput } from '@/graph/links';
 import { removeFromX } from '@/graph/order';
-import { levelOfId, setSubgraphOpen, sharedLevel } from '@/graph/subgraph-level';
+import { addEntrance, emptiedEntrances, removeEntrances } from '@/graph/subgraph-entrance';
+import {
+  instanceDefinition,
+  levelOfId,
+  setSubgraphOpen,
+  sharedLevel,
+  unscopedId,
+} from '@/graph/subgraph-level';
 import type { NodeId, Workflow } from '@/graph/types';
 import { createGraphKit, keptSelection } from '@/store/slices/graph-kit';
 import type { GraphState } from '@/store/use-graph-store';
 
 type GraphLinkActions = Pick<
   GraphState,
-  'connect' | 'connectToWidget' | 'disconnect' | 'disconnectLinks' | 'removeNode' | 'removeNodes'
+  | 'connect'
+  | 'connectToWidget'
+  | 'disconnect'
+  | 'disconnectLinks'
+  | 'addSubgraphEntrance'
+  | 'removeNode'
+  | 'removeNodes'
 >;
 
 export const createGraphLinkSlice: StateCreator<GraphState, [], [], GraphLinkActions> = (
@@ -49,18 +62,29 @@ export const createGraphLinkSlice: StateCreator<GraphState, [], [], GraphLinkAct
     disconnect: (linkId) => {
       const workflow = get().workflow;
       if (!workflow) return;
-      const next = inLevel(workflow, levelOfId(linkId), (level) => removeLink(level, linkId));
-      set(apply(workflow, next));
+      const level = levelOfId(linkId);
+      const removed = inLevel(workflow, level, (target) => removeLink(target, linkId));
+      set(apply(workflow, withoutEmptiedEntrances(workflow, level, removed)));
     },
 
     disconnectLinks: (linkIds) => {
       const workflow = get().workflow;
       const first = linkIds[0];
       if (!workflow || first === undefined) return;
-      const next = inLevel(workflow, levelOfId(first), (level) =>
-        linkIds.reduce((current, linkId) => removeLink(current, linkId), level),
+      const level = levelOfId(first);
+      const removed = inLevel(workflow, level, (target) =>
+        linkIds.reduce((current, linkId) => removeLink(current, linkId), target),
       );
-      set(apply(workflow, next));
+      set(apply(workflow, withoutEmptiedEntrances(workflow, level, removed)));
+    },
+
+    addSubgraphEntrance: (nodeId, widgetName, definitions) => {
+      const workflow = get().workflow;
+      const scoped = unscopedId(nodeId);
+      if (!workflow || !scoped) return;
+      const source = { instanceId: scoped.instanceId, innerId: scoped.innerId, widgetName };
+      const next = addEntrance(workflow, source, definitions);
+      if (next) set(apply(workflow, next));
     },
 
     removeNode: (nodeId) => get().removeNodes([nodeId]),
@@ -95,4 +119,16 @@ function removeFromLevel(target: Workflow, nodeIds: readonly NodeId[], outer: bo
     current = removeNodeKeepingLinks(removeFromX(removeAppInputs(cleared, refs), nodeId), nodeId);
   }
   return current;
+}
+
+function withoutEmptiedEntrances(
+  before: Workflow,
+  level: NodeId | null,
+  after: Workflow,
+): Workflow {
+  if (level === null || after === before) return after;
+  const old = instanceDefinition(before, level);
+  const now = instanceDefinition(after, level);
+  if (!old || !now) return after;
+  return removeEntrances(after, old.id, emptiedEntrances(old, now), old);
 }

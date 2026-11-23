@@ -61,6 +61,7 @@ function candidateOf(message: Record<string, unknown>): Candidate | null {
     sentEstimate: kisara?.sentEstimate,
     trimmed: kisara?.trimmed,
     images: kisara?.images,
+    expression: kisara?.expression,
   });
 }
 

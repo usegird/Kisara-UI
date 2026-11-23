@@ -1,3 +1,4 @@
+import { readAppended } from '@/graph/appended-widgets';
 import { subgraphDefinitions } from '@/graph/normalize';
 import {
   NODE_MODE,
@@ -11,6 +12,7 @@ import {
   defaultSlots,
   slotCandidates,
   switchBranchValues,
+  type ExpandedSlots,
   type SwitchedValues,
   type WidgetSlot,
 } from '@/graph/widget-slots';
@@ -23,6 +25,8 @@ interface WidgetValuesResolved {
   readonly inputs: readonly InputDefinition[];
   readonly byInput: ReadonlyMap<string, unknown>;
   readonly byWidget: ReadonlyMap<string, unknown>;
+  readonly values: readonly unknown[];
+  readonly appended: readonly string[];
 }
 
 type WidgetMismatch = 'slot-count-mismatch' | 'named-mismatch' | 'type-mismatch' | 'linked-choice';
@@ -61,6 +65,10 @@ export function resolveWidgetValues(node: WorkflowNode, definition: NodeDefiniti
   const found = candidates.find((candidate) => candidate.slots.length === values.length);
 
   if (found === undefined) {
+    const appended = readAppended(candidates, values, namedOrder(node, values.length));
+    if (appended !== null && linkedChoice(node, appended.expanded.inputs) === null) {
+      return resolvedOf(appended.expanded, appended.values, appended.appended);
+    }
     const primary = candidates[0] ?? { slots: [], inputs: [] };
     return {
       ok: false,
@@ -85,6 +93,14 @@ export function resolveWidgetValues(node: WorkflowNode, definition: NodeDefiniti
     };
   }
 
+  return resolvedOf(found, values, []);
+}
+
+function resolvedOf(
+  { slots, inputs }: ExpandedSlots,
+  values: readonly unknown[],
+  appended: readonly string[],
+): WidgetValuesResolved {
   const byInput = new Map<string, unknown>();
   const byWidget = new Map<string, unknown>();
   slots.forEach((slot, index) => {
@@ -97,7 +113,14 @@ export function resolveWidgetValues(node: WorkflowNode, definition: NodeDefiniti
       byWidget.set('control_after_generate', values[index]);
   });
 
-  return { ok: true, slots, inputs, byInput, byWidget };
+  return { ok: true, slots, inputs, byInput, byWidget, values, appended };
+}
+
+function namedOrder(node: WorkflowNode, length: number): readonly string[] | null {
+  const named = node.widgets_values_named;
+  if (!isRecord(named)) return null;
+  const names = Object.keys(named);
+  return names.length === length ? names : null;
 }
 
 function linkedChoice(
@@ -165,7 +188,8 @@ export function writeWidgetByName(
   );
   if (index < 0) return null;
 
-  const current = widgetValueList(node);
+  const saved = widgetValueList(node);
+  const current = index < saved.length ? saved : resolved.values;
   if (!Object.is(current[index], value)) {
     const switched = switchBranchValues(resolved, index, current, value);
     if (switched) {
@@ -258,6 +282,10 @@ function labelled(name: string | null, value: unknown, text: string, bypassed: b
   const needsName = name !== null && (typeof value === 'number' || typeof value === 'boolean');
 
   return { text, label: needsName ? `${name}: ${text}` : text, bypassed };
+}
+
+export function valuePartOf(name: string | null, value: unknown, bypassed: boolean): ValuePart {
+  return labelled(name, value, formatValue(value), bypassed);
 }
 
 export function summarizeValues(

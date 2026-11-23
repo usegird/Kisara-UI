@@ -6,39 +6,45 @@ import {
   TouchSensor,
   useSensor,
   useSensors,
-  type DragEndEvent,
 } from '@dnd-kit/core';
-import { useState } from 'react';
+import { useEffect } from 'react';
 import { createPortal } from 'react-dom';
 
+import { expressionImageOf } from '@/chat/avatar-expression';
+import { shownExpressionOf } from '@/chat/expression-tool';
 import { PromptAdvisor } from '@/components/llm/advisor/PromptAdvisorPanel';
 import { AvatarTools } from '@/components/llm/workspace/AvatarControls';
-import { centerOnCursor, collision, jumpToZone } from '@/components/llm/workspace/chat-image-drag';
 import {
-  avatarWidth,
+  centerOnCursor,
+  collision,
+  jumpToZone,
+  previewSlotOf,
+  type PreviewSlot,
+} from '@/components/llm/workspace/chat-image-drag';
+import {
   forwardWheel,
   ghostSide,
   padSide,
   sideArea,
   sidePad,
+  sidePadWidth,
+  STACKED_ROW,
   WHEEL_TO_LOG,
 } from '@/components/llm/workspace/chat-image-style';
-import { DropZone, ImagePreview } from '@/components/llm/workspace/ChatImageDrop';
+import { DragCard, DropPreview, DropZones } from '@/components/llm/workspace/ChatImageDrop';
 import {
   BackgroundImage,
   GhostTools,
   ImageFrame,
   MoveGrip,
 } from '@/components/llm/workspace/ChatImageFrame';
+import { useAvatarDrag, type AvatarDrag } from '@/components/llm/workspace/use-avatar-drag';
 import { useSideCards } from '@/components/llm/workspace/use-side-cards';
 import { MOUSE_ACTIVATION, TOUCH_ACTIVATION } from '@/components/ui/drag-activation';
 import { dragAccessibility } from '@/components/ui/drag-announcements';
 import { blobUrl } from '@/lib/blob-url';
-import {
-  CHAT_IMAGE_PLACES,
-  chatImageSizeAfterMove,
-  type ChatImagePlace,
-} from '@/store/settings-fields/chat-image';
+import type { ChatImagePlace } from '@/store/settings-fields/chat-image';
+import { useAvatarExpressionsStore } from '@/store/use-avatar-expressions-store';
 import { useAvatarsStore } from '@/store/use-avatars-store';
 import { useChatStore } from '@/store/use-chat-store';
 import { useSettingsStore } from '@/store/use-settings-store';
@@ -57,15 +63,14 @@ export function ChatImageLayout({
   after,
 }: ChatImageLayoutProps): React.ReactElement {
   const imageId = useChatStore((state) => state.chats[chatId]?.imageId ?? null);
-  const image = useAvatarsStore((state) =>
-    imageId === null ? null : (state.avatars[imageId]?.image ?? null),
-  );
+  const image = useShownAvatar(chatId, imageId);
   const show = useSettingsStore((state) => state.chatShowAvatar);
   const place = useSettingsStore((state) => state.chatImagePlace);
   const frameWidth = useSettingsStore((state) => state.chatImageWidth);
   const frameHeight = useSettingsStore((state) => state.chatImageHeight);
   const cards = useSideCards(chatId);
-  const [dragging, setDragging] = useState(false);
+  const cardWidth = useSettingsStore((state) => state.chatCardWidth);
+  const drag = useAvatarDrag();
   const sensors = useSensors(
     useSensor(MouseSensor, MOUSE_ACTIVATION),
     useSensor(TouchSensor, TOUCH_ACTIVATION),
@@ -78,7 +83,7 @@ export function ChatImageLayout({
         className={`relative flex h-full min-h-0 flex-col [container-type:size] ${sidePad({
           place: cards ? 'right' : 'none',
         })}`}
-        style={avatarWidth(frameWidth, frameHeight)}
+        style={sidePadWidth(false, { width: frameWidth, height: frameHeight }, cardWidth)}
       >
         {log}
         {composer}
@@ -98,52 +103,41 @@ export function ChatImageLayout({
       if (url === null) return <div className={ghostSide({ place: at })}>{avatar(true)}</div>;
       return <aside className={sideArea({ place: at })}>{avatar(true)}</aside>;
     }
-    return <div className="flex shrink-0 justify-center px-4 pt-2">{avatar(false)}</div>;
+    return <div className={STACKED_ROW}>{avatar(false)}</div>;
   };
 
-  const onDragStart = (): void => setDragging(true);
-  const onDragCancel = (): void => setDragging(false);
-  const onDragEnd = ({ over }: DragEndEvent): void => {
-    setDragging(false);
-    const next = CHAT_IMAGE_PLACES.find((item) => item === over?.id);
-    if (next === undefined) return;
-    const settings = useSettingsStore.getState();
-    const size = chatImageSizeAfterMove(settings.chatImagePlace, next, {
-      width: settings.chatImageWidth,
-      height: settings.chatImageHeight,
-    });
-    if (size.width !== settings.chatImageWidth || size.height !== settings.chatImageHeight) {
-      settings.setChatImageSize(size.width, size.height);
-    }
-    settings.setChatImagePlace(next);
-  };
+  const sideImage = url !== null && (place === 'left' || place === 'right');
 
   return (
     <DndContext
       sensors={sensors}
       collisionDetection={collision}
       accessibility={dragAccessibility()}
-      onDragStart={onDragStart}
-      onDragCancel={onDragCancel}
-      onDragEnd={onDragEnd}
+      onDragStart={drag.onDragStart}
+      onDragOver={drag.onDragOver}
+      onDragCancel={drag.onDragCancel}
+      onDragEnd={drag.onDragEnd}
     >
       <div
         className={`relative flex h-full min-h-0 [container-type:size] ${sidePad({
           place: padSide(url !== null, place, cards),
         })}`}
-        style={avatarWidth(frameWidth, frameHeight)}
+        style={sidePadWidth(sideImage, { width: frameWidth, height: frameHeight }, cardWidth)}
         onWheel={forwardWheel}
       >
         {shown('left')}
         <div className="relative flex min-h-0 min-w-0 flex-1 flex-col [container-type:size]">
           {place === 'background' && url !== null ? <BackgroundImage url={url} /> : null}
+          <PlacePreview drag={drag} url={url} cards={cards} slot="background" />
           <div className="relative flex min-h-0 flex-1 flex-col">
+            <PlacePreview drag={drag} url={url} cards={cards} slot="top" />
             {shown('top')}
             {log}
             {shown('aboveInput')}
             {url === null && (place === 'left' || place === 'right') ? (
               <GhostTools chatId={chatId} place={place} />
             ) : null}
+            <PlacePreview drag={drag} url={url} cards={cards} slot="aboveInput" />
             {composer}
             {after}
           </div>
@@ -161,16 +155,72 @@ export function ChatImageLayout({
         </div>
         {shown('right')}
         <PromptAdvisor chatId={chatId} side={place === 'left' ? 'left' : 'right'} />
-        {CHAT_IMAGE_PLACES.map((item) => (
-          <DropZone key={item} place={item} url={url} shown={dragging} />
-        ))}
+        <DropZones shown={drag.dragging} />
+        <PlacePreview drag={drag} url={url} cards={cards} slot="outer" />
       </div>
       {createPortal(
         <DragOverlay dropAnimation={null} modifiers={[centerOnCursor]}>
-          {dragging ? <ImagePreview url={url} at="card" /> : null}
+          {drag.dragging && drag.over === null ? <DragCard url={url} size={drag.card} /> : null}
         </DragOverlay>,
         document.body,
       )}
     </DndContext>
   );
+}
+
+function PlacePreview({
+  drag,
+  url,
+  cards,
+  slot,
+}: {
+  readonly drag: AvatarDrag;
+  readonly url: string | null;
+  readonly cards: boolean;
+  readonly slot: PreviewSlot;
+}): React.ReactElement | null {
+  const cardWidth = useSettingsStore((state) => state.chatCardWidth);
+  if (!drag.dragging || previewSlotOf(drag.target) !== slot) return null;
+  const { width, height } = drag.frame;
+  const sideImage = url !== null && slot === 'outer';
+  const pad = {
+    className: sidePad({ place: padSide(url !== null, drag.target, cards) }),
+    style: sidePadWidth(sideImage, drag.frame, cardWidth),
+  };
+  return (
+    <DropPreview
+      key={`${drag.target}:${String(width)}x${String(height)}`}
+      place={drag.target}
+      url={url}
+      width={width}
+      height={height}
+      pad={pad}
+      shown={drag.over !== null}
+      onMeasure={drag.measure}
+    />
+  );
+}
+
+function useShownAvatar(chatId: string, imageId: string | null): Blob | null {
+  const avatar = useAvatarsStore((state) =>
+    imageId === null ? undefined : state.avatars[imageId],
+  );
+  const on = useSettingsStore((state) => state.chatExpression);
+  const label = useChatStore((state) => {
+    const chat = state.chats[chatId];
+    return chat === undefined ? null : shownExpressionOf(chat.messages, chat.expression, on);
+  });
+  const entry = useAvatarExpressionsStore((state) =>
+    imageId === null ? undefined : state.reads[imageId],
+  );
+  const hash = avatar?.hash;
+  const needed = on || label !== null;
+  useEffect(() => {
+    if (needed && imageId !== null && hash !== undefined) {
+      useAvatarExpressionsStore.getState().ensure(imageId);
+    }
+  }, [needed, imageId, hash]);
+  if (avatar === undefined) return null;
+  if (!needed || entry?.hash !== avatar.hash || entry.read.kind !== 'ok') return avatar.image;
+  return expressionImageOf(entry.read.set, label) ?? avatar.image;
 }

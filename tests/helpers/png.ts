@@ -1,3 +1,5 @@
+import { buildPng, type PngChunk } from '@/lib/png-chunks';
+
 const SIGNATURE = [137, 80, 78, 71, 13, 10, 26, 10];
 
 export function chunk(type: string, body: number[]): number[] {
@@ -23,4 +25,14 @@ export function png(...chunks: number[][]): ArrayBuffer {
 
 export function pngWithPrompt(json: string): ArrayBuffer {
   return png(textChunk('prompt', json));
+}
+
+export function minimalPngBlob(extra: readonly PngChunk[] = []): Blob {
+  const bytes = buildPng([
+    { type: 'IHDR', data: new Uint8Array(13) },
+    { type: 'IDAT', data: Uint8Array.of(1) },
+    ...extra,
+    { type: 'IEND', data: new Uint8Array(0) },
+  ]);
+  return new Blob([bytes], { type: 'image/png' });
 }

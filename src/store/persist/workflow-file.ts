@@ -10,6 +10,8 @@ import type { Workflow } from '@/graph/types';
 import { withNamedCopies } from '@/graph/widgets';
 import { useAppValuesStore } from '@/store/use-app-values-store';
 import { useGraphStore, type SavedOrigin } from '@/store/use-graph-store';
+import { useSidePanelStore } from '@/store/use-side-panel-store';
+import { useTabsStore } from '@/store/use-tabs-store';
 
 export function openWorkflow(
   raw: unknown,
@@ -21,6 +23,7 @@ export function openWorkflow(
   const working = withoutCreatedMark(withoutSavedAppValues(workflow));
   useGraphStore.getState().loadWorkflow(working, name, saved);
   useAppValuesStore.getState().restore(savedAppValues(workflow));
+  useSidePanelStore.getState().watchReport(useTabsStore.getState().activeId);
 }
 
 export function serializeWorkflow(

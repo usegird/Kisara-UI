@@ -21,6 +21,7 @@ export type ApiPrompt = Record<string, ApiPromptNode>;
 type ApiPromptDiagnosticCode =
   | 'unknown-class'
   | 'unresolved-widgets'
+  | 'appended-defaults'
   | 'misaligned-widgets'
   | 'excluded-downstream'
   | 'missing-input'
@@ -116,6 +117,17 @@ function buildPromptNode(
     });
     return null;
   }
+  const unresolvedOuter = [...entry.outerValues].find(([, outer]) => outer.kind === 'unresolved');
+  if (unresolvedOuter) {
+    excluded.add(id);
+    diagnostics.push({
+      code: 'misaligned-widgets',
+      nodeId: id,
+      classType: definition.name,
+      message: t('graph.prompt.outerValueUnresolved', { name: unresolvedOuter[0] }),
+    });
+    return null;
+  }
 
   const widgets = resolveWidgetValues(entry.node, definition);
   if (!widgets.ok && widgets.reason !== 'slot-count-mismatch') {
@@ -139,6 +151,14 @@ function buildPromptNode(
       }),
     });
   }
+  if (widgets.ok && widgets.appended.length > 0) {
+    diagnostics.push({
+      code: 'appended-defaults',
+      nodeId: id,
+      classType: definition.name,
+      message: t('graph.prompt.appendedDefaults', { names: widgets.appended.join(', ') }),
+    });
+  }
 
   return { class_type: definition.name, inputs: buildInputs(entry, widgets, diagnostics) };
 }
@@ -156,6 +176,11 @@ function buildInputs(
     const source = entry.sources.get(input.name);
     if (source) {
       setOwn(inputs, input.name, [source.nodeId, source.slot]);
+      continue;
+    }
+    const outer = entry.outerValues.get(input.name);
+    if (outer?.kind === 'value') {
+      setOwn(inputs, input.name, outer.value);
       continue;
     }
     if (widgets.ok && widgets.byInput.has(input.name)) {

@@ -108,3 +108,21 @@ describe('要約の読み戻し', () => {
     expect('summary' in old && old.summary.response).toBeUndefined();
   });
 });
+
+describe('決めた表情', () => {
+  it('ラベルと決めたときの発言を読み、読めないものは持たない', () => {
+    const base = { messages: [] };
+    expect(parseChat({ ...base, expression: { label: ' joy ', after: 'm1' } })?.expression).toEqual(
+      {
+        label: 'joy',
+        after: 'm1',
+      },
+    );
+    expect(parseChat({ ...base, expression: { label: 'joy' } })?.expression).toEqual({
+      label: 'joy',
+      after: null,
+    });
+    expect(parseChat({ ...base, expression: { label: '' } })?.expression).toBeUndefined();
+    expect(parseChat({ ...base, expression: 'joy' })?.expression).toBeUndefined();
+  });
+});

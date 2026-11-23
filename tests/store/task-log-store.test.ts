@@ -45,7 +45,7 @@ describe('タスクの控え', () => {
 
   it('履歴から控えるとき、失敗の 1 行も控える（キュー列が応答を読み直さない）', () => {
     useTaskLogStore.getState().clear();
-    const error = { kind: 'error', line: 'boom' } as const;
+    const error = { kind: 'error', line: 'boom', nodeId: null } as const;
     useTaskLogStore.getState().record([historyEntry('p1', 1, { success: false, error })]);
 
     expect(useTaskLogStore.getState().entries[0]?.error).toBe('boom');

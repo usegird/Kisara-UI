@@ -21,6 +21,8 @@ type SettingsChatActions = Pick<
   | 'setChatMaxMegabytes'
   | 'setChatLogWindow'
   | 'setChatShowAvatar'
+  | 'setChatExpression'
+  | 'setChatExpressionMethod'
   | 'setChatTabsFirst'
   | 'setChatImagePlace'
   | 'setChatImageFocus'
@@ -57,6 +59,8 @@ export const createSettingsChatSlice: StateCreator<
   setChatMaxMegabytes: normalizingSetterOf(set, 'chatMaxMegabytes'),
   setChatLogWindow: normalizingSetterOf(set, 'chatLogWindow'),
   setChatShowAvatar: setterOf(set, 'chatShowAvatar'),
+  setChatExpression: setterOf(set, 'chatExpression'),
+  setChatExpressionMethod: setterOf(set, 'chatExpressionMethod'),
   setChatTabsFirst: setterOf(set, 'chatTabsFirst'),
   setChatImagePlace: setterOf(set, 'chatImagePlace'),
   setChatImageFocus: (x, y) =>

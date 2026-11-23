@@ -67,7 +67,6 @@ const COMFY_PLAN: Plan<ComfyPort> = {
     fetchOverrides: 'request',
     saveDictionary: 'request',
     saveOverrides: 'request',
-    removeDictionary: 'request',
   },
   runHistory: { list: 'request', fetch: 'request', save: 'request', sourcesOf: 'local' },
   chats: {

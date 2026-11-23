@@ -5,7 +5,6 @@ import {
   fetchPysssssOverrides,
   fetchPysssssTags,
   fetchTagDictionaries,
-  removeTagDictionary,
   savePysssssOverrides,
   saveTagDictionary,
 } from '@/comfy/tags';
@@ -72,11 +71,5 @@ describe('kisara/tags', () => {
     expect(first?.[1]?.body).toBe('a,0,1,\n');
     expect(String(second?.[0])).toBe(`${dir}override%2Fpysssss.csv?overwrite=true`);
     expect(second?.[1]?.body).toBe('cat,0,2,\n');
-  });
-
-  it('辞書を消す。無ければ済み', async () => {
-    const fetchImpl = vi.fn<FetchLike>(notFound);
-    await expect(removeTagDictionary(base, 'Mine', { fetchImpl })).resolves.toBeUndefined();
-    expect(fetchImpl.mock.calls[0]?.[1]?.method).toBe('DELETE');
   });
 });

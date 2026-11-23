@@ -1,6 +1,8 @@
-import { ImagePlus } from 'lucide-react';
+import { ImagePlus, Smile } from 'lucide-react';
+import { useState } from 'react';
 
 import { chatImageId } from '@/chat/chat-sources';
+import { AvatarExpressionDialog } from '@/components/llm/dialogs/AvatarExpressionDialog';
 import { AvatarPickerDialog } from '@/components/llm/dialogs/AvatarPickerDialog';
 import { DialogTrigger } from '@/components/ui/dialog';
 import { t } from '@/i18n';
@@ -34,8 +36,30 @@ export function AvatarTools({
     if (presetId !== null) usePresetsStore.getState().setImage(presetId, next);
   };
   const stop = (event: React.SyntheticEvent): void => event.stopPropagation();
+  const [editing, setEditing] = useState(false);
   return (
     <div className="flex items-center gap-0.5">
+      {imageId === null ? null : (
+        <button
+          type="button"
+          className={ICON}
+          aria-label={t('llm.expression.open')}
+          title={t('llm.expression.open')}
+          onMouseDown={stop}
+          onTouchStart={stop}
+          onKeyDown={stop}
+          onClick={() => setEditing(true)}
+        >
+          <Smile className="size-3.5" aria-hidden />
+        </button>
+      )}
+      {editing && imageId !== null ? (
+        <AvatarExpressionDialog
+          avatarId={imageId}
+          chatId={chatId}
+          onClose={() => setEditing(false)}
+        />
+      ) : null}
       <AvatarPickerDialog
         trigger={
           <DialogTrigger

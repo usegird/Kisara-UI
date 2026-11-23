@@ -3,6 +3,7 @@ import { PANELS } from '@/components/comfy/side-panel-tabs';
 import { useEmbedAnchor } from '@/components/ui/embed-anchors';
 import { SideColumn } from '@/components/ui/side-column';
 import type { SideColumnKit } from '@/components/ui/side-column-kit';
+import { useReportWatch } from '@/hooks/run/use-report-watch';
 import { useRunReport } from '@/hooks/run/use-run-report';
 import { t } from '@/i18n';
 import { reportAlert } from '@/queue/run-report';
@@ -16,6 +17,8 @@ export function SidePanel(): React.ReactElement {
   const tab = useSidePanelStore((state) => state.tab);
   const setTab = useSidePanelStore((state) => state.setTab);
   const report = useRunReport();
+  const clearReportWatch = useSidePanelStore((state) => state.clearReportWatch);
+  useReportWatch(report);
   const attachPanel = useEmbedAnchor('side');
 
   const kit: SideColumnKit = {
@@ -28,7 +31,9 @@ export function SidePanel(): React.ReactElement {
     })),
     selected: tab,
     onSelect: (value) => {
-      if (isPanel(value)) setTab(value);
+      if (!isPanel(value)) return;
+      clearReportWatch();
+      setTab(value);
     },
     renderTabExtra: (value) =>
       value === 'report' && report.total > 0 ? (

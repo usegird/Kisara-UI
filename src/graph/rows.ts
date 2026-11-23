@@ -48,6 +48,13 @@ export type RowTarget =
       readonly subgraphId: string;
       readonly innerNodeId: NodeId;
       readonly innerClassType: string;
+    }
+  | {
+      readonly kind: 'instance';
+      readonly nodeId: NodeId;
+      readonly slot: number;
+      readonly innerNodeId: NodeId;
+      readonly innerClassType: string;
     };
 
 export interface NodeRow {

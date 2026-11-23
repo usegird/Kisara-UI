@@ -3,6 +3,7 @@ interface LocaleInfo {
   readonly nativeName: string;
   readonly accepts: readonly string[];
   readonly rejects?: readonly string[];
+  readonly ogLocale: string;
 }
 
 export const SOURCE_LOCALE = 'en';
@@ -10,13 +11,14 @@ export const SOURCE_LOCALE = 'en';
 export const LOCALE_KEY = 'kisaraui.locale';
 
 export const LOCALES: readonly LocaleInfo[] = [
-  { code: 'en', nativeName: 'English', accepts: ['en'] },
-  { code: 'ja', nativeName: '日本語', accepts: ['ja'] },
+  { code: 'en', nativeName: 'English', accepts: ['en'], ogLocale: 'en_US' },
+  { code: 'ja', nativeName: '日本語', accepts: ['ja'], ogLocale: 'ja_JP' },
   {
     code: 'zh-Hans',
     nativeName: '简体中文',
     accepts: ['zh-Hans', 'zh-CN', 'zh-SG', 'zh'],
     rejects: ['zh-Hant', 'zh-TW', 'zh-HK', 'zh-MO'],
+    ogLocale: 'zh_CN',
   },
 ];
 

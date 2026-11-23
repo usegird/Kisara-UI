@@ -66,40 +66,25 @@ const commentSlot = cva('', {
 function IndexBadge({
   view,
   below,
-  subgraphOpen,
-  onCloseSubgraph,
   onToggleCollapsed,
 }: {
   readonly view: NodeView;
   readonly below: boolean;
-} & Pick<
-  CardActions,
-  'subgraphOpen' | 'onCloseSubgraph' | 'onToggleCollapsed'
->): React.ReactElement {
-  const closing = subgraphOpen === true;
-  const onBadgeClick = (): void => {
-    if (closing) onCloseSubgraph?.(view.id);
-    if (!closing || !view.collapsed) onToggleCollapsed?.(view.id);
-  };
+} & Pick<CardActions, 'onToggleCollapsed'>): React.ReactElement {
+  const name = view.displayName;
   return (
     <button
       type="button"
       className={indexBadge({ below })}
       {...MENU_ACTION}
-      aria-expanded={!view.collapsed && !closing}
-      aria-label={indexBadgeLabel(view, closing)}
-      title={closing ? t('flow.subgraph.collapseTitle') : t('flow.card.toggleParamsTitle')}
-      onClick={onBadgeClick}
+      aria-expanded={!view.collapsed}
+      aria-label={t(view.collapsed ? 'flow.card.showParams' : 'flow.card.hideParams', { name })}
+      title={t('flow.card.toggleParamsTitle')}
+      onClick={() => onToggleCollapsed?.(view.id)}
     >
       {view.index}
     </button>
   );
-}
-
-function indexBadgeLabel(view: NodeView, closing: boolean): string {
-  const name = view.displayName;
-  if (closing) return t('flow.subgraph.collapse', { name });
-  return t(view.collapsed ? 'flow.card.showParams' : 'flow.card.hideParams', { name });
 }
 
 export function CardHeader({
@@ -137,7 +122,8 @@ export function CardHeader({
 >): React.ReactElement {
   const anchors = useContext(AnchorContext);
   const { commentBelow: below, roomy } = useContext(FlowLookContext);
-  const inlineOutput = collapsed && view.outputs.length === 1;
+  const chips = subgraphOpen !== true;
+  const inlineOutput = chips && collapsed && view.outputs.length === 1;
   const modeLabel = MODE_LABEL[view.mode];
   const onNameKeyDown = (event: React.KeyboardEvent): void => {
     if (event.key !== 'Enter' || !(event.ctrlKey || event.metaKey)) return;
@@ -167,13 +153,7 @@ export function CardHeader({
       <div className="min-w-0 flex-1">
         <div className={headerRow({ below })}>
           {view.index !== null ? (
-            <IndexBadge
-              view={view}
-              below={below}
-              subgraphOpen={subgraphOpen}
-              onCloseSubgraph={onCloseSubgraph}
-              onToggleCollapsed={onToggleCollapsed}
-            />
+            <IndexBadge view={view} below={below} onToggleCollapsed={onToggleCollapsed} />
           ) : null}
           {view.kind === 'subgraph' ? (
             <SubgraphMark
@@ -213,7 +193,7 @@ export function CardHeader({
           ) : null}
         </div>
 
-        {collapsed && view.outputs.length > 1 ? (
+        {chips && collapsed && view.outputs.length > 1 ? (
           <div className="flex min-w-0 items-center justify-end gap-1.5 pt-1 pr-4">
             <OutputChips view={view} onAddAfter={onAddAfter} />
           </div>

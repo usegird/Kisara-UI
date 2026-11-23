@@ -16,7 +16,6 @@ const INDENT = 11;
 const KNOB_BOTTOM_GAP = 4;
 const LINE_X = -GROUP_FRAME_PADDING;
 const LINE = 2;
-const CARD_BORDER = 1;
 const GAP_ABOVE = 12;
 
 export function SubgraphBranch({
@@ -50,16 +49,16 @@ export function SubgraphBranch({
 const BEND = 6;
 
 export function SubgraphHeadLine(): React.ReactElement {
-  const x = LINE_X - CARD_BORDER - LINE / 2;
+  const x = LINE_X - LINE / 2;
   return (
     <span
       aria-hidden
       className="border-muted-foreground/60 absolute border-t-2 border-l-2 border-dotted"
       style={{
         left: x,
-        width: -CARD_BORDER - x,
+        width: -x,
         top: `calc(50% - ${String(LINE / 2)}px)`,
-        bottom: -(CARD_BORDER + GAP_ABOVE),
+        bottom: -GAP_ABOVE,
         borderTopLeftRadius: BEND,
       }}
     />

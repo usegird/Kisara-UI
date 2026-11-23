@@ -1,10 +1,12 @@
 import type { StoreApi } from 'zustand';
 
 import { dropLinkedAppInputs } from '@/graph/app-inputs';
+import { withMatchedTypes } from '@/graph/match-types';
 import { unpinMoved } from '@/graph/node-flags';
 import { settleLayout } from '@/graph/order';
 import { unlinkedDisplayIds } from '@/graph/subgraph-display';
 import type { NodeId, Workflow } from '@/graph/types';
+import { useDefinitionsStore } from '@/store/use-definitions-store';
 import type { GraphHistory, GraphState } from '@/store/use-graph-store';
 
 const HISTORY_LIMIT = 50;
@@ -40,7 +42,8 @@ export function createGraphKit(
     const before = get().workflow;
     const after = patch.workflow;
     if (before && after && after !== before) {
-      rawSet({ ...patch, workflow: unpinMoved(before, after) });
+      const matched = withMatchedTypes(after, useDefinitionsStore.getState().definitions);
+      rawSet({ ...patch, workflow: unpinMoved(before, matched) });
       return;
     }
     rawSet(patch);

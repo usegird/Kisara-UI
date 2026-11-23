@@ -9,9 +9,14 @@ import {
 import { widgetValueEntries } from '@/graph/widgets';
 import { isRecord, isUnknownArray } from '@/lib/guards';
 
+const HUGGING_FACE_HOST = 'huggingface.co';
+const HUGGING_FACE_FILE = 'resolve';
+const HUGGING_FACE_LIST = 'tree';
+
 export interface WorkflowModel {
   readonly promptNodeId: string;
   readonly name: string;
+  readonly selected: string;
   readonly directory: string;
   readonly url: string | null;
   readonly linkable: boolean;
@@ -23,6 +28,22 @@ function lastSegment(name: string): string {
   return normalized.slice(normalized.lastIndexOf('/') + 1);
 }
 
+export function sourcePageOf(url: string): string {
+  let parsed: URL;
+  try {
+    parsed = new URL(url);
+  } catch {
+    return url;
+  }
+  if (parsed.protocol !== 'https:' || parsed.hostname !== HUGGING_FACE_HOST) return url;
+  const segments = parsed.pathname.split('/').filter((segment) => segment.length > 0);
+  const [owner, repo, kind, revision, ...path] = segments;
+  if (owner === undefined || repo === undefined || revision === undefined) return url;
+  if (kind !== HUGGING_FACE_FILE || path.length === 0) return url;
+  const listPath = [owner, repo, HUGGING_FACE_LIST, revision, ...path.slice(0, -1)].join('/');
+  return `https://${HUGGING_FACE_HOST}/${listPath}`;
+}
+
 function isHttpsUrl(url: string): boolean {
   try {
     return new URL(url).protocol === 'https:';
@@ -31,11 +52,20 @@ function isHttpsUrl(url: string): boolean {
   }
 }
 
-function isSelected(node: WorkflowNode, name: string): boolean {
-  const target = lastSegment(name);
-  return widgetValueEntries(node).some(
-    (entry) => typeof entry.value === 'string' && lastSegment(entry.value) === target,
+function stringValuesOf(node: WorkflowNode): string[] {
+  return widgetValueEntries(node).flatMap((entry) =>
+    typeof entry.value === 'string' ? [entry.value] : [],
   );
+}
+
+function selectedValueOf(
+  node: WorkflowNode,
+  name: string,
+  outerValues: readonly string[],
+): string | null {
+  const target = lastSegment(name);
+  const matches = (value: string): boolean => lastSegment(value) === target;
+  return stringValuesOf(node).find(matches) ?? outerValues.find(matches) ?? null;
 }
 
 function isDisabled(node: WorkflowNode): boolean {
@@ -47,6 +77,7 @@ function modelsOfNode(
   node: WorkflowNode,
   promptNodeId: string,
   disabled: boolean,
+  outerValues: readonly string[],
 ): WorkflowModel[] {
   const raw = node.properties?.models;
   if (!isUnknownArray(raw)) return [];
@@ -55,15 +86,18 @@ function modelsOfNode(
     if (!isRecord(item)) return [];
     const { name, directory, url } = item;
     if (typeof name !== 'string' || typeof directory !== 'string') return [];
-    if (name.length === 0 || directory.length === 0 || !isSelected(node, name)) return [];
+    if (name.length === 0 || directory.length === 0) return [];
+    const selected = selectedValueOf(node, name, outerValues);
+    if (selected === null) return [];
     const key = `${directory}\n${name}`;
     if (seen.has(key)) return [];
     seen.add(key);
-    const link = typeof url === 'string' && url.length > 0 ? url : null;
+    const link = typeof url === 'string' && url.length > 0 ? sourcePageOf(url) : null;
     return [
       {
         promptNodeId,
         name,
+        selected,
         directory,
         url: link,
         linkable: link !== null && isHttpsUrl(link),
@@ -81,19 +115,27 @@ export function workflowModels(workflow: Workflow): WorkflowModel[] {
     nodes: readonly WorkflowNode[],
     prefix: string,
     disabled: boolean,
-    path: ReadonlySet<string>,
+    scope: { readonly path: ReadonlySet<string>; readonly outerValues: readonly string[] },
   ): void => {
     for (const node of nodes) {
       const promptNodeId = `${prefix}${String(node.id)}`;
       const off = disabled || isDisabled(node);
-      result.push(...modelsOfNode(node, promptNodeId, off));
+      result.push(...modelsOfNode(node, promptNodeId, off, scope.outerValues));
       const inner = definitions.get(node.type);
-      if (inner === undefined || path.has(inner.id) || !isUnknownArray(inner.nodes)) continue;
-      walk(inner.nodes, `${promptNodeId}:`, off, new Set([...path, inner.id]));
+      if (inner === undefined || scope.path.has(inner.id) || !isUnknownArray(inner.nodes)) {
+        continue;
+      }
+      walk(inner.nodes, `${promptNodeId}:`, off, {
+        path: new Set([...scope.path, inner.id]),
+        outerValues: [...stringValuesOf(node), ...scope.outerValues],
+      });
     }
   };
 
-  walk(isUnknownArray(workflow.nodes) ? workflow.nodes : [], '', false, new Set());
+  walk(isUnknownArray(workflow.nodes) ? workflow.nodes : [], '', false, {
+    path: new Set(),
+    outerValues: [],
+  });
   return result;
 }
 
@@ -101,20 +143,29 @@ export function modelDirectories(models: readonly WorkflowModel[]): string[] {
   return [...new Set(models.map((model) => model.directory))];
 }
 
+export interface MissingModel extends WorkflowModel {
+  readonly elsewhere: string | null;
+}
+
 export function missingModels(
   models: readonly WorkflowModel[],
   filesOf: (directory: string) => readonly string[] | null,
-): WorkflowModel[] {
-  const names = new Map<string, ReadonlySet<string> | null>();
-  const namesOf = (directory: string): ReadonlySet<string> | null => {
-    if (!names.has(directory)) {
+): MissingModel[] {
+  const lists = new Map<string, readonly string[] | null>();
+  const listOf = (directory: string): readonly string[] | null => {
+    if (!lists.has(directory)) {
       const files = filesOf(directory);
-      names.set(directory, files === null ? null : new Set(files.map(lastSegment)));
+      lists.set(directory, files === null ? null : files.map(normalizeModelName));
     }
-    return names.get(directory) ?? null;
+    return lists.get(directory) ?? null;
   };
-  return models.filter((model) => {
-    const present = namesOf(model.directory);
-    return present !== null && !present.has(lastSegment(model.name));
+  return models.flatMap((model): MissingModel[] => {
+    const files = listOf(model.directory);
+    if (files === null) return [];
+    const selected = normalizeModelName(model.selected);
+    if (files.includes(selected)) return [];
+    const target = lastSegment(selected);
+    const elsewhere = files.find((file) => lastSegment(file) === target) ?? null;
+    return [{ ...model, elsewhere }];
   });
 }

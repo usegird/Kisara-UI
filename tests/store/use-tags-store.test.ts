@@ -1,8 +1,9 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import { DELETED_KIND, type TagDictionary } from '@/graph/tag-dictionary';
+import { DELETED_KIND, tagSourceKey, type TagDictionary } from '@/graph/tag-dictionary';
 import type { TagsPort } from '@/port/tags';
-import { createTagsStore, type TagChanges } from '@/store/use-tags-store';
+import { useSettingsStore } from '@/store/use-settings-store';
+import { createTagsStore, useTagsStore, type TagChanges } from '@/store/use-tags-store';
 
 import { tagEntry } from '../helpers/tags';
 
@@ -18,7 +19,6 @@ function setup(dictionaries: TagDictionary[] = [], deleted: string[] = []) {
     fetchOverrides: vi.fn<TagsPort['fetchOverrides']>(() => Promise.resolve(overrides)),
     saveDictionary: vi.fn<TagsPort['saveDictionary']>(() => Promise.resolve()),
     saveOverrides: vi.fn<TagsPort['saveOverrides']>(() => Promise.resolve()),
-    removeDictionary: vi.fn<TagsPort['removeDictionary']>(() => Promise.resolve()),
   };
   return { deps, store: createTagsStore(deps) };
 }
@@ -57,6 +57,18 @@ describe('useTagsStore', () => {
     expect(store.getState().merged[0]?.source).toBe('mine');
   });
 
+  it('無効にした辞書は合わせず、設定を戻すと合わせた一覧を作り直す', async () => {
+    useSettingsStore.setState({ tagSourcesOff: [tagSourceKey('mine')] });
+    const { store } = setup([{ name: 'mine', entries: [tagEntry('dog')] }]);
+    await store.getState().load(base);
+    expect(keys(store)).toEqual(['cat', 'smile']);
+
+    const { pysssss, dictionaries, overrides } = store.getState();
+    useTagsStore.setState({ pysssss, dictionaries, overrides });
+    useSettingsStore.getState().setTagSourceOn(tagSourceKey('mine'), true);
+    expect(useTagsStore.getState().merged.map((tag) => tag.key)).toContain('dog');
+  });
+
   it('読み終える前は書かない', async () => {
     const { store, deps } = setup();
 
@@ -64,11 +76,8 @@ describe('useTagsStore', () => {
     expect(deps.saveOverrides).not.toHaveBeenCalled();
   });
 
-  it('確定で消す・上書き・新しい辞書・pysssss の上書きをまとめて書き、手元にも入れる', async () => {
-    const { store, deps } = setup([
-      { name: 'old', entries: [] },
-      { name: 'kept', entries: [] },
-    ]);
+  it('確定で上書き・新しい辞書・pysssss の上書きをまとめて書き、手元にも入れる', async () => {
+    const { store, deps } = setup([{ name: 'kept', entries: [] }]);
     await store.getState().load(base);
 
     const result = store.getState().commit(
@@ -79,14 +88,12 @@ describe('useTagsStore', () => {
           { name: 'kept', entries: [tagEntry('dog')] },
           { name: 'new', entries: [] },
         ],
-        removed: ['old'],
         overrides: [{ ...tagEntry('smile'), kind: DELETED_KIND }],
       }),
     );
     await expect(result).resolves.toBeNull();
     expect(deps.saveOverrides).toHaveBeenCalledTimes(1);
 
-    expect(deps.removeDictionary).toHaveBeenCalledWith(base, 'old', {});
     const overwrite = deps.saveDictionary.mock.calls.map((call) => [call[1].name, call[2]]);
     expect(overwrite).toEqual([
       ['KisaraUI', true],
@@ -101,31 +108,41 @@ describe('useTagsStore', () => {
     const { store, deps } = setup([{ name: 'a', entries: [] }]);
     await store.getState().load(base);
 
-    const result = store
-      .getState()
-      .commit(base, changes({ dictionaries: [{ name: ' ', entries: [] }], removed: ['a'] }));
+    const result = store.getState().commit(
+      base,
+      changes({
+        dictionaries: [
+          { name: 'a', entries: [tagEntry('x')] },
+          { name: ' ', entries: [] },
+        ],
+      }),
+    );
     await expect(result).resolves.toBe('empty-name');
-    expect(deps.removeDictionary).not.toHaveBeenCalled();
+    expect(deps.saveDictionary).not.toHaveBeenCalled();
   });
 
   it('途中で断られたら、書けた分だけを手元に入れて理由を持つ', async () => {
     const { store, deps } = setup([{ name: 'a', entries: [] }]);
     await store.getState().load(base);
-    deps.saveDictionary.mockRejectedValueOnce(new Error('boom'));
+    deps.saveDictionary.mockResolvedValueOnce().mockRejectedValueOnce(new Error('boom'));
 
-    const result = store
-      .getState()
-      .commit(
-        base,
-        changes({ dictionaries: [{ name: 'a', entries: [tagEntry('x')] }], removed: ['a'] }),
-      );
+    const result = store.getState().commit(
+      base,
+      changes({
+        dictionaries: [
+          { name: 'a', entries: [tagEntry('x')] },
+          { name: 'b', entries: [tagEntry('y')] },
+        ],
+      }),
+    );
     await expect(result).resolves.toBe('failed');
 
-    expect(names(store)).toEqual([]);
+    expect(names(store)).toEqual(['a']);
+    expect(keys(store)).toContain('x');
     expect(store.getState().error).not.toBeNull();
   });
 });
 
 function changes(part: Partial<TagChanges>): TagChanges {
-  return { dictionaries: [], removed: [], overrides: null, ...part };
+  return { dictionaries: [], overrides: null, ...part };
 }

@@ -18,6 +18,7 @@ type SettingsViewActions = Pick<
   | 'setModelSort'
   | 'setImageSortAscending'
   | 'setLoraCopyFormat'
+  | 'setTagSourceOn'
   | 'setRecordRunHistory'
   | 'setRunHistoryLimit'
   | 'moveControl'
@@ -45,6 +46,15 @@ export const createSettingsViewSlice: StateCreator<
     set((state) => ({ modelSort: normalizeModelSort({ ...state.modelSort, ...patch }) })),
   setImageSortAscending: setterOf(set, 'imageSortAscending'),
   setLoraCopyFormat: setterOf(set, 'loraCopyFormat'),
+  setTagSourceOn: (key, on) =>
+    set((state) => {
+      if (state.tagSourcesOff.includes(key) !== on) return state;
+      return {
+        tagSourcesOff: on
+          ? state.tagSourcesOff.filter((item) => item !== key)
+          : [...state.tagSourcesOff, key],
+      };
+    }),
   setRecordRunHistory: setterOf(set, 'recordRunHistory'),
   setRunHistoryLimit: normalizingSetterOf(set, 'runHistoryLimit'),
   moveControl: (from, dx, dy) => set({ controlPosition: moveFloating(from, dx, dy) }),

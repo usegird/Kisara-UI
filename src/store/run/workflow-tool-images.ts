@@ -1,3 +1,4 @@
+import { stripExpressionChunks } from '@/chat/avatar-expression';
 import { chatImageId } from '@/chat/chat-sources';
 import { receivedImages } from '@/chat/tool-results';
 import type { Chat } from '@/chat/types';
@@ -66,8 +67,9 @@ async function valueOf(
     const found = received?.find((image) => image.reference === reference);
     return found === undefined ? missing : { ok: true, value: imageFileValue(found.file) };
   }
-  const image = avatarOf(chat);
-  if (image === null) return missing;
+  const avatar = avatarOf(chat);
+  if (avatar === null) return missing;
+  const image = await stripExpressionChunks(avatar).catch(() => avatar);
   const value = await place(baseUrl, image).catch(() => null);
   return value === null ? { ok: false, message: t('llm.tool.uploadFailed') } : { ok: true, value };
 }

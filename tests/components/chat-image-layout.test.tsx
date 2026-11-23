@@ -42,7 +42,7 @@ describe('左右のアバターとログ', () => {
     const { container } = render(
       <ChatImageLayout chatId="c1" log={<div role="log" />} composer={<div />} />,
     );
-    const outer = container.querySelector('[style*="--chat-avatar-w"]');
+    const outer = container.querySelector('[style*="--chat-side-w"]');
     expect(outer?.className).toContain('--chat-pad-r');
     expect(
       screen.getByRole('log').contains(screen.getByRole('group', { name: 'プリセットの画像' })),
@@ -51,7 +51,7 @@ describe('左右のアバターとログ', () => {
 
   it('画像が無くても、相談かプレイブックのカードがある間はカードの側に余白を取る', () => {
     const outerClass = (): string =>
-      document.querySelector('[style*="--chat-avatar-w"]')?.className ?? '';
+      document.querySelector('[style*="--chat-side-w"]')?.className ?? '';
     useChatStore.setState({ chats: { c1: chat([]) } });
     useSettingsStore.setState({ chatImagePlace: 'left' });
     render(<ChatImageLayout chatId="c1" log={<div />} composer={<div />} />);
@@ -66,6 +66,27 @@ describe('左右のアバターとログ', () => {
     act(() => usePlaybookPanelStore.getState().setOpen('c1', false));
   });
 
+  it('上下・背景に置いてカードがあるときの余白は、アバターの縦横でなくカードの並びの幅', () => {
+    act(() => usePlaybookPanelStore.getState().setOpen('c1', true));
+    useSettingsStore.setState({ chatCardWidth: 288 });
+    for (const place of ['top', 'aboveInput', 'background'] as const) {
+      useSettingsStore.setState({
+        chatImagePlace: place,
+        chatImageWidth: 800,
+        chatImageHeight: 480,
+      });
+      render(<ChatImageLayout chatId="c1" log={<div />} composer={<div />} />);
+      const outer = document.querySelector<HTMLElement>('[style*="--chat-side-w"]');
+      expect(outer?.style.getPropertyValue('--chat-side-w')).toBe('288px');
+      cleanup();
+    }
+    useSettingsStore.setState({ chatImagePlace: 'right' });
+    render(<ChatImageLayout chatId="c1" log={<div />} composer={<div />} />);
+    const outer = document.querySelector<HTMLElement>('[style*="--chat-side-w"]');
+    expect(outer?.style.getPropertyValue('--chat-side-w')).toContain('800px');
+    act(() => usePlaybookPanelStore.getState().setOpen('c1', false));
+  });
+
   it('上下の置き場は画像が無くても場所を取る（重ねない）', () => {
     useChatStore.setState({ chats: { c1: chat([]) } });
     for (const place of ['top', 'aboveInput'] as const) {
@@ -74,6 +95,8 @@ describe('左右のアバターとログ', () => {
       const frame = screen.getByRole('group', { name: 'プリセットの画像' });
       expect(frame.closest('.h-0')).toBeNull();
       expect(frame.closest('.absolute')).toBeNull();
+      expect(frame.parentElement?.className).toContain('--chat-pad-r');
+      expect(frame.parentElement?.className).toContain('--chat-pad-l');
       cleanup();
     }
   });
@@ -85,6 +108,22 @@ describe('左右のアバターとログ', () => {
     log.scrollBy = scrollBy;
     fireEvent.wheel(screen.getByRole('group', { name: 'プリセットの画像' }), { deltaY: 120 });
     expect(scrollBy).toHaveBeenCalledWith({ top: 120, left: 0 });
+  });
+});
+
+describe('落とし先の枠', () => {
+  it('左右の枠は両脇の余白、ほかは会話の欄に置き、幅を要素に直接持つ（クラスが効かなくても固まらない）', () => {
+    render(<ChatImageLayout chatId="c1" log={<div />} composer={<div />} />);
+    const boxes = [...document.querySelectorAll('.border-dashed.rounded-lg')].map(
+      (zone) => zone.parentElement,
+    );
+    const [left, center, right] = [...new Set(boxes)];
+    expect(left?.style.flex).toContain('var(--chat-pad-l, 0px)');
+    expect(right?.style.flex).toContain('var(--chat-pad-r, 0px)');
+    expect(center?.style.flex).toContain('46rem');
+    expect(center?.children).toHaveLength(3);
+    expect((left?.firstElementChild as HTMLElement | null)?.style.top).toBe('20%');
+    expect((right?.firstElementChild as HTMLElement | null)?.style.top).toBe('20%');
   });
 });
 

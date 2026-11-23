@@ -208,3 +208,25 @@ async function scoreTargets(
     return NO_SEMANTIC_HITS;
   }
 }
+
+export async function nearestLabelOf(
+  text: string,
+  labels: readonly string[],
+): Promise<string | null> {
+  if (!useSettingsStore.getState().loreSemantic) return null;
+  if (useSemanticStore.getState().status !== 'ready') return null;
+  if (labels.length === 0 || text.trim().length === 0) return null;
+  const targets = labels.map(
+    (label, index): SemanticTarget => ({ sourceId: '', index, text: label, kind: 'passage' }),
+  );
+  try {
+    if (!(await rememberPassages(targets))) return null;
+    const scores = await scoresFor(targets, text);
+    if (scores === null || scores.length === 0) return null;
+    const best = scores.reduce((top, item) => (item.score > top.score ? item : top));
+    return labels[best.index] ?? null;
+  } catch (error) {
+    console.error('[近似判定]', error);
+    return null;
+  }
+}

@@ -20,6 +20,12 @@ interface ImageGridProps {
   readonly onSelect: (item: ImageItem) => void;
   readonly onClear: () => void;
   readonly onPlace: (item: ImageItem) => void;
+  readonly cardActions?: ((item: ImageItem) => React.ReactNode) | undefined;
+  readonly cardLeadingActions?: ((item: ImageItem) => React.ReactNode) | undefined;
+  readonly cardNameActions?: ((item: ImageItem) => React.ReactNode) | undefined;
+  readonly onRename?: ((item: ImageItem, name: string) => boolean) | undefined;
+  readonly canRename?: ((item: ImageItem) => boolean) | undefined;
+  readonly renameOptions?: ((item: ImageItem) => readonly string[]) | undefined;
 }
 
 export function ImageGrid({
@@ -35,6 +41,12 @@ export function ImageGrid({
   onSelect,
   onClear,
   onPlace,
+  cardActions,
+  cardLeadingActions,
+  cardNameActions,
+  onRename,
+  canRename,
+  renameOptions,
 }: ImageGridProps): React.ReactElement {
   const columns = `repeat(auto-fill, minmax(${String(cardMinWidth(height))}px, 1fr))`;
   return (
@@ -64,6 +76,11 @@ export function ImageGrid({
                 reveal={item.value === reveal}
                 onSelect={onSelect}
                 onPlace={onPlace}
+                actions={cardActions?.(item)}
+                leadingActions={cardLeadingActions?.(item)}
+                nameActions={cardNameActions?.(item)}
+                onRename={canRename?.(item) === false ? undefined : onRename}
+                renameOptions={renameOptions?.(item)}
               />
             ))}
           </div>

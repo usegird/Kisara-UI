@@ -1,27 +1,32 @@
 import { cva } from 'class-variance-authority';
-import { PanelsTopLeft } from 'lucide-react';
+import { ArrowUpFromLine, PanelsTopLeft } from 'lucide-react';
 import { useContext } from 'react';
 
 import { AnchorContext, appTargetAnchorKey } from '@/components/comfy/flow/anchor-context';
+import { EntranceContext, type AddEntrance } from '@/components/comfy/flow/entrance-context';
 import { FlowLookContext } from '@/components/comfy/flow/flow-look-context';
 import type { NodeRowProps } from '@/components/comfy/flow/NodeRow';
 import type { NodeRow as NodeRowData } from '@/graph/rows';
+import { levelOfId } from '@/graph/subgraph-level';
 import type { NodeId } from '@/graph/types';
 import { t } from '@/i18n';
 import { MENU_ACTION } from '@/lib/menu-actions';
 import { truncate } from '@/lib/text';
 import { slotColor } from '@/styles/slot-color';
 
-const rowHeading = cva('group/head text-muted-foreground flex shrink-0 items-center gap-1.5', {
-  variants: {
-    stacked: { true: 'w-full', false: '' },
-    compact: { true: '', false: 'pl-1' },
+const rowHeading = cva(
+  'group/head text-muted-foreground relative flex shrink-0 items-center gap-1.5',
+  {
+    variants: {
+      stacked: { true: 'w-full', false: '' },
+      compact: { true: '', false: 'pl-1' },
+    },
+    compoundVariants: [
+      { stacked: false, compact: false, class: 'w-28' },
+      { stacked: false, compact: true, class: 'w-[92px]' },
+    ],
   },
-  compoundVariants: [
-    { stacked: false, compact: false, class: 'w-28' },
-    { stacked: false, compact: true, class: 'w-[92px]' },
-  ],
-});
+);
 
 const addBeforeButton = cva(
   [
@@ -96,6 +101,7 @@ export function RowHeading({
   onToggleAppInput,
 }: RowHeadingProps): React.ReactElement {
   const { compact } = useContext(FlowLookContext);
+  const addEntrance = useContext(EntranceContext);
   return (
     <span className={rowHeading({ stacked, compact })}>
       {onToggleAppInput && row.kind === 'widget' ? (
@@ -108,7 +114,40 @@ export function RowHeading({
       <span className="min-w-0 truncate" title={row.label}>
         {truncate(row.label, LABEL_MAX)}
       </span>
+      {addEntrance !== null && canBeEntrance(nodeId, row) ? (
+        <EntranceButton nodeId={nodeId} row={row} addEntrance={addEntrance} />
+      ) : null}
     </span>
+  );
+}
+
+function canBeEntrance(nodeId: NodeId, row: NodeRowData): boolean {
+  if (levelOfId(nodeId) === null || row.kind !== 'widget') return false;
+  return row.target?.kind === 'node' && row.widgetName === row.name;
+}
+
+function EntranceButton({
+  nodeId,
+  row,
+  addEntrance,
+}: {
+  readonly nodeId: NodeId;
+  readonly row: NodeRowData;
+  readonly addEntrance: AddEntrance;
+}): React.ReactElement {
+  return (
+    <button
+      type="button"
+      className="bg-card text-muted-foreground hover:text-foreground absolute top-1/2 right-0
+        -translate-y-1/2 rounded p-0.5 opacity-0 transition-opacity group-hover/head:opacity-100
+        focus:opacity-100"
+      {...MENU_ACTION}
+      aria-label={t('flow.row.addEntrance', { name: row.label })}
+      title={t('flow.row.addEntranceTitle')}
+      onClick={() => addEntrance(nodeId, row.widgetName)}
+    >
+      <ArrowUpFromLine className="size-3.5" aria-hidden />
+    </button>
   );
 }
 

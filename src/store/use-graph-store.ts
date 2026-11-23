@@ -97,6 +97,8 @@ export interface GraphState {
 
   readonly setProxyWidgetValue: (target: SubgraphWidgetRef, value: unknown) => boolean;
 
+  readonly setOuterWidgetValue: (nodeId: NodeId, slot: number, value: unknown) => boolean;
+
   readonly advanceSeeds: (definitions: NodeDefinitionMap) => void;
 
   readonly updateNodeSettings: (nodeId: NodeId, patch: NodeSettingsPatch) => void;
@@ -139,6 +141,11 @@ export interface GraphState {
   ) => void;
   readonly disconnect: (linkId: LinkId) => void;
   readonly disconnectLinks: (linkIds: readonly LinkId[]) => void;
+  readonly addSubgraphEntrance: (
+    nodeId: NodeId,
+    widgetName: string,
+    definitions: NodeDefinitionMap,
+  ) => void;
   readonly sortByProcessing: (fromOrigin?: boolean) => void;
   readonly removeNode: (nodeId: NodeId) => void;
   readonly removeNodes: (nodeIds: readonly NodeId[]) => void;

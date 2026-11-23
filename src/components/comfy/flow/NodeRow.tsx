@@ -177,16 +177,13 @@ function RowNote({ row }: { readonly row: NodeRowData }): React.ReactElement | n
     );
   }
   if (row.kind !== 'unresolved') return null;
-  if (row.value === undefined) {
-    return <span className="text-muted-foreground text-xs">{t('flow.row.unknownName')}</span>;
-  }
+  const text =
+    row.value === undefined
+      ? t('flow.row.readOnlyEmpty')
+      : t('flow.row.readOnly', { value: formatDisplayValue(row.value) });
   return (
-    <span
-      className="border-input text-muted-foreground block truncate rounded-md border
-        border-dashed px-2 py-0.5 text-xs"
-      title={t('flow.row.unknownNameTitle')}
-    >
-      {formatDisplayValue(row.value)}
+    <span className="text-destructive block truncate text-xs" title={text}>
+      {text}
     </span>
   );
 }

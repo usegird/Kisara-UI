@@ -22,9 +22,10 @@ import {
 } from '@/graph/subgraph-level';
 import {
   FRONTEND_ONLY_TYPES,
-  nodeInputs,
+  slotTypeName,
   type LinkId,
   type NodeId,
+  type SubgraphDefinition,
   type Workflow,
   type WorkflowNode,
 } from '@/graph/types';
@@ -67,11 +68,18 @@ const NO_PROXY_ROWS: DisplayGraph['proxyRows'] = new Map();
 
 const cache = new WeakMap<Workflow, DisplayGraph>();
 
-function asFrameHead(node: WorkflowNode): WorkflowNode {
-  const inputs = Array.isArray(node.inputs)
-    ? nodeInputs(node).map((input) => (input.link === null ? input : { ...input, link: null }))
-    : undefined;
-  return { ...node, ...(inputs ? { inputs } : {}), outputs: [] };
+function asFrameHead(node: WorkflowNode, definition: SubgraphDefinition): WorkflowNode {
+  const outputs = (definition.inputs ?? []).map((io) => ({
+    name: io.label ?? io.name,
+    type: slotTypeName(io.type),
+    links: [],
+  }));
+  return { ...node, outputs };
+}
+
+function frameHeadOr(node: WorkflowNode, levels: ReadonlyMap<NodeId, OpenLevel>): WorkflowNode {
+  const open = levels.get(node.id);
+  return open ? asFrameHead(node, open.definition) : node;
 }
 
 function usesOf(workflow: Workflow, definitionId: string): number {
@@ -84,6 +92,66 @@ function usesOf(workflow: Workflow, definitionId: string): number {
 
 function isCard(node: WorkflowNode | undefined): boolean {
   return node !== undefined && node.type !== FRONTEND_ONLY_TYPES.reroute;
+}
+
+function innerCardNumbers(level: Workflow): Map<NodeId, number> {
+  const byId = new Map(level.nodes.map((node) => [node.id, node]));
+  const numbers = new Map<NodeId, number>();
+  for (const id of orderedNodeIds(level)) {
+    if (isCard(byId.get(id))) numbers.set(id, numbers.size + 1);
+  }
+  return numbers;
+}
+
+export function innerCardOf(
+  workflow: Workflow,
+  promptNodeId: string,
+): {
+  readonly node: WorkflowNode;
+  readonly number: number;
+  readonly instanceId: NodeId;
+  readonly scopedId: NodeId;
+} | null {
+  const parts = promptNodeId.split(':');
+  if (parts.length !== 2) return null;
+  const [instanceId, innerId] = parts.map(Number);
+  if (!Number.isInteger(instanceId) || !Number.isInteger(innerId)) return null;
+  if (instanceId === undefined || innerId === undefined) return null;
+  const level = subgraphLevel(workflow, instanceId);
+  if (level === null) return null;
+  const id = scopedId(instanceId, innerId);
+  const number = innerCardNumbers(level).get(id);
+  const node = level.nodes.find((candidate) => candidate.id === id);
+  if (number === undefined || node === undefined) return null;
+  return { node, number, instanceId, scopedId: id };
+}
+
+export function deepCardOf(
+  workflow: Workflow,
+  promptNodeId: string,
+): {
+  readonly node: WorkflowNode;
+  readonly numbers: readonly number[];
+  readonly instanceId: NodeId;
+} | null {
+  const ids = promptNodeId.split(':').map(Number);
+  const [instanceId, ...inner] = ids;
+  if (instanceId === undefined || inner.length < 2 || !ids.every(Number.isInteger)) return null;
+  const definitions = new Map(subgraphDefinitions(workflow).map((def) => [def.id, def]));
+  let definition = instanceDefinition(workflow, instanceId);
+  let node: WorkflowNode | undefined;
+  const numbers: number[] = [];
+  for (const id of inner) {
+    if (!definition) return null;
+    const groups = isUnknownArray(definition.groups) ? definition.groups : [];
+    const level: Workflow = { nodes: definition.nodes, links: definition.links, groups };
+    node = level.nodes.find((candidate) => candidate.id === id);
+    const number = innerCardNumbers(level).get(id);
+    if (!node || number === undefined) return null;
+    numbers.push(number);
+    definition = definitions.get(node.type) ?? null;
+  }
+  return node ? { node, numbers, instanceId } : null;
 }
 
 function innerLabels(instanceId: NodeId, level: Workflow): GroupLabel[] {
@@ -145,14 +213,13 @@ function build(workflow: Workflow): DisplayGraph {
     const open = levels.get(id);
     if (!open || !node) continue;
 
-    const innerById = new Map(open.level.nodes.map((inner) => [inner.id, inner]));
-    let innerCount = 0;
+    const innerNumbers = innerCardNumbers(open.level);
     const outer = membership.get(id);
     for (const innerId of orderedNodeIds(open.level)) {
       order.push(innerId);
-      if (isCard(innerById.get(innerId))) {
-        numbers.set(innerId, `${String(count)}.${String(++innerCount)}`);
-      }
+      const innerNumber = innerNumbers.get(innerId);
+      if (innerNumber !== undefined)
+        numbers.set(innerId, `${String(count)}.${String(innerNumber)}`);
       if (outer !== undefined) membership.set(innerId, outer);
     }
     nodes.push(...open.level.nodes);
@@ -174,10 +241,9 @@ function build(workflow: Workflow): DisplayGraph {
 
   const display: Workflow = {
     ...workflow,
-    nodes: [
-      ...workflow.nodes.map((node) => (levels.has(node.id) ? asFrameHead(node) : node)),
-      ...nodes,
-    ].map((node) => withDisplayLinks(node, index, outgoing)),
+    nodes: [...workflow.nodes.map((node) => frameHeadOr(node, levels)), ...nodes].map((node) =>
+      withDisplayLinks(node, index, outgoing),
+    ),
     links,
     extra: withProxyAppInputs(workflow, proxyRows),
   };

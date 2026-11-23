@@ -31,6 +31,7 @@ import type {
   ToolBilling,
   ToolDefinition,
 } from '@/port/llm-port';
+import { expressionToolsFor } from '@/store/chat/expression-decide';
 import { currentLlmTarget, type LlmTarget } from '@/store/chat/llm-target';
 import { chatPlaybookOf } from '@/store/chat/playbook-resolve';
 import type { ChatState } from '@/store/use-chat-store';
@@ -154,7 +155,7 @@ export function currentInputLimit(): number | null {
 }
 
 export function sendMaterials(chat: Chat, baseUrl: string): SendMaterials {
-  const definitions = toolProvider.definitions(chat);
+  const definitions = [...toolProvider.definitions(chat), ...expressionToolsFor(chat)];
   return {
     definitions,
     web: webToolsFor(baseUrl, 'chat'),
