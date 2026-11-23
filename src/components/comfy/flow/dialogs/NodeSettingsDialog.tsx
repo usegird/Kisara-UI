@@ -7,14 +7,8 @@ import { readNodeSettings, type NodeSettingsPatch } from '@/graph/node-settings'
 import type { WorkflowNode } from '@/graph/types';
 import { t } from '@/i18n';
 
-// ─────────────────────────────
-// カードに出していないノード設定のポップアップ。位置・大きさ・ピン留めを直し、
-// 残りのキーは読み取り専用でそのまま見せる。
-// ─────────────────────────────
-
 const FIELD_CLASS = field({ size: 'xs', width: 'full' });
 
-/** ノード設定のポップアップの props */
 export interface NodeSettingsDialogProps {
   readonly node: WorkflowNode;
   readonly displayName: string;
@@ -22,7 +16,6 @@ export interface NodeSettingsDialogProps {
   readonly onClose: () => void;
 }
 
-/** `flags` の印 1 つ。押すとその場で書き込む */
 function FlagCheckbox({
   label,
   title,
@@ -53,7 +46,6 @@ function numberOrNull(text: string): number | null {
   return Number.isFinite(parsed) ? parsed : null;
 }
 
-/** ノードの位置・大きさ・ピン留めの欄と、残りのキーの一覧を出し、変えた分を `onChange` へ渡す */
 export function NodeSettingsDialog({
   node,
   displayName,
@@ -69,7 +61,6 @@ export function NodeSettingsDialog({
   const extraKeys = Object.keys(settings.extra);
 
   return (
-    // 出している間だけ置かれるので、枠は開いたまま。閉じるのは呼び出し側（×・Escape・外側）
     <DialogFrame
       id="node-settings"
       open
@@ -81,7 +72,6 @@ export function NodeSettingsDialog({
       subtitle={`#${String(settings.id)} / ${settings.classType}`}
     >
       <div className="p-4">
-        {/* 位置は落とせない（本体が必ず持つキー）ので、空なら変えない */}
         <div className="mb-2 grid grid-cols-2 gap-2">
           <label className="text-muted-foreground text-xs">
             {t('nodeSettings.x')}

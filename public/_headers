@@ -1,9 +1,3 @@
-# 配信のヘッダー（ADR-0036）。Cloudflare がビルドの出力の _headers を読んで付ける。
-# script-src は自分のサイトだけ。近似判定の ONNX Runtime の WASM のため 'wasm-unsafe-eval' を足す（ADR-0040）。
-# 利用者が指定する ComfyUI・LLM へつなぐので、connect-src と画像・動画の取り先は絞れない。
-# Trusted Types を強制し、方針は src/lib/trusted-types.ts の default だけにする（ADR-0067）。
-# 埋め込めるのは ゲートウェイだけ（ADR-0114）。
-# HSTS はこのサイトだけに掛ける（サブドメインは使わないので includeSubDomains・preload は付けない。人が決めた）。
 /*
   Content-Security-Policy: default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; worker-src 'self'; style-src 'self'; img-src 'self' data: blob: http: https:; media-src 'self' blob: http: https:; font-src 'self'; connect-src 'self' http: https: ws: wss:; object-src 'none'; frame-src https://gw.kisara-ui.com; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; require-trusted-types-for 'script'; trusted-types default
   Strict-Transport-Security: max-age=31536000

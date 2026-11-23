@@ -2,10 +2,6 @@ import { describe, expect, it } from 'vitest';
 
 import { numberSpec, parseNumberText, snapNumber } from '@/graph/number-spec';
 
-// ─────────────────────────────
-// 数値の刻み・下限・上限・丸め
-// ─────────────────────────────
-
 describe('数値の刻み', () => {
   it('定義の刻みを使う（strength_model は 0.01）', () => {
     const spec = numberSpec('FLOAT', { default: 1, min: -100, max: 100, step: 0.01 });
@@ -48,7 +44,6 @@ describe('数値の刻み', () => {
 
 describe('打った文字を値にする', () => {
   const int = numberSpec('INT', { min: 0, max: 100 })!;
-  // seed の上限（2^64 - 1）は数としては正しく持てないので、近い値で代える
   const seed = numberSpec('INT', { min: 0, max: 2 ** 64 })!;
   const float = numberSpec('FLOAT', { min: 0, max: 10, step: 0.1 })!;
 

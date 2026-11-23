@@ -12,16 +12,11 @@ import {
   lacksAdvisorProposal,
 } from '@/chat/prompt-advisor-tool';
 
-// ─────────────────────────────
-// 構成の相談の案を書かせるツール。引数の形・呼び出しの読み方・返す結果
-// ─────────────────────────────
-
 const proposalArgs = JSON.stringify({
   title: 'T',
   changes: [{ target: 'main', content: 'Be brief.' }],
 });
 
-/** ツールの `changes` の 1 件の `target` の列挙 */
 function targetsOf(tool: ReturnType<typeof advisorToolOf>): unknown {
   type Schema = Record<string, Record<string, Record<string, unknown>>>;
   const properties = tool.function.parameters.properties as Record<string, Record<string, unknown>>;
@@ -58,6 +53,7 @@ describe('案を書かせるツール', () => {
     expect(advisorCallResult('applied')).toContain('applied this proposal');
   });
 });
+
 describe('決まったことを入れる', () => {
   it('辞書に書ける相談は辞書、ほかはプロンプトの構成に入れるよう頼む', () => {
     expect(advisorRecordTargetOf('story', null)).toBe('dictionary');
@@ -102,6 +98,7 @@ describe('呼び出しのある発言の送り方', () => {
     expect(reply !== undefined && 'tool_calls' in reply ? reply.tool_calls.length : 0).toBe(1);
     expect(sent[2]).toEqual({ role: 'tool', tool_call_id: 'call_a1_0', content: 'a1/call_a1_0' });
   });
+
   it('読めなかった呼び出しは、引数を {} にして送る', () => {
     const messages: AdvisorMessage[] = [
       {

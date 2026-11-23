@@ -9,10 +9,6 @@ import { useWebSearchStore } from '@/store/use-web-search-store';
 
 import { profile, setDefaultLlm } from '../helpers/llm';
 
-// ─────────────────────────────
-// 入力欄の Web のアイコン。初めて有効にするときだけ費用の注意を出して確かめる
-// ─────────────────────────────
-
 afterEach(cleanup);
 
 beforeEach(() => {

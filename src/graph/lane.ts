@@ -2,11 +2,6 @@ import type { Membership } from '@/graph/groups';
 import { linkIndex } from '@/graph/link-read';
 import type { NodeId, WorkflowLink } from '@/graph/types';
 
-// ─────────────────────────────
-// 支流のつながりと支流の判定。処理順・置き方・読み戻しの 3 か所が同じ判定を使うので、ここだけで決める。
-// ─────────────────────────────
-
-/** 支流の続き（前 → 次）。`ids` に無いノードとの線は数えない。所属の違う 2 つは繋がない */
 export function laneSuccessors(
   ids: ReadonlySet<NodeId>,
   links: readonly WorkflowLink[],
@@ -24,7 +19,6 @@ export function laneSuccessors(
   return next;
 }
 
-/** `ids` の中どうしの線を、出力先・入力元の表にする（自分への線は数えない） */
 function linkSetsOf(
   ids: ReadonlySet<NodeId>,
   links: readonly WorkflowLink[],
@@ -42,16 +36,11 @@ function linkSetsOf(
   return { consumers, producers };
 }
 
-/** 支流。`ids` は本流の下に回り込む続き、`target` はその続きが入る、列に並ぶノード */
 interface Lane {
   readonly ids: readonly NodeId[];
   readonly target: NodeId;
 }
 
-/**
- * 支流の続きをたどり、入る先（続きの最後のノード）と、本流の下に回り込む残りに分けて支流にする。
- * 始まりは前を持たないもの。
- */
 export function lanes(next: ReadonlyMap<NodeId, NodeId>, links: readonly WorkflowLink[]): Lane[] {
   const feeding = new Set(
     [...linkIndex(links).values()]

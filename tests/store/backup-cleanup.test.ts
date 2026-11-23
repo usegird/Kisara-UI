@@ -14,17 +14,11 @@ import { useStorageDialogStore } from '@/store/use-storage-dialog-store';
 
 import { connectComfy } from '../helpers/connection';
 
-// ─────────────────────────────
-// 古いバックアップの知らせ。ブラウザに元の無い控えのうち 30 日より前の物が
-// あれば、つないだときに 1 回だけ知らせる
-// ─────────────────────────────
-
 const NOW = 100 * STALE_BACKUP_MS;
 
 let port: ReturnType<typeof comfyPort>;
 let lists = 0;
 
-/** システムテンプレートの控えを 1 件置く（最後に変えた時刻を渡す） */
 function backupTemplate(updatedAt: number): void {
   installComfyPort({
     ...port,
@@ -47,7 +41,6 @@ function item(key: string, updatedAt: number | null): StorageItem {
   return { key, name: '', known: null, updatedAt, bytes: 1 };
 }
 
-/** 確かめの約束（動的な import と控えの一覧）が片付くまで待つ */
 async function settle(): Promise<void> {
   for (let round = 0; round < 20; round += 1) await Promise.resolve();
   await new Promise((resolve) => setTimeout(resolve, 0));
@@ -61,8 +54,10 @@ beforeEach(() => {
 afterEach(() => {
   installComfyPort(port);
   useConnectionStore.setState({ status: 'disconnected' });
-  useStorageDialogStore.setState({ staleNotice: false, used: false });
+  useStorageDialogStore.setState({ isOpen: false, staleUrl: null, used: false });
 });
+
+const staleUrl = () => useStorageDialogStore.getState().staleUrl;
 
 describe('元の無い控えと古さ', () => {
   it('ブラウザに同じ鍵の無い控えだけを拾い、30 日より前（時刻の無い物は除く）を古いとする', () => {
@@ -83,27 +78,56 @@ describe('元の無い控えと古さ', () => {
   });
 });
 
-describe('つないだときの知らせ', () => {
-  it('古い控えがあれば知らせ、同じ接続先へのつなぎ直しでは確かめ直さない', async () => {
+describe('つないだときの見張り', () => {
+  it('古い控えがあれば行を出し、切ったら下げ、同じ接続先へのつなぎ直しでは確かめ直さない', async () => {
     backupTemplate(1);
     const stop = startBackupCleanupCheck();
     connectComfy();
     await settle();
-    expect(useStorageDialogStore.getState().staleNotice).toBe(true);
+    expect(staleUrl()).toBe('http://comfy');
     const read = lists;
     useConnectionStore.setState({ status: 'disconnected' });
+    expect(staleUrl()).toBeNull();
     connectComfy();
     await settle();
     expect(lists).toBe(read);
     stop();
   });
 
-  it('新しい控えだけなら知らせない', async () => {
+  it('新しい控えだけなら行を出さない', async () => {
     backupTemplate(Date.now());
     const stop = startBackupCleanupCheck();
     connectComfy();
     await settle();
-    expect(useStorageDialogStore.getState().staleNotice).toBe(false);
+    expect(staleUrl()).toBeNull();
+    stop();
+  });
+
+  it('行を出している間にストレージの管理を閉じたら確かめ直し、古い物が無ければ下げる', async () => {
+    backupTemplate(1);
+    const stop = startBackupCleanupCheck();
+    connectComfy();
+    await settle();
+    useStorageDialogStore.getState().open('comfyBackup');
+    const read = lists;
+    await settle();
+    expect(lists).toBe(read);
+
+    useStorageDialogStore.getState().close();
+    await settle();
+    expect(lists).toBeGreaterThan(read);
+    expect(staleUrl()).toBe('http://comfy');
+    backupTemplate(Date.now());
+    useStorageDialogStore.getState().open('comfyBackup');
+    useStorageDialogStore.getState().close();
+    await settle();
+    expect(staleUrl()).toBeNull();
+
+    const after = lists;
+    useStorageDialogStore.getState().open();
+    useStorageDialogStore.getState().close();
+    await settle();
+    expect(lists).toBe(after);
     stop();
   });
 });

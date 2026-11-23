@@ -6,13 +6,8 @@ import type { Workflow } from '@/graph/types';
 
 import { bareNode } from '../helpers/workflow';
 
-// ─────────────────────────────
-// 足して繋いだノードの置き場所（直前の決め方）
-// ─────────────────────────────
-
 const ADDED = 9;
 
-/** 1・2・3 を横に並べ、足すノード 9 を左端に置いたもの（直前を決めるときは数えない） */
 const WORKFLOW: Workflow = {
   nodes: [
     bareNode({ id: 1, pos: [0, 0] }),

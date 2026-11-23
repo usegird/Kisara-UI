@@ -27,11 +27,6 @@ import { importedBookName, isReservedBookName } from '@/chat/reserved-book';
 
 import { chatPlaybook, outlineBook, playbookRef, TEST_PLAYBOOK_ID } from '../helpers/llm';
 
-// ─────────────────────────────
-// プレイブックのアウトラインの段・候補と、フェーズの文。段はアウトラインの辞書の常時の項目で、
-// 有効な項目が今の段
-// ─────────────────────────────
-
 const withOutline = (enabled: number | null = 0, phase = 'write'): PlaybookChat => ({
   playbook: playbookRef(phase),
   lorebooks: [outlineBook(['One', 'Two', 'Three'], enabled)],
@@ -54,7 +49,6 @@ describe('フェーズの文', () => {
     ]);
   });
 
-  // 重要なメモは置かないので、memo のトリガーワードの項目も段として読む
   it('##playbook の項目はどれも段として読む', () => {
     const book = outlineBook(['One'], 0);
     const memo = { ...book.entries[0]!, keys: ['memo'], comment: 'memo', enabled: false };
@@ -178,6 +172,7 @@ describe('応答から候補を読む', () => {
     expect(pickedText([], 'Picked')).toBe('');
   });
 });
+
 describe('予約の辞書の名前', () => {
   it('## で始まる名前を予約とし、取り込んだ辞書の名前からは先頭の # を外す', () => {
     expect(isReservedBookName(PLAYBOOK_BOOK)).toBe(true);

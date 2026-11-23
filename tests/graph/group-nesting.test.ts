@@ -19,11 +19,6 @@ import { isRecord } from '@/lib/guards';
 import { overlaps } from '../helpers/rect';
 import { node } from '../helpers/workflow';
 
-// ─────────────────────────────
-// 入れ子のグループ。親子も位置から読み、操作のあとも親の枠が子の枠を囲む。
-// ─────────────────────────────
-
-/** 線の無いノード 1..5 を並べ、[2, 3] を内側（添字 0）、それと 4 を外側（添字 1）のグループにする */
 function nested(): Workflow {
   const nodes = Array.from({ length: 5 }, (_, at) => node(at + 1, 'X', { pos: [at * 400, 0] }));
   const placed = applyOrder({ nodes, links: [] }, [1, 2, 3, 4, 5]);
@@ -52,7 +47,6 @@ function boxOf(workflow: Workflow, id: NodeId): NodeRect {
   return rectOf(found, DEFAULT_ORDER_LAYOUT);
 }
 
-/** 所属と親が作ったとおりで、子の枠が親の枠の内側にあり、ほかのノードと枠が重ならない */
 function expectShape(workflow: Workflow, membership: Record<number, number>): void {
   const read = groupMembership(workflow);
   expect(Object.fromEntries(read)).toEqual(membership);
@@ -68,7 +62,6 @@ function expectShape(workflow: Workflow, membership: Record<number, number>): vo
   }
 }
 
-/** 抜いて消す（削除と同じ順） */
 function remove(workflow: Workflow, id: NodeId): Workflow {
   const closed = removeFromX(workflow, id);
   return { ...closed, nodes: closed.nodes.filter((each) => each.id !== id) };

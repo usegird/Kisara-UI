@@ -4,10 +4,6 @@ import { buildRunReport, reportAlert, type RunReportInput } from '@/queue/run-re
 
 import { nodeView } from '../helpers/views';
 
-// ─────────────────────────────
-// エラーのタブ。ワークフローとノードの問題を**ノードごと**にまとめる
-// ─────────────────────────────
-
 const NONE: RunReportInput = {
   missing: [],
   diagnostics: [],
@@ -27,6 +23,30 @@ describe('エラーの一覧', () => {
     expect(buildRunReport(NONE, views).total).toBe(0);
   });
 
+  it('足りないモデルはそのノードに出し、無効化していれば注意に下げる', () => {
+    const model = {
+      name: 'a.safetensors',
+      directory: 'vae',
+      url: null,
+      linkable: false,
+    };
+    const report = buildRunReport(
+      {
+        ...NONE,
+        missingModels: [
+          { ...model, promptNodeId: '4', disabled: false },
+          { ...model, promptNodeId: '7:3', disabled: true },
+        ],
+      },
+      views,
+    );
+    expect(report.nodes.map((node) => [node.key, node.lines[0]?.tone])).toEqual([
+      ['4', 'error'],
+      ['7', 'warning'],
+    ]);
+    expect(report.nodes[0]?.lines[0]?.model?.directory).toBe('vae');
+  });
+
   it('見出しはカードと同じ「通し番号 + コメント（無ければノード名）」で、カードの順に並べる', () => {
     const report = buildRunReport(
       {
@@ -44,7 +64,6 @@ describe('エラーの一覧', () => {
       ['2', 'ワイルドカード'],
     ]);
     expect(report.general[0]?.text).toContain('受け付けられませんでした');
-    // 失敗は断られた理由の 2 件。注意は数えない
     expect(report.errors).toBe(2);
     expect(report.total).toBe(3);
     expect(reportAlert(report)).toBe('error');
@@ -59,7 +78,6 @@ describe('エラーの一覧', () => {
     expect(report.nodes[0]?.lines[0]?.tone).toBe('warning');
     expect(report.errors).toBe(0);
     expect(report.total).toBe(1);
-    // 注意だけならタブは黄色
     expect(reportAlert(report)).toBe('warning');
   });
 

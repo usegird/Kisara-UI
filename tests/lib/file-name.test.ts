@@ -2,10 +2,6 @@ import { describe, expect, it } from 'vitest';
 
 import { escapeFileName } from '@/lib/file-name';
 
-// ─────────────────────────────
-// ファイル名の 1 要素への退避。元に戻せる形で、違う名前が重ならないこと。
-// ─────────────────────────────
-
 const bytes = (text: string): number => new TextEncoder().encode(text).length;
 
 describe('退避', () => {

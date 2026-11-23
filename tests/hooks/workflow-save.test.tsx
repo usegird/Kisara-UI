@@ -7,13 +7,9 @@ import { useWorkflowIo } from '@/hooks/comfy/use-workflow-io';
 import { openWorkflow, serializeWorkflow } from '@/store/persist/workflow-file';
 import { useGraphStore } from '@/store/use-graph-store';
 import { useSettingsStore } from '@/store/use-settings-store';
+import { useTabsStore } from '@/store/use-tabs-store';
 
 import { node } from '../helpers/workflow';
-
-// ─────────────────────────────
-// ComfyUI への保存。上書きするのは KisaraUI が作ったファイルを今の接続先で開いたときだけ。
-// 書く中身は押した時点（同名の確認では確認を出した時点）の控え。書き込みは差し替える。
-// ─────────────────────────────
 
 vi.mock('@/comfy/workflows', async (importOriginal) => ({
   ...(await importOriginal<typeof import('@/comfy/workflows')>()),
@@ -102,6 +98,56 @@ describe('上書き保存', () => {
   });
 });
 
+describe('同じファイルを別のタブでも開いているときの上書き保存', () => {
+  afterEach(() => {
+    const { tabs, activeId, closeTab } = useTabsStore.getState();
+    for (const tab of tabs) if (tab.id !== activeId) closeTab(tab.id);
+  });
+
+  function openTwice(): void {
+    openWorkflow(OWN, 'a', { path: 'a.json', baseUrl: BASE });
+    const { activeId, duplicateTab } = useTabsStore.getState();
+    duplicateTab(activeId);
+    useGraphStore.getState().setTitle(1, 'edited');
+  }
+
+  it('書く前に確かめ、認めたら確かめた時点の中身を書く', async () => {
+    openTwice();
+    const result = io();
+
+    await act(() => result.current.save());
+    expect(result.current.saveState.kind).toBe('shared');
+    expect(save).not.toHaveBeenCalled();
+
+    await act(() => result.current.confirmOverwrite());
+    expect(save.mock.calls[0]?.[1]).toBe('a.json');
+    expect(save.mock.calls[0]?.[2]).toContain('edited');
+  });
+
+  it('やめれば書かない', async () => {
+    openTwice();
+    const result = io();
+
+    await act(() => result.current.save());
+    act(() => result.current.resetSaveState());
+    expect(result.current.saveState.kind).toBe('idle');
+    expect(save).not.toHaveBeenCalled();
+  });
+
+  it('別のタブの保存先が別の接続先なら確かめない', async () => {
+    openTwice();
+    const { tabs, activeId, selectTab } = useTabsStore.getState();
+    const other = tabs.find((tab) => tab.id !== activeId)?.id ?? '';
+    selectTab(other);
+    useGraphStore.getState().markSaved('a.json', 'http://other:8188', true);
+    selectTab(activeId);
+    const result = io();
+
+    await act(() => result.current.save());
+    expect(save).toHaveBeenCalledTimes(1);
+  });
+});
+
 describe('名前を付けて保存の同名', () => {
   it('KisaraUI が作っていない同名があれば、上書きを確かめずに別の名前を求める', async () => {
     openWorkflow(FOREIGN, 'a');
@@ -126,7 +172,6 @@ describe('名前を付けて保存の同名', () => {
 
     expect(save.mock.calls[1]?.[3]).toMatchObject({ overwrite: true });
     expect(save.mock.calls[1]?.[2]).toBe(save.mock.calls[0]?.[2]);
-    // 書いたのは確認を出した時点の中身なので、後から直した分は未保存のまま
     expect(useGraphStore.getState().dirty).toBe(true);
   });
 

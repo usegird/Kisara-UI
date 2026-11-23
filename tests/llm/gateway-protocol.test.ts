@@ -8,10 +8,6 @@ import {
   VERIFIED_TYPE,
 } from '@/llm/gateway-protocol';
 
-// ─────────────────────────────
-// 本体・ゲートウェイ・入力の窓の間の知らせ。ゲートウェイは本体からの値を確かめてから使う。
-// ─────────────────────────────
-
 const BASE = 'https://openrouter.ai/api/v1';
 
 describe('本体からの要求を読む', () => {

@@ -4,17 +4,8 @@ import { messageOf } from '@/lib/fault';
 import type { EmbeddingRequest, EmbeddingResponse } from '@/llm/embedding-protocol';
 import type { EmbeddingModel } from '@/port/embedding-port';
 
-// ─────────────────────────────
-// 近似判定の埋め込みを計算する Web Worker。画面の処理を止めないよう、モデルの読み込みと計算をここで行う。
-// モデルは Hugging Face から落とし、ライブラリの既定の Cache Storage に置く。
-// ─────────────────────────────
-
-// 手元のフォルダからは読まない（ブラウザでは無い）
 env.allowLocalModels = false;
 
-// 実行の部品（ONNX Runtime の WASM と補助の JS）は自分のサイトから読む。
-// Transformers.js は読み込んだ時点で取り先を jsDelivr に向けるので、その指定を外す。指定が無いと
-// ONNX Runtime は束ねた補助の JS と、ビルドが出力に置いた .wasm を使う
 const onnxWasm = env.backends.onnx.wasm;
 if (onnxWasm !== undefined) delete onnxWasm.wasmPaths;
 
@@ -25,7 +16,6 @@ interface Loaded {
 
 let loaded: Loaded | null = null;
 
-/** 届いた分のバイト数（ファイルごと）。進み具合をまとめて出す */
 const files = new Map<string, { loaded: number; total: number }>();
 
 function reply(message: EmbeddingResponse): void {
@@ -42,7 +32,6 @@ function ratio(): number {
   return total <= 0 ? 0 : Math.min(1, done / total);
 }
 
-/** 頼まれたモデルを読む。別のモデルを読んでいれば手放してから読む */
 async function load(id: number, model: EmbeddingModel): Promise<Loaded> {
   if (loaded !== null && loaded.model.id === model.id && loaded.model.revision === model.revision) {
     return loaded;
@@ -64,7 +53,6 @@ async function load(id: number, model: EmbeddingModel): Promise<Loaded> {
   return loaded;
 }
 
-/** 文を埋め込み、長さ 1 にそろえた行ごとのベクトルにする */
 async function embed(
   current: Loaded,
   texts: readonly string[],
@@ -94,7 +82,6 @@ async function handle(request: EmbeddingRequest): Promise<void> {
     const vectors = await embed(loaded, request.texts, prefix);
     reply({ id: request.id, kind: 'vectors', vectors });
   } catch (error) {
-    // 読み込みに失敗したら、次に頼まれたときに読み直す
     if (request.kind === 'load') loaded = null;
     reply({ id: request.id, kind: 'error', message: messageOf(error) });
   }

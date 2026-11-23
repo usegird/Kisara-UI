@@ -7,16 +7,11 @@ import { t } from '@/i18n';
 import { RECONNECT_POLICY } from '@/queue/reconnect-policy';
 import { installFaultHandlers, useFaultStore } from '@/store/use-fault-store';
 
-// ─────────────────────────────
-// 通信の層が閉じ込めた失敗は場所を符号で渡し、帯の文は画面の側が訳す（文は前と同じ）
-// ─────────────────────────────
-
 let stop: () => void = () => undefined;
 
 beforeEach(() => {
   useFaultStore.getState().clear();
   stop = installFaultHandlers(window);
-  // ブラウザの reportError と同じく、window の error に届ける
   vi.stubGlobal('reportError', (error: unknown) => {
     window.dispatchEvent(new ErrorEvent('error', { error }));
   });

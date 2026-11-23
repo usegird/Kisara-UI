@@ -7,10 +7,6 @@ import { parseChat } from '@/chat/file';
 
 import { chat, chatMessage, loreEntry } from '../helpers/llm';
 
-// ─────────────────────────────
-// 会話の中身の読み戻し。ブラウザの置き場の形。
-// ─────────────────────────────
-
 describe('ブラウザの置き場の形', () => {
   it('読み戻すと、メッセージ・候補・選んでいる候補・設定が戻る', () => {
     const original = chat(
@@ -19,6 +15,7 @@ describe('ブラウザの置き場の形', () => {
     );
     expect(parseChat(JSON.parse(JSON.stringify(original)))).toEqual(original);
   });
+
   it('ブラウザの置き場の形から、プリセットの写しの欄も戻る', () => {
     const character = { ...EMPTY_CHARACTER, name: 'ミナ', alternateGreetings: ['やあ'] };
     const restored = parseChat(JSON.parse(JSON.stringify(chat([], { character }))));
@@ -46,6 +43,7 @@ describe('ブラウザの置き場の形', () => {
     expect(parseChat(raw)?.messages[0]?.selected).toBe(1);
   });
 });
+
 describe('添えた画像', () => {
   it('ブラウザの置き場の形から画像のデータ URL が戻り、画像でないものは読まない', () => {
     const png = 'data:image/png;base64,iVBORw0KGgo=';
@@ -58,6 +56,7 @@ describe('添えた画像', () => {
     expect(parseChat(mixed)?.messages[0]?.candidates[0]?.images).toEqual([png]);
   });
 });
+
 describe('写した個別追加辞書とアバター', () => {
   it('ブラウザの置き場の形から辞書の並びとアバターの id が戻る', () => {
     const lorebooks = [
@@ -71,6 +70,7 @@ describe('写した個別追加辞書とアバター', () => {
     });
   });
 });
+
 describe('指示で作り直した候補', () => {
   it('土台と指示を読み戻し、指示が空のものは捨てる', () => {
     const revised = (revision: unknown) =>

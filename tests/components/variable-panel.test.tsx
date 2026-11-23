@@ -15,17 +15,11 @@ import type { AnchorRect, AnchorRegistry } from '@/hooks/ui/use-anchor-registry'
 
 import { fixedAnchors } from '../helpers/anchors';
 
-// ─────────────────────────────
-// 変数パネルの連動スクロール。jsdom はレイアウトを持たないので、測定結果（AnchorRegistry）を
-// 差し込んで「全体がどれだけスクロールしたか」を直接与える。
-// ─────────────────────────────
-
 const PANEL_HEIGHT = 300;
 const VIEWPORT_HEIGHT = 400;
 const CARD_STEP = 200;
 
 beforeAll(() => {
-  // jsdom はレイアウトを持たないため scrollTop が常に 0 になる。値を保持させる
   const values = new WeakMap<Element, number>();
   Object.defineProperty(HTMLElement.prototype, 'scrollTop', {
     configurable: true,
@@ -68,10 +62,8 @@ function groups(count: number): VariableGroup[] {
   }));
 }
 
-/** 全体を scrolled px スクロールした状態の測定結果 */
 function registry(count: number, scrolled: number): AnchorRegistry {
   const rects = new Map<string, AnchorRect>();
-  // パネルは sticky なので、全体がスクロールした分だけ内容座標では下がる
   rects.set(PANEL_ANCHOR_KEY, rect(scrolled, PANEL_HEIGHT));
   rects.set(VIEWPORT_ANCHOR_KEY, rect(scrolled, VIEWPORT_HEIGHT));
   for (let index = 0; index < count; index += 1) {
@@ -103,7 +95,6 @@ function renderPanel(count: number, scrolled: number) {
 }
 
 describe('変数パネルの連動スクロール', () => {
-  // 300px のパネルには 6 グループ（49px 刻み・最後の下端 295）まで収まる
   const capacity = Math.floor((PANEL_HEIGHT - groupHeight(1)) / 49) + 1;
 
   it('収まっているうちは動かない', () => {
@@ -115,7 +106,6 @@ describe('変数パネルの連動スクロール', () => {
     const { panel, scrollTo } = renderPanel(12, 0);
     expect(panel.scrollTop).toBe(0);
 
-    // 8枚目のカードの出力欄まで出る位置へ
     scrollTo(1200);
     expect(panel.scrollTop).toBeGreaterThan(0);
   });
@@ -138,7 +128,6 @@ describe('変数パネルの連動スクロール', () => {
     scrollTo(1200);
     expect(panel.scrollTop).toBeGreaterThan(0);
 
-    // 手でパネルだけを戻す（全体スクロールは動かないので測定結果は変わらない）
     panel.scrollTop = 0;
     scrollTo(1200);
     expect(panel.scrollTop).toBe(0);
@@ -148,14 +137,11 @@ describe('変数パネルの連動スクロール', () => {
     const { panel, scrollTo } = renderPanel(12, 0);
     scrollTo(1200);
 
-    // 手で先頭まで戻す
     panel.scrollTop = 0;
 
-    // さらに下へ送っても戻さない
     scrollTo(1600);
     expect(panel.scrollTop).toBe(0);
 
-    // 全体が追い付いた（連動位置が先頭に戻った）ら再開する
     scrollTo(0);
     expect(panel.scrollTop).toBe(0);
     scrollTo(1600);
@@ -210,7 +196,6 @@ describe('見出しからカードへ送る', () => {
 describe('カードのグループの帯', () => {
   const { FRAME_TAB_HEIGHT, FRAME_PADDING, FRAME_SIDE_PADDING, GROUP_GAP, LEFT_GUTTER } =
     VARIABLE_PANEL_METRICS;
-  // 1 と 2 が同じグループ、3 は外
   const groupOf = new Map([
     [1, 0],
     [2, 0],
@@ -231,7 +216,6 @@ describe('カードのグループの帯', () => {
 
     expect(screen.getByText('Load models')).not.toBeNull();
     expect(topOf('node 1')).toBe(FRAME_TAB_HEIGHT + FRAME_PADDING);
-    // 2 は帯の中で続き、3 は帯の末尾の余白のぶん離れる
     expect(topOf('node 2')).toBe(topOf('node 1') + groupHeight(1) + GROUP_GAP);
     expect(topOf('node 3')).toBe(topOf('node 2') + groupHeight(1) + FRAME_PADDING + GROUP_GAP);
   });
@@ -248,7 +232,6 @@ describe('カードのグループの帯', () => {
     const items = [...container.querySelectorAll('[data-flow-item]')];
     expect(items.indexOf(band as Element)).toBeLessThan(items.indexOf(first as Element));
     expect(band?.style.top).toBe('0px');
-    // 横はまとまりより余白のぶん広い（まとまりは右にそのぶん空ける）
     expect(band?.style.left).toBe(`${String(LEFT_GUTTER - FRAME_SIDE_PADDING)}px`);
     expect(band?.style.right).toBe('0px');
     expect(first?.style.right).toBe(`${String(FRAME_SIDE_PADDING)}px`);

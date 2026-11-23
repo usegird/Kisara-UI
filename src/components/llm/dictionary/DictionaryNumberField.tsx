@@ -2,14 +2,6 @@ import { useState } from 'react';
 
 import { FIELD_XS } from '@/components/ui/field';
 
-// ─────────────────────────────
-// 追加辞書のダイアログの数の欄（発動率・位置・トリガー検索範囲）。
-// ─────────────────────────────
-
-/**
- * 数の欄。打つたびに読めれば直しかけに入れ、離れたら欄の文字を直した値に揃える（空は既定の値）。
- * `text` は値から欄の文字、`parse` は欄の文字から値（辞書のダイアログのトリガー検索範囲にも使う）
- */
 export function DictionaryNumberField({
   label,
   value,
@@ -24,7 +16,6 @@ export function DictionaryNumberField({
   readonly value: number;
   readonly min?: number;
   readonly max?: number;
-  /** 増減のボタンの刻み（既定は 1） */
   readonly step?: number;
   readonly text: (value: number) => string;
   readonly parse: (text: string) => number;

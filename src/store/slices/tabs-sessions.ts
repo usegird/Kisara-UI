@@ -19,18 +19,11 @@ import {
 import { useGraphStore } from '@/store/use-graph-store';
 import type { TabsState } from '@/store/use-tabs-store';
 
-// ─────────────────────────────
-// タブのストアの、セッションを替える・控えを読む・控えの値を進める操作と、端末の控えから戻す・
-// どのブラウザのタブにも開かれていない中身を引き取る操作。
-// ─────────────────────────────
-
-/** この slice が持つ操作 */
 type TabsSessionActions = Pick<
   TabsState,
   'renewSession' | 'readTab' | 'advanceTabSeeds' | 'refreshHiddenCandidates' | 'adopt' | 'restore'
 >;
 
-/** セッションと控えの操作を作る */
 export const createTabsSessionSlice: StateCreator<TabsState, [], [], TabsSessionActions> = (
   set,
   get,
@@ -58,7 +51,6 @@ export const createTabsSessionSlice: StateCreator<TabsState, [], [], TabsSession
       return;
     }
 
-    // 控えの側は値を書き換えるだけ。線は変わらないので積み直しは要らない
     const snapshot = snapshots[id];
     if (!snapshot?.workflow) return;
     const workflow = advanceSeeds(snapshot.workflow, definitions);
@@ -103,7 +95,6 @@ export const createTabsSessionSlice: StateCreator<TabsState, [], [], TabsSession
     advanceCounter(tabs);
     const rest = omitKey(snapshots, activeId);
 
-    // セッションの無いワークフローのタブには作る
     const withSessions = tabs.map((tab) =>
       tab.kind === 'workflow' && tab.runSession === undefined
         ? { ...tab, runSession: newSession() }

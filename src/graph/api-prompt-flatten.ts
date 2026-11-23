@@ -18,12 +18,6 @@ import {
   type WorkflowNode,
 } from '@/graph/types';
 
-// ─────────────────────────────
-// API Prompt Format へ直す前段。subgraph を平坦化し、中継・バイパス・ミュートを解いて各入力の供給元を決め、
-// 出力ノードから届くノードを選ぶ。
-// ─────────────────────────────
-
-/** 入力の供給元（平坦化した id と出力の slot） */
 interface Source {
   readonly nodeId: string;
   readonly slot: number;
@@ -33,14 +27,11 @@ interface Level {
   readonly prefix: string;
   readonly nodesById: Map<NodeId, WorkflowNode>;
   readonly links: Map<LinkId, ResolvedLink>;
-  /** subgraph の内側でのみ有効。入力口の slot を親側のソースへ解決する */
   readonly boundary: ((walk: Walk, slot: number) => Source | null) | null;
   readonly subgraphs: ReadonlyMap<string, SubgraphDefinition>;
-  /** このレベルまでに開いた定義の id（自分を含む定義を開き続けないように） */
   readonly chain: readonly string[];
 }
 
-/** 平坦化したノード 1 つと、その入力の供給元 */
 export interface FlatNode {
   readonly id: string;
   readonly node: WorkflowNode;
@@ -49,22 +40,17 @@ export interface FlatNode {
   readonly sources: Map<string, Source>;
 }
 
-/** 供給元を 1 つたどる間の持ち物。たどった出力を覚えて輪を断つ */
 interface Walk {
-  /** 展開した subgraph のインスタンス（平坦化した id → 内側のレベル） */
   readonly childLevels: ReadonlyMap<string, Level>;
   readonly seen: Set<string>;
 }
 
-/** 自分を含むので開かなかった subgraph のインスタンス */
 export interface SubgraphCycle {
-  /** 平坦化したインスタンスの id */
   readonly id: string;
   readonly type: string;
   readonly name: string;
 }
 
-/** レベルを組む間の持ち物 */
 interface Build {
   readonly childLevels: Map<string, Level>;
   readonly flat: Map<string, FlatNode>;
@@ -72,16 +58,11 @@ interface Build {
   readonly cycles: SubgraphCycle[];
 }
 
-/** 平坦化の結果 */
 interface FlatWorkflow {
   readonly flat: Map<string, FlatNode>;
   readonly cycles: readonly SubgraphCycle[];
 }
 
-/**
- * Workflow JSON を平坦化したノードの表にする（送るノードだけ。中継・メモ・バイパス・ミュートは入れない）。
- * 各ノードの入力の供給元も解いておく
- */
 export function flattenWorkflow(workflow: Workflow, definitions: NodeDefinitionMap): FlatWorkflow {
   const build: Build = { childLevels: new Map(), flat: new Map(), definitions, cycles: [] };
   buildLevel(build, {
@@ -103,7 +84,6 @@ export function flattenWorkflow(workflow: Workflow, definitions: NodeDefinitionM
   return { flat: build.flat, cycles: build.cycles };
 }
 
-/** 出力ノードから供給元をたどって届くノードの id */
 export function reachableNodes(flat: ReadonlyMap<string, FlatNode>): Set<string> {
   const reachable = new Set<string>();
   const queue: string[] = [];
@@ -132,17 +112,12 @@ export function reachableNodes(flat: ReadonlyMap<string, FlatNode>): Set<string>
   return reachable;
 }
 
-// ─────────────────────────────
-// レベル構築（subgraph の再帰展開）
-// ─────────────────────────────
-
 function buildLevel(build: Build, level: Level): void {
   for (const node of level.nodesById.values()) {
     const mode = nodeMode(node);
     const definition = level.subgraphs.get(node.type);
 
     if (definition) {
-      // バイパス／ミュートされた subgraph は内部を展開しない（素通し・遮断で扱う）
       if (mode !== NODE_MODE.normal) continue;
       if (level.chain.includes(definition.id)) {
         build.cycles.push({
@@ -189,19 +164,13 @@ function createChildLevel(
       const io = subgraphInputAt(definition, slot);
       if (!io) return null;
 
-      // インスタンス側の入力とは**名前で**対応付ける（インデックスは一致しない）
       const index = nodeInputs(instance).findIndex((input) => input.name === io.name);
       if (index < 0) return null;
 
-      // 印は持ち越す（入口から出口へ素通しの線で、外と内を行き来する輪を断つ）
       return resolveInput(walk, parent, instance, index);
     },
   };
 }
-
-// ─────────────────────────────
-// 入力ソースの解決
-// ─────────────────────────────
 
 function resolveInput(
   walk: Walk,
@@ -227,7 +196,6 @@ function resolveSubgraphOutput(
   const child = walk.childLevels.get(absoluteId(level, node.id));
   if (!child) return null;
 
-  // 出力口へ入っているリンク（target が -20）の供給元をたどる
   for (const link of child.links.values()) {
     if (link.targetId !== SUBGRAPH_IO_NODE_ID.output) continue;
     if (link.targetSlot !== slot) continue;
@@ -242,7 +210,6 @@ function resolveOutput(walk: Walk, level: Level, nodeId: NodeId, slot: number): 
   if (walk.seen.has(key)) return null;
   walk.seen.add(key);
 
-  // 入力口（-10）は親側へ抜ける。未接続なら null（内部 widget 値へフォールバック）
   if (nodeId === SUBGRAPH_IO_NODE_ID.input) {
     return level.boundary ? level.boundary(walk, slot) : null;
   }
@@ -260,7 +227,6 @@ function resolveOutput(walk: Walk, level: Level, nodeId: NodeId, slot: number): 
     return resolveInput(walk, level, node, 0);
   }
   if (mode === NODE_MODE.bypass) {
-    // バイパスは同じ型の入力へ素通しする
     const outputType = nodeOutputs(node)[slot]?.type;
     const index = nodeInputs(node).findIndex((input) => input.type === outputType);
     return index >= 0 ? resolveInput(walk, level, node, index) : null;

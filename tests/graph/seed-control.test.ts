@@ -6,11 +6,6 @@ import { widgetValueList } from '@/graph/widgets';
 
 import { definition, definitionMap, widget } from '../helpers/definitions';
 
-// ─────────────────────────────
-// control_after_generate は**サーバーに送るものではない**。
-// ComfyUI 本家と同じく、キューに入れた直後にフロントエンド側で seed を書き換える。
-// ─────────────────────────────
-
 const definitions = definitionMap(
   definition(
     'KSampler',
@@ -22,7 +17,6 @@ const definitions = definitionMap(
   ),
 );
 
-/** widgets_values は [seed, control, steps] の並び（スロット順） */
 function workflow(seed: number, control: string): Workflow {
   return {
     nodes: [{ id: 1, type: 'KSampler', pos: [0, 0], widgets_values: [seed, control, 20] }],
@@ -64,7 +58,6 @@ describe('実行後の seed 更新', () => {
     const first = next.nodes[0];
     const values = first ? widgetValueList(first) : [];
     expect(values[0]).not.toBe(5);
-    // 制御 widget と後続の値は動かさない
     expect(values[1]).toBe('randomize');
     expect(values[2]).toBe(20);
   });

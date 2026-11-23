@@ -33,10 +33,6 @@ import { formatComfyFailure } from '@/queue/comfy-failure-text';
 import { comfyPort } from '@/store/ports/comfy-port';
 import { CARD_LIST_STEP } from '@/store/settings-fields/card-size';
 
-// ─────────────────────────────
-// 同梱のワークフローテンプレートを選んで開くダイアログ。枠とキーボード操作は基盤に任せる。
-// ─────────────────────────────
-
 const SORT_LABELS: ReadonlyArray<{ readonly key: TemplateSortKey; readonly label: MessageKey }> = [
   { key: 'default', label: 'comfy.template.sort.default' },
   { key: 'popular', label: 'comfy.template.sort.popular' },
@@ -57,24 +53,17 @@ type Loaded =
   | {
       readonly kind: 'ready';
       readonly sections: readonly TemplateSection[];
-      /** 訳が取れず英語に落としたか */
       readonly fellBack: boolean;
     }
   | { readonly kind: 'error'; readonly message: string };
 
-/** テンプレートを選ぶダイアログの props */
 export interface TemplatePickerDialogProps {
-  /** 出しているか。開いたときに一覧を 1 回だけ取る */
   readonly open: boolean;
-  /** 一覧とサムネイルを取る接続先 */
   readonly baseUrl: string;
-  /** 選んだテンプレートを開く */
   readonly onSelect: (template: WorkflowTemplate) => void;
-  /** 閉じる */
   readonly onClose: () => void;
 }
 
-/** テンプレートをカテゴリ・語・並び替え・言語で絞り、カードの格子から選ばせる */
 export function TemplatePickerDialog({
   open,
   baseUrl,
@@ -85,12 +74,10 @@ export function TemplatePickerDialog({
   const [category, setCategory] = useState<number | null>(null);
   const [query, setQuery] = useState('');
   const [sortKey, setSortKey] = useState<TemplateSortKey>('default');
-  // 初めはブラウザの言語。選び直した言語は端末に残さない（読み込み直すまで保つ）
   const [locale, setLocale] = useState(() =>
     pickTemplateLocale(typeof navigator === 'undefined' ? [] : navigator.languages),
   );
 
-  // 開いたとき・言語を変えたときに 1 回だけ取る（自動更新はしない）
   useEffect(() => {
     if (!open) return;
 
@@ -113,15 +100,12 @@ export function TemplatePickerDialog({
     };
   }, [open, baseUrl, locale]);
 
-  // 標準のワークフローは「すべて」の次の先頭のカテゴリ。接続先の一覧が取れなくても出す。
-  // compiler はこの部品を飛ばす（描画中に ref を読むとみなされる）ので、下の memo は手で書く
   const sections = useMemo(
     () => [builtinTemplateSection(), ...(loaded.kind === 'ready' ? loaded.sections : [])],
     [loaded],
   );
   const categories = useMemo(() => templateCategories(sections), [sections]);
   const total = useMemo(() => allTemplates(sections).length, [sections]);
-  // 言語を変えても見出しの並びは同じなので、カテゴリは位置のまま保つ。無ければ「すべて」
   const shownCategory = category !== null && category < sections.length ? category : null;
   const visible = useMemo(
     () =>
@@ -132,7 +116,6 @@ export function TemplatePickerDialog({
     [sections, shownCategory, query, sortKey],
   );
 
-  // 数百枚あるので少しずつ描く。絞り込みか並び順が変わったら先頭から数え直す
   const shown = useIncrementalList(
     visible.length,
     CARD_LIST_STEP,
@@ -157,7 +140,6 @@ export function TemplatePickerDialog({
         )
       }
       actions={
-        // 一覧の言語。訳されるのは題名・説明・カテゴリ名だけ
         <select
           className={CHOICE_CLASS}
           value={locale}
@@ -177,12 +159,10 @@ export function TemplatePickerDialog({
       }
     >
       <div className="flex min-h-0 flex-1">
-        {/* 左: カテゴリ。先頭に「すべて」。本体との間の縦線は掴んで幅を変える */}
         <SidePane
           paneKey="template-picker:left"
           label={t('comfy.template.category')}
           side="left"
-          // 左の列の帯: 右寄せの閉じる ×
           toolbar={
             <DialogToolbar label={t('comfy.template.toolbar')}>
               <PaneCloseButton label={t('comfy.template.close')} onClick={onClose} />
@@ -219,7 +199,6 @@ export function TemplatePickerDialog({
         </SidePane>
 
         <div className="flex min-w-0 flex-1 flex-col">
-          {/* 右の帯: 左寄せの絞り込みと並び替え */}
           <DialogToolbar label={t('comfy.template.filterToolbar')}>
             <SearchField
               autoFocus
@@ -245,7 +224,6 @@ export function TemplatePickerDialog({
             </select>
           </DialogToolbar>
 
-          {/* 右: カードの格子 */}
           <div className="min-h-0 flex-1 overflow-y-auto p-3">
             {loaded.kind === 'error' ? (
               <p className="text-destructive p-4 text-center text-sm" role="alert">
@@ -268,7 +246,6 @@ export function TemplatePickerDialog({
                     />
                   ))}
                 </div>
-                {/* 目印。見えたら次のまとまりを足す */}
                 {shown.done ? null : (
                   <p
                     ref={shown.sentinelRef}
@@ -285,7 +262,6 @@ export function TemplatePickerDialog({
                 )}
               </>
             )}
-            {/* 標準のワークフローは先に出し、接続先の一覧が届くまでその下で回して示す */}
             {loaded.kind === 'loading' ? (
               <p
                 className="text-muted-foreground flex items-center justify-center gap-2 p-8

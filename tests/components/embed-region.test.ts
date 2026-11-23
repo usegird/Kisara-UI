@@ -3,10 +3,6 @@ import { describe, expect, it } from 'vitest';
 import { comfyEmbedRegion } from '@/components/comfy/embed-region';
 import type { AnchorRect, Rects } from '@/hooks/ui/use-anchor-registry';
 
-// ─────────────────────────────
-// ComfyUI のタブで埋め込みのダイアログを嵌める範囲。
-// ─────────────────────────────
-
 function rect(left: number, top: number, right: number, bottom: number): AnchorRect {
   return { left, top, right, bottom, centerY: (top + bottom) / 2 };
 }

@@ -5,13 +5,6 @@ import { describe, expect, it } from 'vitest';
 
 import { anchorColor, slotColor } from '@/styles/slot-color';
 
-// ─────────────────────────────
-// スロット型の配色。`var(--color-slot-*)` を JS から参照しているので、
-// **CSS 側に変数が出ていないと stroke が none になり接続線が消える**。
-// Tailwind の `@theme` は使われている変数しか出力しないため、
-// `@theme static` であることと、参照する型が全部定義されていることを固定する。
-// ─────────────────────────────
-
 function globals(): string {
   return readFileSync(
     fileURLToPath(new URL('../../src/styles/globals.css', import.meta.url)),

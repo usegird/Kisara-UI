@@ -1,9 +1,5 @@
 import * as web from 'node:stream/web';
 
-// jsdom の文脈には流れ（ReadableStream など）と圧縮・展開（CompressionStream・DecompressionStream）が無く、
-// jsdom の Blob には `stream()` が無い。ブラウザには標準であるので、画面を描くテストにだけ Node の物を入れる
-// （ストレージの管理の書き出しを 1 行ずつ gzip で読み書きする。src/lib/json-lines.ts）
-
 if (typeof document !== 'undefined') {
   const streams = {
     ReadableStream: web.ReadableStream,

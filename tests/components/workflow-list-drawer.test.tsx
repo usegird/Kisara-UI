@@ -7,11 +7,6 @@ import { WorkflowListDrawer } from '@/components/comfy/WorkflowListDrawer';
 import { PRESS_GUARD_MS } from '@/lib/press-guard';
 import { useConnectionStore } from '@/store/use-connection-store';
 
-// ─────────────────────────────
-// ハンバーガーメニューのワークフローの一覧。上に開く入口 3 つ、その下に保存された
-// ワークフロー。選ぶと引っ込めて開く。外を押す・Esc でも引っ込む（出し続けるときを除く）。
-// ─────────────────────────────
-
 vi.mock('@/comfy/workflows', async (importOriginal) => ({
   ...(await importOriginal<typeof import('@/comfy/workflows')>()),
   listSavedWorkflows: vi.fn(),
@@ -51,13 +46,11 @@ describe('ワークフローの一覧', () => {
     const names = screen.getAllByRole('button').map((button) => button.textContent);
     expect(names.slice(0, 3)).toEqual(['空で開く', 'ファイルから開く', 'テンプレートから開く']);
 
-    // 日時は出さず、時期の区切りの見出しの下に並べる
     expect(await screen.findByRole('heading', { name: 'それより前' })).toBeTruthy();
     fireEvent.click(screen.getByRole('button', { name: 'cat.json' }));
     expect(props.onClose).toHaveBeenCalledTimes(1);
     expect(props.onOpenSaved).toHaveBeenLastCalledWith(saved, true);
 
-    // 右端のアイコンは別のタブで開く（不意の連打の見張りの間を外す）
     vi.useFakeTimers();
     vi.setSystemTime(Date.now() + 10 * PRESS_GUARD_MS);
     fireEvent.click(screen.getByRole('button', { name: 'cat.json を別のタブで開く' }));

@@ -10,13 +10,6 @@ import type { NodeView } from '@/graph/rows';
 import type { KeyboardMenu } from '@/hooks/ui/use-keyboard-menu';
 import { t } from '@/i18n';
 
-// ─────────────────────────────
-// カードの右クリックメニュー
-// ─────────────────────────────
-
-/**
- * カードの右クリックメニュー
- */
 export function CardMenu({
   view,
   keyboardMenu,
@@ -53,8 +46,6 @@ export function CardMenu({
       label={t('flow.card.menu', { name: view.displayName })}
       finalFocus={keyboardMenu.finalFocus}
     >
-      {/* キーボードから開いたときだけ、Tab から外した行とカードの操作を上に並べる。
-          カードのまとまりの末尾に、選択に足す・外す（Ctrl+Enter と同じ）を置く */}
       {keyboardMenu.sections === null ? null : (
         <ContextMenuActionSections
           sections={keyboardMenu.sections}
@@ -99,7 +90,6 @@ export function CardMenu({
       >
         {t('flow.card.clone')}
       </ContextMenuItem>
-      {/* 選んでいるカードのときだけ出す */}
       {onGroup ? (
         <ContextMenuItem title={t('flow.card.groupTitle')} onClick={() => onGroup(view.id)}>
           {t('flow.card.group')}
@@ -112,7 +102,6 @@ export function CardMenu({
   );
 }
 
-/** メニューの subgraph を開く・閉じる。開いていれば閉じる方だけを出す */
 function renderSubgraphToggle(
   view: NodeView,
   {

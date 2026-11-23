@@ -15,10 +15,6 @@ import { ADDITIONAL_INFO_ID } from '@/chat/types';
 
 import { contentText, sampleComposition } from '../helpers/llm';
 
-// ─────────────────────────────
-// 構成の相談の、反映した後に開く行と、要約（縮める範囲・送る発言・上限に近いか）
-// ─────────────────────────────
-
 const rowsOf = (changes: AdvisorProposal['changes'], outline: string | null = null): string[] => {
   let next = 0;
   return [
@@ -41,7 +37,6 @@ const entry = (dictionary: string) =>
     enabled: true,
   }) as const;
 
-/** 発言 n 件（user と assistant を交互に。id は m0, m1, …） */
 const talk = (count: number): AdvisorMessage[] =>
   Array.from({ length: count }, (_, at) => ({
     id: `m${String(at)}`,
@@ -78,7 +73,6 @@ describe('反映した後に開く行', () => {
 describe('相談の要約', () => {
   it('新しい 2 件（最後の 1 往復）を残して縮め、要約した後ろから次の範囲を数える', () => {
     expect(advisorSummaryRange(talk(2), undefined)).toBeNull();
-    // 2 往復で上限に届いても、前の 1 往復を縮められる
     expect(advisorSummaryRange(talk(4), undefined)).toEqual({ from: 0, to: 2 });
     const summary = { content: 'S', upTo: 'm2' };
     expect(advisorSummaryRange(talk(5), summary)).toBeNull();

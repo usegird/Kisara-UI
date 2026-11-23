@@ -20,27 +20,16 @@ import { t } from '@/i18n';
 import { formatBytes } from '@/lib/text';
 import { totalOf, type StorageItem, type StorageUsage } from '@/store/persist/storage-usage';
 
-// ─────────────────────────────
-// ストレージの管理の合計の表。全体・IndexedDB・見出しの合計と、Comfy バックアップの合計とクリーンアップ。
-// 名前を押すとその場所へ移る（場所と印はダイアログが持つ）。
-// ─────────────────────────────
-
 const overviewName = cva('py-1 pr-2', { variants: { indent: { true: 'pl-2', false: '' } } });
 
-/** 合計の表の props */
 export interface OverviewProps {
   readonly usage: StorageUsage;
   readonly entries: readonly Entry[];
-  /** 選んでいる場所 */
   readonly scope: string;
   readonly connected: boolean;
   readonly onSelect: (id: string) => void;
 }
 
-/**
- * 全体・IndexedDB・見出しの合計の表（`scope` は選んでいる場所）。全体は使用量と、全体の下の物と
- * すべての見出しを、IndexedDB は大きい保存領域の表を、見出しはその種類だけを出す
- */
 export function Overview({
   usage: siteUsage,
   entries,
@@ -53,9 +42,7 @@ export function Overview({
   const groups = scope === INDEXED_DB ? [] : GROUPS.filter((group) => all || group.id === scope);
   const shown = shownEntriesOf(scope, entries, tables, groups);
   const backed = shown.filter((entry) => entry.backup !== null);
-  // 読めなかった種類は合計に入れない（その行は —）
   const loaded = backed.every((entry) => entry.backups !== null);
-  // 使用量はサイト全体の値なので、全体でだけ出す
   const usage = all ? siteUsage : null;
   const onIndexedDbClick = (): void => onSelect(INDEXED_DB);
   const onComfyBackupClick = (): void => onSelect(COMFY_BACKUP);
@@ -71,7 +58,6 @@ export function Overview({
           </p>
         )}
         {usage === null || usage.persisted === null ? null : (
-          // 使用量の補足なので 1 段字下げする
           <p className="text-muted-foreground pl-4">
             {usage.persisted ? t('llm.storage.persisted') : t('llm.storage.notPersisted')}
           </p>
@@ -108,7 +94,6 @@ export function Overview({
             {membersOf(TOP_IDS, entries).map((entry) => (
               <OverviewRow key={entry.id} entry={entry} indent={false} onSelect={onSelect} />
             ))}
-            {/* Comfy バックアップはブラウザの物ではないので、件数と大きさはバックアップの列にだけ出す */}
             <tr className="border-t">
               <td className="py-1 pr-2">
                 <button type="button" className="hover:underline" onClick={onComfyBackupClick}>
@@ -151,7 +136,6 @@ export function Overview({
   );
 }
 
-/** 見出し・IndexedDB の合計の行。名前を押すとそこへ移る */
 function SumRow({
   label,
   items,
@@ -193,7 +177,6 @@ function OverviewRow({
       </button>
     </td>
   );
-  // ユーザーフォルダの物はブラウザの物ではないので、Comfy バックアップと同じく右端の列にだけ出す
   if (!isBrowserEntry(entry)) {
     return (
       <tr className="border-t">

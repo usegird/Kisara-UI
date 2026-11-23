@@ -13,11 +13,6 @@ import { useSettingsStore } from '@/store/use-settings-store';
 
 import { LEAK_ALLOWANCE, LEAK_ROUNDS, leakWatch } from '../helpers/leak';
 
-// ─────────────────────────────
-// アバターの画像の管理。表の画像を並べ、決定で id を返し、消すときは
-// 確かめずに表から消す（プリセットのリンクは残す）
-// ─────────────────────────────
-
 const avatar = (id: string, name: string): Avatar => ({
   id,
   name,
@@ -68,7 +63,6 @@ describe('なし', () => {
     const cards = await screen.findAllByRole('button', { pressed: false });
     const none = screen.getByTitle('なし');
     expect(cards.indexOf(none)).toBeLessThan(cards.indexOf(screen.getByTitle('Alice')));
-    // 今の値の印（読み上げ用の文）が「なし」に付く
     expect(none.querySelector('.sr-only')).not.toBeNull();
     fireEvent.doubleClick(none);
     expect(onPlace).toHaveBeenCalledWith(null);

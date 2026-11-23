@@ -4,11 +4,6 @@ import { HISTORY_LIMIT, queueChanged, queueIds, useQueueStore } from '@/store/us
 
 import { queueEntry } from '../helpers/queue';
 
-// ─────────────────────────────
-// 見張りの判定。**並びが変わったときだけ**履歴ごと取り直す。
-// 履歴は数百 KB になりうるので、変わっていないなら取りに行かない。
-// ─────────────────────────────
-
 const snapshot = (running: string[], pending: string[]) => ({
   running: running.map((promptId) => queueEntry(promptId, null)),
   pending: pending.map((promptId) => queueEntry(promptId, null)),
@@ -30,10 +25,6 @@ describe('キューの見張り', () => {
   });
 });
 
-// ─────────────────────────────
-// 履歴の取り方。最初の 1 回は全件、以後は新しい方から決まった件数。
-// ─────────────────────────────
-
 afterEach(() => {
   vi.unstubAllGlobals();
   useQueueStore.getState().clear();
@@ -52,7 +43,6 @@ describe('履歴の件数', () => {
     );
     const history = (): string[] => urls.filter((url) => url.includes('/history'));
 
-    // 全件は古い方から分けて取る（offset 付き）。新しい方からの決まった件数には offset が付かない
     await useQueueStore.getState().refresh('http://127.0.0.1:8188');
     expect(history().at(-1)).toContain('offset=0');
 
@@ -61,7 +51,6 @@ describe('履歴の件数', () => {
       `http://127.0.0.1:8188/history?max_items=${String(HISTORY_LIMIT)}`,
     );
 
-    // 開いた直後に取り直しが重なっても、全件を取るのは 1 回だけ
     useQueueStore.getState().clear();
     urls.length = 0;
     await Promise.all([
@@ -70,16 +59,15 @@ describe('履歴の件数', () => {
     ]);
     expect(history().filter((url) => url.includes('offset='))).toHaveLength(1);
 
-    // 控えを消したら、また全件
     useQueueStore.getState().clear();
     await useQueueStore.getState().refresh('http://127.0.0.1:8188');
     expect(history().at(-1)).toContain('offset=0');
 
-    // 通知を張り直したとき（全件の指定）も全件
     await useQueueStore.getState().refresh('http://127.0.0.1:8188', true);
     expect(history().at(-1)).toContain('offset=0');
   });
 });
+
 describe('取り直しを 1 本にまとめる', () => {
   it('取得中に来た依頼は重ねず、終わってから 1 回だけ取り直す', async () => {
     let active = 0;
@@ -103,7 +91,6 @@ describe('取り直しを 1 本にまとめる', () => {
     const later = [1, 2, 3].map(() => useQueueStore.getState().refresh(base));
     await Promise.all([first, ...later]);
 
-    // キューと履歴の 2 本ずつ（重ならない）。最初の 1 回と、まとめた 1 回
     expect(most).toBe(2);
     expect(queues).toBe(2);
     expect(useQueueStore.getState().requestedAt).not.toBeNull();

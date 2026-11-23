@@ -7,12 +7,6 @@ import { useAnchorRegistry, type AnchorRegistry } from '@/hooks/ui/use-anchor-re
 
 import { stubMissingDom } from '../helpers/dom';
 
-// ─────────────────────────────
-// 位置の台帳の測り直し。原点の外の送りでは測らないが、
-// 測っている要素そのもの（狭い画面の送りの枠）が送られたときは測る
-// ─────────────────────────────
-
-/** 原点（列を並べた段）を中身ごと上へずらした量。送りの枠は動かない */
 let shift = 0;
 
 beforeAll(() => {

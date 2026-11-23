@@ -11,11 +11,6 @@ import { installSystemPromptTable, useSystemPromptsStore } from '@/store/use-sys
 
 import { connectComfy } from '../helpers/connection';
 
-// ─────────────────────────────
-// ストレージの管理のバックアップ取得。控えの無い 1 件に「→ バックアップ取得」を出し、
-// 押すとその場で控えを書く。テストの環境に IndexedDB が無いので、ブラウザの一覧だけを作り物にする
-// ─────────────────────────────
-
 vi.mock('@/store/persist/storage-usage', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@/store/persist/storage-usage')>();
   const { useSystemPromptsStore: store } = await import('@/store/use-system-prompts-store');
@@ -73,7 +68,7 @@ afterEach(() => {
   installComfyPort(port);
   installSystemPromptTable(null);
   useConnectionStore.setState({ status: 'disconnected' });
-  useStorageDialogStore.setState({ isOpen: false, start: 'overview', staleNotice: false });
+  useStorageDialogStore.setState({ isOpen: false, start: 'overview', staleUrl: null });
 });
 
 async function openTemplates(): Promise<HTMLElement> {

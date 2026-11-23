@@ -7,10 +7,6 @@ import type { Chat } from '@/chat/types';
 
 import { chat, chatMessage, loreEntry } from '../helpers/llm';
 
-// ─────────────────────────────
-// 会話のファイル。ChatGPT の形に `kisara` を足したもの。
-// ─────────────────────────────
-
 function roundTrip(original: Chat): Chat | undefined {
   const text = serializeConversations([{ id: 'c1', chat: original }]);
   return parseConversations(JSON.parse(text)).chats[0];
@@ -64,6 +60,7 @@ describe('書き出しと読み戻し', () => {
     ]);
     expect(roundTrip(failed)?.messages[1]?.candidates[0]?.end.kind).toBe('failed');
   });
+
   it('プリセットの写しの欄も戻る', () => {
     const character = { ...EMPTY_CHARACTER, name: 'ミナ', description: 'd' };
     const original = chat([chatMessage('u1', 'user', ['hi'])], {
@@ -120,7 +117,6 @@ describe('ChatGPT の書き出し', () => {
     const parsed = parseConversations(exported);
     const [only] = parsed.chats;
     expect(only?.name).toBe('From ChatGPT');
-    // `system` の発言は読まない（システムプロンプトは会話に持たない）
     expect(only && 'systemPrompt' in only).toBe(false);
     expect(only?.createdAt).toBe(1_700_000_000_500);
     expect(only?.messages.map((message) => message.role)).toEqual([
@@ -145,6 +141,7 @@ describe('ChatGPT の書き出し', () => {
     expect(parsed.skipped).toBe(2);
   });
 });
+
 describe('添えた画像', () => {
   it('発言の metadata.kisara.images に写し、読み戻すと戻る。content は text のまま', () => {
     const png = 'data:image/png;base64,iVBORw0KGgo=';
@@ -160,6 +157,7 @@ describe('添えた画像', () => {
     expect((node?.metadata as Record<string, unknown>).kisara).toMatchObject({ images: [png] });
   });
 });
+
 describe('写した個別追加辞書とアバター', () => {
   it('会話の辞書の並び（切った印を含む）とアバターの id を書いて読み戻す。空の並びも戻り、持たなければ持たない', () => {
     const lorebooks = [

@@ -6,10 +6,6 @@ import { NO_FILTERS } from '@/graph/search';
 import { definition, matchesFilters, socket } from '../helpers/definitions';
 import { nodeRow, nodeView } from '../helpers/views';
 
-// ─────────────────────────────
-// ノード参照。既にあるノードへ繋ぐときの候補。
-// ─────────────────────────────
-
 const views = [
   nodeView({
     id: 1,
@@ -63,7 +59,6 @@ describe('ノード参照の候補', () => {
       '3:image',
       '3:scale',
     ]);
-    // パラメータは入力に変えてから繋ぐ。線が来ている入力は張り替えになる
     expect(slots.find((slot) => slot.name === 'scale')?.widget).toEqual({
       name: 'scale',
       type: 'FLOAT',
@@ -79,7 +74,6 @@ describe('ノード参照の候補', () => {
       query: '拡大',
     });
 
-    // method は線を受けられない行なので出さない
     expect(slots.map((slot) => slot.nodeLabel)).toEqual(['拡大', '拡大']);
     expect(referenceNodes(slots)).toEqual([
       { nodeId: 3, nodeIndex: '3', nodeLabel: '拡大', count: 2 },

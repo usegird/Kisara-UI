@@ -11,22 +11,13 @@ import { entryKeyOf } from '@/lib/text-entry';
 import { editCharacter } from '@/store/chat/preset-import';
 import { useChatStore } from '@/store/use-chat-store';
 
-// ─────────────────────────────
-// カードの欄の「変数・置換」。見出しの行は行と同じ列に乗せるため、カードのほかの欄の見出しの部品は使わない。
-// ─────────────────────────────
-
 const ICON_BUTTON = `text-muted-foreground hover:text-foreground hover:bg-muted inline-flex size-6
   shrink-0 items-center justify-center rounded`;
 
-/**
- * 列は欄全体で 1 つのグリッドに持ち、行はそれを subgrid で使う。行ごとに別のグリッドにすると、
- * 「戻す」の列（auto）の幅が見出しの行では文字、ほかの行ではチェックで決まり、左端がずれる
- */
 const COLUMNS = 'grid grid-cols-[minmax(0,2fr)_minmax(0,3fr)_auto_1.5rem] gap-1';
 
 const ROW = 'col-span-full grid grid-cols-subgrid items-center';
 
-/** `{{user}}`・`{{char}}` の行と、自分で足した変数・戻すの行。直すと会話の写しに入る */
 export function VariableRows({
   chatId,
   fields,
@@ -39,7 +30,6 @@ export function VariableRows({
   const write = (next: readonly ChatVariable[]): void => editCharacter(chatId, { variables: next });
   const change = (id: string, patch: Partial<ChatVariable>): void =>
     write(variables.map((item) => (item.id === id ? { ...item, ...patch } : item)));
-  /** `{{user}}` は利用者の情報の名前。何も持たなくなれば利用者の情報を外す */
   const setPersona = (next: Persona): void => {
     useChatStore.getState().update(chatId, { persona: isEmptyPersona(next) ? null : next });
   };
@@ -69,7 +59,6 @@ export function VariableRows({
       {variables.map((item) => (
         <div key={item.id} className={ROW}>
           {item.restore === true ? (
-            // 戻すの行は左に元の文字（値）、右に送る文字（左の文字）を出す。保存の形は変えない
             <>
               <input
                 className={FIELD_XS}
@@ -136,11 +125,7 @@ export function VariableRows({
   );
 }
 
-/**
- * 戻すを入れ替えた行。保存の形は、置き換えの向きをそろえるため戻すの有無で変えない
- */
 function restoredRow(item: ChatVariable, restore: boolean): ChatVariable {
-  // 戻すの行は左に値・右に左の文字を出すので、左右の欄の文字が入れ替わらないように持ち替える
   const left = normalizeVariableName(restore ? item.name : item.value, restore);
   const right = restore ? item.value : item.name;
   return restore
@@ -148,10 +133,6 @@ function restoredRow(item: ChatVariable, restore: boolean): ChatVariable {
     : { id: item.id, name: left, value: right };
 }
 
-/**
- * `{{user}}`・`{{char}}` の行。左は名前の印、右は名前（空なら薄く既定の名前）。戻すは淡くして押せなくし、
- * 指すと戻すの行を足すよう出す
- */
 function NameRow({
   macro,
   value,
@@ -178,10 +159,6 @@ function NameRow({
   );
 }
 
-/**
- * 戻すのチェック。見出しの「戻す」の列に左を揃えて置き、指すと何をするかを出す。
- * `onChange` が無ければ淡くして押せなくする（`{{user}}`・`{{char}}`）
- */
 function RestoreCheck({
   name,
   hint,
@@ -189,7 +166,6 @@ function RestoreCheck({
   onChange,
 }: {
   readonly name: string;
-  /** 指したときの説明。無ければ自分で足した行の説明 */
   readonly hint?: string;
   readonly checked: boolean;
   readonly onChange?: (checked: boolean) => void;
@@ -207,10 +183,6 @@ function RestoreCheck({
   );
 }
 
-/**
- * 左の文字（保存の形での名前）。打っている間はそのまま持ち、確定したときに `{{}}` を付けて書く。
- * 戻すの行は付けず（右の欄に出す送る文字）、空の欄には `{{}}` の無い例を薄く出す
- */
 function VariableName({
   value,
   restore,
@@ -222,7 +194,6 @@ function VariableName({
   readonly label: string;
   readonly onCommit: (name: string) => void;
 }): React.ReactElement {
-  // 打ちかけの名前（焦点がある間だけ）
   const [draft, setDraft] = useState<string | null>(null);
   const commit = (): void => {
     if (draft === null) return;

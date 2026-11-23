@@ -25,11 +25,6 @@ import {
   type TabSnapshot,
 } from '@/store/use-tabs-store';
 
-// ─────────────────────────────
-// 開いていたものの読み戻し。読めないものは異常とせず、既定の 1 枚から始める。閉じたタブの中身も拾う。
-// ─────────────────────────────
-
-/** 小さい保存領域の JSON。無い・読めなければ null */
 function readText(storage: StateStorage, key: string): unknown {
   try {
     const text = storage.getItem(key);
@@ -39,13 +34,11 @@ function readText(storage: StateStorage, key: string): unknown {
   }
 }
 
-/** 1 件を書いたブラウザのタブと時刻 */
 interface Written {
   readonly writer: string | null;
   readonly savedAt: number | null;
 }
 
-/** 並びに載ったタブの中身と、それを書いたブラウザのタブを読む。読めないタブは空から始める */
 async function loadSnapshots(
   store: SessionStore,
   tabs: readonly Tab[],
@@ -68,11 +61,6 @@ async function loadSnapshots(
   return { snapshots, written };
 }
 
-/**
- * 読み込み直し・開き直しで戻したタブの一時保存を、ほかのブラウザのタブが書いていたら注意に出す
- * （閉じている間に引き継がれて書き換えられた）。複製したブラウザのタブは
- * 写しから始めるのが当然なので出さない
- */
 async function noticeOtherWriters(
   tabs: readonly Tab[],
   snapshots: Readonly<Record<string, TabSnapshot>>,
@@ -94,7 +82,6 @@ async function noticeOtherWriters(
   if (notices.length > 0) useRunReportStore.getState().addSaveNotices(notices);
 }
 
-/** セッションの中身の控えを新しい id へ移す。編集の印は前の id のものを消す */
 async function moveSession(store: SessionStore, from: string): Promise<string> {
   const fresh = newShortId();
   const raw = await getOrNull(store, tabKey(from));
@@ -106,11 +93,6 @@ async function moveSession(store: SessionStore, from: string): Promise<string> {
   return fresh;
 }
 
-/**
- * 新しく開いたブラウザのタブでは、ほかのブラウザのタブで開いている会話のタブを戻さない
- * （複製ではないので写さない。写すと開くたびに同じ会話が増える）。
- * 選んでいたタブを外したら先頭を選ぶ
- */
 async function withoutChatsOpenElsewhere(layout: {
   readonly tabs: readonly Tab[];
   readonly activeId: string;
@@ -123,12 +105,6 @@ async function withoutChatsOpenElsewhere(layout: {
   return { tabs, activeId: kept ? layout.activeId : (tabs[0]?.id ?? '') };
 }
 
-/**
- * ブラウザを起動し直した（このブラウザのタブの並びが無い）ときは、ワークフローのタブに
- * 新しいセッションを振る。前の起動の記録に足し続けない。
- * ほかのブラウザのタブが開いているセッションは触らない（戻すときに写しになる）。
- * 鍵の一覧が取れない・移せないときはそのまま戻す
- */
 async function renewSessions(store: SessionStore, tabs: readonly Tab[]): Promise<readonly Tab[]> {
   try {
     const held = await heldSessionLocks();
@@ -148,20 +124,12 @@ async function renewSessions(store: SessionStore, tabs: readonly Tab[]): Promise
   }
 }
 
-/** どのブラウザのタブにも開かれていないタブの中身 */
 interface Orphan {
   readonly session: string;
   readonly snapshot: TabSnapshot;
   readonly savedAt: number;
 }
 
-/**
- * どのブラウザのタブにも開かれておらず、戻した並びにも無いタブの中身を、追加で開く
- * （並びとタブの中身は別に置く。ブラウザのタブごと閉じたタブを失わない）。
- * 書いた時刻の古い順に並びの最後へ足す。読めない中身と、中身の無い編集の印は消す。
- * 開かれているかは鍵（Web Locks）で見る。鍵の一覧が取れなければ何もしない。
- * `renew` ならブラウザを起動し直したので、開くタブに新しいセッションを振る（`renewSessions`）
- */
 async function adoptOrphans(store: SessionStore, renew: boolean): Promise<void> {
   if (!hasWebLocks()) return;
   await whenSessionsClaimed();
@@ -182,7 +150,6 @@ async function adoptOrphans(store: SessionStore, renew: boolean): Promise<void> 
   await removeEmptyEditMarks(store, keys, keep);
 }
 
-/** 持ち主の無い中身を読む。読めない中身と、接続前のタブの中身は開かずに消して null */
 async function readOrphan(
   store: SessionStore,
   key: string,
@@ -199,7 +166,6 @@ async function readOrphan(
   return { session: renew ? await moveSession(store, session) : session, snapshot, savedAt };
 }
 
-/** 中身の無い編集の印（閉じたタブの残り）を消す */
 async function removeEmptyEditMarks(
   store: SessionStore,
   keys: readonly string[],
@@ -213,20 +179,13 @@ async function removeEmptyEditMarks(
   }
 }
 
-/** 追加で開く。開けなくても起動は続ける（次に開いたときにもう一度開く） */
 async function adoptQuietly(store: SessionStore, renew: boolean): Promise<void> {
   try {
     await adoptOrphans(store, renew);
   } catch {
-    // 置き場が読めない・鍵が取れない環境でも画面は続ける
   }
 }
 
-/**
- * 端末に残した控えを読み、タブごと戻す。無ければ何もしない。
- * 並びは**このブラウザのタブのもの**（読み込み直し・複製）→ 最後に保存したもの（新しく開いた
- * ブラウザのタブ）の順に探す
- */
 export async function restoreSession(
   store: SessionStore = defaultSessionStore(),
   tabStorage: StateStorage = safeStorage('session'),
@@ -234,21 +193,17 @@ export async function restoreSession(
   const own = parseLayout(readText(tabStorage, TAB_LAYOUT_KEY));
   const layout = own ?? parseLayout(await getOrNull(store, LAYOUT_KEY));
 
-  // このブラウザのタブの並びが無い＝ブラウザを起動し直した（か新しく開いた）。
-  // 開いていたタブには新しいセッションを振る（読み込み直しでは今のセッションを続ける）
   const renew = own === null;
   if (layout !== null) {
     const kept = renew ? await withoutChatsOpenElsewhere(layout) : layout;
     const tabs = renew ? await renewSessions(store, kept.tabs) : kept.tabs;
     const { snapshots, written } = await loadSnapshots(store, tabs);
     useTabsStore.getState().restore(tabs, kept.activeId, snapshots);
-    // このブラウザのタブの並び（読み込み直し・開き直し）のときだけ、書き換えを見る
     if (!renew) void noticeOtherWriters(tabs, snapshots, written);
     await adoptQuietly(store, renew);
     return true;
   }
 
-  // 並びが無くても、中身だけ残っていれば開く
   await adoptQuietly(store, renew);
   return useTabsStore.getState().tabs.length > 1;
 }

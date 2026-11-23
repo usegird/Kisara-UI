@@ -13,18 +13,12 @@ import { definition, definitionMap, socket, widget } from '../helpers/definition
 import { LEAK_ALLOWANCE, LEAK_ROUNDS, leakWatch } from '../helpers/leak';
 import { node } from '../helpers/workflow';
 
-// ─────────────────────────────
-// カード表示データの使い回し。並べ替えで番号だけ変わったカードでも、
-// 中身が同じ行は前回の行を返す（行とアプリ入力の項目を描き直さないため）。
-// ─────────────────────────────
-
 const STEP = definition('Step', [socket('in', 'IMAGE'), widget('value', 'INT')], {
   outputs: [{ name: 'out', type: 'IMAGE' }],
 });
 
 beforeEach(() => {
   useDefinitionsStore.setState({ definitions: definitionMap(STEP) });
-  // 1 → 2 → 3 の鎖。線で繋がったカードは、並べ替えると番号が変わる
   const ids = [1, 2, 3];
   useGraphStore.getState().loadWorkflow({
     nodes: ids.map((id) =>
@@ -51,9 +45,7 @@ describe('カード表示データの使い回し', () => {
     rerender();
 
     const after = result.current;
-    // 並べ替えで作り直されたカードがあること（無ければこのテストは何も確かめていない）
     expect(after.some((view) => view !== before.get(view.id))).toBe(true);
-    // 値の行は並べ替えで中身が変わらない（線の行は上流の番号を載せるので変わりうる）
     const valueRow = (view: (typeof after)[number] | undefined): unknown =>
       view?.rows.find((row) => row.name === 'value');
     for (const view of after) {
@@ -61,7 +53,6 @@ describe('カード表示データの使い回し', () => {
     }
   });
 
-  // 切り替えごとに前回を分けて持つと、切り替えるたびに全カードが描き直しになる
   it('表示の切り替えをまたいでも、中身が同じカードは前回のものを返す', () => {
     const { result, rerender } = renderHook(() => useNodeViews());
     const before = new Map(result.current.map((view) => [view.id, view]));
@@ -82,7 +73,6 @@ describe('カード表示データの使い回し', () => {
     }
   });
 
-  // 隠す候補は切り替えのたびに作り直される。カードが同じなら並びも同じものを返す
   it('カードが全部同じなら、並び（配列）も前回のものを返す', () => {
     const { result, rerender } = renderHook(() => useNodeViews());
     const before = result.current;
@@ -97,9 +87,8 @@ describe('カード表示データの使い回し', () => {
     expect(result.current).toBe(before);
   });
 });
+
 describe('タブを閉じたとき', () => {
-  // 前回のカードは id で覚えるので、同じ id のカードに差し替わるまで閉じたタブのカードが残る。
-  // 閉じたら残ったタブのカードだけに絞る。回ごとに id を変え、残れば数に出るようにする
   it('閉じたタブのカードを覚え続けない', async () => {
     const leak = leakWatch();
     for (let round = 0; round < LEAK_ROUNDS; round++) {
@@ -120,7 +109,6 @@ describe('タブを閉じたとき', () => {
       const { result, unmount } = renderHook(() => useNodeViews());
       expect(result.current).toHaveLength(3);
       for (const view of result.current) leak.watch(view);
-      // 画面と同じ順（閉じると次のタブで描き直し、それから外れる）
       act(() => {
         useTabsStore.getState().closeTab(tab);
       });

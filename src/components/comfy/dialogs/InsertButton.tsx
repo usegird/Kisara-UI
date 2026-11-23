@@ -3,38 +3,33 @@ import { t } from '@/i18n';
 import type { TextField } from '@/lib/insert-at-caret';
 import { placeEntry } from '@/lib/insert-motion';
 
-// ─────────────────────────────
-// 取り込みの決定（スタイルの編集・ワイルドカード）。差し込み先の決まりは `insert-target.ts`。
-// ─────────────────────────────
-
-/** 取り込みの決定のボタンの props */
 export interface InsertButtonProps {
-  /** 差し込む文字 */
   readonly text: string;
-  /** 読み上げの名前 */
   readonly label: string;
-  /** 差し込み先。無ければ押せない */
   readonly field: TextField | null;
-  /** ボタンの文字。既定は「決定」（スタイルは肯定・否定） */
   readonly caption?: string | undefined;
+  readonly onPlaced: () => void;
 }
 
-/** 差し込み先のキャレット位置へ入れる。押してもフォーカスを奪わない */
 export function InsertButton({
   text,
   label,
   field,
   caption,
+  onPlaced,
 }: InsertButtonProps): React.ReactElement {
+  const onClick = (event: React.MouseEvent<HTMLButtonElement>): void => {
+    if (field === null) return;
+    const origin = event.currentTarget.getBoundingClientRect();
+    if (placeEntry(field, text, origin)) onPlaced();
+  };
   return (
     <DecideButton
       label={label}
       caption={caption}
       title={t(field === null ? 'comfy.insert.noFieldTitle' : 'comfy.insert.title')}
       disabled={field === null || text.length === 0}
-      onClick={(event) => {
-        if (field !== null) placeEntry(field, text, event.currentTarget.getBoundingClientRect());
-      }}
+      onClick={onClick}
     />
   );
 }

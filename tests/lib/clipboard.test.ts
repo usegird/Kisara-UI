@@ -3,10 +3,6 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { copyText } from '@/lib/clipboard';
 
-// ─────────────────────────────
-// 写し取りは失敗しうる（許可されていない・安全な文脈でない環境）。成否を返すこと。
-// ─────────────────────────────
-
 function setClipboard(value: unknown): void {
   Object.defineProperty(globalThis.navigator, 'clipboard', { value, configurable: true });
 }

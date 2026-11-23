@@ -1,12 +1,11 @@
 import { cva } from 'class-variance-authority';
 
+import { NodePackFinder } from '@/components/comfy/queue/NodePackFinder';
+import { CopyButton } from '@/components/ui/copy-button';
+import type { WorkflowModel } from '@/graph/missing-models';
 import { useRunReport } from '@/hooks/run/use-run-report';
 import { t } from '@/i18n';
 import type { ReportLine, ReportTone } from '@/queue/run-report';
-
-// ─────────────────────────────
-// 右の列のエラーのタブ。最後の実行の失敗と注意をノードごとに並べる（まとめる計算は `run-report.ts`）。
-// ─────────────────────────────
 
 const lineText = cva('whitespace-pre-wrap break-words', {
   variants: {
@@ -22,9 +21,9 @@ function Lines({ lines }: { readonly lines: readonly ReportLine[] }): React.Reac
   return (
     <ul className="flex flex-col gap-1">
       {lines.map((line, at) => (
-        // 同じ文言が並ぶことがあるので位置を添える（並べ替えはしない一覧）
         <li key={`${String(at)}:${line.text}`} className={lineText({ tone: line.tone })}>
           {line.text}
+          {line.model === undefined ? null : <ModelSource model={line.model} />}
           {line.steps === undefined ? null : (
             <ol className="text-muted-foreground mt-0.5 list-decimal pl-4">
               {line.steps.map((step) => (
@@ -38,7 +37,36 @@ function Lines({ lines }: { readonly lines: readonly ReportLine[] }): React.Reac
   );
 }
 
-/** 最後の実行の失敗と注意の一覧。無ければその旨だけを出す */
+function ModelSource({ model }: { readonly model: WorkflowModel }): React.ReactElement {
+  const place = `models/${model.directory}/`;
+  return (
+    <div className="text-muted-foreground mt-0.5 flex flex-col gap-0.5">
+      <span className="flex items-center gap-1">
+        {t('run.report.model.place', { directory: model.directory })}
+        <CopyButton text={place} label={t('run.report.model.copyPlace')} iconOnly frameless />
+      </span>
+      {model.url === null ? null : (
+        <span className="flex min-w-0 items-center gap-1">
+          {model.linkable ? (
+            <a
+              href={model.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-foreground underline"
+              title={model.url}
+            >
+              {t('run.report.model.openSource')}
+            </a>
+          ) : (
+            <span className="break-all">{t('run.report.model.source', { url: model.url })}</span>
+          )}
+          <CopyButton text={model.url} label={t('run.report.model.copyUrl')} iconOnly frameless />
+        </span>
+      )}
+    </div>
+  );
+}
+
 export function RunReportPanel(): React.ReactElement {
   const report = useRunReport();
 
@@ -48,6 +76,7 @@ export function RunReportPanel(): React.ReactElement {
 
   return (
     <div className="flex flex-col gap-3 px-1 text-2xs">
+      <NodePackFinder />
       {report.general.length === 0 ? null : <Lines lines={report.general} />}
 
       {report.nodes.map((node) => (

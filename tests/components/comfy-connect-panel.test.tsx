@@ -19,10 +19,6 @@ import { useTermsStore } from '@/store/use-terms-store';
 
 import { acceptTerms } from '../helpers/connection';
 
-// ─────────────────────────────
-// 「ComfyUI に接続する」のポップアップの中身。失敗の案内は帯ではなく、この中に出す
-// ─────────────────────────────
-
 const BASE_URL = 'http://127.0.0.1:8188';
 function show(): void {
   render(<ComfyConnectPanel />);
@@ -31,7 +27,6 @@ function show(): void {
 beforeEach(() => {
   useSettingsStore.setState({ baseUrl: BASE_URL });
   useConnectionStore.getState().reset();
-  // 起動時の自動接続で通信させない
   useConnectionStore.setState({ probe: () => Promise.resolve(false) });
 });
 
@@ -47,7 +42,6 @@ describe('接続の案内', () => {
     });
     show();
 
-    // 入力欄を後から書き換えても、文は実際に失敗した要求の宛先のまま
     useSettingsStore.setState({ baseUrl: 'http://example.test:1' });
     const alert = screen.getByRole('alert');
     expect(alert.textContent).toContain(`${BASE_URL}/features が応答しません`);
@@ -80,7 +74,6 @@ describe('接続のボタン', () => {
     expect(screen.getByRole('button', { name: '接続' })).toBeTruthy();
     cleanup();
 
-    // 起動時の自動接続で状態を書き換えさせない（接続先が空なら試さない）
     useSettingsStore.setState({ baseUrl: '' });
     useConnectionStore.setState({ status: 'connected' });
     show();
@@ -125,7 +118,6 @@ describe('自動の接続', () => {
     return () => probes;
   }
 
-  // 自動の接続は AppShell の 1 か所だけ。ここでも持つと起動時に 2 回試した
   it('案内を開いても、接続先が入っていて同意済みでも自分では試さない', async () => {
     acceptTerms();
     const probes = countProbes();
@@ -148,7 +140,6 @@ describe('自動の接続', () => {
 });
 
 describe('接続先の欄', () => {
-  // 打つたびに接続先を変えると、つながっている通知が不正な URL を組み立てて画面ごと止まった
   it('打ちかけの値は接続先にせず、接続を押したときにその値でつなぐ', async () => {
     acceptTerms();
     const probed: string[] = [];
@@ -184,9 +175,9 @@ describe('接続先の欄', () => {
     expect(input.value).toBe('http://b:8188');
   });
 });
+
 describe('外部の ComfyUI に接続する注意', () => {
   const REMOTE = 'https://abc-8188.proxy.runpod.net';
-  // 押下の見張り（同じ鍵は 300ms の間だけ捨てる）に、前の試験の押下を引きずらせない
   let now = 10_000_000;
 
   beforeEach(() => {

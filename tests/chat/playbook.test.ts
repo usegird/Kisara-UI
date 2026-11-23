@@ -16,11 +16,6 @@ import zh from '@/i18n/locales/zh-Hans.json';
 
 import { chat, chatMessage, chatPlaybook, outlineBook, playbookRef } from '../helpers/llm';
 
-// ─────────────────────────────
-// プレイブック。フェーズの文と指示の発言の置き場、読み戻し、標準のプレイブックの
-// 文言。アウトラインの段・候補・フェーズの文の中身は playbook-outline.test.ts
-// ─────────────────────────────
-
 const send: PlaybookSendAction = {
   kind: 'send',
   id: 'w',
@@ -39,7 +34,6 @@ describe('送る中身の組み立て', () => {
         { text, userId: 'u2', assistantId: 'a2', images: [], instruction },
       ),
       chat().prompt,
-      // 定義は出どころが引いて渡す（会話は参照だけ）
       { ...NO_SOURCES, userName: 'Kei', playbook: chatPlaybook() },
     );
 
@@ -50,6 +44,7 @@ describe('送る中身の組み立て', () => {
     expect(frame?.role).toBe('system');
     expect(frame?.content).toContain('<direction> and </direction>');
   });
+
   it('指示の発言は囲んだ user の発言で送る', () => {
     const text = directionText([send.instruction, 'More rain.']);
     const parts = sent(text, directionOf(send));
@@ -112,6 +107,7 @@ describe('プレイブックの定義の読み戻し（自分のプレイブッ�
     raw.phases[1]!.kind = 'close';
     expect(parsePlaybook(raw)?.phases.map((phase) => phase.outline)).toEqual(['readonly', 'multi']);
   });
+
   it('入力欄に入れる印は送るの操作に戻し、使い道とは併せない', () => {
     const raw = definition();
     (raw.phases[1]!.actions as unknown[]).push({
@@ -144,7 +140,6 @@ describe('プレイブックの定義の読み戻し（自分のプレイブッ�
 
 describe('組み込みのプレイブック', () => {
   it('文言の道筋がすべて英語の表にある', () => {
-    // 文言を引くたびに道筋を控える
     const paths: string[] = [];
     for (const shape of BUILTIN_PLAYBOOKS) {
       resolvePlaybook(shape, (path) => {
@@ -156,7 +151,6 @@ describe('組み込みのプレイブック', () => {
     expect(missing).toEqual([]);
   });
 
-  // 役割の文はフェーズの文として送るたびに注記を外すので、外れる囲みを持つと指示が欠ける
   it('役割の文は送るときに欠けず、物語は本文の外の話を <comment> で囲ませる', () => {
     for (const locale of [en, ja, zh]) {
       const text = (path: string): string => {
@@ -175,7 +169,6 @@ describe('組み込みのプレイブック', () => {
     for (const locale of [en, ja, zh]) {
       const entry = lookupEntry(locale, 'llm.playbook.builtin.story.actions.makePlan.instruction');
       const instruction = typeof entry === 'string' ? entry : '';
-      // 前置き・前提・人物の 3 か所で主人公を {{user}} と書く
       expect(instruction.split('{{user}}').length - 1).toBeGreaterThanOrEqual(3);
     }
   });
@@ -220,7 +213,6 @@ describe('組み込みのプレイブック', () => {
       kind: 'consult',
       greeting: 'llm.playbook.builtin.story.actions.makePlan.greeting',
     });
-    // 型は送るの操作として持つ
     expect(playbook.phases[0]?.actions.find((a) => a.id === 'close')).toMatchObject({
       kind: 'send',
       name: 'llm.playbook.builtin.story.actions.close.name',

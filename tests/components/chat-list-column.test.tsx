@@ -16,10 +16,6 @@ import { useTabsStore } from '@/store/use-tabs-store';
 
 import { chat, chatMessage } from '../helpers/llm';
 
-// ─────────────────────────────
-// 会話の左の列の行のメニュー。並びと、クリアの確認
-// ─────────────────────────────
-
 const BROWSER = { kind: 'browser' } as const;
 let stop: () => void;
 

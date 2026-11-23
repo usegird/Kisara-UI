@@ -3,11 +3,6 @@ import { describe, expect, it, vi } from 'vitest';
 import { parseStyleTable, type SavedStyle } from '@/graph/styles';
 import { createStylesStore, type StylesDeps } from '@/store/use-styles-store';
 
-// ─────────────────────────────
-// スタイルの一覧の保持。
-// **読み終えた接続先にしか書かない**ことと、書くのは `kisara/` の 1 件ずつであることを見る。
-// ─────────────────────────────
-
 const base = 'http://127.0.0.1:8188';
 const style = (name: string, prompt = 'p') => ({ name, prompt, negative: '', other: {} });
 

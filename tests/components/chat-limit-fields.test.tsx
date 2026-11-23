@@ -5,10 +5,6 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { ChatLimitFields } from '@/components/llm/side-panel/ChatLimitFields';
 import { useSettingsStore } from '@/store/use-settings-store';
 
-// ─────────────────────────────
-// 会話の大きさの上限と、一度に描く発言の数の欄
-// ─────────────────────────────
-
 afterEach(() => {
   cleanup();
   useSettingsStore.setState({ chatMaxMegabytes: 10, chatLogWindow: 100 });

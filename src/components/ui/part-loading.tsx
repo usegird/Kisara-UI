@@ -4,12 +4,6 @@ import { FALLBACK_BUTTON_CLASS } from '@/components/ui/fallback-button';
 import { t } from '@/i18n';
 import { reloadPage } from '@/lib/reload-page';
 
-// ─────────────────────────────
-// 開いたときだけ読む部品（lazy-part）が、読んでいる間と読めなかったときに出すもの。
-// 作る側の関数とは別ファイルに置く（部品以外を一緒に export すると Fast Refresh が状態を保てない）。
-// ─────────────────────────────
-
-/** 読んでいる間の中身。枠は呼び出し側が置く */
 export function PartLoading({ label }: { readonly label: string }): React.ReactElement {
   return (
     <div
@@ -23,7 +17,6 @@ export function PartLoading({ label }: { readonly label: string }): React.ReactE
   );
 }
 
-/** 読めなかったときの差し替え。枠が無くても見えるよう、画面の上部に浮かせる */
 export function PartLoadFault({
   label,
   error,

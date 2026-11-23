@@ -7,10 +7,6 @@ import { toSlashPath } from '@/lib/file-name';
 import { finiteNumber, isRecord, isUnknownArray } from '@/lib/guards';
 import type { UserFile, UserFileKind } from '@/port/comfy-port';
 
-// ─────────────────────────────
-// ストレージの管理で見る・消す、ユーザーフォルダの KisaraUI の物（控えを除く）。
-// ─────────────────────────────
-
 const DIRS: Readonly<Record<UserFileKind, string>> = {
   history: RUN_HISTORY_DIR,
   notes: KISARA_NOTES_DIR,
@@ -19,10 +15,8 @@ const DIRS: Readonly<Record<UserFileKind, string>> = {
 };
 
 const MS_PER_SECOND = 1000;
-/** これ未満の時刻は秒とみなす（ミリ秒なら 2001 年 9 月より前になる） */
 const SECONDS_LIKE_BELOW = 1e12;
 
-/** フォルダの中の経路として受け付ける形（外へ出る `..`・頭の `/` を作らない） */
 function filePath(kind: UserFileKind, path: string): string {
   const parts = path.split('/');
   if (path === '' || parts.some((part) => part === '' || part === '.' || part === '..')) {
@@ -31,17 +25,12 @@ function filePath(kind: UserFileKind, path: string): string {
   return `${DIRS[kind]}/${path}`;
 }
 
-/**
- * 最後に書いた時刻（ミリ秒）。この経路はミリ秒で返すが、同じ項目を秒で返す経路もあり、
- * 版によって秒で返るかは確かめていないので、秒らしい値は 1000 倍する
- */
 function modifiedOf(raw: unknown): number | null {
   const value = finiteNumber(raw);
   if (value === null) return null;
   return value < SECONDS_LIKE_BELOW ? Math.round(value * MS_PER_SECOND) : value;
 }
 
-/** 一覧の 1 件。`full_info` の形（`{path, size, modified}`）と、名前だけの形の両方を読む */
 function listEntry(raw: unknown): UserFile | null {
   const path = isRecord(raw) ? raw.path : raw;
   if (typeof path !== 'string') return null;
@@ -52,7 +41,6 @@ function listEntry(raw: unknown): UserFile | null {
   };
 }
 
-/** フォルダの中のファイル（大きさと最後に書いた時刻）。フォルダが無ければ空 */
 export async function listUserFiles(
   baseUrl: string,
   kind: UserFileKind,
@@ -69,7 +57,6 @@ export async function listUserFiles(
   return raw.map(listEntry).filter((entry) => entry !== null);
 }
 
-/** 1 つのファイルの中身（文字のまま）。無ければ null */
 export async function readUserFile(
   baseUrl: string,
   kind: UserFileKind,
@@ -87,10 +74,6 @@ export async function readUserFile(
   }
 }
 
-/**
- * 1 つのファイルを消す。**接続先のファイルを消す**。無ければ済み。
- * ファイルを消さない決まりの例外で、消すのは一覧に出た 1 つのファイルだけ
- */
 export async function removeUserFile(
   baseUrl: string,
   kind: UserFileKind,

@@ -5,10 +5,6 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { WorkflowIoToasts } from '@/components/comfy/WorkflowIoToasts';
 import { Toaster } from '@/components/ui/toast';
 
-// ─────────────────────────────
-// 保存の結果は帯に積まず、画面上部の知らせ（トースト）に出す
-// ─────────────────────────────
-
 afterEach(() => {
   cleanup();
 });
@@ -57,7 +53,6 @@ describe('読み込みの失敗の知らせ', () => {
         <WorkflowIoToasts saveState={{ kind: 'idle' }} fileError={{ message: '読めない形' }} />
       </>,
     );
-    // 同じ文面は 1 つにまとめ、回数を出す
     expect(await screen.findByText('×2')).toBeDefined();
     expect(screen.getAllByText('ワークフローを読み込めません')).toHaveLength(1);
   });

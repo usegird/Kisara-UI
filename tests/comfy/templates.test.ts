@@ -4,10 +4,6 @@ import type { FetchLike } from '@/comfy/client';
 import { templateFileUrl, templateIndexUrl } from '@/comfy/endpoints';
 import { listTemplates, parseTemplateIndex, templateThumbnailSrc } from '@/comfy/templates';
 
-// ─────────────────────────────
-// 同梱テンプレートの一覧。見出しの配列で、見出しが `templates[]` を持つ。
-// ─────────────────────────────
-
 const BASE = 'http://127.0.0.1:8188';
 
 const INDEX = [

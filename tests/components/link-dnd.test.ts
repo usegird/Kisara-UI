@@ -4,15 +4,13 @@ import {
   inputDropData,
   inputDropId,
   isOutputDrag,
+  linkChipDragData,
+  linkChipDragId,
   linkFromDrag,
   outputDragData,
   outputDragId,
+  outputDragSource,
 } from '@/components/comfy/flow/link-dnd';
-
-// ─────────────────────────────
-// ドラッグ&ドロップ接続の判定。dnd-kit の data は any 相当で降ってくるので、
-// **形を検証してから**リンクにする（外から来た値は unknown で受ける）。
-// ─────────────────────────────
 
 describe('ドラッグ&ドロップでの接続', () => {
   it('出力をパラメータへ落とすとリンクになる', () => {
@@ -51,8 +49,33 @@ describe('ドラッグ&ドロップでの接続', () => {
     expect(linkFromDrag('output', 'input')).toBeNull();
   });
 
+  it('行のチップは結線の出力を落としたのと同じに繋ぎ、掴んだ行へ戻した落としは繋がない', () => {
+    const chip = linkChipDragData({ nodeId: 3, slot: 1, type: 'IMAGE' }, 'a.png', {
+      nodeId: 7,
+      slot: 2,
+      inputName: 'image',
+    });
+
+    expect(linkFromDrag(chip, inputDropData(8, 0))).toMatchObject({
+      originId: 3,
+      originSlot: 1,
+      targetId: 8,
+      targetSlot: 0,
+    });
+    expect(linkFromDrag(chip, inputDropData(7, 0))?.targetSlot).toBe(0);
+    expect(linkFromDrag(chip, inputDropData(7, 2))).toBeNull();
+    expect(isOutputDrag(chip)).toBe(true);
+  });
+
+  it('行のチップの id は結線で引き、どこから掴んだかを見分けられる', () => {
+    expect(linkChipDragId(9)).toBe('link:9');
+    expect(outputDragSource(linkChipDragId(9))).toBe('row');
+    expect(outputDragSource(outputDragId(5, 2, 'card'))).toBe('card');
+    expect(outputDragSource(outputDragId(5, 2, 'panel'))).toBe('panel');
+    expect(outputDragSource(12)).toBeNull();
+  });
+
   it('同じ出力でも、出力チップと変数ボックスで id を分ける', () => {
-    // dnd-kit は id で登録を引くので、重複すると別の要素を掴んだことになる
     expect(outputDragId(5, 2, 'card')).toBe('chip:5:2');
     expect(outputDragId(5, 2, 'panel')).toBe('var:5:2');
     expect(outputDragId(5, 2, 'card')).not.toBe(outputDragId(5, 2, 'panel'));

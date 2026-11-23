@@ -18,19 +18,12 @@ import {
 import type { ChatTable } from '@/store/persist/chat-repo';
 import { useSettingsStore } from '@/store/use-settings-store';
 
-// ─────────────────────────────
-// 全体の追加辞書の一覧。端末の大きい保存領域に 1 冊 1 件で置き、画面の中にも全部を持つ
-// （書けなくても画面の中では使える）。全体で有効にした並びは設定のストアが持つ。
-// ─────────────────────────────
-
 const dictionaryTable = createLibraryTable('dictionary');
 
-/** テストから置き場を差し替える */
 export function installDictionaryTable(next: ChatTable | null): void {
   dictionaryTable.install(next);
 }
 
-/** 足した結果。同じ項目の列の辞書が既にあれば、足さずにそれを返す */
 interface AdoptResult {
   readonly dictionary: Dictionary;
   readonly added: boolean;
@@ -38,40 +31,19 @@ interface AdoptResult {
 
 interface DictionariesState {
   readonly dictionaries: Readonly<Record<string, Dictionary>>;
-  /** 置き場から読み終えたか（読む前は、辞書が見つからないと決めつけない） */
   readonly loaded: boolean;
   readonly load: () => Promise<void>;
-  /**
-   * 項目の列を全体の 1 冊として足す。同じ項目の列の全体の辞書があれば
-   * それを使う
-   */
   readonly adopt: (name: string, entries: readonly LoreEntry[]) => AdoptResult;
-  /**
-   * 個別追加辞書を 1 冊足す（毎回作る。全体で有効にはしない）
-   */
-  /**
-   * 項目の無い辞書を足し、全体で有効にする（拡張のタブの新規作成）
-   */
   readonly add: (name: string) => Dictionary;
-  /**
-   * 名前・項目の列を直す
-   */
   readonly update: (
     id: string,
     patch: Partial<Pick<Dictionary, 'name' | 'entries' | 'scanDepth'>>,
   ) => void;
-  /** 一覧から消す（端末から消す。ComfyUI の控えは残す。有効にした並びからも外す） */
   readonly remove: (id: string) => void;
-  /** 控えから戻す。同じ id があれば最後に変えた時刻（版）の新しい方を残す */
   readonly restore: (dictionary: Dictionary) => RestoreOutcome;
 }
 
 export const useDictionariesStore = create<DictionariesState>()((set, get) => {
-  /**
-   * 一覧に入れて端末に書く。書けなくても、この画面の中では使える。持っていた 1 件を直すときは、
-   * 置き場の 1 件がほかのタブで変わっていないかを照合してから書く。
-   * 控えから戻すときは照合しない（`checked: false`）
-   */
   const put = (dictionary: Dictionary, checked = true): void => {
     const expected = checked ? (get().dictionaries[dictionary.id]?.updatedAt ?? null) : null;
     set({ dictionaries: { ...get().dictionaries, [dictionary.id]: dictionary } });
@@ -92,7 +64,6 @@ export const useDictionariesStore = create<DictionariesState>()((set, get) => {
       const found = await dictionaryTable.loadAll(parseDictionary, (item) => item.id);
       const dictionaries = { ...found, ...get().dictionaries };
       set({ dictionaries, loaded: true });
-      // 有効にした並びに、一覧に無い id があれば外す
       useSettingsStore.getState().keepLoreDictionaryIds(new Set(Object.keys(dictionaries)));
     },
 
@@ -146,19 +117,11 @@ export const useDictionariesStore = create<DictionariesState>()((set, get) => {
   };
 });
 
-/**
- * 取り込んだ 1 ファイルの結果（拡張のタブの通知に出す）
- */
 export type DictionaryImport =
   | { readonly kind: 'added' | 'existing'; readonly name: string; readonly count: number }
   | { readonly kind: 'error'; readonly fileName: string; readonly problem: DictionaryFileProblem };
 
-/**
- * ファイルを追加辞書として取り込み、全体で有効にする（有効でなければ並びの最後に足す）。
- * 同じ項目の列の辞書があれば、足さずにそれを有効にする
- */
 export async function importDictionaryFile(file: File): Promise<DictionaryImport> {
-  // 丸ごと読む前に大きさを見る（巨大なファイルで画面を止めない）
   if (isTooLarge(file, DICTIONARY_FILE_MAX_BYTES)) {
     return { kind: 'error', fileName: file.name, problem: 'size' };
   }

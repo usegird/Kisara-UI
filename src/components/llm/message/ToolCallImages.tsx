@@ -10,11 +10,6 @@ import { CallImages } from '@/components/llm/message/ToolCallResult';
 import { openChatImage } from '@/components/llm/workspace/chat-viewer';
 import type { OutputFileRef } from '@/port/files';
 
-// ─────────────────────────────
-// ワークフローの呼び出しの画像の欄。
-// ─────────────────────────────
-
-/** 呼び出しの画像の欄の props */
 export interface ToolCallImagesProps {
   readonly chatId: string;
   readonly messageId: string;
@@ -23,11 +18,6 @@ export interface ToolCallImagesProps {
   readonly onShow: (callId: string, shown: ShownRun) => void;
 }
 
-/**
- * 呼び出しごとに、表示している実行の画像を中央に縦に並べる。実行し直している間は表示を変えず、
- * 受け取った画像を読み終えてから新しい実行の画像に切り替える。出せる実行が 2 回以上なら切り替えを
- * 画像の下に出す
- */
 export function ToolCallImages({
   chatId,
   messageId,

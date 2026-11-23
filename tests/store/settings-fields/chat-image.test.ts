@@ -2,10 +2,6 @@ import { describe, expect, it } from 'vitest';
 
 import { chatImageSizeAfterMove } from '@/store/settings-fields/chat-image';
 
-// ─────────────────────────────
-// アバターの置き場を移したあとの枠の縦横。
-// ─────────────────────────────
-
 const tall = { width: 320, height: 480 };
 const wide = { width: 480, height: 320 };
 

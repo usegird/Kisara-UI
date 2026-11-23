@@ -2,11 +2,6 @@ import { t } from '@/i18n';
 import { isWebUrl } from '@/lib/web-url';
 import type { Citation } from '@/port/llm-port';
 
-// ─────────────────────────────
-// `assistant` の本文の下の出典の一覧。
-// ─────────────────────────────
-
-/** URL のドメイン。読めなければ null */
 function domainOf(url: string): string | null {
   try {
     return new URL(url).hostname;
@@ -15,7 +10,6 @@ function domainOf(url: string): string | null {
   }
 }
 
-/** 出典を番号つきで並べ、http・https のものは別のブラウザのタブで開くリンクにする */
 export function CitationList({
   citations,
 }: {
@@ -30,7 +24,6 @@ export function CitationList({
           return (
             <li key={citation.url} className="flex min-w-0 gap-1">
               <span className="tabular-nums">[{index + 1}]</span>
-              {/* 前に残った出典にも効くよう、http・https でなければリンクにしない（文字のまま） */}
               {isWebUrl(citation.url) ? (
                 <a
                   href={citation.url}

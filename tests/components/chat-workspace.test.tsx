@@ -26,10 +26,6 @@ import {
   type FakeLlmPort,
 } from '../helpers/llm';
 
-// ─────────────────────────────
-// 会話の画面。接続の案内・送る操作・候補の切り替え。
-// ─────────────────────────────
-
 let port: FakeLlmPort;
 
 beforeEach(() => {
@@ -41,10 +37,8 @@ beforeEach(() => {
   setDefaultLlm();
 });
 
-/** キーの無いゲートウェイの窓口（入力の窓だけ差し替える） */
 const NO_KEYS: LlmKeyPort = fakeKeyPort();
 
-/** 選んでいる接続の設定がつながっていると確かめた状態にする */
 function connected(): void {
   useLlmProfilesStore.setState({
     checks: { p1: { kind: 'ok', models: [], contexts: {}, details: {}, serverContext: null } },
@@ -54,10 +48,10 @@ function connected(): void {
 afterEach(() => {
   cleanup();
   useChatStore.getState().unload('c1');
-  // 接続の案内を出すかはページ全体で持つので、テストごとに戻す
   useLlmConnectDialogStore.setState({ requested: false, dismissed: false });
   useLlmKeysStore.setState({ keyed: [] });
 });
+
 describe('長い会話のログ', () => {
   afterEach(() => {
     vi.unstubAllGlobals();
@@ -65,7 +59,6 @@ describe('長い会話のログ', () => {
   });
 
   it('新しい 20 件から描き、上へ読みに行くと遠い側を外し、下へ戻ると最新を描き直す', () => {
-    // 先頭・末尾の目印のどちらが見えたかを試験から起こす（先に見張るのが先頭）
     let report: ((onTop: boolean, onBottom: boolean) => void) | null = null;
     vi.stubGlobal(
       'IntersectionObserver',
@@ -89,7 +82,6 @@ describe('長い会話のログ', () => {
         disconnect(): void {}
       },
     );
-    // 発言は 1 件 1000px の高さに並び、ログの欄は `view` の位置を映す
     const HEIGHT = 1000;
     let view = 0;
     vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(function (
@@ -119,7 +111,6 @@ describe('長い会話のログ', () => {
     expect(drawn()).toBe(100);
     expect(screen.getByText('本文 239')).toBeTruthy();
 
-    // 最新の側を見ているうちは、見えている発言を外さない
     view = 238 * HEIGHT;
     act(() => report?.(true, false));
     expect(screen.getByText('本文 239')).toBeTruthy();
@@ -133,6 +124,7 @@ describe('長い会話のログ', () => {
     expect(screen.getByText('本文 239')).toBeTruthy();
   });
 });
+
 describe('会話の大きさの上限', () => {
   afterEach(() => useSettingsStore.setState({ chatMaxMegabytes: 10 }));
 
@@ -184,12 +176,10 @@ describe('会話の画面', () => {
     useLlmConnectDialogStore.getState().open();
     render(<ChatWorkspace chatId="c1" />);
     expect(screen.queryByRole('log')).toBeNull();
-    // 接続の案内にモデルの欄は無い（モデルは入力欄の横で選ぶ）
     expect(screen.queryByRole('button', { name: /^モデル:/ })).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: '会話を始める' }));
     expect(useSettingsStore.getState()).toMatchObject({ llmProfileId: 'p1', llmModel: 'm1' });
     expect(screen.getByRole('log')).toBeTruthy();
-    // 入力欄の横のモデルの欄は、選んだ名前を出す開くボタン
     expect(screen.getByRole('button', { name: 'モデル: m1（選ぶ）' })).toBeTruthy();
   });
 
@@ -197,17 +187,14 @@ describe('会話の画面', () => {
     useLlmProfilesStore.setState({ profiles: [] });
     useChatStore.getState().put('c1', chat([chatMessage('u1', 'user', ['saved text'])]));
     render(<ChatWorkspace chatId="c1" />);
-    // 会話の画面はダイアログの後ろに残る（ダイアログが開いている間は読み上げから外れる）
     const log = screen.getByRole('log', { hidden: true });
     expect(log.textContent).toContain('saved text');
     const dialog = screen.getByRole('dialog', { name: 'LLM に接続する' });
     expect(dialog.contains(screen.getByRole('button', { name: '会話を始める' }))).toBe(true);
-    // 末尾に CORS の許可設定と、外部のクラウドに送る中身・料金・キーの注意を閉じて置く
     const notes = screen.getByText('セキュリティの注意').closest('details');
     expect(dialog.contains(notes)).toBe(true);
     expect(notes?.querySelectorAll('li')).toHaveLength(6);
     expect(notes?.textContent).toContain('許可する URL をこのページに制限することを推奨します');
-    // 送るボタンは接続断のアイコンに替わり、押すと接続の案内を出す
     expect(screen.queryByRole('button', { hidden: true, name: '送る' })).toBeNull();
     const connect = screen.getByRole('button', { hidden: true, name: 'LLM に接続する' });
     expect(connect.querySelector('svg')?.getAttribute('class')).toContain('lucide-unplug');
@@ -229,14 +216,12 @@ describe('会話の画面', () => {
     render(<ChatWorkspace chatId="c1" />);
     const url = screen.getByRole('combobox', { name: 'ベース URL' });
     fireEvent.change(url, { target: { value: 'http://y/v1' } });
-    // 打っているだけでは作らない
     expect(useLlmProfilesStore.getState().profiles).toHaveLength(0);
     fireEvent.click(screen.getByRole('button', { name: '接続' }));
     expect(useLlmProfilesStore.getState().profiles.map((item) => item.baseUrl)).toEqual([
       'http://y/v1',
     ]);
 
-    // 同じ URL でもう一度つないでも増やさない
     fireEvent.change(screen.getByRole('combobox', { name: 'ベース URL' }), {
       target: { value: 'http://y/v1/' },
     });
@@ -257,13 +242,10 @@ describe('会話の画面', () => {
     useChatStore.getState().put('c1', chat([]));
     const view = render(<ChatWorkspace chatId="c1" />);
     expect(await screen.findByRole('button', { name: '再接続' })).toBeTruthy();
-    // アバターの並べ替え（dnd-kit）も読み上げの status を置くので、文で引く
     const status = screen.getByText('接続済み - モデル 1 件');
     expect(status.getAttribute('role')).toBe('status');
-    // 再接続のボタンと同じ行の、すぐ右に出す
     expect(screen.getByRole('button', { name: '再接続' }).nextElementSibling).toBe(status);
 
-    // 開き直しても、もう自動では試さない
     view.unmount();
     render(<ChatWorkspace chatId="c1" />);
     expect(calls).toBe(1);
@@ -284,8 +266,7 @@ describe('会話の画面', () => {
     const alert = await screen.findByRole('alert');
     expect(screen.getByRole('button', { name: '接続' })).toBeTruthy();
     expect(calls).toBe(1);
-    // 失敗は API キーをセットのボタンの下、ローカルネットワークの許可の案内のさらに下に出す
-    const key = screen.getByRole('button', { name: 'API キーをセット' });
+    const key = screen.getByRole('button', { name: 'API キーを設定' });
     const note = screen.getByText(/ローカルネットワークへのアクセス許可/);
     expect(key.compareDocumentPosition(note) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     expect(note.compareDocumentPosition(alert) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
@@ -313,9 +294,7 @@ describe('会話の画面', () => {
     expect(screen.queryByRole('dialog')).toBeNull();
     act(() => useLlmConnectDialogStore.getState().open());
     expect(screen.getByRole('dialog', { name: 'LLM に接続する' })).toBeTruthy();
-    // 会話の画面はそのまま（ダイアログの後ろ）
     expect(screen.getByRole('textbox', { hidden: true, name: 'メッセージ' })).toBeTruthy();
-    // 埋め込みへの切り替えは持たない（× だけ）
     expect(screen.queryByRole('button', { name: /埋め込み/ })).toBeNull();
   });
 
@@ -351,7 +330,6 @@ describe('会話の画面', () => {
 
   it('つないでいない間は送らず、Enter と送るボタンで接続の案内を出す（閉じた後でも）', async () => {
     useChatStore.getState().put('c1', chat());
-    // 一度閉じた後（自動では出さない）
     useLlmConnectDialogStore.setState({ dismissed: true });
     render(<ChatWorkspace chatId="c1" />);
     const input = screen.getByRole('textbox', { name: 'メッセージ' });
@@ -362,7 +340,6 @@ describe('会話の画面', () => {
 
     fireEvent.keyDown(screen.getByRole('dialog'), { key: 'Escape' });
     await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
-    // 送れない理由を title に出す送るボタン（構成の相談の送るボタンとは別）。押せるままにする
     const button = screen.getByTitle('先に接続の設定とモデルを選んでください');
     expect(button.hasAttribute('disabled')).toBe(false);
     fireEvent.click(button);
@@ -375,7 +352,6 @@ describe('会話の画面', () => {
     connected();
     useChatStore.getState().put('c1', chat());
     render(<ChatWorkspace chatId="c1" />);
-    // モデルの欄は青い枠で選ぶ場所を示す
     expect(screen.getByRole('button', { name: 'モデルを選択' }).className).toContain('ring-1');
     const input = screen.getByRole('textbox', { name: 'メッセージ' });
     fireEvent.change(input, { target: { value: 'hello' } });
@@ -399,7 +375,7 @@ describe('会話の画面', () => {
     connected();
     useChatStore.getState().put('c1', chat());
     render(<ChatWorkspace chatId="c1" />);
-    fireEvent.click(screen.getByTitle('先に API キーをセットしてください'));
+    fireEvent.click(screen.getByTitle('先に API キーを設定してください'));
     expect(openEntry).toHaveBeenCalledWith(base);
     const input = screen.getByRole('textbox', { name: 'メッセージ' });
     fireEvent.change(input, { target: { value: 'hello' } });
@@ -408,7 +384,7 @@ describe('会話の画面', () => {
     expect(port.requests).toHaveLength(0);
 
     act(() => useLlmKeysStore.setState({ keyed: [base] }));
-    expect(screen.queryByTitle('先に API キーをセットしてください')).toBeNull();
+    expect(screen.queryByTitle('先に API キーを設定してください')).toBeNull();
   });
 
   it('外部の接続先で注意に合意していなければ、鍵を押すと先に注意を出し、合意したら窓を開く', () => {
@@ -421,7 +397,7 @@ describe('会話の画面', () => {
     connected();
     useChatStore.getState().put('c1', chat());
     render(<ChatWorkspace chatId="c1" />);
-    fireEvent.click(screen.getByTitle('先に API キーをセットしてください'));
+    fireEvent.click(screen.getByTitle('先に API キーを設定してください'));
     expect(openEntry).not.toHaveBeenCalled();
     fireEvent.click(screen.getByRole('button', { name: '同意して接続' }));
     expect(openEntry).toHaveBeenCalledWith(base);
@@ -431,7 +407,7 @@ describe('会話の画面', () => {
     useLlmProfilesStore.setState({ checks: { p1: { kind: 'failed', failure: { kind: 'auth' } } } });
     useChatStore.getState().put('c1', chat());
     render(<ChatWorkspace chatId="c1" />);
-    expect(screen.getByTitle('先に API キーをセットしてください')).toBeTruthy();
+    expect(screen.getByTitle('先に API キーを設定してください')).toBeTruthy();
   });
 
   it('自動で出した接続の案内は、つながっても閉じない', async () => {
@@ -459,7 +435,6 @@ describe('会話の画面', () => {
 
     fireEvent.keyDown(input, { key: 'Enter' });
     expect(port.requests).toHaveLength(1);
-    // 受け取り中は送るボタンが止めるボタンに替わる
     expect(screen.getByRole('button', { name: '止める' })).toBeTruthy();
   });
 
@@ -494,6 +469,7 @@ describe('会話の画面', () => {
     expect(screen.getByText('A')).toBeTruthy();
     expect(useChatStore.getState().chats.c1?.messages[1]?.selected).toBe(0);
   });
+
   it('注記の枠は入力欄の上に読むだけで出し、× で外す', () => {
     connected();
     useChatStore.getState().put('c1', chat([]));

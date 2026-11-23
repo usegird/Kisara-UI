@@ -6,7 +6,7 @@ import { WildcardOverlay } from '@/components/comfy/dialogs/WildcardOverlay';
 import { InsertBar } from '@/components/comfy/flow/InsertBar';
 import { LORA_FOLDER } from '@/graph/model-files';
 import { EMPTY_STYLE_TABLE } from '@/graph/styles';
-import { TEXT_DRAG_TYPE } from '@/lib/text-drag-session';
+import { INSERT_CARET_MARK, TEXT_DRAG_TYPE } from '@/lib/text-drag-session';
 import { useConnectionStore } from '@/store/use-connection-store';
 import { useDialogStore } from '@/store/use-dialog-store';
 import { useGraphStore } from '@/store/use-graph-store';
@@ -18,22 +18,17 @@ import { useWildcardsStore } from '@/store/use-wildcards-store';
 import { stubMissingDom } from '../helpers/dom';
 import { modelFile, modelFolder } from '../helpers/model-files';
 
-// 一覧は取りに行かない（テストから ComfyUI に触れない）
 vi.mock('@/comfy/models', async (importOriginal) => ({
   ...(await importOriginal<typeof import('@/comfy/models')>()),
   fetchModelFiles: () => Promise.reject(new Error('テストでは取らない')),
-  // 学習で多かった語は取り終わらない（画像の読み込みで接続が埋まっている間の形）
   fetchModelMetadata: () => new Promise(() => undefined),
 }));
 vi.mock('@/comfy/wildcards', () => ({ fetchWildcards: () => Promise.resolve(null) }));
 
-// ─────────────────────────────
-// 差し込みのアイコン。3 つとも常に並べ、サーバーの事情で使えなければ斜線。
-// どれもキャレットに拠らず開け、各画面の決定が差し込み先の条件を持つ。
-// ─────────────────────────────
-
 const BASE = 'http://127.0.0.1:1';
 const NAMES = ['Lora を差し込む', 'スタイルを開く', 'ワイルドカードを差し込む'] as const;
+
+const caretMarker = () => document.body.querySelector(`[${INSERT_CARET_MARK}]`);
 
 beforeAll(stubMissingDom);
 
@@ -49,7 +44,6 @@ function icons(): HTMLButtonElement[] {
   return NAMES.map((name) => screen.getByRole<HTMLButtonElement>('button', { name }));
 }
 
-/** 3 つとも使える接続先につないだ状態 */
 function ready(): void {
   useSettingsStore.setState({ baseUrl: BASE });
   useConnectionStore.setState({ status: 'connected' });
@@ -102,10 +96,9 @@ describe('差し込みのアイコン', () => {
   });
 
   describe('Lora', () => {
-    /** 学習の語を使わない書式にする（テストから metadata を取りに行かない） */
     function readyWithLoras(): void {
       ready();
-      useSettingsStore.setState({ loraCopyFormat: '<lora:[loraname]:1>' });
+      useSettingsStore.setState({ loraCopyFormat: '<lora:[name]:1>' });
       useModelFilesStore.setState({
         folders: new Map([[LORA_FOLDER, modelFolder([modelFile('b.safetensors')])]]),
       });
@@ -147,11 +140,35 @@ describe('差し込みのアイコン', () => {
       host.remove();
     });
 
+    it('Lora の画面の中を押してからワイルドカードへ切り替えても、差し込み先を引き継ぐ', async () => {
+      readyWithLoras();
+      useSettingsStore.setState({ dialogLayouts: { 'lora-insert': { mode: 'embedded' } } });
+      const host = document.createElement('div');
+      document.body.append(host);
+      act(() => useDialogStore.getState().setEmbedHost(host));
+      render(
+        <>
+          <textarea aria-label="複数行" />
+          <InsertBar />
+          <WildcardOverlay />
+        </>,
+      );
+      act(() => screen.getByLabelText('複数行').focus());
+      const dialog = await openLora();
+      act(() => within(dialog).getByTitle('b.safetensors').focus());
+
+      fireEvent.click(screen.getByRole('button', { name: 'ワイルドカードを差し込む' }));
+
+      await screen.findByLabelText('ワイルドカードを絞り込む');
+      expect(screen.queryByText('挿入先を選択してから選択してください')).toBeNull();
+      useSettingsStore.setState({ dialogLayouts: {} });
+      host.remove();
+    });
+
     it('出し方と列の幅は、パラメータ行から開くものと分けて残す', async () => {
       readyWithLoras();
       render(<InsertBar />);
       const dialog = await openLora();
-      // ディレクトリをピン止めすると、境目で幅を変えられる
       fireEvent.click(within(dialog).getByRole('button', { name: 'フォルダを出す' }));
       fireEvent.click(
         within(dialog).getByRole('button', { name: 'フォルダをピン止めする（常に出す）' }),
@@ -177,19 +194,16 @@ describe('差し込みのアイコン', () => {
         within(dialog).queryByRole('navigation', { name: 'ディレクトリ' });
       expect(directoryList()).toBeNull();
 
-      // 一時的に出す。ディレクトリを選ぶと閉じる
       fireEvent.click(within(dialog).getByRole('button', { name: 'フォルダを出す' }));
       const shown = directoryList();
       expect(shown).not.toBeNull();
       fireEvent.click(within(shown as HTMLElement).getAllByRole('button')[0] as HTMLElement);
       expect(directoryList()).toBeNull();
 
-      // 一時的に出したものは、外（格子）を押しても閉じる
       fireEvent.click(within(dialog).getByRole('button', { name: 'フォルダを出す' }));
       fireEvent.pointerDown(within(dialog).getByTitle('b.safetensors'));
       expect(directoryList()).toBeNull();
 
-      // ピン止めすると選んでも外を押しても残り、やめると隠れる
       fireEvent.click(within(dialog).getByRole('button', { name: 'フォルダを出す' }));
       fireEvent.click(
         within(dialog).getByRole('button', { name: 'フォルダをピン止めする（常に出す）' }),
@@ -200,7 +214,6 @@ describe('差し込みのアイコン', () => {
         within(dialog).getByRole('button', { name: 'フォルダのピン止めをやめる（隠す）' }),
       );
       expect(directoryList()).toBeNull();
-      // やめたことも残す（切り替えていないときの既定と分ける）
       expect(useSettingsStore.getState().dialogPanePins).toEqual({
         'lora-insert:directory': false,
       });
@@ -235,10 +248,8 @@ describe('差し込みのアイコン', () => {
 
       const place = within(dialog).getByRole<HTMLButtonElement>('button', { name: /を決定する$/ });
       expect(place.disabled).toBe(true);
-      expect(place.title).toBe('挿入先を選択してから選択するか、アイコンをドロップしてください');
+      expect(place.title).toBe('挿入先を選択してから選択してください');
 
-      // 開いたまま外の欄に入れば、そこが差し込み先になる
-      // 開いたまま外の欄を押せば（閉じない）、そこが差し込み先になる
       const field = screen.getByLabelText<HTMLTextAreaElement>('複数行');
       fireEvent.pointerDown(field);
       fireEvent.mouseDown(field);
@@ -248,7 +259,7 @@ describe('差し込みのアイコン', () => {
       expect(screen.queryByRole('dialog')).not.toBeNull();
     });
 
-    it('差し込み先が無ければ見出しに理由と帯にアイコンを出し、アイコンを欄へ落とすと差し込み先になる', async () => {
+    it('差し込み先が無ければ見出しに理由を出すが、挿入位置のアイコンはどこにも出さない', async () => {
       readyWithLoras();
       render(
         <>
@@ -257,38 +268,19 @@ describe('差し込みのアイコン', () => {
         </>,
       );
       const dialog = await openLora();
-      const reason = '挿入先を選択してから選択するか、アイコンをドロップしてください';
-      expect(within(dialog).getByText(reason)).toBeTruthy();
-      const handle = within(dialog).getByTitle('複数行の入力欄へ落とすと、そこを挿入先にします');
-      fireEvent.dragStart(handle, { dataTransfer: { setData: () => undefined } });
-
-      const field = screen.getByLabelText<HTMLTextAreaElement>('複数行');
-      for (const type of ['dragover', 'drop'] as const) {
-        const event = new Event(type, { bubbles: true, cancelable: true });
-        Object.defineProperty(event, 'dataTransfer', {
-          value: { types: [TEXT_DRAG_TYPE], dropEffect: 'none' },
-        });
-        act(() => {
-          field.dispatchEvent(event);
-        });
-      }
-
-      // 文字は入れず、落とした欄が差し込み先になる（理由と帯のアイコンが消え、欄に印が付く）
-      await waitFor(() => expect(within(dialog).queryByText(reason)).toBeNull());
-      expect(field.value).toBe('ab');
-      expect(within(dialog).queryByTitle(/^複数行の入力欄へ落とすと/)).toBeNull();
-      expect(screen.getByTitle('挿入位置（掴んでほかの位置・欄へ動かせます）')).toBeTruthy();
+      expect(within(dialog).getByText('挿入先を選択してから選択してください')).toBeTruthy();
+      expect(within(dialog).queryByText(/アイコンをドロップ/)).toBeNull();
+      expect(caretMarker()).toBeNull();
+      expect(dialog.querySelector('[draggable="true"] .lucide-text-cursor')).toBeNull();
     });
 
     it('挿入位置のアイコンは開いている間だけ出す', async () => {
       const { dialog } = await openWithField();
-      const marker = '挿入位置（掴んでほかの位置・欄へ動かせます）';
-      expect(screen.getByTitle(marker)).toBeTruthy();
+      expect(caretMarker()).not.toBeNull();
       fireEvent.click(within(dialog).getByRole('button', { name: 'Loraを選ぶ画面を閉じる' }));
-      await waitFor(() => expect(screen.queryByTitle(marker)).toBeNull());
+      await waitFor(() => expect(caretMarker()).toBeNull());
     });
 
-    /** 差し込み先の欄にキャレットを置いてから開き、b を選ぶ */
     async function openWithField(): Promise<{ field: HTMLTextAreaElement; dialog: HTMLElement }> {
       readyWithLoras();
       render(
@@ -315,20 +307,20 @@ describe('差し込みのアイコン', () => {
       expect(screen.queryByRole('dialog')).not.toBeNull();
       expect(within(dialog).queryByLabelText('モデルの情報')).not.toBeNull();
 
-      // 操作の帯の左のまとまりの右端の × でも閉じる
       fireEvent.click(within(dialog).getByRole('button', { name: 'Loraを選ぶ画面を閉じる' }));
       await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
     });
 
-    it('決定は差し込み先へ入れ、閉じずに続けて選べる', async () => {
+    it('帯の決定は差し込み先へ入れて閉じる。説明は「Loraを設定して閉じる」', async () => {
       const { field, dialog } = await openWithField();
-      fireEvent.click(within(dialog).getByRole('button', { name: /を決定する$/ }));
+      const decide = within(dialog).getByRole('button', { name: /を決定する$/ });
+      expect(decide.title).toBe('Loraを設定して閉じる');
+      fireEvent.click(decide);
 
       await waitFor(() => expect(field.value).toContain('<lora:'));
-      expect(screen.queryByRole('dialog')).not.toBeNull();
-      // 末尾に改行を足し、キャレットは入れた文字の先頭に戻す
-      expect(field.value.endsWith('\n')).toBe(true);
-      expect(field.selectionStart).toBe(0);
+      await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+      expect(field.value).toBe('<lora:b:1>');
+      expect(field.selectionStart).toBe(field.value.length);
     });
 
     it('カードのダブルクリックも入れて閉じない', async () => {
@@ -366,9 +358,7 @@ describe('差し込みのアイコン', () => {
       const card = within(dialog).getByTitle('b.safetensors');
       fireEvent.click(card);
 
-      // 押してすぐには出さない（ダブルクリックの 1 回目で出さない）
       expect(within(dialog).queryByLabelText('モデルの情報')).toBeNull();
-      // 格子と同じ囲みの中に重ねる（横に並べて格子の幅を削らない）
       const info = await within(dialog).findByLabelText('モデルの情報');
       const grid = card.closest('.overflow-y-auto');
       expect(grid?.parentElement?.contains(info)).toBe(true);
@@ -377,7 +367,6 @@ describe('差し込みのアイコン', () => {
 
     it('ダブルクリック（押す 2 回とダブルクリック）では情報を出さない', async () => {
       const { dialog } = await openWithField();
-      // 開いた直後の選択を外してから、外したカードをダブルクリックする
       const card = within(dialog).getByTitle('b.safetensors');
       fireEvent.click(card, { detail: 1 });
       fireEvent.click(card, { detail: 1 });
@@ -395,7 +384,7 @@ describe('差し込みのアイコン', () => {
       fireEvent.click(card, { detail: 1 });
       const info = await within(dialog).findByLabelText('モデルの情報');
 
-      fireEvent.pointerDown(within(info).getByText('パス'));
+      fireEvent.pointerDown(within(info).getByText('type'));
       expect(within(dialog).queryByLabelText('モデルの情報')).not.toBeNull();
 
       fireEvent.pointerDown(within(dialog).getByLabelText('大きさで並べる'));
@@ -431,13 +420,11 @@ describe('差し込みのアイコン', () => {
       const dialog = await openLora();
       fireEvent.click(within(dialog).getByTitle('b.safetensors'), { detail: 1 });
       const info = await within(dialog).findByLabelText('モデルの情報');
-      expect(info.textContent).toContain('b.safetensors');
+      expect(info.textContent).toContain('nameb');
 
       fireEvent.click(within(dialog).getByTitle('c.safetensors'), { detail: 1 });
       await waitFor(() =>
-        expect(within(dialog).getByLabelText('モデルの情報').textContent).toContain(
-          'c.safetensors',
-        ),
+        expect(within(dialog).getByLabelText('モデルの情報').textContent).toContain('namec'),
       );
       expect(within(dialog).getByTitle('b.safetensors').getAttribute('aria-pressed')).toBe('false');
     });
@@ -455,7 +442,6 @@ describe('差し込みのアイコン', () => {
       expect(within(dialog).queryByLabelText('モデルの情報')).toBeNull();
       expect(card.getAttribute('aria-pressed')).toBe('false');
 
-      // 選んでいるカードを押し直す
       fireEvent.click(card, { detail: 1 });
       await within(dialog).findByLabelText('モデルの情報');
       fireEvent.click(card, { detail: 1 });
@@ -470,7 +456,6 @@ describe('差し込みのアイコン', () => {
         dialogPaneWidths: { 'lora-insert:info:bottom': 200 },
         dialogPanePins: { 'lora-insert:directory': true },
       });
-      // 格子の囲みは 1000×1000。下の情報（200 + 境目 1）が覆うのは y >= 799
       const rect = vi
         .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
         .mockReturnValue(new DOMRect(0, 0, 1000, 1000));
@@ -480,12 +465,9 @@ describe('差し込みのアイコン', () => {
       const grid = card.closest<HTMLElement>('.overflow-y-auto');
       expect(grid?.style.paddingBottom).toBe('');
 
-      // 被らない所を押したら待たずに出す
       fireEvent.click(card, { detail: 1, clientX: 100, clientY: 100 });
       expect(within(dialog).getByLabelText('モデルの情報')).toBeDefined();
-      // 情報の高さ + 境目の線 + 格子の余白
       expect(grid?.style.paddingBottom).toBe('213px');
-      // 下の情報は格子の外（左のディレクトリの列の上）まで全幅に重ねる。押しても隠れない
       const info = within(dialog).getByLabelText('モデルの情報');
       const directory = within(dialog).getByRole('navigation', { name: 'ディレクトリ' });
       expect(grid?.parentElement?.contains(info)).toBe(false);
@@ -493,7 +475,6 @@ describe('差し込みのアイコン', () => {
       fireEvent.pointerDown(info);
       expect(within(dialog).getByLabelText('モデルの情報')).toBeDefined();
 
-      // 被る所を押したら待つ
       fireEvent.click(card, { detail: 1 });
       fireEvent.click(card, { detail: 1, clientX: 100, clientY: 900 });
       expect(within(dialog).queryByLabelText('モデルの情報')).toBeNull();
@@ -519,7 +500,7 @@ describe('差し込みのアイコン', () => {
 
     it('学習で多かった語を取り終える前でも掴める（入れる文字は落とした時に作る）', async () => {
       readyWithLoras();
-      useSettingsStore.setState({ loraCopyFormat: '<lora:[loraname]:1> [learntext]' });
+      useSettingsStore.setState({ loraCopyFormat: '<lora:[name]:1> [ss_tag_frequency]' });
       render(<InsertBar />);
       const dialog = await openLora();
       const card = within(dialog).getByTitle('b.safetensors').closest('[draggable="true"]');
@@ -530,7 +511,6 @@ describe('差し込みのアイコン', () => {
         dataTransfer: { setData, effectAllowed: '' },
       });
 
-      // 掴むのを止めない。落とし先が受け持つ目印だけ載せ、文字は載せない
       expect(started).toBe(true);
       expect(setData).toHaveBeenCalledWith(TEXT_DRAG_TYPE, '');
       expect(setData).not.toHaveBeenCalledWith('text/plain', expect.anything());
@@ -569,7 +549,6 @@ describe('差し込みのアイコン', () => {
 
     fireEvent.click(icon);
     expect(useWildcardsStore.getState().panelOpen).toBe(true);
-    // 開いている間に押し直すと閉じる
     fireEvent.click(icon);
     expect(useWildcardsStore.getState().panelOpen).toBe(false);
   });
@@ -596,20 +575,17 @@ describe('差し込みのアイコン', () => {
     expect(useStylesStore.getState().editing).not.toBeNull();
     fireEvent.click(icon);
 
-    // 直しかけの確認は画面が持つので、ここでは頼むだけ
     expect(useStylesStore.getState().closeRequested).toBe(true);
     act(() => useStylesStore.getState().closeEditor());
   });
 
   it('LLM からの呼び出し設定は、直しかけがあるまま押し直すと確かめ、無ければそのまま閉じる', async () => {
-    // 前のテストが残した埋め込み先には出さない（画面の外になる）
     useDialogStore.setState({ embedHost: null, order: [] });
     useGraphStore.setState({
       workflow: { nodes: [], links: [], extra: { ds: { scale: 1 } } },
     });
     render(<InsertBar />);
     const icon = screen.getByRole('button', { name: 'LLM からの呼び出し設定' });
-    // ダイアログは遅れて読み込む部品。先に読んでおき、開いたときの読み込みを待たない
     await import('@/components/comfy/flow/dialogs/WorkflowToolDialog');
     const name = async (): Promise<HTMLElement> => screen.findByRole('textbox', { name: /機能名/ });
 

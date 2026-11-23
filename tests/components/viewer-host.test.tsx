@@ -9,11 +9,6 @@ import { useViewerStore } from '@/store/use-viewer-store';
 
 import { stubMissingDom } from '../helpers/dom';
 
-// ─────────────────────────────
-// 会話のタブの画像ビューワーの置き場。重ねる範囲を測る見張りは、
-// 開いている間だけ付け、閉じたら外す。
-// ─────────────────────────────
-
 beforeAll(stubMissingDom);
 
 afterEach(() => {

@@ -7,19 +7,10 @@ import { asError } from '@/lib/fault';
 import { traceFault } from '@/lib/trace';
 import { useFaultStore } from '@/store/use-fault-store';
 
-// ─────────────────────────────
-// 描けなかった部品だけを差し替える受け止め口。外から来た値が想定外の形でも、
-// **壊れた部品の外へは広げない**。
-// ─────────────────────────────
-
-/** 受け止め口の props */
 export interface ErrorBoundaryProps {
-  /** どの部品か。帯とログに出す（例: 「ノード 3（KSampler）」） */
   readonly label: string;
   readonly children: React.ReactNode;
-  /** 差し替える見た目。無ければ既定の小さな枠 */
   readonly fallback?: ((error: Error, retry: () => void) => React.ReactNode) | undefined;
-  /** これが変わったら作り直す（ワークフローを切り替えたときなど） */
   readonly resetKey?: unknown;
 }
 
@@ -28,10 +19,6 @@ interface ErrorBoundaryState {
   readonly resetKey: unknown;
 }
 
-/**
- * 受け止め口。React の受け止め口はクラスでしか書けない（関数コンポーネントの API が無い）。
- * 捕まえた失敗は画面上部の帯にも残す（どこで何が起きたかを追えるように）
- */
 export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
   override state: ErrorBoundaryState = { error: null, resetKey: this.props.resetKey };
 
@@ -39,7 +26,6 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
     return { error: asError(error) };
   }
 
-  // 作り直す鍵が変わったら、壊れた印を外してもう一度描く
   static getDerivedStateFromProps(
     props: ErrorBoundaryProps,
     state: ErrorBoundaryState,
@@ -51,7 +37,6 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
   override componentDidCatch(error: unknown, info: React.ErrorInfo): void {
     const caught = asError(error);
     console.error(`[${this.props.label}]`, caught);
-    // 診断のログには描けなかった部品の位置も残す
     traceFault(this.props.label, caught, info.componentStack);
     useFaultStore.getState().report(this.props.label, caught.message);
   }
@@ -72,18 +57,13 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
   }
 }
 
-/** 既定の差し替えの props */
 export interface BrokenNoticeProps {
-  /** 何が描けなかったか */
   readonly label: string;
   readonly error: Error;
-  /** もう一度描く */
   readonly onRetry: () => void;
-  /** 「もう一度描く」の横に並べる操作 */
   readonly extra?: React.ReactNode;
 }
 
-/** 既定の差し替え。何が描けなかったかと理由、もう一度描く操作を出す */
 export function BrokenNotice({
   label,
   error,

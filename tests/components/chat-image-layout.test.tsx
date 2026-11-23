@@ -10,10 +10,6 @@ import { useSettingsStore } from '@/store/use-settings-store';
 
 import { chat } from '../helpers/llm';
 
-// ─────────────────────────────
-// 会話の画面のアバター。キーボードでも中央点を決められる（WCAG 2.1.1）。
-// ─────────────────────────────
-
 beforeEach(() => {
   URL.createObjectURL = vi.fn(() => 'blob:x');
   useAvatarsStore.setState({
@@ -48,7 +44,6 @@ describe('左右のアバターとログ', () => {
     );
     const outer = container.querySelector('[style*="--chat-avatar-w"]');
     expect(outer?.className).toContain('--chat-pad-r');
-    // 画像の枠はログの外に重ねる（ログの中に入れない）
     expect(
       screen.getByRole('log').contains(screen.getByRole('group', { name: 'プリセットの画像' })),
     ).toBe(false);
@@ -65,7 +60,6 @@ describe('左右のアバターとログ', () => {
     expect(outerClass()).toContain('--chat-pad-l');
     cleanup();
 
-    // アバターを出さない設定でも、右に取る
     useSettingsStore.setState({ chatShowAvatar: false });
     render(<ChatImageLayout chatId="c1" log={<div />} composer={<div />} />);
     expect(outerClass()).toContain('--chat-pad-r');

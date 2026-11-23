@@ -11,14 +11,9 @@ import { useTermsStore } from '@/store/use-terms-store';
 
 import { fakeEmbeddingPort } from '../helpers/embedding';
 
-// ─────────────────────────────
-// 機能のタブのカードの見出しのスイッチと、Workflow 実行の確認スキップの注意
-// ─────────────────────────────
-
 const BYPASS = '実行前に確認を行わない';
 
 beforeEach(() => {
-  // 辞書のカードの近似判定が、置いたモデルの一覧を読む
   installEmbeddingPort(fakeEmbeddingPort());
   installDictionaryTable(memoryTable());
   useDictionariesStore.setState({ dictionaries: {}, loaded: true });

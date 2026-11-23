@@ -35,10 +35,6 @@ import {
   TEST_PLAYBOOK_ID,
 } from '../helpers/llm';
 
-// ─────────────────────────────
-// プレイブックの始めるアイコン・選ぶ所・カードと、ログの指示の印
-// ─────────────────────────────
-
 afterEach(cleanup);
 
 beforeEach(() => {
@@ -62,26 +58,22 @@ function Screen(): React.ReactElement {
 const story = (part: string): string => tPath(`llm.playbook.builtin.story.${part}`);
 const shared = (id: string): string => tPath(`llm.playbook.shared.${id}.name`);
 
-/** 「› コマンド」を開く（送るの操作はその中のリンク） */
 function openCommands(): void {
   fireEvent.click(screen.getByRole('button', { name: t('llm.playbook.commands') }));
 }
 const chooser = (): HTMLElement[] =>
   screen.queryAllByRole('region', { name: t('llm.playbook.title') });
 
-/** 選ぶ所の行の読み上げ（名前と説明。印があれば「選んでいます」も入る） */
 const chooserRow = (id: string): RegExp => {
   const part = (key: string): string => tPath(`llm.playbook.builtin.${id}.${key}`);
   return new RegExp(`^${part('name')}(${t('llm.playbook.chosen')})?${part('description')}$`, 'u');
 };
 
-/** 始めるアイコンで選ぶ所を開き、物語（筋に沿う）を選ぶ */
 function chooseStory(): void {
   fireEvent.click(screen.getByRole('button', { name: t('llm.playbook.start') }));
   fireEvent.click(screen.getByRole('button', { name: chooserRow('story') }));
 }
 
-/** そのプレイブックのフェーズにいて、操作で求めた応答を受け取り終えた会話にする */
 function setResponse(id: string, phase: string, action: string, text: string): void {
   const shape = BUILTIN_PLAYBOOKS.find((item) => item.id === id)!;
   const patch = startPlaybook({}, resolvePlaybook(shape, tPath));
@@ -95,7 +87,6 @@ function setResponse(id: string, phase: string, action: string, text: string): v
   });
 }
 
-/** 選んだ会話のプレイブックの辞書（##playbook）に段を入れる（`enabled` の段だけ有効）。ほかの辞書は残す */
 function putSteps(titles: readonly string[], enabled: number | null = null): void {
   act(() => {
     const current = useChatStore.getState().chats.c1!;
@@ -123,11 +114,9 @@ describe('プレイブックのカード', () => {
     render(<Screen />);
     chooseStory();
     const current = useChatStore.getState().chats.c1;
-    // 準備と執筆を分けず、1 つのフェーズに相談と書く操作を置く
     expect(current?.playbook).toEqual({ origin: 'builtin', id: 'story', phase: 'writing' });
     expect(current?.lorebooks?.map((book) => book.name)).toEqual([PLAYBOOK_BOOK]);
     expect(chooser()).toHaveLength(0);
-    // 相談のリンクは操作の名前で出し、指したときにサブセッションを開くことを添える
     const consult = screen.getByRole('button', { name: story('actions.makePlan.name') });
     expect(consult.getAttribute('title')).toBe(t('llm.playbook.subSession'));
     fireEvent.click(consult);
@@ -136,7 +125,6 @@ describe('プレイブックのカード', () => {
     expect(session?.guide?.outline).toBe(current?.lorebooks?.[0]?.name);
   });
 
-  // × で終えない限り、送った後でも同じ相談を開き直す
   it('プロットを相談は、前に開いた相談が残っていれば送った後でも開き直し、× で終えたら新しく始める', () => {
     render(<Screen />);
     chooseStory();
@@ -165,17 +153,15 @@ describe('プレイブックのカード', () => {
     expect(next).toBeDefined();
     expect(next).not.toBe(first);
   });
+
   it('プロット進行は 1 つのフェーズで、相談で書いた段をアウトラインの一覧で選ぶ', () => {
     render(<Screen />);
     chooseStory();
     putSteps(['One', 'Two', 'Three']);
-    // 相談で足した段は切ってあるので、書く段は利用者が選ぶ
     expect(enabledSteps()).toEqual([false, false, false]);
-    // フェーズが 1 つなら、フェーズの行（‹ 名前 i/n ›）は置かない
     expect(screen.queryByRole('button', { name: t('llm.playbook.phaseNext') })).toBeNull();
     const name = story('phases.writing.name');
     expect(screen.queryByText(new RegExp(`^${name} \\d+/\\d+$`))).toBeNull();
-    // 一覧は縮めずに出す（見出しの行・次の段へのアイコンは置かない）
     const outline = screen.getByRole('group', { name: t('llm.playbook.outline') });
     expect(within(outline).getAllByRole('listitem')).toHaveLength(3);
     fireEvent.click(
@@ -185,7 +171,6 @@ describe('プレイブックのカード', () => {
   });
 
   it('候補を受け取ると操作の代わりに候補の行を出し、送る先が無ければ続きを書くの指示と候補を指示の枠に入れる。やめると畳む', () => {
-    // 標準で候補を受け取る操作は、保留中のロールプレイの流れの候補
     setResponse('roleplay', 'scene', 'moveIdeas', '1. Dawn: a start\n2. Night: an end');
     render(<Screen />);
     fireEvent.click(
@@ -193,7 +178,6 @@ describe('プレイブックのカード', () => {
     );
     const name = t('llm.playbook.continueSend');
     fireEvent.click(screen.getByRole('button', { name: t('llm.playbook.pickAndSend', { name }) }));
-    // 送らずに指示の枠に入れる
     const box = useChatStore.getState().draftDirections.c1?.text ?? '';
     expect(box.startsWith(tPath('llm.playbook.builtin.roleplay.continue'))).toBe(true);
     expect(box).toContain('Night');
@@ -201,10 +185,10 @@ describe('プレイブックのカード', () => {
     fireEvent.click(screen.getByRole('button', { name: t('llm.playbook.pickCancel') }));
     expect(screen.queryByRole('checkbox')).toBeNull();
   });
+
   it('送るの操作は「› コマンド」の中のリンクで、常設の操作は進める段だけに並べる', () => {
     render(<Screen />);
     chooseStory();
-    // 相談のリンクと「› コマンド」を同じフェーズに出す
     expect(screen.getByRole('button', { name: story('actions.makePlan.name') })).toBeTruthy();
     expect(screen.queryByRole('button', { name: shared('twist') })).toBeNull();
     openCommands();
@@ -212,7 +196,6 @@ describe('プレイブックのカード', () => {
       .getAllByRole('listitem')
       .map((item) => item.textContent)
       .filter((name) => name !== null);
-    // 続きを書く・直前の応答を校正・型の 5 つの順（展開の候補は置かない）
     expect(links.slice(0, 7)).toEqual([
       t('llm.playbook.continueSend'),
       ...['revise', 'deepen', 'shake', 'shift', 'widen', 'close'].map((id) =>
@@ -220,6 +203,7 @@ describe('プレイブックのカード', () => {
       ),
     ]);
   });
+
   it('型のリンクは指示の枠に入れ、終わりに向かうは入れたときの次の段の題を差し込む', () => {
     render(<Screen />);
     chooseStory();
@@ -231,7 +215,6 @@ describe('プレイブックのカード', () => {
     };
     expect(insert('shake')).toBe(story('actions.shake.instruction'));
     expect(insert('close')).toBe(story('actions.close.instruction').replace('{{nextStep}}', 'Two'));
-    // 最後の段では次の段の題の代わりの語にする
     fireEvent.click(
       screen.getByRole('button', { name: t('llm.playbook.makeCurrent', { title: 'Two' }) }),
     );
@@ -239,13 +222,13 @@ describe('プレイブックのカード', () => {
       story('actions.close.instruction').replace('{{nextStep}}', t('llm.playbook.noNextStep')),
     );
   });
+
   it('直前の応答を校正は、最後が応答のときだけ押せ、入力欄を指示に置き換え、注記は注記の枠に出す', () => {
     render(<Screen />);
     chooseStory();
     openCommands();
     const revise = (): HTMLElement =>
       screen.getByRole('button', { name: story('actions.revise.name') });
-    // 作り直せる応答がまだ無い
     expect(revise().hasAttribute('disabled')).toBe(true);
     act(() => {
       const current = useChatStore.getState().chats.c1!;
@@ -253,18 +236,16 @@ describe('プレイブックのカード', () => {
       useChatStore.setState({ chats: { c1: { ...current, messages } } });
     });
     useChatStore.getState().setDraft('c1', 'Keep the rain. ');
-    // 前の操作の指示の枠は外す
     useChatStore.getState().fillDirection('c1', ['Go on.'], directionOf(null));
     fireEvent.click(revise());
     const state = useChatStore.getState();
-    // 打ちかけは置き換える（画面では Ctrl+Z で戻せる）。注記は入力欄に入れず、注記の枠に出す
     const instruction = story('actions.revise.instruction');
     expect(state.drafts.c1).toBe(stripComments(instruction));
     expect(state.draftNotes.c1).toBe(commentsOf(instruction).join('\n\n'));
     expect(state.draftNotes.c1?.length).toBeGreaterThan(0);
-    // 指示の枠には入れない（生成し直すで作り直す）
     expect(state.draftDirections.c1).toBeUndefined();
   });
+
   it('受け取り中も送るのリンクと続きを書くは押せ、指示の枠に入れる。校正だけは押せない', () => {
     render(<Screen />);
     chooseStory();
@@ -307,11 +288,9 @@ describe('プレイブックのカード', () => {
     chooseStory();
     putSteps(['One', 'Two', 'Three'], 0);
     const foldButton = screen.getByRole('button', { name: t('llm.playbook.fold') });
-    // 縮める三角はプレイブックのアイコンの右
     expect(foldButton.previousElementSibling?.tagName.toLowerCase()).toBe('svg');
     fireEvent.click(foldButton);
     expect(useSettingsStore.getState().playbookCardFolded).toBe(true);
-    // 目的・コマンド・一覧は出さない
     expect(screen.queryByRole('button', { name: t('llm.playbook.commands') })).toBeNull();
     expect(screen.queryAllByRole('listitem')).toHaveLength(0);
     const step = (i: string, title: string): HTMLElement =>
@@ -322,7 +301,6 @@ describe('プレイブックのカード', () => {
     expect(step('2', 'Two')).toBeTruthy();
     fireEvent.click(screen.getByRole('button', { name: t('llm.playbook.stepPrev') }));
     expect(enabledSteps()).toEqual([true, false, false]);
-    // いくつも有効なら何件を選んでいるかだけ（移るアイコンは出さない）
     act(() => useChatStore.getState().updatePlaybookChat('c1', withAllSteps));
     expect(screen.getByText(t('llm.playbook.picked', { i: '3', n: '3' }))).toBeTruthy();
     expect(screen.queryByRole('button', { name: t('llm.playbook.stepNext') })).toBeNull();
@@ -339,7 +317,6 @@ describe('プレイブックのカード', () => {
       screen.getByRole('button', { name: t('llm.playbook.removeNamed', { name: story('name') }) }),
     );
     expect(useChatStore.getState().chats.c1?.playbook).toBeUndefined();
-    // 消えるのは今のフェーズと今の段だけ
     expect(enabledSteps()).toEqual([false, false]);
     expect(screen.queryByRole('region', { name: story('name') })).toBeNull();
 
@@ -352,7 +329,6 @@ describe('プレイブックのカード', () => {
   });
 
   it('いくつでも選べるフェーズに入ると全部にチェックを入れ、いくつでも切り替えられる', () => {
-    // 標準のプレイブックに締める段は無いので、自分のプレイブックに足して確かめる
     const own = ownPlaybooks();
     const item = own[TEST_PLAYBOOK_ID]!;
     const close = {
@@ -377,10 +353,8 @@ describe('プレイブックのカード', () => {
       },
     });
     render(<Screen />);
-    // フェーズが 2 つ以上ならフェーズの行を出す（種類の補助名は付けない）
     expect(screen.getByText('Write 2/3')).toBeTruthy();
     fireEvent.click(screen.getByRole('button', { name: t('llm.playbook.phaseNext') }));
-    // 入ると段をすべて有効にする。送るの操作を押してもチェックは変えない
     expect(enabledSteps()).toEqual([true, true]);
     const two = screen.getByRole('checkbox', {
       name: t('llm.playbook.pickStep', { title: 'Two' }),
@@ -391,13 +365,11 @@ describe('プレイブックのカード', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Check' }));
     expect(enabledSteps()).toEqual([true, false]);
     fireEvent.click(two);
-    // 1 つを選ぶ段に戻ると、今の段だけに絞る
     fireEvent.click(screen.getByRole('button', { name: t('llm.playbook.phasePrev') }));
     expect(enabledSteps()).toEqual([true, false]);
   });
 
   it('読むだけのフェーズでも、有効な段をチェックで見せる（押せない）', () => {
-    // 自分のプレイブックの定義を直すと、選んでいる会話にもすぐ効く（写しを持たない）
     const own = ownPlaybooks();
     const item = own[TEST_PLAYBOOK_ID]!;
     const phases = item.playbook.phases.map((phase) =>
@@ -422,6 +394,7 @@ describe('プレイブックのカード', () => {
       [true, true],
     ]);
   });
+
   it('選ぶ所を開いて閉じても残らない', async () => {
     const leak = leakWatch();
     render(<Screen />);
@@ -433,6 +406,7 @@ describe('プレイブックのカード', () => {
     expect(await leak.survivors()).toBeLessThanOrEqual(LEAK_ALLOWANCE);
   });
 });
+
 describe('続きを書く・指示の枠', () => {
   it('「続きを書く」は押すと送らずに指示を指示の枠に入れ、入力欄は空にする', () => {
     render(<Screen />);
@@ -446,7 +420,6 @@ describe('続きを書く・指示の枠', () => {
     openCommands();
     fireEvent.click(continueButton()!);
     expect(sendDirection).not.toHaveBeenCalled();
-    // コマンドを押したら入力欄は空にする（画面では Ctrl+Z で戻せる）
     expect(useChatStore.getState().drafts.c1).toBe('');
     expect(useChatStore.getState().draftDirections.c1).toEqual({
       instruction: directionOf(null),
@@ -454,6 +427,7 @@ describe('続きを書く・指示の枠', () => {
     });
     sendDirection.mockRestore();
   });
+
   it('送る操作は指示を指示の枠に入れ、送ると枠と打ちかけを囲んでその操作として送る', () => {
     render(<Screen />);
     chooseStory();
@@ -486,7 +460,6 @@ describe('続きを書く・指示の枠', () => {
       </>,
     );
     const name = story('name');
-    // 自分のものはまだ作らないので、機能のタブのカードは組の見出しも行のメニューも出さない
     const card = screen.getByRole('region', { name: t('llm.extension.playbook.title') });
     expect(within(card).queryByText(t('llm.playbook.builtinGroup'))).toBeNull();
     expect(within(card).queryByText(t('llm.playbook.ownGroup'))).toBeNull();
@@ -499,7 +472,6 @@ describe('続きを書く・指示の枠', () => {
     expect(useSettingsStore.getState().playbooksHidden).toEqual(['builtin:story']);
     fireEvent.click(screen.getByRole('button', { name: t('llm.playbook.start') }));
     expect(screen.queryByRole('button', { name: chooserRow('story') })).toBeNull();
-    // 保留の標準のプレイブックは選ぶ所に出さない
     expect(screen.queryByRole('button', { name: chooserRow('research') })).toBeNull();
   });
 });
@@ -579,7 +551,6 @@ describe('ログの指示の印', () => {
     );
     const details = screen.getByText(t('llm.playbook.directionMark')).closest('details');
     expect(details?.textContent).toContain('Aoi greets Kei.');
-    // 持つ本文は置き換える前のまま
     const stored = useChatStore.getState().chats.c1?.messages[0]?.candidates[0]?.content;
     expect(stored).toContain('{{char}}');
   });

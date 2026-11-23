@@ -12,10 +12,6 @@ import { t } from '@/i18n';
 import { messageOf } from '@/lib/fault';
 import { useGraphStore } from '@/store/use-graph-store';
 
-// ─────────────────────────────
-// 公開用のデモの画面。見出しの帯とワークフローの画面だけを置き、タブ・実行・保存・接続は持たない。
-// ─────────────────────────────
-
 const HEADER_BUTTON = 'border-input hover:bg-muted rounded border px-2 py-0.5 text-xs';
 
 const MENU_ITEM =
@@ -27,7 +23,6 @@ interface DemoMenuProps {
   readonly onResetSample: () => void;
 }
 
-/** 狭い画面の見出しの帯の右端のメニュー。説明の一行と操作を畳む */
 function DemoMenu({ onOpenFile, onResetSample }: DemoMenuProps): React.ReactElement {
   return (
     <Menu.Root>
@@ -58,11 +53,9 @@ function DemoMenu({ onOpenFile, onResetSample }: DemoMenuProps): React.ReactElem
   );
 }
 
-/** デモの頁。見出しの帯・案内の帯・ワークフローの画面・模擬実行の枠を描く */
 export function FlowStyleDemo(): React.ReactElement {
   const fileInput = useRef<HTMLInputElement>(null);
   const [fileError, setFileError] = useState<string | null>(null);
-  // 開き直すたびに模擬実行の枠を作り直す（実行を止め、結果を消す）
   const [opened, setOpened] = useState(0);
   const workflow = useGraphStore((state) => state.workflow);
   const narrow = useNarrowScreen();
@@ -110,7 +103,6 @@ export function FlowStyleDemo(): React.ReactElement {
           className="hidden"
           onChange={(event) => {
             void openFile(event.target.files?.[0]);
-            // 同じファイルをもう一度選んでも開けるように
             event.target.value = '';
           }}
         />
@@ -122,7 +114,6 @@ export function FlowStyleDemo(): React.ReactElement {
         </p>
       )}
       <main className="relative min-h-0 flex-1">
-        {/* 描けなければ見本に戻す手を出す。開き直したら作り直す */}
         <ErrorBoundary
           label={t('demo.workflow')}
           resetKey={workflow}

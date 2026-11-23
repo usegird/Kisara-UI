@@ -94,8 +94,8 @@
       "chatFirst": "将对话标签页靠左排列"
     },
     "loraFormat": {
-      "label": "Lora 复制格式",
-      "note": "[loraname] 会替换为去掉扩展名的名称，[learntext] 会替换为训练中出现最多的词，[memo] 会替换为备注。留空则恢复默认。"
+      "label": "Lora 提示词格式",
+      "note": "可以用 [] 指定键名，例如 [activation text]。用 | 分隔时，若值未设置，则使用右边的键。"
     },
     "nodeDisplay": {
       "heading": "节点显示"
@@ -338,7 +338,8 @@
     "decide": {
       "toolbar": "确定{kind}",
       "label": "确定{kind}",
-      "title": "确定为 {name} 并关闭（双击或按 Enter 也可确定）"
+      "title": "确定为 {name} 并关闭（双击或按 Enter 也可确定）",
+      "insertTitle": "设置{kind}并关闭"
     },
     "insert": {
       "label": "不关闭，将{kind}插入到光标位置"
@@ -382,32 +383,42 @@
     },
     "info": {
       "panel": "模型信息",
+      "preview": "{name} 的预览",
       "close": "关闭信息",
-      "path": "路径",
+      "type": "type",
       "copyName": "复制 {name} 的名称",
       "size": "大小",
-      "modified": "修改",
-      "created": "创建",
-      "name": "名称",
-      "baseModel": "基础模型",
+      "modified": "修改日期",
+      "created": "创建日期",
+      "name": "name",
+      "baseModel": "base model",
       "network": "网络",
       "loading": "正在加载信息…",
       "error": "无法获取信息：{error}",
       "noEmbedded": "没有嵌入的信息",
-      "triggerWords": "训练中的高频词",
+      "triggerWords": "ss_tag_frequency",
       "copyTriggerWords": "复制全部训练高频词",
       "insertTriggerWords": "将训练中的高频词插入光标处",
-      "notes": "备注",
-      "notesNone": "还没有备注文件。保存后会创建。",
-      "notesLoading": "正在读取备注…",
-      "notesFailed": "无法读取备注：{error}",
-      "notesSave": "保存备注",
+      "notes": "txt",
+      "notesLoading": "正在读取 txt…",
+      "notesFailed": "无法读取 txt：{error}",
+      "notesSave": "保存 txt",
+      "notesEdit": "编辑 txt",
+      "notesCancel": "停止编辑 txt",
       "notesSaving": "正在保存…",
       "notesSaved": "已保存",
       "notesSaveFailed": "无法保存：{error}",
-      "copyNotes": "复制备注",
-      "insertNotes": "将备注插入光标处",
-      "allEntries": "全部嵌入项目"
+      "copyNotes": "复制 txt",
+      "insertNotes": "将 txt 插入光标处",
+      "json": "JSON",
+      "jsonLoading": "正在读取 JSON…",
+      "jsonFailed": "无法读取 JSON：{error}",
+      "jsonEdit": "编辑 {key}",
+      "jsonCancel": "停止编辑 {key}",
+      "jsonSave": "保存 {key}",
+      "copyActivationText": "复制 activation text",
+      "insertActivationText": "将 activation text 插入光标处",
+      "allEntries": "model data"
     }
   },
   "imagePicker": {
@@ -440,14 +451,13 @@
   "insertBar": {
     "label": "插入",
     "waiting": "正在加载列表",
-    "noTarget": "请先选择插入位置再选择，或拖放图标",
-    "caretMarker": "插入位置（可拖动到其他位置或输入框）",
-    "caretHandle": "拖放到多行输入框，即以该处为插入位置",
+    "noTarget": "请先选择插入位置再选择",
     "lora": {
       "title": "选择 Lora 并插入到光标位置",
       "label": "插入 Lora",
       "triggersFailed": "无法获取训练中的高频词：{message}",
-      "memoFailed": "无法获取备注：{message}"
+      "memoFailed": "无法获取 txt：{message}",
+      "jsonFailed": "无法获取 JSON：{message}"
     },
     "style": {
       "title": "打开样式编辑界面（确定或双击插入到光标位置）",
@@ -551,7 +561,7 @@
     },
     "insert": {
       "noFieldTitle": "请先将光标放在本窗口外的多行输入框中再点击",
-      "title": "插入到所选输入框的光标位置"
+      "title": "插入到所选输入框的光标位置并关闭"
     },
     "saveAs": {
       "title": "另存为",
@@ -597,7 +607,7 @@
       "builtin": {
         "a1111Txt2img": {
           "title": "txt2img（A1111 风格）",
-          "description": "与 Stable Diffusion web UI 相同布局的文生图。提示词中可用 LoRA 和通配符，带 Hires. fix 与 ADetailer 开关。需要 Impact Pack（ADetailer 还需要 Impact Subpack）"
+          "description": "与 Stable Diffusion web UI 相同布局的文生图。提示词中可用 LoRA 和通配符，带 Hires. fix 与 ADetailer 分组（初始为绕过）。需要 Impact Pack（ADetailer 还需要 Impact Subpack）"
         }
       }
     },
@@ -618,6 +628,7 @@
       "empty": "没有符合条件的工作流"
     },
     "tabMenu": {
+      "duplicate": "复制标签页",
       "save": "保存",
       "saveAs": "另存为…",
       "export": "导出",
@@ -719,7 +730,17 @@
     "copy": "复制通配符",
     "noMatch": "没有匹配项",
     "list": "通配符列表",
-    "itemTitle": "{name}（双击或拖到输入框中即可插入）"
+    "itemTitle": "{name}（双击或拖到输入框中即可插入）",
+    "back": "关闭预览并返回列表",
+    "preview": {
+      "title": "预览",
+      "note": "预览（嵌套、通配符和权重已应用，因此与实际写法不同）",
+      "loading": "正在读取内容…",
+      "unavailable": "服务器无法展开通配符，因此无法显示预览（仍可插入名称）",
+      "failed": "无法读取内容：{error}",
+      "empty": "此通配符没有候选项",
+      "entries": "通配符候选项"
+    }
   },
   "tagComplete": {
     "list": "标签候选",
@@ -785,6 +806,7 @@
     "overwrite": {
       "title": "要覆盖吗？",
       "description": "ComfyUI 中已有同名工作流（workflows/{path}）。覆盖后无法恢复。",
+      "shared": "另一个标签页也打开了同一个文件。\n确定要覆盖吗？",
       "confirm": "覆盖"
     },
     "rootFallback": {
@@ -941,6 +963,7 @@
       "danglingReference": "输入“{name}”的连接源（{source}）不在运行对象中",
       "namedMismatch": "参数名称顺序与定义不一致，不运行此节点（参数值可能错位）",
       "typeMismatch": "参数值类型与定义不符，不运行此节点（参数值可能错位）",
+      "linkedChoice": "切换后续输入的选择项连接了连线，不运行此节点（ComfyUI 无法根据连线传入的值选择输入）",
       "excludedDownstream": "输入来源节点 {source} 不运行，因此此节点也不运行",
       "subgraphCycle": "子图“{name}”包含其自身，因此无法展开",
       "noOutputLeft": "没有可运行的输出节点，未提交"
@@ -1104,6 +1127,7 @@
       "appInputOffTitle": "设为应用输入（App Mode）项",
       "disconnectLabel": "断开 {name} 的连接",
       "disconnect": "断开连接",
+      "dragLinkLabel": "将 {name} 的来源也连接到其他行",
       "unconnected": "未连接",
       "unconnectedRequired": "未连接（必需）",
       "unknownName": "无法确定参数名",
@@ -1144,15 +1168,10 @@
       "toSubgraphTitle": "将成员和分组移入新的 subgraph",
       "deleteGroup": "删除分组及其成员",
       "deleteGroupTitle": "移除框和其中的所有卡片",
-      "switchShow": "在应用输入中显示开关",
-      "switchHide": "移除开关",
-      "switchTitle": "一次性旁路此分组中所有卡片的开关"
-    },
-    "groupSwitch": {
-      "title": "开关",
-      "clearLabel": "移除所有开关",
-      "clearTitle": "从此列移除开关（卡片保持不变）",
-      "mixed": "部分"
+      "bypass": "全部绕过",
+      "bypassTitle": "将此分组中的所有卡片（包括子分组）设为绕过",
+      "enable": "全部启用",
+      "enableTitle": "将此分组中的所有卡片恢复为正常（包括已静音的卡片）"
     },
     "subgraph": {
       "mark": "subgraph",
@@ -1265,11 +1284,43 @@
       "otherWriter": "“{name}”的临时保存已被其他浏览器标签页更新（{time}）",
       "parallelEdit": "“{name}”也正在其他浏览器标签页中编辑（最后编辑 {time}）",
       "untitledTab": "未命名",
-      "noIssues": "没有问题"
+      "noIssues": "没有问题",
+      "missingModel": "所连接的 ComfyUI 中没有该模型：{name}",
+      "model": {
+        "place": "放置位置：models/{directory}/",
+        "openSource": "打开下载页面",
+        "copyUrl": "复制下载 URL",
+        "copyPlace": "复制放置位置",
+        "source": "下载地址：{url}"
+      },
+      "manager": {
+        "title": "缺少定义的节点：{count} 种",
+        "find": "用 ComfyUI-Manager 查找",
+        "finding": "正在查找…",
+        "noManager": "所连接的 ComfyUI 未安装 ComfyUI-Manager。请手动安装缺少的节点包。",
+        "failed": "无法查找：{reason}",
+        "version": "ComfyUI-Manager {version}",
+        "packNodes": "包含的节点：{nodes}",
+        "install": "安装",
+        "installing": "正在安装…",
+        "installed": "已安装（需要重启才能使用）",
+        "installFailed": "安装失败：{reason}",
+        "unresolved": "在任何节点包中都找不到：{nodes}",
+        "forbidden": "ComfyUI-Manager 拒绝了请求（security_level）。请检查 config.ini 和 ComfyUI 终端日志。",
+        "restart": "重启 ComfyUI",
+        "restarting": "正在重启…",
+        "restarted": "已请求重启。重新连接后，请更新节点定义。",
+        "restartFailed": "无法重启：{reason}",
+        "refreshDefinitions": "更新节点定义",
+        "confirmInstallTitle": "安装节点包",
+        "confirmInstall": "要通过 ComfyUI-Manager 将“{title}”安装到所连接的 ComfyUI 吗？\n这会向 ComfyUI 服务器添加文件。需要重启才能使用这些节点。",
+        "confirmRestartTitle": "重启 ComfyUI",
+        "confirmRestart": "要重启所连接的 ComfyUI 吗？\n正在运行和排队的任务会停止，其他使用此 ComfyUI 的用户也会断开连接。"
+      }
     },
     "control": {
       "repeatHint": "持续逐个提交此标签页的工作流，直到停止为止（会持续占用 GPU）。其他标签页的重复也会继续，交替处理。中断时停止",
-      "repeatActive": "此标签页正在重复执行。请从任务列停止",
+      "repeatStop": "停止重复运行",
       "blocked": {
         "noWorkflow": "请打开工作流",
         "notConnected": "请先连接",
@@ -1308,7 +1359,7 @@
       "openDetailHint": "点击查看运行内容和结果",
       "cancel": "从队列移除",
       "cancelHint": "在运行前将此任务从队列中移除",
-      "nodeProgress": "{finished}/{total} 个节点"
+      "nodeProgress": "{finished}/{total}"
     },
     "panel": {
       "fetchFailed": "无法获取队列：{error}",
@@ -1347,9 +1398,11 @@
       "following": "跟随中：任务结束后切换到该任务",
       "openViewer": "在查看器中打开",
       "openViewerHint": "从此图像切换到查看器",
+      "copyOutputText": "复制输出的文字",
       "section": {
         "models": "模型",
         "prompts": "提示词",
+        "outputTexts": "输出的文字",
         "settingsTimed": "运行顺序、耗时与设置",
         "settings": "设置（seed、steps 等）"
       },
@@ -1458,8 +1511,11 @@
       "openImages": "打开 {name} 的图像",
       "openImagesHint": "在查看器中打开此工作流的所有图像",
       "openDetailHint": "打开此工作流运行的详情",
-      "noModel": "未知模型",
-      "dateRuns": "{date} / {runs} 次"
+      "runsWorkflow": "{runs} / {workflow}",
+      "remove": "删除 {name} 的历史",
+      "removeHint": "删除此会话的运行记录文件",
+      "removeTitle": "删除历史",
+      "removeDescription": "将删除“{name}”的运行记录。此操作无法撤销。"
     },
     "detail": {
       "title": "历史详情",
@@ -1485,7 +1541,9 @@
       "session": "session: {id}",
       "sessionNamed": "{name}（{id}）",
       "sessionLabel": "会话",
-      "typeLabel": "类型"
+      "typeLabel": "类型",
+      "rename": "重命名会话",
+      "renameInput": "会话名称"
     },
     "panel": {
       "notRecording": "运行历史已关闭。",
@@ -1992,14 +2050,7 @@
       "cleanup": {
         "heading": "清理",
         "description": "浏览器中没有的、30 天以前的备份数据",
-        "none": "没有符合条件的备份。",
-        "notice": {
-          "title": "清理",
-          "description": "仍有旧的备份数据。要查看吗？",
-          "confirm": "查看",
-          "later": "稍后"
-        }
-      },
+        "none": "没有符合条件的备份。"      },
       "userFiles": {
         "history": "运行记录",
         "historyHint": "KisaraUI 写入 ComfyUI 用户文件夹的运行记录（kisara/history）。",
@@ -2050,6 +2101,7 @@
       "newChat": "新对话",
       "openFile": "从文件打开",
       "openFileTitle": "导入导出的对话，或从角色卡开始新对话",
+      "tidyBackups": "整理旧数据",
       "list": "显示对话列表",
       "empty": "发送过消息的对话会显示在这里。",
       "place": "对话保存位置",

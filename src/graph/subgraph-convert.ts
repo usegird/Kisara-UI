@@ -46,15 +46,6 @@ import { nodeInputs, type NodeId, type Workflow, type WorkflowLink } from '@/gra
 import { lastGroupIdOf, lastLinkIdOf, lastNodeIdOf } from '@/graph/workflow-ids';
 import { isRecord } from '@/lib/guards';
 
-// ─────────────────────────────
-// グループと subgraph の変換。本体の「Convert to Subgraph」「Unpack Subgraph」と同じ形で書く。
-// どちらも外の階層だけで、位置は変更箇所だけを動かす。
-// ─────────────────────────────
-
-/**
- * グループを subgraph にする。中のノード・子のグループと
- * グループ自身を新しい定義へ移し、グループのあった並びの位置にインスタンスを置く。できなければ null
- */
 export function groupToSubgraph(
   workflow: Workflow,
   groupIndex: number,
@@ -71,7 +62,6 @@ export function groupToSubgraph(
   const split = splitLinks(liveLinks(workflow), members);
   const { inputs, outputs } = boundaryPorts(workflow, split);
 
-  // 定義の中の線: 中どうし・入口から出る線（id はそのまま）・出口へ入る線（出どころごとに 1 本）
   const innerLinks = innerLinksOf(split.internal, inputs, outputs);
   const innerNodes = relink(
     workflow.nodes.filter((node) => inside(node.id)),
@@ -79,12 +69,10 @@ export function groupToSubgraph(
     members,
   );
 
-  // 採番（外と全部の定義で共有）
   const instanceId = lastNodeIdOf(workflow) + 1;
   const definitionId = uuid();
   const outer = outerLinksOf(inputs, outputs, instanceId, lastLinkIdOf(workflow));
 
-  // アプリ入力: メンバーの値はインスタンスの昇格した入力へ（同じ名前は先のものだけ）
   const proxies: [string, string][] = [];
   const definition = createDefinition(
     {
@@ -135,24 +123,13 @@ export function groupToSubgraph(
     proxies.push([String(ref.nodeId), ref.widgetName]);
     return { nodeId: instanceId, widgetName: ref.widgetName };
   });
-  // 開いていたメンバーの subgraph は中に入るので閉じる
   for (const id of openSubgraphIds(workflow))
     if (inside(id)) next = setSubgraphOpen(next, id, false);
 
-  // 線が変わったノードの束だけ、線の中継を置き直す
   const placed = routeLongLinks(next, layout, touched);
   return { workflow: withCounters(placed, instanceId, outer.lastLink), instanceId };
 }
 
-// ─────────────────────────────
-// subgraph → グループ
-// ─────────────────────────────
-
-/**
- * subgraph のインスタンスをグループに戻す。中のノードに新しい id を
- * 振って外へ出し、1 つのグループにまとめる。中のグループは子のグループとして親子のまま持ち出す。
- * できなければ null
- */
 export function subgraphToGroup(
   workflow: Workflow,
   instanceId: NodeId,
@@ -198,8 +175,6 @@ export function subgraphToGroup(
     ...intoInstance.map(({ link }) => link.originId),
     ...fromInstance.map(({ link }) => link.targetId),
   ]);
-  // インスタンスは置き場所を決めるまで残す（先に抜くと、親のグループが空になって消えたとき、
-  // 入れる先が無くなる）
   let next: Workflow = {
     ...start,
     nodes: relink([...start.nodes, ...moved], links, touched),
@@ -213,7 +188,6 @@ export function subgraphToGroup(
     },
   };
   next = withGroupCounter(next, lastGroupId);
-  // アプリ入力: インスタンスの昇格した入力は、出したノードの入力へ
   const proxyTo = new Map(
     proxyWidgets(instance).map((proxy) => [proxy.widget, map(proxy.nodeId)] as const),
   );
@@ -223,7 +197,6 @@ export function subgraphToGroup(
     return to === undefined ? null : { nodeId: to, widgetName: ref.widgetName };
   });
 
-  // 並びの位置: インスタンスの手前にグループの箱を入れてから、インスタンスを抜いて詰める
   const container = groupMembership(start, layout).get(instanceId) ?? null;
   const opened = shiftInsertGroup(
     next,

@@ -8,11 +8,6 @@ import { useExecutionStore } from '@/store/use-execution-store';
 import { useQueueStore } from '@/store/use-queue-store';
 import { useSettingsStore } from '@/store/use-settings-store';
 
-// ─────────────────────────────
-// 実行中の見張り。**切れたことが通知の口に届かない**構成では、見張りが取れないことだけが手がかりになる。
-// 取れなければ口を疑わせ、諦めた（タイムアウト）あとは問い合わせない。
-// ─────────────────────────────
-
 const ORIGINAL = { poll: useQueueStore.getState().poll, refresh: useQueueStore.getState().refresh };
 
 let poll: ReturnType<typeof vi.fn<(baseUrl: string) => Promise<boolean>>>;

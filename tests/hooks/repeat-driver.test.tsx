@@ -6,15 +6,12 @@ import { useRepeatRunDriver } from '@/hooks/run/use-repeat-run';
 import { INITIAL_EXECUTION } from '@/queue/execution-state';
 import { DEFAULT_SAFEGUARDS } from '@/store/settings-fields/safeguards';
 import { useExecutionStore } from '@/store/use-execution-store';
+import { useQueueStore } from '@/store/use-queue-store';
 import { useRepeatStore } from '@/store/use-repeat-store';
 import { useSettingsStore } from '@/store/use-settings-store';
 import { useTabsStore } from '@/store/use-tabs-store';
 
-// ─────────────────────────────
-// 繰り返しの送り。実行中に失敗しても次を投げ、失敗が続いたら終える。
-// 防御機構の値（最短の間隔・回数の上限）で止める。
-// **投入は差し替える**（テストから ComfyUI に投げない）。時計は作り物にする。
-// ─────────────────────────────
+import { queueEntry } from '../helpers/queue';
 
 let issued = 0;
 const runTab = vi.hoisted(() => vi.fn<(tabId: string) => Promise<string | null>>());
@@ -32,6 +29,7 @@ beforeEach(() => {
   runTab.mockReset();
   runTab.mockImplementation(() => Promise.resolve(`p${String(++issued)}`));
   useTabsStore.setState({ tabs: [{ id: 'tab-1', kind: 'workflow' }] });
+  setQueue(0);
   useRepeatStore.setState({ jobs: [] });
   useRepeatStore.getState().begin('tab-1');
   useRepeatStore.getState().submitted('tab-1', 'p1');
@@ -41,13 +39,20 @@ afterEach(() => {
   cleanup();
   useRepeatStore.setState({ jobs: [] });
   useExecutionStore.setState(INITIAL_EXECUTION);
+  useQueueStore.getState().clear();
   vi.useRealTimers();
 });
+
+function setQueue(count: number): void {
+  const entries = Array.from({ length: count }, (_, index) =>
+    queueEntry(`other-${String(index)}`, index),
+  );
+  useQueueStore.setState({ running: entries.slice(0, 1), pending: entries.slice(1), fetchedAt: 0 });
+}
 
 const jobOf = (tabId = 'tab-1') =>
   useRepeatStore.getState().jobs.find((job) => job.tabId === tabId) ?? null;
 
-/** 今キューに置いている実行を、その状態で終わらせる。既定では最短の間隔まで時計を進める */
 async function finish(
   status: 'done' | 'failed',
   tabId = 'tab-1',
@@ -108,7 +113,6 @@ describe('繰り返しの送り', () => {
 
     for (let i = 0; i < 3; i += 1) await finish('done');
 
-    // 1 回目は始めたときに投げている。上限の 3 回目が終わったら投げない
     expect(runTab).toHaveBeenCalledTimes(2);
     expect(jobOf()).toBeNull();
   });
@@ -130,6 +134,55 @@ describe('繰り返しの送り', () => {
 
     await finish('done', 'tab-1');
     expect(runTab.mock.calls.map(([tabId]) => tabId)).toEqual(['tab-2', 'tab-1']);
+  });
+
+  it('始めても、キューにタスクがある間は投げず、空いたら 1 回目を投げる', async () => {
+    useRepeatStore.setState({ jobs: [] });
+    setQueue(1);
+    renderHook(() => useRepeatRunDriver());
+    act(() => {
+      useRepeatStore.getState().begin('tab-1');
+    });
+
+    await act(() => vi.advanceTimersByTimeAsync(INTERVAL * 3));
+    expect(runTab).not.toHaveBeenCalled();
+
+    await act(async () => {
+      setQueue(0);
+      await vi.advanceTimersByTimeAsync(0);
+    });
+    expect(runTab).toHaveBeenCalledTimes(1);
+    expect(jobOf()).toMatchObject({ promptId: 'p2', count: 1, sending: false });
+  });
+
+  it('自分の実行が終わっても、キューにほかのタスクが残っていれば次を投げない', async () => {
+    renderHook(() => useRepeatRunDriver());
+    setQueue(2);
+
+    await finish('done');
+    await act(() => vi.advanceTimersByTimeAsync(INTERVAL * 3));
+    expect(runTab).not.toHaveBeenCalled();
+
+    await act(async () => {
+      setQueue(0);
+      await vi.advanceTimersByTimeAsync(0);
+    });
+    expect(runTab).toHaveBeenCalledTimes(1);
+  });
+
+  it('待つ間にキューが埋まったら投げず、また空いたら投げる', async () => {
+    renderHook(() => useRepeatRunDriver());
+
+    await finish('done', 'tab-1', 0);
+    act(() => setQueue(1));
+    await act(() => vi.advanceTimersByTimeAsync(INTERVAL));
+    expect(runTab).not.toHaveBeenCalled();
+
+    await act(async () => {
+      setQueue(0);
+      await vi.advanceTimersByTimeAsync(0);
+    });
+    expect(runTab).toHaveBeenCalledTimes(1);
   });
 
   it('対象のタブを閉じたら、その繰り返しだけ止まる', async () => {

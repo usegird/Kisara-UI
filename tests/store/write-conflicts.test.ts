@@ -9,11 +9,6 @@ import {
   type CheckedWrite,
 } from '@/store/use-write-conflicts-store';
 
-// ─────────────────────────────
-// 書く前の照合。ほかのタブで変わった・消えた 1 件は書かずに知らせ、
-// 上書きを押したら今のこのタブの内容を書く。
-// ─────────────────────────────
-
 afterEach(() => {
   for (const { key } of useWriteConflictsStore.getState().conflicts) {
     useWriteConflictsStore.getState().close(key);
@@ -40,7 +35,6 @@ describe('追加辞書の書き込み', () => {
     const table = memoryTable();
     installDictionaryTable(table);
     const dictionary = useDictionariesStore.getState().add('Lore');
-    // 足した 1 冊の書き込みを待つ
     await new Promise((resolve) => setTimeout(resolve, 0));
     await table.put(dictionary.id, { ...dictionary, name: 'Other tab', updatedAt: 9e12 });
 
@@ -76,7 +70,6 @@ describe('書く前の照合', () => {
     const write = writer(table, latest);
 
     await writeChecked(write({ updatedAt: 2, by: 'mine' }, 1));
-    // 知らせている間に直した分も書かない
     await writeChecked(write({ updatedAt: 3, by: 'mine' }, 2));
     expect(await table.get('a')).toEqual({ updatedAt: 5, by: 'other' });
     expect(useWriteConflictsStore.getState().conflicts).toEqual([

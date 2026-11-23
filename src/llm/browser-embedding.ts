@@ -11,25 +11,16 @@ import type {
   StoredEmbeddingModel,
 } from '@/port/embedding-port';
 
-// ─────────────────────────────
-// 近似判定の窓口のブラウザ実装。Web Worker は初めて頼まれたときに作る（使わない人の
-// 初めの読み込みを増やさない）。入口が作って受け口に入れる
-// ─────────────────────────────
-
-/** Transformers.js が落とした物を置く Cache Storage の名前（ライブラリの既定） */
 const CACHE = 'transformers-cache';
 
-/** Hugging Face から落としたモデルのファイルの URL の頭 */
 const HUB = 'https://huggingface.co/';
 
-/** 置いたファイルの URL からモデルの id（`組織/名前`）を取り出す。モデルのファイルでなければ null */
 function modelIdOf(url: string): string | null {
   if (!url.startsWith(HUB)) return null;
   const [owner, name] = url.slice(HUB.length).split('/');
   return owner === undefined || name === undefined ? null : `${owner}/${name}`;
 }
 
-/** このブラウザに置いたモデルと、そのファイルの大きさの合計（置いた順）。読めなければ空 */
 async function storedModels(): Promise<StoredEmbeddingModel[]> {
   if (typeof caches === 'undefined') return [];
   try {
@@ -48,7 +39,6 @@ async function storedModels(): Promise<StoredEmbeddingModel[]> {
   }
 }
 
-/** そのモデルのファイルを消す（実行の部品とほかのモデルは残す） */
 async function removeModel(id: string): Promise<void> {
   if (typeof caches === 'undefined') return;
   try {
@@ -57,11 +47,9 @@ async function removeModel(id: string): Promise<void> {
       if (modelIdOf(request.url) === id) await cache.delete(request);
     }
   } catch {
-    // 消せなければそのまま（一覧に残る）
   }
 }
 
-/** 読んだモデルのファイルの大きさの合計。読めなければ 0 */
 async function bytesOf(model: EmbeddingModel): Promise<number> {
   return (await storedModels()).find((stored) => stored.id === model.id)?.bytes ?? 0;
 }
@@ -71,7 +59,6 @@ interface Pending {
   readonly resolve: (response: EmbeddingResponse) => void;
 }
 
-/** Web Worker で埋め込みを計算する、近似判定の窓口を作る */
 export function createBrowserEmbeddingPort(): EmbeddingPort {
   let worker: Worker | null = null;
   let nextId = 0;
@@ -94,7 +81,6 @@ export function createBrowserEmbeddingPort(): EmbeddingPort {
       waiting.resolve(response);
     });
     created.addEventListener('error', (event) => {
-      // Worker が読めない・落ちたときは、待っている頼みをすべて失敗で返す
       for (const [id, waiting] of pending) {
         waiting.resolve({ id, kind: 'error', message: event.message || 'worker error' });
       }

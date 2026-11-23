@@ -7,10 +7,6 @@ import { useRepeatStore } from '@/store/use-repeat-store';
 import { useRunHistoryStore } from '@/store/use-run-history-store';
 import { useTabsStore } from '@/store/use-tabs-store';
 
-// ─────────────────────────────
-// 繰り返しのカード。タスクと同じ並びの先頭に、始めた順に足す。停止はその繰り返しだけ。
-// ─────────────────────────────
-
 afterEach(() => {
   cleanup();
   useRepeatStore.setState({ jobs: [] });
@@ -26,7 +22,6 @@ function twoJobs(): void {
   repeat.begin('tab-2');
 }
 
-/** タスクの並びと同じく `ul` の中に描く */
 function renderInList(): void {
   render(
     <ul>

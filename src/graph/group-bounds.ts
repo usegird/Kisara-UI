@@ -15,17 +15,10 @@ import {
 import type { Workflow } from '@/graph/types';
 import { isRecord } from '@/lib/guards';
 
-// ─────────────────────────────
-// グループの枠をメンバーの箱から求め直す。
-// ─────────────────────────────
-
-/** 枠の周りの余白 */
 export const GROUP_PADDING = 10;
 
-/** 枠の見出しの高さ（本体はノードの見出しと同じ高さ） */
 export const GROUP_TITLE_HEIGHT = TITLE_HEIGHT;
 
-/** 位置と大きさを同じとみなす差（px の端数を丸めた違いは変えたことにしない） */
 const SAME_NUMBER_TOLERANCE = 0.5;
 
 function sameNumber(a: unknown, b: number): boolean {
@@ -40,7 +33,6 @@ function sameBounding(group: unknown, next: readonly number[]): boolean {
   );
 }
 
-/** 中の箱を囲む枠（周りに余白、上に見出し） */
 export function frameAround(inside: readonly NodeRect[]): NodeRect {
   return {
     left: Math.min(...inside.map((box) => box.left)) - GROUP_PADDING,
@@ -50,9 +42,6 @@ export function frameAround(inside: readonly NodeRect[]): NodeRect {
   };
 }
 
-/**
- * 枠を位置から求め直す。変わった枠だけを差し替え、1 つも変わらなければ同じものを返す
- */
 export function withGroupBounds(
   workflow: Workflow,
   membership: Membership,
@@ -77,12 +66,11 @@ export function withGroupBounds(
     children.set(parent, [...(children.get(parent) ?? []), child]);
   }
 
-  // 内側から求める（子の枠を囲んで親の枠にする）
   const frames = new Map<number, NodeRect | null>();
   const frameOf = (index: number): NodeRect | null => {
     const known = frames.get(index);
     if (known !== undefined) return known;
-    frames.set(index, null); // 輪になっていても止まる
+    frames.set(index, null);
     const inside = [
       ...(boxes.get(index) ?? []),
       ...(children.get(index) ?? []).flatMap((child) => frameOf(child) ?? []),
@@ -91,7 +79,6 @@ export function withGroupBounds(
     frames.set(index, frame);
     return frame;
   };
-  // メンバーのある枠の右端も越える（寄せた枠が別の枠に重ならないように）
   const fitted = new Map<number, number[]>();
   for (let index = 0; index < groups.length; index += 1) {
     const frame = frameOf(index);

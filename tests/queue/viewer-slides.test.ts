@@ -19,12 +19,6 @@ import {
 
 import { outputFile, queueTask } from '../helpers/queue';
 
-// ─────────────────────────────
-// ビューワーの送り。**画像はすべて対等**で、1 件のタスクが何枚出していても全部並ぶ。
-// 行×列で決まる枚数ごとにページ送りし、端では止まる。
-// 新しい画像を追いかけるのは**先頭のページを見ているときだけ**。
-// ─────────────────────────────
-
 describe('タスクの画像', () => {
   it('画像でないものは飛ばし、後に出たものを先に並べる', () => {
     const found = imagesOf([
@@ -92,7 +86,6 @@ describe('追従を切っているときのページ（錨から数える）', (
     queueTask('b', [outputFile('b1.png'), outputFile('b2.png')]),
     queueTask('c', [outputFile('c1.png'), outputFile('c2.png')]),
   ]);
-  // 先頭に 1 枚増えた並び
   const after = buildSlides([
     queueTask('a', [outputFile('a1.png')]),
     queueTask('b', [outputFile('b1.png'), outputFile('b2.png')]),
@@ -135,7 +128,6 @@ describe('ページ送り', () => {
     expect(slideIndex(slides, null)).toBe(-1);
   });
 
-  /** 錨の無いとき（見ている画像のページから）に送った先 */
   const movePage = (
     list: typeof slides,
     key: string | null,
@@ -202,7 +194,6 @@ describe('見ている位置の付け直し', () => {
   });
 
   it('**画像が差し替わっても、同じタスクに留まる**（新しい方へ飛ばない）', () => {
-    // 実行中の一時画像は、終わると別のファイルになる
     const gone = 'b:temp:/preview.png';
     expect(resolveSlide(slides, gone)).toBe(slides[1]?.key);
   });
@@ -256,7 +247,6 @@ describe('追従の押しのけ', () => {
       queueTask('b', [outputFile('b.png')]),
       queueTask('c', [outputFile('c.png')]),
     ]);
-    // 増える前は 1 番目（b, c）を出していた。2 枚増えたので同じ位置 1 から数えると 2 枚送られる
     const previous = slides.slice(3, 5);
     expect(followShift(previous, slides, 2, 1)).toBe(2);
   });
@@ -266,7 +256,6 @@ describe('追従の押しのけ', () => {
 
     expect(offsets[0]).toEqual({ x: -1, y: 0 });
     expect(offsets[1]).toEqual({ x: -1, y: 0 });
-    // 枠 2（2 行目の左）は枠 1（1 行目の右）から来る
     expect(offsets[2]).toEqual({ x: 1, y: -1 });
   });
 

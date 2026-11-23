@@ -2,10 +2,6 @@ import { describe, expect, it } from 'vitest';
 
 import { ATTACH_MAX_EDGE, fitScale, isImageFile } from '@/lib/image-attach';
 
-// ─────────────────────────────
-// 添える画像の読み込み。縮尺と画像の見分けだけ（canvas は jsdom に無い）。
-// ─────────────────────────────
-
 describe('添える画像', () => {
   it('長辺が上限を超えるときだけ縮め、上限に収まるものは 1', () => {
     expect(fitScale(800, 600)).toBe(1);

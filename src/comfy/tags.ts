@@ -15,15 +15,8 @@ import {
   type TagEntry,
 } from '@/graph/tag-dictionary';
 
-// ─────────────────────────────
-// タグ辞書の読み書き。pysssss の一覧は読むだけで、書くのは `kisara/tags/` の辞書と pysssss の上書きだけ
-// （合わせるのはストア）。
-// ─────────────────────────────
-
-/** 書いた直後に読み直すので、ブラウザのキャッシュを通さない */
 const NO_STORE = { cache: 'no-store' } as const;
 
-/** 無ければ null（置いていないだけで、失敗ではない） */
 async function fetchTextOrNull(url: string, options: RequestOptions): Promise<string | null> {
   try {
     return await fetchText(url, { ...NO_STORE, ...options });
@@ -33,7 +26,6 @@ async function fetchTextOrNull(url: string, options: RequestOptions): Promise<st
   }
 }
 
-/** pysssss の補完の一覧。拡張か一覧のファイルが無ければ null */
 export async function fetchPysssssTags(
   baseUrl: string,
   options: RequestOptions = {},
@@ -42,7 +34,6 @@ export async function fetchPysssssTags(
   return text === null ? null : parseTagRows(text);
 }
 
-/** `kisara/tags/` の辞書の全件。ファイル名の順に返す。読む間に消えたファイルは外す */
 export async function fetchTagDictionaries(
   baseUrl: string,
   options: RequestOptions = {},
@@ -61,7 +52,6 @@ export async function fetchTagDictionaries(
   return read.filter((dictionary) => dictionary !== null);
 }
 
-/** pysssss の上書き（辞書と同じ形の行）。ファイルが無ければ空 */
 export async function fetchPysssssOverrides(
   baseUrl: string,
   options: RequestOptions = {},
@@ -71,10 +61,6 @@ export async function fetchPysssssOverrides(
   return text === null ? [] : parseTagRows(text);
 }
 
-/**
- * 辞書 1 つを丸ごと書く。`overwrite` が false なら、同じ名前のファイルがあるとき接続先が断る
- * （新しく作る・取り込むとき）
- */
 export async function saveTagDictionary(
   baseUrl: string,
   dictionary: TagDictionary,
@@ -86,7 +72,6 @@ export async function saveTagDictionary(
   await postText(url, serializeTagRows(dictionary.entries), options);
 }
 
-/** pysssss の上書きのファイルを丸ごと書く（辞書と同じ 4 列の形） */
 export async function savePysssssOverrides(
   baseUrl: string,
   overrides: readonly TagEntry[],
@@ -96,10 +81,6 @@ export async function savePysssssOverrides(
   await postText(userdataWriteUrl(baseUrl, path, true), serializeTagRows(overrides), options);
 }
 
-/**
- * 辞書のファイルを消す。**接続先のファイルを消す**。無ければ済み。
- * ファイルを消さない決まりの例外で、消すのは辞書の画面で選んだ 1 つだけ
- */
 export async function removeTagDictionary(
   baseUrl: string,
   name: string,

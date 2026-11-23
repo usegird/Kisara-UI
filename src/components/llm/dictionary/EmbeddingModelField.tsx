@@ -7,15 +7,9 @@ import { entryKeyOf } from '@/lib/text-entry';
 import { useSemanticStore } from '@/store/use-semantic-store';
 import { useSettingsStore } from '@/store/use-settings-store';
 
-// ─────────────────────────────
-// 近似判定のカードの一番下の埋め込みモデルの欄。
-// ─────────────────────────────
-
-/** 埋め込みモデルの URL の欄。決めたとき近似判定が有効なら読み直す */
 export function EmbeddingModelField(): React.ReactElement {
   const id = useId();
   const saved = useSettingsStore((state) => state.embeddingModel);
-  // 打ちかけ（この欄だけで持つ。決めたら設定に書く）
   const [value, setValue] = useState(saved);
   const commit = (): void => {
     const next = value.trim();

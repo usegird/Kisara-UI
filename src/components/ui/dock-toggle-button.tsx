@@ -3,10 +3,6 @@ import { PanelBottom, PanelRight } from 'lucide-react';
 import { t } from '@/i18n';
 import { useSettingsStore } from '@/store/use-settings-store';
 
-/**
- * 置き場所の切り替え（右と下）。列の右下と、縮めた行の端に置く。
- * 絵は**押したときの行き先**（右にあるときは下、下にあるときは右）。文字は持たない
- */
 export function DockToggleButton({
   className,
 }: {

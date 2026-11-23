@@ -36,6 +36,17 @@ describe('実行状態の反映', () => {
     expect(done.progress).toBeNull();
   });
 
+  it('次のノードへ移ったら、前のノードのステップの進捗を持ち越さない', () => {
+    const state = apply(
+      RUNNING,
+      { type: 'executing', promptId: 'p1', node: '12', displayNode: '12' },
+      { type: 'progress', promptId: 'p1', node: '12', value: 20, max: 20 },
+      { type: 'executing', promptId: 'p1', node: '13', displayNode: '13' },
+    );
+
+    expect(state.progress).toBeNull();
+  });
+
   it('進捗と実行中ノードを保持する', () => {
     const state = apply(RUNNING, {
       type: 'progress',
@@ -68,13 +79,10 @@ describe('実行状態の反映', () => {
   it('次の実行へ移っても、前の実行の出力は id ごとに残す', () => {
     const file = { filename: 'a.png', subfolder: '', type: 'output' };
     const executed: ComfyEvent = { type: 'executed', promptId: 'p1', node: '9', files: [file] };
-    // 続けて投げた実行が始まった（通知）
     const queued = { ...RUNNING, submittedIds: ['p1', 'p2'] };
     const switched = apply(queued, executed, { type: 'execution_start', promptId: 'p2' });
-    // 今の実行は p2 に移るが、p1 の出力は id ごとに残る
     expect([switched.promptId, switched.outputsById.p1]).toEqual(['p2', { 9: [file] }]);
 
-    // 終わった後に次を投げた（受理）
     useExecutionStore.setState(
       apply(RUNNING, executed, { type: 'execution_success', promptId: 'p1' }),
     );
@@ -189,7 +197,6 @@ describe('実行状態の反映', () => {
   });
 
   it('キューが空になったら、完了通知を取りこぼしていても実行中を解く', () => {
-    // WS が切れている間に終わった場合。ここで解かないと実行ボタンが押せないまま固まる
     const settled = apply({ ...RUNNING, status: 'running' }, { type: 'status', queueRemaining: 0 });
 
     expect(settled.status).toBe('done');
@@ -219,8 +226,6 @@ describe('実行状態の反映', () => {
   });
 
   it('受理応答より先に届いた通知を、start が塗り潰さない', () => {
-    // 検証エラーで即座に落ちると、`POST /prompt` の応答より先に通知が届くことがある。
-    // ここで「キュー待ち」に戻すと、実行ボタンが押せないまま固まる
     const failed = apply(INITIAL_EXECUTION, {
       type: 'execution_error',
       promptId: 'p9',
@@ -325,10 +330,8 @@ describe('実行状態の反映', () => {
     const state = useExecutionStore.getState();
     expect(state.promptId).toBe('p2');
     expect(state.status).toBe('running');
-    // 1つ前の進捗は引きずらない
     expect(state.runningNode).toBeNull();
     expect(state.nodeTimingsById.p2 ?? []).toEqual([]);
-    // ただし**前の実行の記録は消さない**（詳細で見られるように）
     expect(state.nodeTimingsById.p1).toHaveLength(1);
   });
 
@@ -343,11 +346,6 @@ describe('実行状態の反映', () => {
   });
 });
 
-// ─────────────────────────────
-// サーバーとの突き合わせ。
-// **通知を取りこぼしても実行中のまま固まらない**が、投げた直後には結論を出さない。
-// ─────────────────────────────
-
 describe('サーバーとの突き合わせ', () => {
   const inFlight: ExecutionSnapshot = {
     ...INITIAL_EXECUTION,
@@ -357,7 +355,6 @@ describe('サーバーとの突き合わせ', () => {
     startedAt: 0,
   };
   const late = RECONCILE_GRACE_MS + 1;
-  /** 投げた後に問い合わせた見え方 */
   const seen = (
     active: string[],
     finished: QueuePresence['finished'] = [],
@@ -516,7 +513,6 @@ describe('失敗したあとに届く通知', () => {
 });
 
 describe('エラー状態のノード', () => {
-  // `execution_error` を取りこぼしても「処理中」のまま残らないようにする
   it('進捗にエラーのノードが居れば失敗にする', () => {
     const after = apply(RUNNING, {
       type: 'progress_state',

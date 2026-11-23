@@ -16,11 +16,6 @@ import type { TaskLogEntry } from '@/queue/task-log';
 
 import { historyEntry, queueEntry, queueTask, taskLogEntry } from '../helpers/queue';
 
-// ─────────────────────────────
-// キュー列。実行中は WebSocket の進捗と経過時間、終わったものは `/history` の時刻から処理時間を出す。
-// 応答の形は本体ソース読解による想定なので、**欠けていても落ちない**ことまで確かめる。
-// ─────────────────────────────
-
 const NO_RUN: CurrentRun = {
   promptId: null,
   status: 'idle',
@@ -41,7 +36,6 @@ describe('キューの応答', () => {
       ],
     });
 
-    // セッションは `extra_data.kisara.session`。無ければ null
     expect(queue.running).toEqual([queueEntry('a', 3, null, 'tab-1')]);
     expect(queue.pending[0]?.session).toBeNull();
     expect(queue.pending.map((entry) => entry.promptId)).toEqual(['b', 'c']);
@@ -152,14 +146,12 @@ describe('キュー列の組み立て', () => {
     expect(mine?.progress).toEqual({ value: 3, max: 10 });
     expect(mine?.durationMs).toBe(3_500);
     expect(mine?.outputs).toEqual([{ filename: 'b.png', subfolder: '', type: 'temp' }]);
-    // 他の画面が投げた実行の中身は分からない
     expect(other?.progress).toBeNull();
     expect(other?.durationMs).toBeNull();
     expect(other?.outputs).toEqual([]);
   });
 
   it('終わった直後でキューにも履歴にも居ない自分の実行は、手元の出力で出す', () => {
-    // 成功の通知は履歴へ移す前に届く。/queue と /history の間に移ると、どちらにも居ない
     const file = { filename: 'b.png', subfolder: '', type: 'temp' };
     const current: CurrentRun = {
       ...NO_RUN,
@@ -171,7 +163,6 @@ describe('キュー列の組み立て', () => {
       running: [],
       pending: [],
       history: [historyEntry('a', 1)],
-      // 投げた時点の控え（結果も終了時刻もまだ無い）があっても出す
       logged: [taskLogEntry('b')],
       current,
       now: 0,
@@ -182,7 +173,6 @@ describe('キュー列の組み立て', () => {
     ]);
     expect(gap[0]?.outputs).toEqual([file]);
 
-    // 履歴に入ったらそちらで出す（2 つにしない）
     const settled = buildQueueTasks({
       running: [],
       pending: [],
@@ -208,7 +198,6 @@ describe('キュー列の組み立て', () => {
   });
 
   it('次の実行へ移っても、キューの写しが古い間は前の実行の出力を出す', () => {
-    // 前の実行 a が写しの上ではまだ実行中。出力を消すと、追従しているビューワーが前の画像へ戻る
     const file = { filename: 'a.png', subfolder: '', type: 'output' };
     const [previous] = buildQueueTasks({
       running: [queueEntry('a', 1)],
@@ -227,7 +216,6 @@ describe('キュー列の組み立て', () => {
   });
 
   it('自分の実行でなくても、投入時刻が取れれば経過時間を出す', () => {
-    // 詰まって残ったものを「回っているだけの行」にしない
     const [task] = buildQueueTasks({
       running: [queueEntry('other', 0, 1_000)],
       pending: [],
@@ -317,7 +305,6 @@ describe('キュー列の組み立て', () => {
 
     expect(task?.state).toBe('failed');
     expect(task?.durationMs).toBeNull();
-    // 失敗の 1 行はカードに出す
     expect(task?.message).toBe('CUDA out of memory');
   });
 });
@@ -380,14 +367,12 @@ describe('受理されなかった実行', () => {
         rejectedEntry('rejected:3', 5000, 'Value not in list'),
         rejectedEntry('rejected:1', 1000, 'Required input is missing'),
       ],
-      // 断られた実行は手元の状態にも失敗として残るが、控えと二重には出さない
       current: { ...NO_RUN, status: 'failed', error: 'Value not in list' },
       now: 0,
     });
 
     expect(tasks.map((task) => task.promptId)).toEqual(['r', 'rejected:3', 'z', 'rejected:1']);
     expect(tasks.some((task) => task.promptId === LOCAL_TASK_ID)).toBe(false);
-    // カードには最初のノードの理由を出す
     expect(tasks[1]?.message).toBe('#7 Encode: Value not in list');
     expect(tasks[1]?.state).toBe('failed');
   });
@@ -564,7 +549,6 @@ describe('隣のタスク', () => {
 });
 
 describe('キューの写しが古いとき', () => {
-  // キューの取り直しは数秒おき。その間、失敗を掴んでいても「処理中」に見えてしまう
   const failed: CurrentRun = {
     promptId: 'a',
     status: 'failed',
@@ -589,7 +573,6 @@ describe('キューの写しが古いとき', () => {
 
     expect(task?.state).toBe('failed');
     expect(task?.message).toBe('落ちました');
-    // 経過時間ではなく処理時間になる
     expect(task?.durationMs).toBe(3_000);
   });
 
@@ -623,7 +606,6 @@ describe('通知が途切れているとき', () => {
 
     expect(running?.state).toBe('running');
     expect(running?.message).toBe('リトライ (4/10)');
-    // 通知が来ないので、時間だけ進んで見えないよう出さない
     expect(running?.durationMs).toBeNull();
     expect(pending?.state).toBe('pending');
     expect(pending?.message).toBeNull();

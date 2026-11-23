@@ -12,17 +12,11 @@ import type { RunHistoryState } from '@/store/use-run-history-store';
 import { useSettingsStore } from '@/store/use-settings-store';
 import { activeSession, useTabsStore } from '@/store/use-tabs-store';
 
-// ─────────────────────────────
-// 実行の記録のストアの、送った実行を記録に足す・セッションの名前を読む・書く操作。
-// ─────────────────────────────
-
-/** この slice が持つ操作 */
 type RunHistorySessionActions = Pick<
   RunHistoryState,
   'setUpTo' | 'rememberSent' | 'ingest' | 'loadSession' | 'setSessionName'
 >;
 
-/** 送った実行を記録に足す・セッションの名前の操作を作る */
 export const createRunHistorySessionSlice: StateCreator<
   RunHistoryState,
   [],
@@ -50,7 +44,6 @@ export const createRunHistorySessionSlice: StateCreator<
     return queueWrite(set, async () => {
       const file = await ownFile(baseUrl, session);
       rememberName({ set, get }, session, file.name ?? '');
-      // 読んでいる間に別のタブへ移っていたら出さない
       if (activeSession(useTabsStore.getState()) === session) {
         set({ sessionName: file.name ?? '' });
       }

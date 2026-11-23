@@ -2,15 +2,8 @@ import { leadingSystemText } from '@/chat/prompt';
 import type { Candidate, Chat, MessageRole } from '@/chat/types';
 import { setOwn } from '@/lib/own-key';
 
-// ─────────────────────────────
-// 会話のファイルの書き出し。ChatGPT の `conversations.json` の形に KisaraUI の持ち物を足す。
-// 書き出しと、ComfyUI に置く会話のファイルで使う。読み戻しは conversation-file-parse.ts。
-// ─────────────────────────────
-
-/** 会話の `kisara` の版 */
 const CONVERSATION_KISARA_VERSION = 1;
 
-/** 1 秒のミリ秒（ChatGPT の形は時刻を秒で持つ） */
 export const MS_PER_SECOND = 1000;
 
 const ROOT_ID = 'root';
@@ -54,7 +47,6 @@ function candidateRecord(messageId: string, candidate: Candidate): Record<string
   };
 }
 
-/** 会話 1 つを ChatGPT の形にする。接続の設定は id だけを書き、ベース URL と API キーは書かない */
 export function toConversation(id: string, chat: Chat): Record<string, unknown> {
   const mapping: Record<string, TreeNode> = {
     [ROOT_ID]: { id: ROOT_ID, message: null, parent: null, children: [] },
@@ -116,7 +108,6 @@ export function toConversation(id: string, chat: Chat): Record<string, unknown> 
   };
 }
 
-/** 書き出すファイルの本文（会話の配列） */
 export function serializeConversations(
   entries: readonly { readonly id: string; readonly chat: Chat }[],
 ): string {

@@ -6,24 +6,14 @@ import { caretOffsetAt } from '@/lib/caret-from-point';
 import { MENU_ACTION } from '@/lib/menu-actions';
 import { entryKeyOf } from '@/lib/text-entry';
 
-// ─────────────────────────────
-// 見出しのコメント（`title`）。押したときだけ入力欄に変える。
-// 外部でコメントが変わったら、置く側が `key` で作り直す（描画中の state 同期を避ける）。
-// ─────────────────────────────
-
-/** 見出しのコメントの受け取り物 */
 export interface CommentFieldProps {
   readonly view: NodeView;
-  /** 無ければ読むだけ */
   readonly onCommentChange?: ((id: number, comment: string) => void) | undefined;
 }
 
-/** コメントを出し、押すと押した位置にキャレットを置いた入力欄に変える */
 export function CommentField({ view, onCommentChange }: CommentFieldProps): React.ReactElement {
   const [draft, setDraft] = useState<string | null>(null);
-  // 入力欄に変えたあと、最初に置くキャレットの位置
   const caret = useRef<number | null>(null);
-  // Esc でやめたとき、続いて来る blur で書き戻さない
   const cancelled = useRef(false);
   const text = useRef<HTMLSpanElement>(null);
 
@@ -44,10 +34,8 @@ export function CommentField({ view, onCommentChange }: CommentFieldProps): Reac
           rounded border border-transparent pr-1 pl-px text-left text-2xs"
         title={empty ? t('flow.comment.emptyTitle') : view.comment}
         aria-label={t('flow.comment.editLabel', { name: view.displayName })}
-        // Tab で止めず、キーボードで開くメニューから届く
         {...MENU_ACTION}
         onClick={(event) => {
-          // キーで押したとき（位置を持たない）は末尾
           const at =
             event.detail === 0 || empty || text.current === null
               ? null
@@ -73,7 +61,6 @@ export function CommentField({ view, onCommentChange }: CommentFieldProps): Reac
 
   return (
     <input
-      // 押した操作の続きで書けるよう、現れたらすぐ焦点を当ててキャレットを置く
       ref={(element) => {
         const at = caret.current;
         if (element === null || at === null) return;

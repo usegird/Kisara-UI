@@ -22,15 +22,8 @@ import {
 import { useDiagnosticsDialogStore } from '@/store/use-diagnostics-dialog-store';
 import { useFaultStore } from '@/store/use-fault-store';
 
-// ─────────────────────────────
-// 「ログをエクスポート」のダイアログ。**書き出す前に中身の全文を見せる。**
-// 外枠に 1 つだけ置き、開くのはストアの印。
-// ─────────────────────────────
-
-/** 問い合わせフォーム（本体の外の Worker。プライバシーポリシー 11 と同じ URL） */
 const CONTACT_FORM_URL = 'https://contact.kisara-ui.com';
 
-/** 表示している中身と、その時点のログの量 */
 interface View {
   readonly text: string;
   readonly faults: number;
@@ -52,7 +45,6 @@ function levelName(level: TraceLevels[keyof TraceLevels]): string {
   return t(`settings.diagnostics.level.${level}`);
 }
 
-/** 説明の一言。「問い合わせフォーム」の所をフォームを開くリンクにする（語順は文言の側が持つ） */
 function IntroText(): React.ReactElement {
   return (
     <p className="text-muted-foreground">
@@ -93,7 +85,6 @@ function SectionGroups({
             {t(`settings.diagnostics.dialog.group.${group.id}`)}
           </legend>
           {group.sections.map((section) => {
-            // 外せない区分は、入れたまま外せない印にする
             const required = REQUIRED_SECTIONS.has(section);
             return (
               <label key={section} className="text-muted-foreground flex items-start gap-2 pl-2">
@@ -114,17 +105,14 @@ function SectionGroups({
   );
 }
 
-/** 閉じるのは見出しの帯の × と Esc（下端には置かない） */
 function DiagnosticsBody(): React.ReactElement {
   const [inputs, setInputs] = useState<DiagnosticsInputs | null>(null);
   const [chosen, setChosen] = useState<ReadonlySet<DiagnosticsSection>>(
     () => new Set(DEFAULT_SECTIONS),
   );
-  // ログは画面の外の入れ物にあるので、読んだ結果を手続きの中で組んで持つ
   const [view, setView] = useState<View | null>(null);
   const [confirming, setConfirming] = useState(false);
 
-  // 開いたときに 1 回だけ、ComfyUI の版と保存領域の使用量を読む
   useEffect(() => {
     let alive = true;
     void readDiagnosticsInputs().then((read) => {
@@ -174,7 +162,6 @@ function DiagnosticsBody(): React.ReactElement {
           readOnly
           value={view?.text ?? t('settings.diagnostics.dialog.loading')}
         />
-        {/* 中身の枠のすぐ下の行。左に大きさ、右に操作のボタン */}
         <div className="flex shrink-0 flex-wrap items-center gap-2">
           <span className="text-muted-foreground text-xs tabular-nums">
             {view === null
@@ -215,7 +202,6 @@ function DiagnosticsBody(): React.ReactElement {
   );
 }
 
-/** 外枠に 1 つだけ置く。開いている間だけ中身を組む（閉じると区分の選びは既定に戻る） */
 export function DiagnosticsDialog(): React.ReactElement {
   const open = useDiagnosticsDialogStore((state) => state.isOpen);
   const close = useDiagnosticsDialogStore((state) => state.close);

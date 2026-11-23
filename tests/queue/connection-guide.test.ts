@@ -3,10 +3,6 @@ import { describe, expect, it } from 'vitest';
 import type { ConnectionFailureCode } from '@/port/connection';
 import { failureGuide, forbiddenRunGuide, launchSample } from '@/queue/connection-guide';
 
-// ─────────────────────────────
-// 接続失敗の案内。**CORS 未設定 / ローカルネットワーク拒否 / URL 誤り**で、それぞれ別の実行可能な指示が出ること。
-// ─────────────────────────────
-
 const ORIGIN = 'https://kisara.example';
 
 describe('接続失敗の案内', () => {

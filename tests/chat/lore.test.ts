@@ -13,10 +13,6 @@ import {
 
 import { chatMessage, loreEntry as entry } from '../helpers/llm';
 
-// ─────────────────────────────
-// ロアブックの当て方と包み方
-// ─────────────────────────────
-
 const said = (...texts: string[]) =>
   texts.map((content, index) =>
     chatMessage(`m${index}`, index % 2 ? 'assistant' : 'user', [content]),
@@ -169,7 +165,6 @@ describe('予算と並び', () => {
       entry({ constant: true, content: 'bbbb', priority: 3, order: 3 }),
       entry({ constant: true, content: 'cccc', priority: 2, order: 2 }),
     ];
-    // 英字 4 文字で 1。予算 2 なら優先の高い 2 つ
     expect(run(lore, [], { budget: 2 }).additional).toBe('cccc\n\nbbbb');
   });
 
@@ -221,10 +216,10 @@ describe('置き場と包み方', () => {
     expect(result.depthItems.map((item) => [item.role, item.content])).toEqual([
       ['system', 'Top.'],
     ]);
-    // 2 件の発言と今回のメッセージで 3
     expect(result.depthItems[0]?.position).toMatchObject({ kind: 'depth', depth: 3 });
   });
 });
+
 describe('出どころをまたぐ', () => {
   const sources = (...lists: (readonly [string, readonly LoreEntry[]])[]) =>
     lists.map(([id, entries]) => ({ id, entries }));
@@ -253,6 +248,7 @@ describe('出どころをまたぐ', () => {
     expect(result.additional).toBe('aaaa');
     expect(result.hits.has('global')).toBe(false);
   });
+
   it('予算は先に足すと決めた出どころ（プリセットのロアブック）から埋め、並びは出どころの順', () => {
     const result = activateLore(
       [
@@ -291,6 +287,7 @@ describe('出どころをまたぐ', () => {
     expect(runAll(sources(['a', book], ['a', book])).additional).toBe('Once.');
   });
 });
+
 describe('個別追加辞書の並び', () => {
   const first = entry({ content: 'A' });
   const second = entry({ content: 'B' });

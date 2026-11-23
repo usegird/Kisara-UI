@@ -3,10 +3,6 @@ import { describe, expect, it, vi } from 'vitest';
 import type { FetchLike } from '@/comfy/client';
 import { fetchSavedStyles, fetchStyleTable, saveStyle } from '@/comfy/styles';
 
-// ─────────────────────────────
-// スタイルの読み書き。`styles.csv` は読むだけ、書くのは `kisara/styles/` の 1 件。
-// ─────────────────────────────
-
 const base = 'http://127.0.0.1:8188';
 const dir = `${base}/userdata/kisara%2Fstyles%2F`;
 

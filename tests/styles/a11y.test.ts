@@ -5,22 +5,15 @@ import { describe, expect, it } from 'vitest';
 
 import { TOAST_TIMEOUT } from '@/components/ui/toast-manager';
 
-// ─────────────────────────────
-// WCAG 2.1 AA の明度差・動き・知らせの時間。
-// 色は `globals.css` のトークンの値から明度差を求める（ブラウザと同じく sRGB で重ねる）。
-// ─────────────────────────────
-
 const CSS = readFileSync('src/styles/globals.css', 'utf8');
 
 type Rgb = readonly [number, number, number];
 
-/** `selector {` から閉じ括弧までの中身 */
 function block(selector: string): string {
   const start = CSS.indexOf(`${selector} {`);
   return CSS.slice(start, CSS.indexOf('\n}', start));
 }
 
-/** トークンの oklch（L C H と透明度） */
 function token(scope: string, name: string): { readonly lch: Rgb; readonly alpha: number } {
   const match = new RegExp(
     `--${name}: oklch\\(([\\d.]+) ([\\d.]+) ([\\d.]+)(?: / (\\d+)%)?\\)`,
@@ -68,7 +61,6 @@ function ratio(x: Rgb, y: Rgb): number {
   return ((hi ?? 0) + 0.05) / ((lo ?? 0) + 0.05);
 }
 
-/** 地のトークンをページの地に重ねた色 */
 function ground(scope: string, name: string): Rgb {
   const page = srgb(token(scope, 'background').lch);
   const { lch, alpha } = token(scope, name);
@@ -83,6 +75,13 @@ describe('明度差（WCAG 1.4.3・1.4.11）', () => {
       const text = srgb(token(scope, 'muted-foreground').lch);
       for (const name of ['background', 'card', 'muted', 'band', 'pane']) {
         expect(ratio(text, ground(scope, name)), name).toBeGreaterThanOrEqual(4.5);
+      }
+    });
+
+    it(`${scope}: 注意の橙の文字は、列の欄の地と地で 4.5:1 以上`, () => {
+      const caution = srgb(token(scope, 'caution').lch);
+      for (const name of ['background', 'pane']) {
+        expect(ratio(caution, ground(scope, name)), name).toBeGreaterThanOrEqual(4.5);
       }
     });
 
@@ -107,7 +106,6 @@ describe('明度差（WCAG 1.4.3・1.4.11）', () => {
   });
 });
 
-/** `src/` の下の .ts・.tsx */
 function sources(dir: string): string[] {
   return readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
     const path = join(dir, entry.name);
@@ -116,7 +114,6 @@ function sources(dir: string): string[] {
   });
 }
 
-/** 正規表現に当たる行（`path:行`） */
 function offenders(pattern: RegExp, allow: (line: string) => boolean = () => false): string[] {
   return sources('src').flatMap((path) =>
     readFileSync(path, 'utf8')

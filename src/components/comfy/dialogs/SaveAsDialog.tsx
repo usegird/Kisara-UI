@@ -4,24 +4,13 @@ import { DialogClose, DialogFrame } from '@/components/ui/dialog';
 import { dialogButton } from '@/components/ui/dialog-button';
 import { t } from '@/i18n';
 
-// ─────────────────────────────
-// 名前を付けて保存のダイアログ。名前を尋ねるだけで、書き込みは呼び出し側。
-// 焦点の閉じ込めと Escape は自作せず Base UI に任せる。
-// ─────────────────────────────
-
-/** 名前を付けて保存のダイアログの props */
 export interface SaveAsDialogProps {
-  /** 出しているか。開閉は呼び出し側が持つ */
   readonly open: boolean;
-  /** 開いたときに入れておく名前（今のタブの名前） */
   readonly initialName: string;
-  /** 前後の空白を除いた名前で保存する */
   readonly onSave: (name: string) => void;
-  /** やめる・閉じる */
   readonly onCancel: () => void;
 }
 
-/** 保存する名前を尋ねる。空の名前では保存を押せない */
 export function SaveAsDialog({
   open,
   initialName,
@@ -39,7 +28,6 @@ export function SaveAsDialog({
       title={t('comfy.saveAs.title')}
       description={t('comfy.saveAs.description')}
     >
-      {/* 開くたびに初期値から始めたいので、中身は開いている間だけ置く */}
       {open ? <NameForm initialName={initialName} onSave={onSave} /> : null}
     </DialogFrame>
   );

@@ -30,7 +30,6 @@ function fakeFactory(): { factory: SocketFactory; sockets: FakeSocket[] } {
   return { factory, sockets };
 }
 
-/** 回数だけを確かめるときの方針。開くまでの見切りを外す（時間で失敗が増えないように） */
 const COUNT_ONLY = { ...RECONNECT_POLICY, openTimeoutMs: null };
 
 beforeEach(() => {
@@ -91,7 +90,7 @@ describe('WebSocket 購読', () => {
 
     sockets[1]?.handlers.onClose();
     vi.advanceTimersByTime(500);
-    expect(sockets).toHaveLength(2); // まだ足りない
+    expect(sockets).toHaveLength(2);
     vi.advanceTimersByTime(500);
     expect(sockets).toHaveLength(3);
   });
@@ -111,7 +110,6 @@ describe('WebSocket 購読', () => {
       sockets.at(-1)?.handlers.onClose();
       vi.advanceTimersByTime(60_000);
     }
-    // 張り直しは 10 回まで（最初の 1 本を含めて 11 本）
     expect(sockets).toHaveLength(RECONNECT_ATTEMPTS + 1);
 
     sockets.at(-1)?.handlers.onClose();
@@ -146,7 +144,6 @@ describe('WebSocket 購読', () => {
     expect(onGiveUp).toHaveBeenCalledTimes(1);
     expect(onGiveUp).toHaveBeenCalledWith('retries');
 
-    // 手で閉じたのは諦めではない
     socket.close();
     expect(onGiveUp).toHaveBeenCalledTimes(1);
   });
@@ -168,7 +165,6 @@ describe('WebSocket 購読', () => {
     expect(sockets[0]?.closed).toBe(true);
     expect(statuses.at(-1)).toBe('reconnecting');
 
-    // 見切ったあとに遅れて開いても、開通にしない
     sockets[0]?.handlers.onOpen();
     expect(statuses.at(-1)).toBe('reconnecting');
   });
@@ -185,10 +181,8 @@ describe('WebSocket 購読', () => {
       factory,
     });
 
-    // 繋がっていた口が切れ、張り直し 10 本がどれも開かないまま待たされる
     sockets[0]?.handlers.onOpen();
     sockets[0]?.handlers.onClose();
-    // 待ち 37.5 秒 ＋ 見切り 5 秒 × 10 回 ＝ 87.5 秒。早すぎもしない
     vi.advanceTimersByTime(87_000);
     expect(onGiveUp).not.toHaveBeenCalled();
     vi.advanceTimersByTime(1_000);
@@ -209,7 +203,6 @@ describe('WebSocket 購読', () => {
       factory,
     });
 
-    /** 開いて、しばらく続いてから切れる（回数は戻る） */
     const dropAfterStable = (): void => {
       sockets.at(-1)?.handlers.onOpen();
       vi.advanceTimersByTime(STABLE_OPEN_MS);
@@ -217,7 +210,6 @@ describe('WebSocket 購読', () => {
       vi.advanceTimersByTime(10_000);
     };
 
-    // 数えないと言われた切れ（何もしていない間）は、いくら続いても諦めない
     for (let index = 0; index < RUN_DROP_LIMIT * 2; index += 1) dropAfterStable();
     expect(onGiveUp).not.toHaveBeenCalled();
 
@@ -227,7 +219,6 @@ describe('WebSocket 購読', () => {
     const opened = sockets.length;
     dropAfterStable();
     expect(onGiveUp).toHaveBeenCalledWith('drops');
-    // 諦めたら張り直さない
     expect(sockets).toHaveLength(opened);
     expect(socket.status()).toBe('closed');
   });
@@ -244,7 +235,6 @@ describe('WebSocket 購読', () => {
       factory,
     });
 
-    // 開く前は疑わない（開くまでの見切りに任せる）
     socket.suspect();
     expect(retries).toEqual([]);
 
@@ -254,7 +244,6 @@ describe('WebSocket 購読', () => {
     expect(socket.status()).toBe('reconnecting');
     expect(retries).toEqual([1]);
 
-    // 張り直している間に重ねて疑っても、回数を進めない
     socket.suspect();
     expect(retries).toEqual([1]);
   });
@@ -269,7 +258,6 @@ describe('WebSocket 購読', () => {
       factory,
     });
 
-    // 開いてはすぐ切れる相手。回数が戻らないので、いずれ打ち切られる
     for (let attempt = 0; attempt < RECONNECT_ATTEMPTS + 5; attempt += 1) {
       sockets.at(-1)?.handlers.onOpen();
       sockets.at(-1)?.handlers.onClose();
@@ -288,14 +276,12 @@ describe('WebSocket 購読', () => {
       reconnect: COUNT_ONLY,
     });
 
-    // 先に何度か失敗させておく
     for (let attempt = 0; attempt < 5; attempt += 1) {
       sockets.at(-1)?.handlers.onClose();
       vi.advanceTimersByTime(60_000);
     }
     const before = sockets.length;
 
-    // しばらく続いた接続で数え直し
     sockets.at(-1)?.handlers.onOpen();
     vi.advanceTimersByTime(STABLE_OPEN_MS);
     sockets.at(-1)?.handlers.onClose();
@@ -305,7 +291,6 @@ describe('WebSocket 購読', () => {
       sockets.at(-1)?.handlers.onClose();
       vi.advanceTimersByTime(60_000);
     }
-    // 数え直したので、ここからさらに 10 本張り直せる
     expect(sockets).toHaveLength(before + RECONNECT_ATTEMPTS);
   });
 
@@ -387,7 +372,7 @@ describe('WebSocket 購読', () => {
     sockets[0]?.handlers.onMessage(
       JSON.stringify({ type: 'executing', data: { node: '3', prompt_id: 'p1' } }),
     );
-    sockets[0]?.handlers.onMessage(new Uint8Array([1, 2])); // プレビュー画像は無視
+    sockets[0]?.handlers.onMessage(new Uint8Array([1, 2]));
 
     expect(events).toEqual([{ type: 'executing', promptId: 'p1', node: '3', displayNode: null }]);
   });

@@ -60,7 +60,6 @@ describe('formatEntry', () => {
 });
 
 describe('t', () => {
-  // 他のテストは日本語で描く前提（tests/setup/locale.ts）。ここで変えたら戻す
   afterAll(() => initLocale('ja'));
 
   it('読み込んだ言語の表から引く', async () => {

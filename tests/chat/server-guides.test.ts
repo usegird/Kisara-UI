@@ -2,10 +2,6 @@ import { describe, expect, it } from 'vitest';
 
 import { CLOUD_SERVERS, ollamaAllows, SERVERS } from '@/chat/server-guides';
 
-// ─────────────────────────────
-// LLM の接続の案内に並べるサーバーの表
-// ─────────────────────────────
-
 const ORIGIN = 'https://kisara.example';
 
 function server(key: string) {

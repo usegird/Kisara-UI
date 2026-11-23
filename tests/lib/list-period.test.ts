@@ -2,8 +2,6 @@ import { describe, expect, it } from 'vitest';
 
 import { groupByPeriod, listPeriod } from '@/lib/list-period';
 
-// 一覧の時期の区切り（会話の一覧とワークフローの一覧で共用）
-
 const NOW = new Date(2026, 9, 31, 12).getTime();
 const DAY = 24 * 60 * 60 * 1000;
 

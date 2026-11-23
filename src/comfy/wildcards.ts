@@ -1,16 +1,12 @@
-import { fetchJson, type RequestOptions } from '@/comfy/client';
-import { wildcardListUrl } from '@/comfy/endpoints';
-import { isNotFound } from '@/comfy/request-error';
-import { parseWildcardList } from '@/comfy/schema';
+import { fetchJson, postJson, type RequestOptions } from '@/comfy/client';
+import { wildcardExpandUrl, wildcardListUrl } from '@/comfy/endpoints';
+import { ComfyRequestError, isNotFound } from '@/comfy/request-error';
+import { parseWildcardExpansion, parseWildcardList } from '@/comfy/schema';
 
-// ─────────────────────────────
-// ワイルドカードの名前の一覧を読む。
-// ─────────────────────────────
+const SELECT_ALL_COUNT = 9999;
 
-/**
- * ワイルドカードの名前の一覧。**本体の経路ではなく**（Impact Pack が足すもの）、入っていない接続先では
- * 404 になるので、使えない接続先（経路が無い・形が違う）なら null（呼び出し側はアイコンを出さない）
- */
+const ENTRY_SEPARATOR = '␞';
+
 export async function fetchWildcards(
   baseUrl: string,
   options: RequestOptions = {},
@@ -21,4 +17,27 @@ export async function fetchWildcards(
     if (isNotFound(error)) return null;
     throw error;
   }
+}
+
+export async function fetchWildcardEntries(
+  baseUrl: string,
+  name: string,
+  options: RequestOptions = {},
+): Promise<string[] | null> {
+  const body = { text: `{${String(SELECT_ALL_COUNT)}$$${ENTRY_SEPARATOR}$$${name}}` };
+  const url = wildcardExpandUrl(baseUrl);
+  let raw: unknown;
+  try {
+    raw = await postJson(url, body, options);
+  } catch (error) {
+    if (isNotFound(error)) return null;
+    throw error;
+  }
+  const text = parseWildcardExpansion(raw);
+  if (text === null) throw new ComfyRequestError('parse', url);
+  return text
+    .split(ENTRY_SEPARATOR)
+    .map((entry) => entry.trim())
+    .filter((entry) => entry.length > 0)
+    .sort((a, b) => a.localeCompare(b));
 }

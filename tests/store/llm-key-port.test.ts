@@ -9,10 +9,6 @@ import { useLlmProfilesStore } from '@/store/use-llm-profiles-store';
 
 import { fakeKeyPort, fakeLlmPort, profile } from '../helpers/llm';
 
-// ─────────────────────────────
-// ゲートウェイの窓口の受け口。キーが入ったら確かめて、結果を返す。
-// ─────────────────────────────
-
 describe('キーが入ったとき', () => {
   it('確かめた結果を、そのベース URL と一緒にゲートウェイへ返す', async () => {
     installLlmPort(fakeLlmPort(['m']));

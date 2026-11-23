@@ -7,10 +7,6 @@ import { useConnectionStore } from '@/store/use-connection-store';
 import { useRunHistoryStore } from '@/store/use-run-history-store';
 import { useSettingsStore } from '@/store/use-settings-store';
 
-// ─────────────────────────────
-// 実行の記録は接続したときに読み直す
-// ─────────────────────────────
-
 const ORIGINAL_LOAD = useRunHistoryStore.getState().load;
 
 afterEach(() => {

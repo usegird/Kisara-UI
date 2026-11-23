@@ -5,10 +5,6 @@ import type { Workflow } from '@/graph/types';
 
 import { node } from '../helpers/workflow';
 
-// ─────────────────────────────
-// 位置を変えたノードのピン留めを外す。
-// ─────────────────────────────
-
 const pinned = { flags: { pinned: true } };
 
 describe('位置を変えたらピン留めを外す', () => {

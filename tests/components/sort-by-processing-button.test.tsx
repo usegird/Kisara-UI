@@ -5,10 +5,6 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { SortByProcessingButton } from '@/components/comfy/flow/SortByProcessingButton';
 import { useGraphStore } from '@/store/use-graph-store';
 
-// ─────────────────────────────
-// 処理順に並べるアイコン。**押しただけでは並べ直さない。** 確かめて「並べる」を選んだときだけ並べる。
-// ─────────────────────────────
-
 const original = useGraphStore.getState().sortByProcessing;
 
 afterEach(() => {

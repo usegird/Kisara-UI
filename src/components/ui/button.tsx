@@ -2,7 +2,6 @@ import { Button as ButtonPrimitive } from '@base-ui/react/button';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from 'cn';
 
-// 焦点の輪は不透明にする（WCAG 1.4.11。shadcn の既定（輪を半分透かす）では地との明度差が足りない）
 const buttonVariants = cva(
   "group/button inline-flex shrink-0 items-center justify-center rounded-lg border border-transparent bg-clip-padding text-sm font-medium whitespace-nowrap transition-all outline-none select-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring active:not-aria-[haspopup]:translate-y-px disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
   {
@@ -40,7 +39,6 @@ const buttonVariants = cva(
   },
 );
 
-/** Base UI のボタンに、段（`variant`・`size`）ごとの見た目を付けたもの */
 function Button({
   className,
   variant = 'default',
@@ -56,6 +54,4 @@ function Button({
   );
 }
 
-// 手直し: 生成物は buttonVariants も export するが、ここでは出さない
-// （部品以外を export すると Fast Refresh が状態を保てない。使う側も無い）
 export { Button };

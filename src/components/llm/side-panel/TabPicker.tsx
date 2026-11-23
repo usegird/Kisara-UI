@@ -12,20 +12,10 @@ import { useDefinitionsStore } from '@/store/use-definitions-store';
 import type { ComfyToolTarget } from '@/store/use-settings-store';
 import { listToolTabs, type ToolTab } from '@/store/use-workflow-tools-store';
 
-// ─────────────────────────────
-// 機能のタブの Comfy Workflow の追加のダイアログ。
-// ─────────────────────────────
-
-/** 追加のダイアログの最小の大きさ。ほかのダイアログの幅の半分 */
 const PICKER_MIN = { width: DIALOG_MIN.width / 2, height: DIALOG_MIN.height };
 
-/** 追加のダイアログの行の、設定を見るボタン（1 行目の高さに揃える） */
 const PICKER_ICON_BUTTON = `${SMALL_ICON_BUTTON} mt-1.5`;
 
-/**
- * 追加のダイアログ。LLM からの呼び出し設定を持つ、開いているタブをすべて出し、選んでいるものには
- * チェックを入れておく。OK で、チェックしたタブを選び、外したタブを選択から外す
- */
 export function TabPicker({
   baseUrl,
   selected,
@@ -37,9 +27,7 @@ export function TabPicker({
   readonly onApply: (shown: readonly ToolTab[], checked: ReadonlySet<string>) => void;
   readonly onClose: () => void;
 }): React.ReactElement {
-  // 開いた時点のタブを出す（開いている間にタブは増えない）
   const [tabs] = useState(() => listToolTabs(baseUrl));
-  // 設定を見ているタブ（画面の中だけ）
   const [viewing, setViewing] = useState<ToolTab | null>(null);
   const definitions = useDefinitionsStore((state) => state.definitions);
   const [checked, setChecked] = useState<ReadonlySet<string>>(
@@ -65,16 +53,12 @@ export function TabPicker({
       onOpenChange={(next) => {
         if (!next) onClose();
       }}
-      // 会話のタブには嵌める列が無いので自由移動だけ。最小はほかのダイアログの幅の半分で、
-      // タブが少なくても開いたときからその大きさで出す（帯の下の本体は 304px 以上）
       size="narrow"
       movable
       embeddable={false}
       minSize={PICKER_MIN}
       title={t('llm.extension.picker.title')}
     >
-      {/* OK は最後のタブのすぐ下。タブが多ければ一覧だけを送る（高さの上限は一覧に持たせる。枠に
-          持たせると中身の高さが 0 に潰れる） */}
       <div className="flex min-h-76 flex-1 flex-col gap-2 p-3">
         <ul className="flex max-h-[60vh] min-h-0 flex-col overflow-auto">
           {tabs.length === 0 ? (

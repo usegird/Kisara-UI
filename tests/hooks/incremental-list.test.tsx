@@ -4,12 +4,6 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { useIncrementalList } from '@/hooks/ui/use-incremental-list';
 
-// ─────────────────────────────
-// 長い一覧を少しずつ描く。目印を見張る仕組みは差し替えて、見えたことにして進める。
-// jsdom は IntersectionObserver を持たないので、**持たない環境の道**も確かめる。
-// ─────────────────────────────
-
-/** 目印が見えたことを試験から起こせる差し替え */
 class FakeObserver {
   static latest: FakeObserver | null = null;
 
@@ -24,7 +18,6 @@ class FakeObserver {
 
   disconnect(): void {}
 
-  /** 見えたことにして呼び戻す。フックは `isIntersecting` しか見ない */
   fire(): void {
     const entries = [{ isIntersecting: true }] as unknown as IntersectionObserverEntry[];
     this.callback(entries, this as unknown as IntersectionObserver);

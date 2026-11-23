@@ -13,13 +13,8 @@ import {
   semanticModelFor,
 } from '@/chat/semantic-models';
 
-// ─────────────────────────────
-// 近似判定のモデルの選び方
-// ─────────────────────────────
-
 describe('近似判定のモデル', () => {
   it('実行の部品の大きさは、ビルドが出力に置く ONNX Runtime の WASM に Worker の JS を足した値', () => {
-    // ビルドが差し替える CPU だけの版の WASM（依存の更新で大きさが変わったら RUNTIME_SIZE を直す）
     const fromTransformers = createRequire(require.resolve('@huggingface/transformers'));
     const dist = dirname(fromTransformers.resolve('onnxruntime-web'));
     const wasm = statSync(join(dist, 'ort-wasm-simd-threaded.wasm')).size;

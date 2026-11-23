@@ -1,10 +1,5 @@
 import { slotTypeName, type LinkId, type ResolvedLink, type WorkflowLink } from '@/graph/types';
 
-// ─────────────────────────────
-// リンクを読む。ルートがタプル、subgraph の中がオブジェクトの形なので、両方を読む。
-// ─────────────────────────────
-
-/** タプルかオブジェクトの形のリンクを、1 つの形に読む。id や端が数でなければ null */
 export function readLink(link: WorkflowLink): ResolvedLink | null {
   if (Array.isArray(link)) {
     const [id, originId, originSlot, targetId, targetSlot, type] = link;
@@ -25,7 +20,6 @@ export function readLink(link: WorkflowLink): ResolvedLink | null {
   };
 }
 
-/** 読めるリンクを id で引ける表。読めないものは落とす */
 export function linkIndex(links: readonly WorkflowLink[]): Map<LinkId, ResolvedLink> {
   const index = new Map<LinkId, ResolvedLink>();
   for (const link of links) {

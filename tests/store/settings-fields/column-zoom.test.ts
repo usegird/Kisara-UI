@@ -9,10 +9,6 @@ import {
   zoomedTransform,
 } from '@/store/settings-fields/column-zoom';
 
-// ─────────────────────────────
-// 列の倍率の範囲と刻み
-// ─────────────────────────────
-
 describe('列の倍率', () => {
   it('20% ずつ動き、範囲の端で止まる', () => {
     expect(stepZoom(100, 1)).toBe(120);
@@ -31,9 +27,7 @@ describe('列の倍率', () => {
   });
 
   it('倍率を変えても指していた所が同じ位置に残る', () => {
-    // 中身の 300px の所を列の上端から 100px で指していた。倍にすると中身の 600px になる
     expect(anchoredScrollTop(200, 100, 100, 200)).toBe(500);
-    // 上端より上へは送らない
     expect(anchoredScrollTop(0, 100, 100, 40)).toBe(0);
   });
 

@@ -16,22 +16,12 @@ import { isImageFile } from '@/lib/image-attach';
 import { cn } from '@/lib/utils';
 import { avatarNameOf, useAvatarsStore } from '@/store/use-avatars-store';
 
-// ─────────────────────────────
-// アバターの画像の管理。入力画像を選ぶ画面と同じ `ImagePicker` に端末のアバターの表の画像を並べる。
-// 決定した画像の使い道は呼び出し元が決める。
-// ─────────────────────────────
-
-/** アバターの画像の管理のダイアログの props */
 export interface AvatarPickerDialogProps {
-  /** 開く引き金（アバターの「画像を選ぶ」） */
   readonly trigger: React.ReactNode;
-  /** 今の画像（アバターの id。無ければ空） */
   readonly value: string;
-  /** 決定したアバターの id を返す。先頭の「なし」なら null（画像を外す） */
   readonly onPlace: (avatarId: string | null) => void;
 }
 
-/** アバターの画像を選ぶ・足す・消すダイアログ。足すのはアバターの表へ（中身が同じなら今ある 1 件を選ぶ） */
 export function AvatarPickerDialog({
   trigger,
   value,
@@ -39,7 +29,6 @@ export function AvatarPickerDialog({
 }: AvatarPickerDialogProps): React.ReactElement {
   const avatars = useAvatarsStore((state) => state.avatars);
   const [uploading, setUploading] = useState(false);
-  // compiler はこの部品を飛ばす（catch の無い try を扱えない）ので手で揃える
   const items = useMemo(
     (): ImageItem[] =>
       Object.values(avatars).map((avatar) => ({
@@ -55,11 +44,9 @@ export function AvatarPickerDialog({
     return image === undefined ? null : blobUrl(image);
   };
 
-  /** 画像だけをアバターの表に足し、最後に足した（または同じ中身の）画像を選ぶ */
   const upload = async (files: readonly File[]): Promise<UploadOutcome> => {
     setUploading(true);
     try {
-      // 大きすぎる画像は足さない（縮める前に絵にするので、巨大な画像で画面を止めない）
       const images = files.filter(isImageFile);
       const tooLarge = images.find((file) => isTooLarge(file, AVATAR_MAX_BYTES));
       const sizeNotice =
@@ -103,7 +90,6 @@ export function AvatarPickerDialog({
           disabled={item === null || item.value === NONE_IMAGE}
           onClick={() => {
             if (item === null || item.value === NONE_IMAGE) return;
-            // 確かめない。プリセットと会話はリンクを持ったままで、同じ画像を戻せばまた出る
             useAvatarsStore.getState().remove(item.value);
           }}
         >

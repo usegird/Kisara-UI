@@ -12,6 +12,7 @@ import {
   nodeMode,
   nodeOutputs,
   slotTypeName,
+  type InputDefinition,
   type NodeDefinition,
   type NodeDefinitionMap,
   type NodeId,
@@ -22,40 +23,28 @@ import {
 import { resolveWidgetValues, widgetValueEntries } from '@/graph/widgets';
 import { t } from '@/i18n';
 
-// ─────────────────────────────
-// カードの行を組み立てる。定義のあるノード・subgraph のインスタンス・定義の無いノードの 3 通り。
-// ─────────────────────────────
-
-/** ComfyUI のフロントエンドが seed 系に付ける制御 widget。選択肢は seed-control.ts が正本 */
 export const CONTROL_AFTER_GENERATE = 'control_after_generate';
 
-/** 行を組み立てるときに見るもの */
 export interface RowContext {
   readonly workflow: Workflow;
   readonly definitions: NodeDefinitionMap;
   readonly subgraphs: ReadonlyMap<string, SubgraphDefinition>;
   readonly links: ReturnType<typeof linkIndex>;
-  /** 出力スロットに流れる値の目安（上流から引き継ぐ） */
   readonly outputValue: OutputValueResolver;
-  /** ノード id → カードの通し番号 */
   readonly numbers: ReadonlyMap<NodeId, string>;
 }
 
-/** 位置の対応を解いた widget の値 */
 type WidgetValues = ReturnType<typeof resolveWidgetValues>;
 
-/** 定義のあるノードの行を組み立てる間の持ち物 */
 interface NodeRowsState {
   readonly context: RowContext;
   readonly node: WorkflowNode;
   readonly widgets: WidgetValues;
   readonly appInputs: ReadonlySet<string>;
   readonly textHeight: number | null;
-  /** control_after_generate の widget が付く入力（宣言 + 名前ルール） */
   readonly controlInputs: ReadonlySet<string>;
 }
 
-/** 定義のあるノードの行。定義の入力の順に、seed の制御 widget と定義に無い入力を足す */
 export function rowsForNode(
   context: RowContext,
   node: WorkflowNode,
@@ -75,12 +64,11 @@ export function rowsForNode(
     ),
   };
 
-  const rows: NodeRow[] = definition.inputs.flatMap((input) => inputRows(state, input));
-  rows.push(...undeclaredRows(context, node, definition));
+  const rows: NodeRow[] = widgets.inputs.flatMap((input) => inputRows(state, input));
+  rows.push(...undeclaredRows(context, node, widgets.inputs));
   return rows;
 }
 
-/** 定義の入力 1 つの行（seed なら直下に制御 widget の行も） */
 function inputRows(state: NodeRowsState, input: NodeDefinition['inputs'][number]): NodeRow[] {
   const { node, widgets, appInputs } = state;
   const inputSlot = nodeInputs(node).findIndex((candidate) => candidate.name === input.name);
@@ -103,22 +91,17 @@ function inputRows(state: NodeRowsState, input: NodeDefinition['inputs'][number]
     widgetName: input.name,
     appInput: appInputs.has(input.name),
     inputSlot: isWidget || inputSlot < 0 ? null : inputSlot,
-    // パラメータ行は `inputs[]` に項目が無くても、足してから繋げる
-    linkable: isWidget || inputSlot >= 0,
+    linkable: input.branches === undefined && (isWidget || inputSlot >= 0),
     multiline: input.config.multiline === true,
     number: edit.number,
     height: edit.height,
     imageUpload: edit.imageUpload,
   };
 
-  // seed の直下に付く制御 widget（ComfyUI 本家と同じ並び）。
-  // 入力ではないので `/object_info` の入力一覧には出ず、ここで足す。
-  // **接続済みの seed には出さない**（値は上流から来るので制御しても効かない）
   if (!state.controlInputs.has(input.name) || kind === 'link') return [row];
   return [row, controlRow(state, input.name)];
 }
 
-/** widget の行だけが持つ編集の情報（ほかの行は無し） */
 function widgetEditOf(
   state: NodeRowsState,
   input: NodeDefinition['inputs'][number],
@@ -127,7 +110,6 @@ function widgetEditOf(
   if (!isWidget) return { target: null, number: null, height: null, imageUpload: false };
   const { node } = state;
   return {
-    // 書き込み先はそのまま持つ（左の列から編集する）。カード側で読み取り専用にする
     target: { kind: 'node', nodeId: node.id, classType: node.type },
     number: numberSpec(input.type, input.config),
     height: input.config.multiline === true ? state.textHeight : null,
@@ -142,7 +124,6 @@ function rowKindOf(source: RowSource | null, isWidget: boolean, resolved: boolea
   return 'widget';
 }
 
-/** seed の入力の直下に付く制御 widget の行 */
 function controlRow({ node, widgets, appInputs }: NodeRowsState, inputName: string): NodeRow {
   return {
     name: `${inputName}.${CONTROL_AFTER_GENERATE}`,
@@ -165,16 +146,12 @@ function controlRow({ node, widgets, appInputs }: NodeRowsState, inputName: stri
   };
 }
 
-/**
- * `/object_info` に載らない入力がある。フロントエンドが動的に足すもので、
- * 定義だけで組み立てると接続が丸ごと消えるので拾う。
- */
 function undeclaredRows(
   context: RowContext,
   node: WorkflowNode,
-  definition: NodeDefinition,
+  inputs: readonly InputDefinition[],
 ): NodeRow[] {
-  const declared = new Set(definition.inputs.map((input) => input.name));
+  const declared = new Set(inputs.map((input) => input.name));
   return nodeInputs(node).flatMap((slot, inputSlot): NodeRow[] => {
     if (declared.has(slot.name)) return [];
     const source = sourceOf(context, slot.link);
@@ -202,12 +179,6 @@ function undeclaredRows(
   });
 }
 
-/**
- * ノード定義が無い場合（未接続・未導入のカスタムノード）でも、
- * Workflow JSON 自身が持つ情報だけで行を組み立てる。
- *   ・`inputs[]` は名前と型と接続状態を持っている
- *   ・`widgets_values` は値だけで名前を持たないため、位置で示して読み取り専用にする
- */
 export function rowsForUnknown(context: RowContext, node: WorkflowNode): NodeRow[] {
   const rows: NodeRow[] = nodeInputs(node).map((slot, inputSlot) => {
     const source = sourceOf(context, slot.link);
@@ -232,7 +203,6 @@ export function rowsForUnknown(context: RowContext, node: WorkflowNode): NodeRow
     };
   });
 
-  // 名前をキーにしたオブジェクトで持つノードは、キーを名前にして出す
   widgetValueEntries(node).forEach(({ name, value }, index) => {
     rows.push({
       name: `#${index}`,
@@ -263,7 +233,6 @@ function unknownRowKind(source: RowSource | null, widget: unknown): NodeRowKind 
   return widget ? 'unresolved' : 'socket';
 }
 
-/** 接続済み入力のチップに出す「生成元ノード名 / 出力名」 */
 export function sourceOf(context: RowContext, linkId: number | null | undefined): RowSource | null {
   if (linkId === null || linkId === undefined) return null;
 
@@ -290,7 +259,6 @@ export function sourceOf(context: RowContext, linkId: number | null | undefined)
   };
 }
 
-/** カードの出力。ノードの `outputs[]` が無ければ定義から */
 export function outputsOf(
   context: RowContext,
   node: WorkflowNode,

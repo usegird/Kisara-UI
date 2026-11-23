@@ -15,7 +15,6 @@ import { useViewerStore } from '@/store/use-viewer-store';
 import { definition, definitionMap, widget } from '../helpers/definitions';
 import { runSource } from '../helpers/run-history';
 
-// 記録のファイルの中身は手元で返す（テストから ComfyUI に触れない）
 const fetchRunHistoryFile = vi.hoisted(() =>
   vi.fn<(baseUrl: string, name: string) => Promise<unknown>>(),
 );
@@ -24,15 +23,10 @@ vi.mock('@/comfy/run-history', async (importOriginal) => ({
   fetchRunHistoryFile,
 }));
 
-// 画像の中身は取りに行かない（テストから ComfyUI に触れない）
 vi.mock('@/comfy/queue', async (importOriginal) => ({
   ...(await importOriginal<typeof import('@/comfy/queue')>()),
   fetchOutputImage: () => Promise.reject(new Error('テストでは取らない')),
 }));
-
-// ─────────────────────────────
-// 履歴のタブ。ワークフローの段ごとに 1 枚のカードにまとめる
-// ─────────────────────────────
 
 const DEFINITIONS = definitionMap(
   definition('Text', [widget('text', 'STRING', { multiline: true })]),
@@ -42,7 +36,6 @@ function sent(text: string): Record<string, unknown> {
   return { nodes: [{ id: 1, type: 'Text', pos: [0, 0], widgets_values: [text] }], links: [] };
 }
 
-/** セッション 2 つ分の記録（cat を 2 回のセッションと、dog を 1 回のセッション） */
 function showRecords(): void {
   const record = (sources: Parameters<typeof addRuns>[0]['sources']) =>
     addRuns({
@@ -55,7 +48,6 @@ function showRecords(): void {
         ['c', 'portrait'],
       ]),
     });
-  // cat のセッションにだけ名前を付ける
   const cat = {
     ...record([
       runSource('a', 1_000, ['a.png'], sent('cat')),
@@ -64,7 +56,6 @@ function showRecords(): void {
     name: 'cat session',
   };
   const dog = record([runSource('c', 999_000, ['c.png'], sent('dog'))]);
-  // 一覧の時期は最後に書いた時刻（ここでは最後の実行の時刻）。中身は読み終えたものとして置く
   useRunHistoryStore.setState({
     entries: [
       { name: 'tab-cat.json', modified: 2_000 },
@@ -88,17 +79,43 @@ afterEach(() => {
 });
 
 describe('履歴のタブ', () => {
-  it('セッションごとに 1 枚にし、日付 / 回数・ワークフロー名・セッション名か無ければモデル名を出す', () => {
+  it('セッションごとに 1 枚にし、日付・セッション名か無ければ id・回数とワークフロー名を出す', () => {
     showRecords();
     render(<HistoryPanel />);
 
     expect(screen.getAllByRole('listitem')).toHaveLength(2);
-    expect(screen.getAllByText('portrait')).toHaveLength(2);
     expect(screen.getByText('cat session')).toBeDefined();
-    expect(screen.getByText(`${formatDateTime(2_000)} / 2 回`)).toBeDefined();
-    expect(screen.getByText(`${formatDateTime(999_000)} / 1 回`)).toBeDefined();
-    // 名前の無い dog のセッションはモデル名（ここでは分からないので「モデル不明」）
-    expect(screen.getAllByText('モデル不明')).toHaveLength(1);
+    expect(screen.getByText('tab-dog')).toBeDefined();
+    expect(screen.getByText(formatDateTime(2_000))).toBeDefined();
+    expect(screen.getByText('2 回 / portrait')).toBeDefined();
+    expect(screen.getByText('1 回 / portrait')).toBeDefined();
+  });
+
+  it('削除のアイコンは確かめてから記録のファイルを消し、開いていた詳細を閉じる', () => {
+    const removeSession = vi.fn(() => Promise.resolve());
+    showRecords();
+    useRunHistoryStore.setState({ removeSession });
+    useHistoryDetailStore.getState().open('tab-cat.json');
+    render(<HistoryPanel />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'cat session の履歴を消す' }));
+    expect(removeSession).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole('button', { name: '削除する' }));
+
+    expect(removeSession).toHaveBeenCalledWith('http://comfy.test', 'tab-cat.json');
+    expect(useHistoryDetailStore.getState().key).toBeNull();
+  });
+
+  it('削除の確認でやめたら消さない', () => {
+    const removeSession = vi.fn(() => Promise.resolve());
+    showRecords();
+    useRunHistoryStore.setState({ removeSession });
+    render(<HistoryPanel />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'tab-dog の履歴を消す' }));
+    fireEvent.click(screen.getByRole('button', { name: 'キャンセル' }));
+
+    expect(removeSession).not.toHaveBeenCalled();
   });
 
   it('記録を書かない設定なら、入れるリンクを出し、押すと入れる', () => {
@@ -117,7 +134,7 @@ describe('履歴のタブ', () => {
     useTaskDetailStore.getState().open('x');
     render(<HistoryPanel />);
 
-    fireEvent.click(screen.getByText(`${formatDateTime(2_000)} / 2 回`));
+    fireEvent.click(screen.getByText(formatDateTime(2_000)));
 
     expect(useHistoryDetailStore.getState().key).not.toBeNull();
     expect(useTaskDetailStore.getState().promptId).toBeNull();
@@ -127,10 +144,7 @@ describe('履歴のタブ', () => {
     showRecords();
     render(<HistoryPanel />);
 
-    // 新しい順なので、2 枚目が cat のカード
-    const [, cat] = screen.getAllByRole('button', { name: 'portrait の画像を開く' });
-    if (cat === undefined) throw new Error('no card');
-    fireEvent.click(cat);
+    fireEvent.click(screen.getByRole('button', { name: 'cat session の画像を開く' }));
 
     const viewer = useViewerStore.getState();
     expect(viewer.mode).toBe('overlay');
@@ -158,7 +172,6 @@ describe('履歴のタブ', () => {
     const { unmount } = render(<HistoryPanel />);
     fetchFiles.mockClear();
 
-    // 読み直しの結果（一覧は同じ名前、中身は空）
     act(() =>
       useRunHistoryStore.setState((state) => ({ entries: [...state.entries], files: new Map() })),
     );
@@ -167,7 +180,6 @@ describe('履歴のタブ', () => {
       'http://comfy.test',
       expect.arrayContaining(['tab-cat.json', 'tab-dog.json']),
     );
-    // 外してから戻す（出したまま戻すと、戻した手続きで読みに行ってしまう）
     unmount();
     useRunHistoryStore.setState({ fetchFiles: original });
   });
@@ -179,7 +191,6 @@ describe('履歴のタブ', () => {
     expect(screen.getByRole('slider', { name: 'さかのぼる範囲' })).toBeDefined();
     expect(screen.getAllByRole('listitem')).toHaveLength(2);
 
-    // 左端（0）が一番新しいファイル＝全部
     const slider = screen.getByRole('slider', { name: 'さかのぼる範囲' });
     expect(slider.getAttribute('aria-valuenow')).toBe('0');
 
@@ -196,10 +207,6 @@ describe('履歴のタブ', () => {
 });
 
 describe('履歴のカードを少しずつ描く', () => {
-  /**
-   * 見張りの代わり。`fire` を呼ぶと末尾の目印（`li`）が見えたことにする。
-   * 画像の目印（画面に近づいたら取る）は見えないままにする
-   */
   function stubObserver(): { fire: () => void } {
     type Notify = (entries: { isIntersecting: boolean }[]) => void;
     const sentinels: Notify[] = [];
@@ -235,7 +242,6 @@ describe('履歴のカードを少しずつ描く', () => {
       Promise.resolve({ kind: 'file', file: record(Number(name.slice(1, -5))) }),
     );
     useSettingsStore.setState({ baseUrl: 'http://comfy.test' });
-    // 中身は読んでいない。一覧（名前と時期）だけ
     useRunHistoryStore.setState({
       entries: Array.from({ length: 12 }, (_, index) => ({
         name: `s${String(index)}.json`,
@@ -247,7 +253,6 @@ describe('履歴のカードを少しずつ描く', () => {
 
     const cards = (): number => container.querySelectorAll('button[data-detail]').length;
     await waitFor(() => expect(cards()).toBe(8));
-    // 読んだのは新しい 8 つだけ
     expect(fetchRunHistoryFile.mock.calls.map((call) => call[1])).toEqual(
       Array.from({ length: 8 }, (_, index) => `s${String(11 - index)}.json`),
     );

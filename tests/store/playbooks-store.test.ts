@@ -4,11 +4,6 @@ import { memoryTable } from '@/store/persist/chat-repo';
 import { installPlaybookTable, usePlaybooksStore } from '@/store/use-playbooks-store';
 import { useSettingsStore } from '@/store/use-settings-store';
 
-// ─────────────────────────────
-// 自分のプレイブックの一覧。読み戻したとき、もう無い自分のプレイブックの
-// 外した鍵を設定から外す（ほかのタブで消した分。辞書の有効にした並びと同じ）
-// ─────────────────────────────
-
 afterEach(() => {
   installPlaybookTable(null);
   usePlaybooksStore.setState({ playbooks: {}, loaded: false });

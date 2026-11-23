@@ -24,23 +24,10 @@ import type {
 import type { OwnPlaybook } from '@/store/use-playbooks-store';
 import { useSettingsStore } from '@/store/use-settings-store';
 
-// ─────────────────────────────
-// LLM の窓口と会話の組み立て。通信は作り物の窓口で済ませ、`POST /chat/completions` を
-// 本物に送らない（課金や資源の消費が起きるため）。
-// ─────────────────────────────
-
-/**
- * そろえたカードの、送る中身を組むときの欄。読み込みと同じく、カードの欄とロアブックをプリセットへ
- * 写したものから作る
- */
 export function cardView(card: Record<string, unknown>): CardView {
   return characterView(cardFields(card), cardLorebook(card)?.entries);
 }
 
-/**
- * 文面の項目を持つ構成（初めの構成は印だけなので、項目の操作や組み立てを試すときに使う）。口調・決まり・
- * 例・追加辞書の印・会話履歴・メッセージ・発言に添える指示・考え方・出力の形の順。本文はどれも空
- */
 export function sampleComposition(): PromptComposition {
   const base = defaultComposition();
   const text = (id: string, role: PromptItem['role']): PromptItem => ({
@@ -70,7 +57,6 @@ export function sampleComposition(): PromptComposition {
   };
 }
 
-/** SSE の本文を、指定した区切りごとに届く `Response` にする */
 export function sseResponse(chunks: readonly string[], init: ResponseInit = {}): Response {
   const encoder = new TextEncoder();
   const body = new ReadableStream<Uint8Array>({
@@ -86,21 +72,16 @@ export function sseResponse(chunks: readonly string[], init: ResponseInit = {}):
   });
 }
 
-/** Chat Completions のストリーミングの 1 件の `data:` 行 */
 export function deltaLine(content: string, extra: Record<string, unknown> = {}): string {
   return `data: ${JSON.stringify({ choices: [{ delta: { content, ...extra } }] })}\n\n`;
 }
 
 export interface FakeLlmPort extends LlmPort {
-  /** 送られた要求 */
   readonly requests: Parameters<LlmPort['streamChat']>[1][];
-  /** 受け取りを終える（`streamChat` の返りを解決する） */
   readonly finish: (result?: LlmResult<null>) => void;
-  /** 届いたものを流す */
   readonly emit: (event: ChatStreamEvent) => void;
 }
 
-/** モデルの付帯情報。既定は空（渡した項目だけ埋める） */
 export function modelDetails(patch: Partial<ModelDetails> = {}): ModelDetails {
   return {
     description: null,
@@ -117,12 +98,10 @@ export function modelDetails(patch: Partial<ModelDetails> = {}): ModelDetails {
   };
 }
 
-/** 文脈長のわからないモデルの一覧 */
 export function modelList(ids: readonly string[]): ModelList {
   return { ids, contexts: {}, details: {}, serverContext: null, truncated: false };
 }
 
-/** キーの無いゲートウェイの窓口。使う項目だけを差し替える */
 export function fakeKeyPort(patch: Partial<LlmKeyPort> = {}): LlmKeyPort {
   return {
     keyedUrls: () => [],
@@ -135,7 +114,6 @@ export function fakeKeyPort(patch: Partial<LlmKeyPort> = {}): LlmKeyPort {
   };
 }
 
-/** 呼び出し側が手で流して終える窓口。止めると `stopped` で終わる */
 export function fakeLlmPort(models: readonly string[] = []): FakeLlmPort {
   const requests: Parameters<LlmPort['streamChat']>[1][] = [];
   let onEvent: ((event: ChatStreamEvent) => void) | null = null;
@@ -162,9 +140,6 @@ export function chatMessage(
   role: ChatMessage['role'],
   contents: readonly string[],
   selected = 0,
-  /**
-   * 全部の候補に添える画像（データ URL）
-   */
   images: readonly string[] = [],
 ): ChatMessage {
   return {
@@ -180,7 +155,6 @@ export function chatMessage(
   };
 }
 
-/** 交互に n 件の発言（m0 は user、m1 は assistant、…）。本文は「m<番号> 」と長さ `size` の埋め草 */
 export function chatTurns(n: number, size = 40): ChatMessage[] {
   return Array.from({ length: n }, (_, index) =>
     chatMessage(`m${String(index)}`, index % 2 === 0 ? 'user' : 'assistant', [
@@ -189,9 +163,6 @@ export function chatTurns(n: number, size = 40): ChatMessage[] {
   );
 }
 
-/**
- * ロアの 1 項目。既定は用語と定義の表から取り込んだ項目と同じ
- */
 export function loreEntry(patch: Partial<LoreEntry> = {}): LoreEntry {
   return {
     keys: [],
@@ -228,9 +199,6 @@ export function chat(messages: readonly ChatMessage[] = [], patch: Partial<Chat>
   };
 }
 
-/**
- * 送る中身に渡すモデルと生成の設定（全体で持つもの）。モデルは 'model-a'
- */
 export function llm(params: GenerationParams = {}): {
   readonly model: string;
   readonly params: GenerationParams;
@@ -238,7 +206,6 @@ export function llm(params: GenerationParams = {}): {
   return { model: 'model-a', params };
 }
 
-/** 全体の接続の設定とモデルを 'p1'・'model-a' にする（生成の設定は何も決めない） */
 export function setDefaultLlm(): void {
   useSettingsStore.setState({ llmProfileId: 'p1', llmModel: 'model-a', llmParams: {} });
 }
@@ -253,14 +220,12 @@ export function profile(patch: Partial<ConnectionProfile> = {}): ConnectionProfi
   };
 }
 
-/** 送る発言の本文の文字（部品の配列なら text の部品をつないだもの。画像は数えない） */
 export function contentText(message: ChatRequestMessage): string {
   const content = message.content;
   if (content === null || typeof content === 'string') return content ?? '';
   return content.flatMap((part) => (part.type === 'text' ? [part.text] : [])).join('\n');
 }
 
-/** ワークフローの呼び出しを持つ `assistant`（受け取り終えた候補 1 つ） */
 export function toolCallMessage(id: string, calls: readonly ToolCallRecord[]): ChatMessage {
   const candidate: Candidate = {
     content: '',
@@ -271,26 +236,17 @@ export function toolCallMessage(id: string, calls: readonly ToolCallRecord[]): C
   return { id, role: 'assistant', candidates: [candidate], selected: 0 };
 }
 
-/** 試しのプレイブックの id（自分のプレイブックとして一覧に置く。`ownPlaybooks`） */
 export const TEST_PLAYBOOK_ID = 'pb';
 
-/**
- * 会話が持つ参照（試しのプレイブックの、そのフェーズ）
- */
 export function playbookRef(phase = 'plan'): ChatPlaybookRef {
   return { origin: 'own', id: TEST_PLAYBOOK_ID, phase };
 }
 
-/** 自分のプレイブックの一覧に置く形（`usePlaybooksStore.setState({ playbooks: ownPlaybooks() })`） */
 export function ownPlaybooks(): Record<string, OwnPlaybook> {
   const { playbook } = chatPlaybook();
   return { [TEST_PLAYBOOK_ID]: { id: TEST_PLAYBOOK_ID, playbook, createdAt: 0, updatedAt: 0 } };
 }
 
-/**
- * 2 フェーズの試しのプレイブックを引いた形（定義と今のフェーズ）。会話には
- * `playbookRef` を、辞書には `outlineBook` を置く。`patch` で今のフェーズなどを替える
- */
 export function chatPlaybook(patch: Partial<ChatPlaybook> = {}): ChatPlaybook {
   return {
     playbook: {
@@ -344,10 +300,6 @@ export function chatPlaybook(patch: Partial<ChatPlaybook> = {}): ChatPlaybook {
   };
 }
 
-/**
- * プレイブックの辞書（`##playbook`）。段ごとに題を受け取り、`*, outline` の常時の項目にする。
- * `enabled` の位置の段だけを有効にする（null ならどれも切る）。`memo` があれば `*, memo` の項目を足す
- */
 export function outlineBook(titles: readonly string[], enabled: number | null = 0): OwnLorebook {
   return {
     id: 'book',

@@ -45,7 +45,6 @@ describe('絞り込んだ結果の並び', () => {
   it('全部の語に当たるもの（AND）→ 数 → 同じ数なら先に書いた語に当たったもの', () => {
     const names = ['a dog', 'a cat', 'a bird', 'a cat dog'];
     expect(rank('cat dog', names)).toEqual(['a cat dog', 'a cat', 'a dog', 'a bird']);
-    // 入力の順を入れ替えれば、同じ数どうしの順も入れ替わる
     expect(rank('dog cat', names)).toEqual(['a cat dog', 'a dog', 'a cat', 'a bird']);
   });
 

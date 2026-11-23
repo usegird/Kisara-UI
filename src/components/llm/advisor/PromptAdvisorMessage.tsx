@@ -15,23 +15,15 @@ import { t } from '@/i18n';
 import { useChatStore } from '@/store/use-chat-store';
 import { proposalKey, usePromptAdvisorStore } from '@/store/use-prompt-advisor-store';
 
-// ─────────────────────────────
-// 構成の相談の 1 件。思考の本文・出典・応答の情報は会話と同じ部品で出す。
-// ─────────────────────────────
-
-/** 構成の相談の発言 1 件。LLM の本文は Markdown で描き、本文の中の案は案のカードにする */
 export function PromptAdvisorMessage({
   sessionId,
   chatId,
   message,
   receiving = false,
 }: {
-  /** 相談の id（反映の控えを引く） */
   readonly sessionId: string;
-  /** 会話の id（項目の名前を引く） */
   readonly chatId: string;
   readonly message: AdvisorMessage;
-  /** 受け取り中の発言か（呼び出しの引数が途中） */
   readonly receiving?: boolean;
 }): React.ReactElement {
   if (message.role === 'user') {
@@ -51,13 +43,11 @@ export function PromptAdvisorMessage({
         </details>
       )}
       {splitAdvisorText(message.content).map((segment, index) => {
-        // 本文は流し込みで伸びるだけなので、位置で区別してよい（並べ替えない）
         const key = `${segment.kind}-${String(index)}`;
         switch (segment.kind) {
           case 'text':
             return <MarkdownText key={key} text={segment.text} />;
           case 'proposal': {
-            // 本文の中の位置で案を指す（流し込みで前の区切りは変わらない）
             const id = proposalKey(message.id, index);
             return (
               <ProposalCard
@@ -75,11 +65,8 @@ export function PromptAdvisorMessage({
             return <PendingProposal key={key} />;
         }
       })}
-      {/* 案を書かせるツールの呼び出しは、本文の下に呼び出しの順で案のカードにする */}
       {advisorCallProposals(message.toolCalls).map(({ call, proposal }, index) => {
-        // 呼び出しの id は受け取り終えたときに付け直すので、並びの位置で区別する
         const key = `call-${String(index)}`;
-        // 受け取り中は引数が途中なので、書いている途中として出す（id も決まっていない）
         if (receiving) return <PendingProposal key={key} />;
         if (proposal === null) return <InvalidProposal key={key} raw={call.arguments} />;
         return (
@@ -92,15 +79,12 @@ export function PromptAdvisorMessage({
           />
         );
       })}
-      {/* 出典 */}
       {message.citations === undefined ? null : <CitationList citations={message.citations} />}
-      {/* 応答の情報（Web のツールの回数と、使ったトークン数。費用は会話と同じく開発中だけ） */}
       {figures.length === 0 ? null : <ResponseStatsPanel figures={figures} />}
     </div>
   );
 }
 
-/** 変える所 1 件の、どこを変えるか */
 function changeLabel(change: AdvisorChange, nameOf: (id: string) => string): string {
   switch (change.target) {
     case 'main':
@@ -119,7 +103,6 @@ function changeLabel(change: AdvisorChange, nameOf: (id: string) => string): str
       });
     case 'dictionaryEntry': {
       const keys = change.constant ? t('llm.advisor.constant') : change.keys.join(', ');
-      // 足す先の辞書の名前を LLM が書いていれば添える
       return change.dictionary.length > 0
         ? t('llm.advisor.targets.dictionaryEntryIn', { dictionary: change.dictionary, keys })
         : t('llm.advisor.targets.dictionaryEntry', { keys });
@@ -127,7 +110,6 @@ function changeLabel(change: AdvisorChange, nameOf: (id: string) => string): str
   }
 }
 
-/** 読めない案。書かれた文字のまま出す */
 function InvalidProposal({ raw }: { readonly raw: string }): React.ReactElement {
   return (
     <div className="rounded-md border border-dashed p-2">
@@ -137,25 +119,18 @@ function InvalidProposal({ raw }: { readonly raw: string }): React.ReactElement 
   );
 }
 
-/** 書いている途中の案 */
 function PendingProposal(): React.ReactElement {
   return <p className="text-muted-foreground text-xs">{t('llm.advisor.pending')}</p>;
 }
 
-/** 変える所 1 件の本文（消すときは無い） */
 function changeBody(change: AdvisorChange): string {
   return change.target === 'removeItem' ? '' : change.content;
 }
 
-/** 開く三角（閉じて ▶、開いて ▼） */
 const triangle = cva('size-2.5 shrink-0 fill-current transition-transform', {
   variants: { open: { true: 'rotate-90', false: '' } },
 });
 
-/**
- * 案のカード。三角か名前で開くと、変える所ごとに本文の全体を出す。押したときだけ会話に当て、
- * 当てたら元に戻すを出す
- */
 function ProposalCard({
   sessionId,
   chatId,
@@ -198,7 +173,6 @@ function ProposalCard({
         {proposal.changes.map((change, index) => {
           const body = changeBody(change);
           return (
-            // 案は読み直しても同じ並びで、並べ替えない読むだけの列なので、位置で区別してよい
             <li key={`${change.target}-${String(index)}`} className="min-w-0 text-xs">
               <div className="flex min-w-0 gap-2">
                 <span className="shrink-0 font-medium">{changeLabel(change, nameOf)}</span>

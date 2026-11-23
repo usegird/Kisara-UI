@@ -14,11 +14,6 @@ import { SortableRow, SortableRows } from '@/components/llm/playbook/PlaybookSor
 import { t } from '@/i18n';
 import { newShortId } from '@/lib/id';
 
-// ─────────────────────────────
-// プレイブックを作る・直すダイアログの操作の並び。
-// ─────────────────────────────
-
-/** 操作の並び（フェーズの操作か常設の操作）。掴んで並べ替え、足す・消す */
 export function ActionList({
   draft,
   owner,

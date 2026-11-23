@@ -4,14 +4,8 @@ import { t } from '@/i18n';
 import { guardPress } from '@/lib/press-guard';
 import { usePromptAdvisorStore } from '@/store/use-prompt-advisor-store';
 
-// ─────────────────────────────
-// 構成の相談の要約の行と、上限に近い知らせ。
-// ─────────────────────────────
-
-/** 枠も地も付けない文字のリンク */
 const LINK = 'hover:text-foreground underline underline-offset-2 disabled:no-underline';
 
-/** 要約した相談の要約の行。開くと要約の本文を文字のまま出す（初めは閉じる） */
 export function AdvisorSummaryRow({ id }: { readonly id: string }): React.ReactElement | null {
   const content = usePromptAdvisorStore((state) => state.sessions[id]?.summary?.content);
   if (content === undefined) return null;
@@ -23,10 +17,6 @@ export function AdvisorSummaryRow({ id }: { readonly id: string }): React.ReactE
   );
 }
 
-/**
- * 上限に近い・上限を超えた（長さで切れた・送れなかった）ときに、縮められる発言があれば、
- * 知らせと「要約する」を出す。受け取り中は出さない
- */
 export function AdvisorNearLimit({ id }: { readonly id: string }): React.ReactElement | null {
   const { limit } = useInputLimit();
   const summarizing = usePromptAdvisorStore((state) => state.sessions[id]?.summarizing === true);

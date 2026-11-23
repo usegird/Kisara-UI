@@ -6,9 +6,6 @@ import { describe, expect, it } from 'vitest';
 import { legal } from '@/i18n';
 import { LOCALES } from '@/i18n/locales';
 
-// 規約・ポリシーの本文の置き場。表の形の検査（catalog.test.ts）と同じく、
-// 言語一覧と一対一で、文書が揃っていることを見る
-
 const DIR = join(import.meta.dirname, '../../legal');
 const DOCUMENTS = ['terms', 'privacy'] as const;
 

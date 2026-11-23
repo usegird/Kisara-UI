@@ -10,8 +10,6 @@ import { useTabsStore } from '@/store/use-tabs-store';
 
 import { node } from '../helpers/workflow';
 
-// ワークフローの出し入れは外殻（AppShell）が持つ。**編集のたびに外殻を描き直さない**
-
 afterEach(() => {
   cleanup();
   useGraphStore.getState().clear();
@@ -33,6 +31,7 @@ describe('ワークフローの出し入れ', () => {
     expect(renders).toBe(before);
   });
 });
+
 describe('保存されたワークフローを開く', () => {
   let real: ReturnType<typeof comfyPort>;
   const saved = { name: 'cat', path: 'cat.json', modified: 0, size: 1 };
@@ -76,7 +75,6 @@ describe('保存されたワークフローを開く', () => {
     expect(result.current.pendingSwitch).toBe(saved);
     expect(fetchWorkflow).not.toHaveBeenCalled();
 
-    // やめれば何も変えない
     act(() => result.current.cancelSwitch());
     expect(result.current.pendingSwitch).toBeNull();
     expect(useGraphStore.getState().dirty).toBe(true);
@@ -96,12 +94,23 @@ describe('保存されたワークフローを開く', () => {
     expect(useTabsStore.getState().tabs).toHaveLength(tabs + 1);
   });
 
-  it('同じ接続先の同じファイルを開いているタブがあれば、取りに行かずにそこへ移る', async () => {
+  it('行は、同じ接続先の同じファイルを開いているタブがあれば、取りに行かずにそこへ移る', async () => {
     await open(true);
     const first = useTabsStore.getState().activeId;
     useTabsStore.getState().addTab();
-    await open(false);
+    await open(true);
     expect(useTabsStore.getState().activeId).toBe(first);
     expect(fetchWorkflow).toHaveBeenCalledTimes(1);
+  });
+
+  it('別のタブでは、同じファイルを開いているタブがあってももう 1 つ開く', async () => {
+    await open(true);
+    const first = useTabsStore.getState().activeId;
+    const tabs = useTabsStore.getState().tabs.length;
+    await open(false);
+    expect(useTabsStore.getState().tabs).toHaveLength(tabs + 1);
+    expect(useTabsStore.getState().activeId).not.toBe(first);
+    expect(useGraphStore.getState().savedPath).toBe('cat.json');
+    expect(fetchWorkflow).toHaveBeenCalledTimes(2);
   });
 });

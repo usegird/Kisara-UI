@@ -4,8 +4,6 @@ import { describe, expect, it } from 'vitest';
 
 import { useReusedItems } from '@/hooks/ui/use-reused-items';
 
-// 組み直した並びでも、中身が同じ要素は前回のものを返す
-
 const keyOf = (item: { readonly id: number }): number => item.id;
 
 describe('中身が同じ要素は前回のもの', () => {

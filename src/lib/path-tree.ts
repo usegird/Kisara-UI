@@ -1,24 +1,10 @@
-// ─────────────────────────────
-// `/` で区切った経路から、階層の一覧（入れ子の深さと件数つき）を作る（ComfyUI 非依存）。
-// モデルを選ぶ画面のディレクトリと、ワイルドカードの階層で同じものを使う。
-// ─────────────────────────────
-
-/** 階層の一覧の 1 行 */
 export interface PathDirectory {
-  /** 根からの経路。根なら空文字 */
   readonly path: string;
-  /** この階層だけの名前 */
   readonly label: string;
-  /** 入れ子の深さ（根は 0） */
   readonly depth: number;
-  /** 直下と、その下すべてを合わせた件数 */
   readonly count: number;
 }
 
-/**
- * 項目ごとの置き場（空文字は根の直下）から、階層の一覧を作る。並びは経路の順
- * （親の直後に子が来る）
- */
 export function directoryTree(directories: readonly string[]): PathDirectory[] {
   const counts = new Map<string, number>();
 
@@ -40,7 +26,67 @@ export function directoryTree(directories: readonly string[]): PathDirectory[] {
   }));
 }
 
-/** 経路を、最後の `/` より前（置き場。無ければ空文字）と後ろ（名前）に分ける */
+export interface PathLeaf {
+  readonly key: string;
+  readonly path: string;
+}
+
+export type PathTreeRow =
+  | ({ readonly kind: 'directory' } & PathDirectory)
+  | {
+      readonly kind: 'leaf';
+      readonly key: string;
+      readonly path: string;
+      readonly label: string;
+      readonly depth: number;
+    };
+
+export function pathTreeRows(
+  directories: readonly PathDirectory[],
+  leaves: readonly PathLeaf[],
+): PathTreeRow[] {
+  const childDirectories = new Map<string, PathDirectory[]>();
+  for (const directory of directories) {
+    const parent = splitPath(directory.path).directory;
+    childDirectories.set(parent, [...(childDirectories.get(parent) ?? []), directory]);
+  }
+  const childLeaves = new Map<string, PathLeaf[]>();
+  for (const leaf of [...leaves].sort((a, b) => a.path.localeCompare(b.path))) {
+    const parent = splitPath(leaf.path).directory;
+    childLeaves.set(parent, [...(childLeaves.get(parent) ?? []), leaf]);
+  }
+
+  const rows: PathTreeRow[] = [];
+  const visit = (parent: string, depth: number): void => {
+    for (const directory of childDirectories.get(parent) ?? []) {
+      rows.push({ kind: 'directory', ...directory });
+      visit(directory.path, directory.depth + 1);
+    }
+    for (const leaf of childLeaves.get(parent) ?? []) {
+      rows.push({
+        kind: 'leaf',
+        key: leaf.key,
+        path: leaf.path,
+        label: splitPath(leaf.path).label,
+        depth,
+      });
+    }
+  };
+  visit('', 0);
+  return rows;
+}
+
+export function visibleTreeRows(
+  rows: readonly PathTreeRow[],
+  isOpen: (path: string) => boolean,
+): PathTreeRow[] {
+  return rows.filter((row) => {
+    const segments = splitPath(row.path).directory.split('/');
+    if (segments[0] === '') return true;
+    return segments.every((_, end) => isOpen(segments.slice(0, end + 1).join('/')));
+  });
+}
+
 export function splitPath(path: string): { readonly directory: string; readonly label: string } {
   const at = path.lastIndexOf('/');
   return at < 0
@@ -48,7 +94,6 @@ export function splitPath(path: string): { readonly directory: string; readonly 
     : { directory: path.slice(0, at), label: path.slice(at + 1) };
 }
 
-/** 置き場が、選んだ階層（入れ子を含む）の下か。空文字を選んでいれば全部 */
 export function isUnderDirectory(directory: string, selected: string): boolean {
   return selected.length === 0 || directory === selected || directory.startsWith(`${selected}/`);
 }

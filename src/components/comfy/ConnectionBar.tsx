@@ -3,11 +3,6 @@ import { t } from '@/i18n';
 import { useComfyConnectDialogStore } from '@/store/use-comfy-connect-dialog-store';
 import { useSettingsStore } from '@/store/use-settings-store';
 
-// ─────────────────────────────
-// 右の列の設定のタブの接続まわり。接続中の接続先と状況を出すだけにし、接続先はポップアップで変える。
-// ─────────────────────────────
-
-/** 接続中の接続先・「再接続」のボタン・接続の状況を並べる */
 export function ConnectionBar(): React.ReactElement {
   const baseUrl = useSettingsStore((state) => state.baseUrl.trim());
   return (

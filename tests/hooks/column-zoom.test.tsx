@@ -7,10 +7,6 @@ import { useColumnZoom } from '@/hooks/flow/use-column-zoom';
 import type { ZoomColumn } from '@/store/settings-fields/column-zoom';
 import { useSettingsStore } from '@/store/use-settings-store';
 
-// ─────────────────────────────
-// 列の倍率の受け口。Ctrl＋ホイールは指している列、キーは焦点 → ポインタの列。
-// ─────────────────────────────
-
 afterEach(cleanup);
 beforeEach(() => {
   act(() => {
@@ -25,7 +21,6 @@ const columnOf = (target: Element): ZoomColumn | null =>
   target.closest('[data-testid="app"]') ? 'app' : null;
 
 function Flow({ unified = false }: { readonly unified?: boolean }): React.ReactElement {
-  // 列の中身でない所はカードの列に属するものとする
   const [host, setHost] = useState<HTMLElement | null>(null);
   const { zooms: shown, zoomBy } = useColumnZoom(host, {
     columnOf,
@@ -56,7 +51,6 @@ describe('列の倍率の受け口', () => {
     expect(allowed).toBe(false);
     expect(zooms()).toMatchObject({ app: 120, cards: 100 });
 
-    // 余白は左の列（ここではカード）に属する
     fireEvent.wheel(screen.getByTestId('gap'), { deltaY: 100, ctrlKey: true });
     expect(zooms().cards).toBe(80);
   });

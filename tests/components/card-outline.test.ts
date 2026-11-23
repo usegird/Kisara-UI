@@ -7,10 +7,6 @@ import {
   type OutlineEntry,
 } from '@/components/comfy/flow/card-outline';
 
-// ─────────────────────────────
-// ドラッグ中の置き直し。枠をまたいだカードを、落とす先へ置いて見せる。
-// ─────────────────────────────
-
 const card = (id: number): OutlineEntry => ({ kind: 'card', id });
 const group = (key: string, items: (number | OutlineEntry)[]): OutlineEntry => ({
   kind: 'group',
@@ -20,7 +16,6 @@ const group = (key: string, items: (number | OutlineEntry)[]): OutlineEntry => (
 
 type Shape = number | Shape[];
 
-/** 段ごとに id を並べる（グループは配列。入れ子も） */
 function shape(outline: readonly OutlineEntry[]): Shape[] {
   return outline.map((entry) => (entry.kind === 'card' ? entry.id : shape(entry.entries)));
 }
@@ -63,13 +58,8 @@ describe('ドラッグ中の置き直し', () => {
   });
 });
 
-// ─────────────────────────────
-// キーボードの落とす先。並びで数え、枠の先頭と末尾にも止まる。
-// ─────────────────────────────
-
 describe('キーボードの落とす先', () => {
   const lists = { outer: [1, { group: 'g' }, 4], members: new Map([['g', [2, 3]]]) };
-  /** 落とす先を「前/後ろ:相手@枠」の文字にする。元の場所は home */
   const label = (slot: DragPreview | null): string => {
     if (slot === null) return 'home';
     const beside = typeof slot.beside === 'number' ? String(slot.beside) : slot.beside.group;
@@ -101,10 +91,6 @@ describe('キーボードの落とす先', () => {
     expect(home).toBe(1);
   });
 });
-
-// ─────────────────────────────
-// 入れ子の枠。枠の中の枠にも置き直し、キーボードでも止まる。
-// ─────────────────────────────
 
 describe('入れ子の枠', () => {
   const outline = [card(1), group('outer', [group('inner', [2, 3]), 4]), card(5)];

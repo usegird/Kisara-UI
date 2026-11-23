@@ -4,8 +4,6 @@ import { searchIndexOf } from '@/graph/search-index';
 
 import { definition, definitionMap, socket } from '../helpers/definitions';
 
-// 検索の索引。定義の入れ物ごとに一度だけ作る
-
 describe('検索の索引', () => {
   const definitions = definitionMap(
     definition('Mix', [socket('a', 'IMAGE,MASK')], { outputs: [{ name: 'out', type: '*' }] }),

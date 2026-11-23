@@ -1,10 +1,5 @@
 import { withAppStore } from '@/store/persist/app-db';
 
-// ─────────────────────────────
-// 開いていたものの控えの置き場。読み書きは待ちが要る。鍵ごとの 1 件を出し入れする。
-// ─────────────────────────────
-
-/** 控えの置き場の読み書き（テストでは作り物に差し替える） */
 export interface SessionStore {
   readonly get: (key: string) => Promise<unknown>;
   readonly put: (key: string, value: unknown) => Promise<void>;
@@ -12,10 +7,6 @@ export interface SessionStore {
   readonly keys: () => Promise<string[]>;
 }
 
-/**
- * 大きい保存領域（IndexedDB）に置く控えを作る。大きさの読めないワークフローを設定と同じ
- * 小さい領域（localStorage）に置くと、容量を奪い合って設定まで書けなくなる
- */
 function createIndexedDbSessionStore(factory: IDBFactory): SessionStore {
   return {
     get: (key) => withAppStore(factory, 'session', 'readonly', (store) => store.get(key)),
@@ -34,7 +25,6 @@ function createIndexedDbSessionStore(factory: IDBFactory): SessionStore {
   };
 }
 
-/** IndexedDB が使えない環境（プライベートウィンドウ等）とテスト向け。画面を閉じると消える */
 export function createMemorySessionStore(): SessionStore & {
   readonly entries: () => ReadonlyMap<string, unknown>;
 } {
@@ -56,7 +46,6 @@ export function createMemorySessionStore(): SessionStore & {
 
 let sharedStore: SessionStore | null = null;
 
-/** 読み戻しと書き込みで**同じ置き場**を使う（メモリに落ちたときに別々にならないよう） */
 export function defaultSessionStore(): SessionStore {
   if (sharedStore !== null) return sharedStore;
   try {
@@ -65,13 +54,11 @@ export function defaultSessionStore(): SessionStore {
       return sharedStore;
     }
   } catch {
-    // IndexedDB へのアクセス自体が例外になる環境がある
   }
   sharedStore = createMemorySessionStore();
   return sharedStore;
 }
 
-/** 1 件読む。読めなければ null */
 export async function getOrNull(store: SessionStore, key: string): Promise<unknown> {
   try {
     return (await store.get(key)) ?? null;

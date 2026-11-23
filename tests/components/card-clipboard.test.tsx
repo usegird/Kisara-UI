@@ -7,11 +7,6 @@ import { useCardClipboard } from '@/hooks/flow/use-card-clipboard';
 import { useGraphStore } from '@/store/use-graph-store';
 import { useTabsStore } from '@/store/use-tabs-store';
 
-// ─────────────────────────────
-// カードの写しと貼り付け。選んだカードを Ctrl+C で覚え、
-// Ctrl+V で選んでいるカードの後ろへクローンを足す。同じタブの中だけ。
-// ─────────────────────────────
-
 const paste = vi.fn<(sources: readonly NodeId[], after: readonly NodeId[]) => void>();
 
 function Host(): React.ReactElement {

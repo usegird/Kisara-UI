@@ -7,10 +7,6 @@ import { memoryTable } from '@/store/persist/chat-repo';
 import { useSettingsStore } from '@/store/use-settings-store';
 import { installSystemPromptTable, useSystemPromptsStore } from '@/store/use-system-prompts-store';
 
-// ─────────────────────────────
-// システムプロンプトのテンプレートの 1 行。複製ではなく「別名で保存」を置く。
-// ─────────────────────────────
-
 beforeEach(() => {
   installSystemPromptTable(memoryTable());
   useSystemPromptsStore.setState({ templates: {} });

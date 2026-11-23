@@ -11,17 +11,10 @@ import {
 } from '@/queue/task-failure';
 import type { RunNote, SubmitFailure } from '@/queue/task-log';
 
-// ─────────────────────────────
-// タスクの詳細の先頭に出す失敗の内容・投入を断られた理由・実行の形に変えたときの注意。
-// ─────────────────────────────
-
-/** 失敗の内容の受け取り物 */
 export interface TaskFailureProps {
   readonly failure: RunFailure;
   readonly nodes: ReadonlyMap<string, PromptNode>;
-  /** この画面が見ていた実行のノード時刻。あれば並びの根拠にする */
   readonly timings: readonly NodeTiming[];
-  /** ノードの表記（投げた時点のカードの通し番号と名前） */
   readonly label: NodeLabeler;
 }
 
@@ -29,10 +22,6 @@ function Heading({ children }: { readonly children: React.ReactNode }): React.Re
   return <h4 className="text-muted-foreground mb-0.5 text-2xs font-semibold">{children}</h4>;
 }
 
-/**
- * 止まったノード・例外・そこまでの処理・止まったときの入力・トレースバックを出す。
- * 出どころは履歴の 1 件の `status.messages`
- */
 export function TaskFailure({
   failure,
   nodes,
@@ -155,10 +144,6 @@ export function TaskFailure({
   );
 }
 
-/**
- * 投入を断られたタスク。ComfyUI が返したノードごとの理由を全部出す。
- * 断られたタスクは履歴に居ないので、手元の控えの理由を使う
- */
 export function TaskRejection({
   rejection,
   label,
@@ -166,7 +151,6 @@ export function TaskRejection({
   readonly rejection: SubmitFailure;
   readonly label: NodeLabeler;
 }): React.ReactElement {
-  // 別オリジンの拒否は、起動オプションで許可する手順を添える
   const guide =
     rejection.forbidden === true ? forbiddenRunGuide(globalThis.location?.origin ?? '') : null;
 
@@ -222,7 +206,6 @@ export function TaskRejection({
   );
 }
 
-/** 実行の形に変えたときの注意（落とした・解決できなかったもの）。薄い色で出す */
 export function TaskNotes({
   notes,
   label,

@@ -2,11 +2,6 @@ import { describe, expect, it } from 'vitest';
 
 import { parseCsv } from '@/lib/csv';
 
-// ─────────────────────────────
-// 区切りの表の読み（RFC 4180）。実物の `styles.csv` は
-// 欄の中に改行・区切り・引用符が入るので、そこを外さないこと。
-// ─────────────────────────────
-
 describe('読み', () => {
   it('囲まれた欄の中の改行・区切り・引用符を保つ', () => {
     const text = 'name,prompt\r\na,"1girl, solo\nnext ""quoted"" line"\r\n';

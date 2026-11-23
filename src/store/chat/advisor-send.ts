@@ -42,11 +42,6 @@ import { useLlmProfilesStore } from '@/store/use-llm-profiles-store';
 import { useSettingsStore } from '@/store/use-settings-store';
 import { webToolsFor } from '@/store/use-web-search-store';
 
-// ─────────────────────────────
-// 構成の相談の 1 つの形と、LLM へ送る・要約させる手続き（相談の並びはストアが持つ）。
-// 付加情報は初めて送るときに作って相談に持ち、2 通目からはそれを送る
-// ─────────────────────────────
-
 const GREETING_TEXT: Readonly<Record<AdvisorUse, MessageKey>> = {
   blank: 'llm.advisor.greeting.blank',
   work: 'llm.advisor.greeting.work',
@@ -55,57 +50,40 @@ const GREETING_TEXT: Readonly<Record<AdvisorUse, MessageKey>> = {
   game: 'llm.advisor.greeting.game',
 };
 
-/** 構成の相談の 1 つ */
 export interface AdvisorSession {
   readonly id: string;
   readonly chatId: string;
-  /** 選んだ初期メッセージの候補（ADVISOR_USES の位置） */
   readonly greeting: number;
-  /**
-   * 外から渡した勘所。あれば候補の代わりにこれを初期メッセージにし、切り替えない
-   */
   readonly guide?: AdvisorGuide | undefined;
-  /** 初めて送ったときの付加情報。2 通目からもこれを送る（送る前は無い） */
   readonly sentContext?: string | undefined;
   readonly messages: readonly AdvisorMessage[];
-  /** 相談の要約（要約したときだけ） */
   readonly summary?: AdvisorSummary | undefined;
-  /** 要約しているか */
   readonly summarizing: boolean;
-  /** 欄を開いているか */
   readonly isOpen: boolean;
   readonly streaming: boolean;
-  /** 受け取り中の要求を送った時刻（`performance.now()` の ms。経過時間を出す） */
   readonly sentAt?: number | undefined;
   readonly failure: LlmFailure | null;
   readonly draft: string;
-  /** 反映した案（`proposalKey`）と、当てる直前の値 */
   readonly applied: Readonly<Record<string, AdvisorTarget>>;
 }
 
-/** 相談 1 つを書き換える手続き */
 export type SessionPatch = (id: string, edit: (session: AdvisorSession) => AdvisorSession) => void;
 
-/** 送る・要約する手続きが読み書きするストア */
 interface SessionAccess {
   readonly get: () => { readonly sessions: Readonly<Record<string, AdvisorSession>> };
   readonly patch: SessionPatch;
 }
 
-/** 受け取り中・要約している要求。相談ごとに 1 つ */
 const controllers = new Map<string, AbortController>();
 
-/** 初期メッセージの候補の用途 */
 export function greetingUse(index: number): AdvisorUse {
   return ADVISOR_USES[index] ?? ADVISOR_USES[0];
 }
 
-/** 初期メッセージの候補の見せる文（画面の言語） */
 export function formatGreeting(index: number): string {
   return t(GREETING_TEXT[greetingUse(index)]);
 }
 
-/** 相談の初期メッセージの用途と見せる文。勘所を渡した相談はその文 */
 export function sessionGreeting(session: Pick<AdvisorSession, 'greeting' | 'guide'>): {
   readonly use: AdvisorUse;
   readonly visible: string;
@@ -115,21 +93,15 @@ export function sessionGreeting(session: Pick<AdvisorSession, 'greeting' | 'guid
     : { use: session.guide.use, visible: session.guide.visible };
 }
 
-/** 受け取り中・要約している要求を止める（相談は残す） */
 export function stopAdvice(id: string): void {
   controllers.get(id)?.abort();
 }
 
-/** 受け取り中・要約している要求を止めて忘れる（相談を終えるとき） */
 export function dropAdvice(id: string): void {
   controllers.get(id)?.abort();
   controllers.delete(id);
 }
 
-/**
- * 打ちかけ（`text` があればその文。打ちかけは残す）を送り、返る発言へ受け取る。空・受け取り中・
- * 要約している間は何もしない
- */
 export async function sendAdvice(store: SessionAccess, id: string, text?: string): Promise<void> {
   const session = store.get().sessions[id];
   const chat = session === undefined ? undefined : useChatStore.getState().chats[session.chatId];
@@ -165,12 +137,10 @@ export async function sendAdvice(store: SessionAccess, id: string, text?: string
   }));
   const controller = new AbortController();
   controllers.set(id, controller);
-  // Web 検索・取得の注意は有効にするときに確かめたので、送るときは確かめない
   const web = webToolsFor(profile.baseUrl, 'advisor');
   const opening = {
     greeting: advisorGreeting(visible, context),
     summary: advisorSummaryText(session.summary),
-    // 呼び出しの結果は、送るときに反映したかで作る
     callResult: (call: AdvisorToolCall, messageId: string): string => {
       const applied = session.applied[advisorCallKey(messageId, call.id)];
       return advisorCallResult(advisorCallStatus(call, applied));
@@ -195,14 +165,11 @@ export async function sendAdvice(store: SessionAccess, id: string, text?: string
       signal: controller.signal,
     },
   );
-  // 終えた相談・別の要求に替わったものは触らない
   if (controllers.get(id) !== controller) return;
   controllers.delete(id);
-  // 上限を超えて断られたら、読めた文脈長を覚える（次からの知らせと要約に渡す量に使う）
   if (!result.ok) learnOverflow(target, result.failure);
   store.patch(id, (current) => ({
     ...current,
-    // 呼び出しの id は相談の中で重ならないものに付け直す（LLM の id は空や重なりがある）
     messages: current.messages.map((message) =>
       message.id === reply.id ? withCallIds(message) : message,
     ),
@@ -211,7 +178,6 @@ export async function sendAdvice(store: SessionAccess, id: string, text?: string
   }));
 }
 
-/** 発言の呼び出しに、相談の中で重ならない id を付ける */
 function withCallIds(message: AdvisorMessage): AdvisorMessage {
   if (message.toolCalls === undefined) return message;
   return {
@@ -223,10 +189,6 @@ function withCallIds(message: AdvisorMessage): AdvisorMessage {
   };
 }
 
-/**
- * 新しい 4 件の手前までの発言と前の要約を要約させ、相談の要約を置き換える。縮めるものが無い・
- * 受け取り中・要約している間は何もしない。渡す分は送れる上限に収まるだけにする
- */
 export async function summarizeAdvice(store: SessionAccess, id: string): Promise<void> {
   const session = store.get().sessions[id];
   if (session === undefined || session.streaming || session.summarizing) return;
@@ -271,7 +233,6 @@ export async function summarizeAdvice(store: SessionAccess, id: string): Promise
   }));
 }
 
-/** 要約の結果で変える所。失敗（止めたのは除く）か、空の本文なら失敗を出し、要約は変えない */
 function summaryOutcome(
   failure: LlmFailure | null,
   content: string,
@@ -282,15 +243,11 @@ function summaryOutcome(
   return { summary: { content, upTo } };
 }
 
-/** 今の接続の設定。設定かモデルを選んでいなければ undefined */
 function profileOf(target: LlmTarget): ConnectionProfile | undefined {
   if (target.model.trim().length === 0) return undefined;
   return useLlmProfilesStore.getState().profiles.find((item) => item.id === target.profileId);
 }
 
-/**
- * 相談の要求の本文。初期メッセージ（持った付加情報を埋め込む）と要約は渡された物を使う
- */
 function advisorRequestOf(
   chat: Chat,
   opening: Parameters<typeof advisorMessages>[2],
@@ -311,10 +268,6 @@ function advisorRequestOf(
   );
 }
 
-/**
- * 返る発言へ届いた知らせを足す受け手。使ったトークン数・Web のツールの回数と費用・出典は
- * 返った発言に添えて見せる（会話と同じ）
- */
 function createReplyReceiver(
   setReply: (edit: (message: AdvisorMessage) => AdvisorMessage) => void,
 ): (event: ChatStreamEvent) => void {
@@ -322,7 +275,6 @@ function createReplyReceiver(
   let reasoning = '';
   let calls: ToolCallRecord[] = [];
   return (event) => {
-    // 案は案を書かせるツールの呼び出しで届く（引数は断片で届くので足していく）
     if (event.kind === 'tool-call') {
       calls = addToolCallPart(calls, event);
       const toolCalls = calls.map((call) => ({
@@ -337,7 +289,6 @@ function createReplyReceiver(
       setReply((message) => ({ ...message, usage: event.usage }));
       return;
     }
-    // 長さで切れたかを知らせに使う
     if (event.kind === 'finish') {
       setReply((message) => ({ ...message, finishReason: event.reason }));
       return;

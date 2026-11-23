@@ -5,8 +5,8 @@ import { addRuns, EMPTY_RUN_HISTORY } from '@/queue/run-history';
 import {
   buildHistoryCards,
   formatHistorySession,
+  historySessionTitle,
   historyTasks,
-  modelLabel,
   namesUpTo,
   promptNumbers,
   runDetail,
@@ -18,11 +18,6 @@ import { modelKindOf, type ModelKindNames } from '@/queue/task-detail';
 import { definition, definitionMap, socket, widget } from '../helpers/definitions';
 import { runSource } from '../helpers/run-history';
 
-// ─────────────────────────────
-// 実行の記録の合わせ方・起動の識別子・履歴のカード
-// ─────────────────────────────
-
-// 実行の形は出力ノードから辿れるノードだけになるので、どれも出力ノードにする
 const DEFINITIONS = definitionMap(
   definition('Sampler', [widget('seed', 'INT'), widget('steps', 'INT')], { outputNode: true }),
   definition('Text', [widget('text', 'STRING', { multiline: true })], { outputNode: true }),
@@ -37,9 +32,7 @@ interface Sent {
   readonly steps?: number;
   readonly model?: string;
   readonly lora?: string;
-  /** Workflow JSON の `id`（ファイルごとに付く） */
   readonly id?: string;
-  /** LoRA の一覧にある値を、入力名に lora を含まない入力で使う */
   readonly extra?: string;
 }
 
@@ -65,7 +58,6 @@ function sentWorkflow({
   };
 }
 
-/** 実行 1 件。完了は開始の 1 秒後 */
 function source(
   promptId: string,
   startedAt: number | null,
@@ -79,7 +71,6 @@ function source(
 
 const NO_NAMES = new Map<string, string>();
 
-/** モデルの区分を決める一覧（書くときに区分を決める） */
 const OPTIONS: ModelKindNames = {
   modelNames: new Set(['base.safetensors', 'other.safetensors']),
   loraNames: new Set([
@@ -195,7 +186,6 @@ describe('addRuns', () => {
   });
 
   it('送った画面は、別の画面が /history の値で先に書いた実行を書き直し、使われない分を外す', () => {
-    // 別の画面は、サーバー側で書き換わった Workflow JSON（ここでは文と id）で先に書いた
     const other = file([source('a', 1_000, ['a.png'], sentWorkflow({ text: 'x', id: 'b' }))]);
     const sent = { ...source('a', 1_000, ['a.png'], sentWorkflow({ text: 'a' })), sent: true };
     const fixed = addRuns({
@@ -209,7 +199,6 @@ describe('addRuns', () => {
     expect(fixed.runs).toHaveLength(1);
     expect(Object.values(fixed.prompts)).toEqual([['a']]);
     expect(Object.keys(fixed.workflows)).toHaveLength(1);
-    // 書き直した後は同じファイルを返す（書かなくてよい）
     expect(
       addRuns({
         file: fixed,
@@ -240,18 +229,16 @@ describe('buildHistoryCards', () => {
   it('セッション（記録のファイル）1 つを 1 枚にする。時間・ワークフロー・モデルでは分けない', () => {
     const cards = cardsOf([
       source('a', 1_000, ['x/a.png'], sentWorkflow({ text: 'cat' })),
-      // 間が空いても、ワークフローやモデルが変わっても同じカード
       source('b', 900_000, ['b.png'], sentWorkflow({ id: 'wf-b', model: 'other.safetensors' })),
     ]);
 
     expect(cards).toHaveLength(1);
     expect(cards[0]).toMatchObject({
       key: 'f0.json',
-      // セッション名を付けていなければ null（カードではモデル名を出す）
       name: null,
       workflowName: 'portrait',
-      models: ['base.safetensors', 'other.safetensors'],
     });
+    expect(cards[0] === undefined ? '' : historySessionTitle(cards[0])).toBe('f0');
   });
 
   it('記録のファイル（セッション）が違えば、同時に実行していても別のカードにする', () => {
@@ -266,7 +253,9 @@ describe('buildHistoryCards', () => {
   it('カードの名前はセッション名を先に使う', () => {
     const named = { ...file([source('a', 1_000, [])]), name: 'morning batch' };
 
-    expect(buildHistoryCards([['f.json', named]])[0]?.name).toBe('morning batch');
+    const [card] = buildHistoryCards([['f.json', named]]);
+    expect(card?.name).toBe('morning batch');
+    expect(card === undefined ? '' : historySessionTitle(card)).toBe('morning batch');
   });
 
   it('ビューワーに渡す並びは新しい実行から、サブフォルダを分けて出す', () => {
@@ -277,6 +266,7 @@ describe('buildHistoryCards', () => {
     expect(tasks.map((task) => task.outputs[0]?.filename)).toEqual(['b.png', 'a.png']);
     expect(tasks[1]?.outputs[0]).toEqual({ filename: 'a.png', subfolder: 'x', type: 'output' });
   });
+
   it('記録にはモデル・プロンプト・シードの置き場だけを残す', () => {
     const run = cardsOf([source('a', 1_000, [], sentWorkflow({ seed: 3, text: 'cat' }))])[0]
       ?.runs[0];
@@ -285,7 +275,6 @@ describe('buildHistoryCards', () => {
     expect(Object.keys(run.entry).sort()).toEqual(
       ['lora', 'model', 'name', 'nodes', 'other', 'prompts', 'seeds'].sort(),
     );
-    // 置き場は [ノード id, 入力名]。ノード名とコメントは定義（nodes）に 1 回だけ置く
     expect(run.entry.seeds).toEqual([['1', 'seed']]);
     expect(run.entry.prompts).toEqual([['2', 'text', null]]);
     expect(run.entry.nodes).toEqual({ '1': ['Sampler'], '2': ['Text'] });
@@ -303,11 +292,6 @@ describe('buildHistoryCards', () => {
     const numbers = promptNumbers(card);
     expect(card.runs.map((run) => numbers.get(run.prompt))).toEqual([1, 2, 1]);
   });
-
-  it('モデルの表示名は、フォルダと拡張子を落とす', () => {
-    expect(modelLabel('anime/waiANIMA_v10.safetensors')).toBe('waiANIMA_v10');
-    expect(modelLabel('plain')).toBe('plain');
-  });
 });
 
 describe('履歴の詳細の材料', () => {
@@ -324,7 +308,6 @@ describe('履歴の詳細の材料', () => {
 });
 
 describe('さかのぼる範囲', () => {
-  // 並びは一覧の時期（最後に書いた時刻）で決まる。中身は読まない
   const entries = [
     { name: 'tab-b.json', modified: 9_000 },
     { name: 'tab-a.json', modified: 1_000 },
@@ -436,7 +419,6 @@ describe('履歴の詳細のセッションの 1 行', () => {
     name,
     workflowName: null,
     runs: [],
-    models: [],
   });
 
   it('名前が無ければ UI のタブの id、あれば名前と括弧書きの id', () => {

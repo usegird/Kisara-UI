@@ -2,22 +2,12 @@ import type { ApiPrompt } from '@/graph/to-api-prompt';
 import type { ComfyEvent, ProgressNode } from '@/port/run';
 import { useExecutionStore } from '@/store/use-execution-store';
 
-// ─────────────────────────────
-// デモの模擬実行。実行の形に変えたノードを処理の順に並べ、ComfyUI の通知と同じ形の事象を
-// 時間をかけて実行の状況のストアへ流す。**通信はしない。**
-// ─────────────────────────────
-
-/** 模擬実行の計画の 1 段。ノード 1 つぶん */
 interface RunStep {
-  /** 実行の形のノード id（`12` / subgraph の中なら `12:34`） */
   readonly nodeId: string;
-  /** 進める手数（`steps` の値を持つノード）。持たなければ 0 */
   readonly steps: number;
-  /** 出力ノード（結果の画像を出す） */
   readonly output: boolean;
 }
 
-/** 実行の形の入力が、別のノードの出力を指しているか（`[ノード id, 出力の番号]`） */
 function referenceOf(value: unknown): string | null {
   return Array.isArray(value) && value.length === 2 && typeof value[0] === 'string'
     ? value[0]
@@ -29,15 +19,10 @@ function stepsOf(inputs: Record<string, unknown>): number {
   return typeof steps === 'number' && Number.isInteger(steps) && steps > 0 ? steps : 0;
 }
 
-/** id の並び（`2` は `10` より前。subgraph の中の id も数として比べる） */
 function byId(a: string, b: string): number {
   return a.localeCompare(b, undefined, { numeric: true });
 }
 
-/**
- * 実行の計画。指されるノードを先に、同じ段では id の小さい順に並べる。
- * 輪になっているノード（本来は送れない）は最後に id の順で足す
- */
 export function planRun(prompt: ApiPrompt, isOutput: (classType: string) => boolean): RunStep[] {
   const ids = Object.keys(prompt).sort(byId);
   const waiting = new Map<string, Set<string>>();
@@ -72,24 +57,13 @@ export function planRun(prompt: ApiPrompt, isOutput: (classType: string) => bool
   });
 }
 
-// ─────────────────────────────
-// 時間の配り方。全体で数秒に収まるよう、手数 1 つを短くする
-// ─────────────────────────────
-
-/** 手数を持たないノードの長さ */
 const NODE_MS = 120;
-/** 手数 1 つの長さ */
 const STEP_MS = 40;
-/** 出力ノードの長さ（画像を書き出している見立て） */
 const OUTPUT_MS = 300;
 
-/** 模擬実行の進みを受け取る手続き */
 interface SimulationHandlers {
-  /** 出力ノードが終わった */
   readonly onOutput: (nodeId: string) => void;
-  /** 終わったノードの数が変わった */
   readonly onStep: (finished: number) => void;
-  /** すべて終わった */
   readonly onDone: () => void;
 }
 
@@ -111,14 +85,12 @@ function progressState(
   return { type: 'progress_state', promptId, nodes };
 }
 
-/** 事象を流し始める。戻り値は止める手続き（止めたら実行の状況を解く） */
 export function runSimulation(plan: readonly RunStep[], handlers: SimulationHandlers): () => void {
   runCount += 1;
   const promptId = `simulated-${String(runCount)}`;
   const store = useExecutionStore.getState();
   const apply = (event: ComfyEvent): void => useExecutionStore.getState().applyEvent(event);
 
-  // 流す順に「待つ時間と、そのときにすること」を並べる
   const actions: { readonly wait: number; readonly run: () => void }[] = [];
   plan.forEach((step, index) => {
     actions.push({
@@ -151,7 +123,10 @@ export function runSimulation(plan: readonly RunStep[], handlers: SimulationHand
     },
   });
 
-  store.start(promptId, plan.length);
+  store.start(
+    promptId,
+    plan.map((step) => step.nodeId),
+  );
   apply({ type: 'execution_start', promptId });
 
   let timer: ReturnType<typeof setTimeout> | null = null;
@@ -178,7 +153,6 @@ export function runSimulation(plan: readonly RunStep[], handlers: SimulationHand
   };
 }
 
-/** 段の状態。今の段より前は済み、今の段は実行中、後は待ち */
 function stepStateOf(index: number, current: number): ProgressNode['state'] {
   if (index < current) return 'finished';
   return index === current ? 'running' : 'pending';

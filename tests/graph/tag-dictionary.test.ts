@@ -15,10 +15,6 @@ import {
 
 import { tagEntry as entry } from '../helpers/tags';
 
-// ─────────────────────────────
-// タグ辞書。列の数で読み分け、4 列の形で書き戻し、出どころを鍵で合わせる。
-// ─────────────────────────────
-
 describe('parseTagRows', () => {
   it('pysssss の 2 列（タグ,優先度）を読む', () => {
     const rows = parseTagRows('long_hair,5000\nblue eyes,30\n');
@@ -83,7 +79,6 @@ describe('mergeTags', () => {
       overrides: [{ ...entry('SMILE'), kind: DELETED_KIND }, entry('long hair', 9, ['lh'])],
     });
     expect(merged.map((tag) => tag.key)).toEqual(['long hair']);
-    // タグの文字は pysssss のまま、別名と優先度は上書きのもの
     expect(merged[0]?.entry).toMatchObject({ tag: pysssss[0]?.tag, priority: 9, aliases: ['lh'] });
   });
 
@@ -121,7 +116,6 @@ describe('直す操作', () => {
       ['dog', 1],
       ['cat', 7],
     ]);
-    // 同じ鍵は位置を保って置き換える
     const deleted = setOverride(edited, original, { ...original, kind: DELETED_KIND });
     expect(deleted.map((item) => item.kind)).toEqual(['', DELETED_KIND]);
     expect(setOverride(deleted, original, original).map((item) => item.tag)).toEqual(['dog']);

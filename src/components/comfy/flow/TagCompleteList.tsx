@@ -5,13 +5,7 @@ import { formatTagPriority } from '@/graph/tag-complete';
 import type { TagComplete } from '@/hooks/flow/use-tag-complete';
 import { t } from '@/i18n';
 
-// ─────────────────────────────
-// タグの候補の一覧。欄の焦点は動かさず、キャレットの行の下（収まらなければ上）に浮かせる。
-// ─────────────────────────────
-
-/** 一覧の高さの上限（px）。下に収まるかの判定にも使う */
 const LIST_MAX_HEIGHT = 240;
-/** キャレットの行と一覧の間（px） */
 const GAP = 2;
 
 const optionItem = cva('flex cursor-default items-baseline gap-3 rounded px-2 py-0.5', {
@@ -22,7 +16,6 @@ interface TagCompleteListProps {
   readonly complete: TagComplete;
 }
 
-/** 候補を出しているときだけ一覧を描く。行を押すとそのタグを入れる（押しても欄の焦点を奪わない） */
 export function TagCompleteList({ complete }: TagCompleteListProps): React.ReactElement | null {
   const { suggestions, listId, optionId, pick } = complete;
   if (suggestions === null) return null;
@@ -79,7 +72,6 @@ export function TagCompleteList({ complete }: TagCompleteListProps): React.React
   );
 }
 
-/** 語に当たった部分を太くする。`_` と空白、大小は区別せずに探す */
 function Highlighted({ text, word }: { readonly text: string; readonly word: string }) {
   const at = normalize(text).indexOf(normalize(word).trim());
   if (at < 0) return <>{text}</>;
@@ -93,7 +85,6 @@ function Highlighted({ text, word }: { readonly text: string; readonly word: str
   );
 }
 
-/** 選んだ行を一覧の見える範囲へ入れる。選ぶ行が変わると付け直されるので、キーで動かすたびに呼ばれる */
 function attachActiveOption(option: HTMLLIElement | null): void {
   option?.scrollIntoView({ block: 'nearest' });
 }

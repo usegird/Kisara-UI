@@ -3,14 +3,8 @@ import type { StateCreator } from 'zustand';
 import { normalizingSetterOf, setterOf } from '@/store/settings-fields/settings-table';
 import type { SettingsState } from '@/store/use-settings-store';
 
-// ─────────────────────────────
-// 設定のストアの、追加辞書・プレイブック・近似判定・Web 検索の設定の操作。
-// ─────────────────────────────
-
-/** 自分のプレイブックを隠す鍵の頭（後ろは自分のプレイブックの id） */
 const OWN_PLAYBOOK_PREFIX = 'own:';
 
-/** この slice が持つ操作 */
 type SettingsLoreActions = Pick<
   SettingsState,
   | 'setLoreDictionariesOn'
@@ -26,7 +20,6 @@ type SettingsLoreActions = Pick<
   | 'setWebFetchMaxTokens'
 >;
 
-/** 追加辞書・プレイブック・近似判定・Web 検索の設定の操作を作る */
 export const createSettingsLoreSlice: StateCreator<
   SettingsState,
   [['zustand/persist', unknown]],

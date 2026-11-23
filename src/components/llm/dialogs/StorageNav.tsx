@@ -25,15 +25,6 @@ import { reloadPage } from '@/lib/reload-page';
 import { formatBytes } from '@/lib/text';
 import { totalOf, type StorageItem } from '@/store/persist/storage-usage';
 
-// ─────────────────────────────
-// ストレージの管理の帯と、場所を選ぶ左の列（全体・種類・見出し）。
-// 選んでいる場所と印はダイアログが持ち、ここは描いて押したことを返すだけ。
-// ─────────────────────────────
-
-/**
- * 左の列の 1 行。選んでいる行は地の色で示す。見出しの左端は全体のアイコンに揃え、全体の下の 4 つと
- * 見出しの下の種類は 1 段字下げする
- */
 const entryClass = cva(
   'hover:bg-accent flex w-full items-center gap-1.5 rounded py-1 pr-2 text-left text-xs',
   {
@@ -44,38 +35,24 @@ const entryClass = cva(
   },
 );
 
-/** 左の列の名前。見出しは太くする */
 const navLabel = cva('min-w-0 flex-1 truncate', {
   variants: { heading: { true: 'font-medium', false: '' } },
 });
 
-/**
- * 左の列の大きさ。いちばん長い名前（システムテンプレート）が半分ほど隠れる幅（字下げ・大きさ「99.9 KB」を
- * 含めて中身の幅 8.5rem）より狭いときは出さない（幅は左の列の `@container` で決める）
- */
 const NAV_SIZE = 'text-muted-foreground shrink-0 text-2xs tabular-nums @max-[8.5rem]:hidden';
 
-/** 帯の props */
 export interface StorageBandProps {
-  /** 左のまとまりの幅（ピン止めした左の列に揃える。出していなければ無し） */
   readonly leadStyle: React.CSSProperties | undefined;
   readonly applyDisabled: boolean;
   readonly onApply: () => void;
-  /** 左の列の出し方（切り替えのアイコン） */
   readonly directory: 'pinned' | 'shown' | 'hidden';
   readonly onDirectory: () => void;
-  /** 今の場所の階層 */
   readonly path: readonly { readonly id: string; readonly label: string }[];
   readonly onSelect: (id: string) => void;
-  /** 種類ごとの操作（エクスポート・全て削除）。種類を選んでいなければ無し */
   readonly header: React.ReactNode;
   readonly onReload: () => void;
 }
 
-/**
- * 帯は全幅の 1 行（Lora を選ぶ画面の帯と同じ形）。左のまとまりは、ピン止めした左の列の幅に揃え、
- * 切り替えの位置を動かさない。幅が足りなければ左のまとまりが中身の幅まで先に縮む
- */
 export function StorageBand({
   leadStyle,
   applyDisabled,
@@ -102,11 +79,9 @@ export function StorageBand({
           <DirectoryToggle state={directory} onToggle={onDirectory} />
         </DialogToolbar>
       </div>
-      {/* 右の列と同じ下限を持たせ、左のまとまりの右端をピン止めした左の列の右端に揃える */}
       <div className="grow basis-0" style={{ minWidth: RIGHT_MIN }}>
         <DialogToolbar label={t('llm.storage.itemsToolbar')}>
           <Breadcrumb path={path} onSelect={onSelect} />
-          {/* 右端に読み直す。全て削除はその左 */}
           <span className="ml-auto" />
           {header}
           <button
@@ -124,7 +99,6 @@ export function StorageBand({
   );
 }
 
-/** 一時的に出した左の列。右の列の上（帯の下）に重ね、境目で幅を変える */
 export function NavOverlay({
   ref,
   width,
@@ -134,7 +108,6 @@ export function NavOverlay({
   readonly ref: React.Ref<HTMLDivElement>;
   readonly width: number;
   readonly onResize: (next: number) => void;
-  /** 左の列 */
   readonly children: React.ReactNode;
 }): React.ReactElement {
   return (
@@ -156,7 +129,6 @@ export function NavOverlay({
   );
 }
 
-/** IndexedDB・ユーザーフォルダを変えたあとの、読み込み直しを勧める行 */
 export function ReloadNotice(): React.ReactElement {
   return (
     <div className="bg-muted/60 flex items-center gap-2 border-b px-3 py-1.5">
@@ -168,7 +140,6 @@ export function ReloadNotice(): React.ReactElement {
   );
 }
 
-/** 帯の今の場所。最後（今いる所）以外は押すとそこへ戻る */
 function Breadcrumb({
   path,
   onSelect,
@@ -202,7 +173,6 @@ function Breadcrumb({
   );
 }
 
-/** 左の列の props */
 export interface CategoryNavProps {
   readonly entries: readonly Entry[];
   readonly selected: string;
@@ -210,20 +180,12 @@ export interface CategoryNavProps {
   readonly onSelect: (id: string) => void;
 }
 
-/**
- * 左の列。全体・IndexedDB・localStorage・sessionStorage・Comfy バックアップの下に、目的ごとの見出し
- * （押せる）と種類
- */
 export function CategoryNav({
   entries,
   selected,
   marks,
   onSelect,
 }: CategoryNavProps): React.ReactElement {
-  /**
-   * 1 行。名前と大きさの合計を同じ高さに並べる。全体の下の 4 つと見出しの下の種類は字下げする。
-   * 中身を読めていない（つないでいないバックアップ）ときは大きさを — にする
-   */
   const line = (
     id: string,
     label: string,
@@ -246,7 +208,6 @@ export function CategoryNav({
       </button>
     );
   };
-  // ユーザーフォルダの物は、読めていなければ大きさを — にする
   const row = (entry: Entry, indent: boolean): React.ReactElement =>
     line(entry.id, entry.label, entry.remote === null ? entry.items : null, {
       indent,
@@ -283,7 +244,6 @@ export function CategoryNav({
         const members = membersOf(group.ids, entries);
         return (
           <div key={group.id} className="mt-2">
-            {/* 見出しの大きさはブラウザの物だけの合計（ユーザーフォルダの物は種類の行にだけ出す） */}
             {line(
               group.id,
               t(group.label),
@@ -301,7 +261,6 @@ export function CategoryNav({
   );
 }
 
-/** 左の列の種類の行の、印の数（緑の ＋ と赤の −。無ければ出さない） */
 function MarkCount({
   entry,
   marks,

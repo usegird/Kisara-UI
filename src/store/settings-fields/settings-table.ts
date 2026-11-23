@@ -80,12 +80,6 @@ import { DEFAULT_SPLIT_RATIO, normalizeSplitRatio } from '@/store/settings-field
 import { DEFAULT_VIEWER_GRID, normalizeViewerGrid } from '@/store/settings-fields/viewer-grid';
 import type { ComfyToolTarget, SettingsState } from '@/store/use-settings-store';
 
-// ─────────────────────────────
-// 端末に残す設定の項目の表。初めの値・読み戻し（壊れた値は既定に落とす）・書く形を項目ごとに持ち、
-// 初めの値・`partialize`・`merge`・範囲に収める setter をここから作る。並びは端末に書く順。
-// ─────────────────────────────
-
-/** 端末に残す項目（関数とタブごとの clientId を除く） */
 type PersistedSettings = Omit<
   {
     [
@@ -94,20 +88,15 @@ type PersistedSettings = Omit<
   },
   'clientId'
 >;
-/** 端末に残す項目の名前 */
 export type PersistedKey = keyof PersistedSettings;
 
-/** 1 項目の初めの値・読み戻し・書く形 */
 interface SettingsField<T> {
   readonly initial: T;
-  /** 残した値を読む。壊れていれば既定に落とす（setter が範囲に収めるのにも使う） */
   readonly read: (raw: unknown) => T;
-  /** 端末に書く形。無ければそのまま */
   readonly store?: (value: T) => unknown;
 }
 
 const isTrue = (raw: unknown): boolean => raw === true;
-/** 既定が true の項目（外したときだけ false を残す） */
 const isNotFalse = (raw: unknown): boolean => raw !== false;
 const textOf = (raw: unknown): string => stringOr(raw);
 
@@ -131,7 +120,6 @@ const SETTINGS_FIELDS: { readonly [K in PersistedKey]: SettingsField<PersistedSe
   },
   recordRunHistory: { initial: false, read: isTrue },
   runHistoryLimit: { initial: RUN_HISTORY_LIMIT_DEFAULT, read: normalizeRunHistoryLimit },
-  // 既定と違う項目だけを残す（既定のままなら何も残さない）
   safeguards: { initial: DEFAULT_SAFEGUARDS, read: normalizeSafeguards, store: safeguardOverrides },
   controlPosition: { initial: null, read: normalizeFloatingPosition },
   viewerGrid: { initial: DEFAULT_VIEWER_GRID, read: normalizeViewerGrid },
@@ -142,7 +130,6 @@ const SETTINGS_FIELDS: { readonly [K in PersistedKey]: SettingsField<PersistedSe
   dialogPaneWidths: { initial: {}, read: normalizePaneWidths },
   dialogPaneDocks: { initial: {}, read: normalizePaneDocks },
   dialogPanePins: { initial: {}, read: normalizePanePins },
-  // 知らない値は既定（右）に落とす
   sidePanelDock: { initial: 'right', read: (raw) => (raw === 'bottom' ? 'bottom' : 'right') },
   sidePanelHeight: { initial: DEFAULT_SIDE_PANEL_HEIGHT, read: normalizeSidePanelHeight },
   sidePanelCollapsed: { initial: false, read: isTrue },
@@ -160,7 +147,6 @@ const SETTINGS_FIELDS: { readonly [K in PersistedKey]: SettingsField<PersistedSe
   loreDictionariesOn: { initial: true, read: isNotFalse },
   playbooksOn: { initial: true, read: isNotFalse },
   playbookCardFolded: { initial: false, read: isTrue },
-  // 鍵の並びは id の並びと同じ形（文字の配列。重なりは 1 つにする）
   playbooksHidden: { initial: [], read: normalizeDictionaryIds },
   webSearchEngine: { initial: DEFAULT_SEARCH_ENGINE, read: normalizeSearchEngine },
   webSearchMaxCalls: { initial: WEB_CALLS.initial, read: normalizeWebCalls },
@@ -190,19 +176,15 @@ const SETTINGS_FIELDS: { readonly [K in PersistedKey]: SettingsField<PersistedSe
   chatImageFocusY: { initial: CHAT_IMAGE_FOCUS, read: normalizeChatImageFocus },
 };
 
-/** 表の項目の名前（表の並び） */
 const SETTINGS_KEYS = Object.keys(SETTINGS_FIELDS) as PersistedKey[];
 
-/** 設定のストアの書き方 */
 export type SettingsSet = (patch: Partial<SettingsState>) => void;
 
-/** 項目ごとの値から、残す項目のすべてを作る */
 function buildSettings(
   valueOf: <K extends PersistedKey>(key: K) => PersistedSettings[K],
 ): PersistedSettings {
   const values: Partial<PersistedSettings> = {};
   for (const key of SETTINGS_KEYS) setField(values, key, valueOf(key));
-  // 表はすべての項目を持つ（型が確かめる）ので、上で全部の項目を書いている
   return values as PersistedSettings;
 }
 
@@ -214,17 +196,14 @@ function setField<K extends PersistedKey>(
   values[key] = value;
 }
 
-/** 初めの値 */
 export function initialSettings(): PersistedSettings {
   return buildSettings((key) => SETTINGS_FIELDS[key].initial);
 }
 
-/** 残した値を読む。無い・壊れた項目は既定に落とす */
 export function readSettings(saved: Readonly<Record<string, unknown>>): PersistedSettings {
   return buildSettings((key) => SETTINGS_FIELDS[key].read(saved[key]));
 }
 
-/** 端末に書く形（`partialize`） */
 export function storedSettings(state: SettingsState): Record<string, unknown> {
   const stored: Record<string, unknown> = {};
   for (const key of SETTINGS_KEYS) stored[key] = storedValueOf(state, key);
@@ -236,7 +215,6 @@ function storedValueOf<K extends PersistedKey>(state: SettingsState, key: K): un
   return field.store === undefined ? state[key] : field.store(state[key]);
 }
 
-/** 値をそのまま入れる setter */
 export function setterOf<K extends PersistedKey>(
   set: SettingsSet,
   key: K,
@@ -248,7 +226,6 @@ export function setterOf<K extends PersistedKey>(
   };
 }
 
-/** 読み戻しと同じく範囲に収めてから入れる setter */
 export function normalizingSetterOf<K extends PersistedKey>(
   set: SettingsSet,
   key: K,
@@ -258,13 +235,11 @@ export function normalizingSetterOf<K extends PersistedKey>(
   return (value) => assign(field.read(value));
 }
 
-/** 有効にした追加辞書の並び（読めない値は空。重なりは最初の 1 つ） */
 function normalizeDictionaryIds(raw: unknown): string[] {
   if (!isUnknownArray(raw)) return [];
   return [...new Set(raw.filter((item): item is string => typeof item === 'string'))];
 }
 
-/** 呼べるワークフロー。形の合わない項目と、同じタブの重なりは落とす */
 function normalizeToolTargets(raw: unknown): ComfyToolTarget[] {
   if (!isUnknownArray(raw)) return [];
   const targets: ComfyToolTarget[] = [];

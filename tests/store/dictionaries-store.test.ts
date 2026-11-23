@@ -13,10 +13,6 @@ import { useSettingsStore } from '@/store/use-settings-store';
 
 import { chat, chatMessage, loreEntry } from '../helpers/llm';
 
-// ─────────────────────────────
-// 追加辞書の一覧と、プリセットのロアブックとの当てる順
-// ─────────────────────────────
-
 let presetTable: ChatTable;
 
 beforeEach(() => {
@@ -88,6 +84,7 @@ describe('消す', () => {
 
 describe('カードのロアブック', () => {
   const book = { entries: [{ keys: ['castle'], content: 'A castle.' }] };
+
   it('カードのロアブックはプリセットの中に持ち、追加辞書の表には足さない', async () => {
     const preset = await usePresetsStore
       .getState()
@@ -122,11 +119,8 @@ describe('会話に当てる出どころ', () => {
     const lorebooks = [own];
     const preset = usePresetsStore.getState().add('P', EMPTY_CHARACTER, null, lorebooks);
     expect(sent({ preset: { id: preset.id, name: 'P' }, lorebooks })).toBe('Global.\n\nOwn.');
-    // 写しを持たない会話は、リンクしたプリセットに辞書があっても当てない
     expect(sent({ preset: { id: preset.id, name: 'P' } })).toBe('Global.');
-    // 写した会話は、プリセットが見つからなくても自分の辞書で当てる
     expect(sent({ preset: { id: 'missing', name: 'gone' }, lorebooks })).toBe('Global.\n\nOwn.');
-    // 2 冊目も並びの順に当て、会話で切った冊だけ当てない
     const second = {
       id: 'b2',
       name: '',

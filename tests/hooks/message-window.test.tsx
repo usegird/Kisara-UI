@@ -4,12 +4,6 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { useMessageWindow, type MessageWindow } from '@/hooks/chat/use-message-window';
 
-// ─────────────────────────────
-// 会話のログに一度に描く発言の範囲。
-// 目印を見張る仕組みは差し替え、見えたことを試験から起こす。
-// ─────────────────────────────
-
-/** 見張っている目印ごとに、見えた・見えなくなったを試験から起こせる差し替え */
 class FakeObserver {
   static latest: FakeObserver | null = null;
 
@@ -93,7 +87,6 @@ function setup(initialTotal: number, size: number) {
   };
 }
 
-/** 発言の要素を `count` 件に揃え、位置を差し替える */
 function fillList(element: HTMLElement, count: number, rectOf: (at: number) => DOMRect): void {
   element.replaceChildren(
     ...Array.from({ length: count }, (_, at) => {
@@ -104,17 +97,11 @@ function fillList(element: HTMLElement, count: number, rectOf: (at: number) => D
   );
 }
 
-/** 先読みの遥か外の位置（`setup` では、どの発言も外してよい） */
 const FAR_RECT = { top: 1e9, bottom: -1e9 } as DOMRect;
 
-/** 欄の高さと、先読みの余白（px。`use-message-window` と同じ） */
 const VIEW_HEIGHT = 800;
 const NEAR = 400;
 
-/**
- * 発言の高さを揃えた配置で、位置から目印の見え方を決める。位置は会話の先頭からの座標で持つ
- * （足し引きしてもブラウザの位置の保持で見ている所は動かない）
- */
 function setupLayout({ total, size, height }: { total: number; size: number; height: number }) {
   vi.stubGlobal('IntersectionObserver', FakeObserver);
   let count = total;
@@ -128,7 +115,6 @@ function setupLayout({ total, size, height }: { total: number; size: number; hei
   });
   const range = (): [number, number] => [hook.result.current.start, hook.result.current.end];
   const near = (y: number): boolean => y >= viewTop - NEAR && y <= viewTop + VIEW_HEIGHT + NEAR;
-  /** 範囲が動かなくなるまで見え方を知らせ、動いた回数を返す */
   const settle = (): number => {
     for (let moves = 0; moves < 500; moves += 1) {
       const [start, end] = range();
@@ -194,7 +180,6 @@ describe('一度に描く発言の範囲', () => {
   });
 
   it('目印が先読みに入る発言は外さず、件数を超えて描く', () => {
-    // 高さ 10px なので、描いた分が全部先読みの中に入る（外すと古い発言へ戻れなくなる）
     const { range, settle } = setupLayout({ total: 300, size: 30, height: 10 });
     settle();
     expect(range()[0]).toBeLessThan(270);
@@ -211,7 +196,6 @@ describe('一度に描く発言の範囲', () => {
     settle();
     for (let round = 0; round < 40; round += 1) {
       scrollBy(-250);
-      // 落ち着くまでの動きは、向きを変えない
       expect(settle()).toBeLessThan(20);
     }
     expect(range()[0]).toBeLessThan(380);

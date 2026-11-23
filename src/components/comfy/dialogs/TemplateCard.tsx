@@ -5,15 +5,10 @@ import { useState } from 'react';
 import type { WorkflowTemplate } from '@/graph/template-filter';
 import { comfyPort } from '@/store/ports/comfy-port';
 
-// ─────────────────────────────
-// テンプレートのカード 1 枚
-// ─────────────────────────────
-
 const thumbnail = cva('size-full object-cover', {
   variants: { ready: { true: '', false: 'opacity-0' } },
 });
 
-/** テンプレートのカード 1 枚。絵と題名を出し、押すと選ぶ */
 export function TemplateCard({
   template,
   baseUrl,

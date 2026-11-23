@@ -4,11 +4,6 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { textDragProps } from '@/components/ui/text-drag';
 
-// ─────────────────────────────
-// 文字のドラッグ。指先に付いてくる絵は載せる文字だけの小さな札にする
-// （掴んだ要素が付いてくると、落とし先のキャレットを覆い隠すため）。
-// ─────────────────────────────
-
 afterEach(cleanup);
 
 describe('文字のドラッグ', () => {

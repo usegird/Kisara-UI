@@ -1,21 +1,10 @@
 import { isRecord, isUnknownArray } from '@/lib/guards';
 import { setOwn } from '@/lib/own-key';
 
-// ─────────────────────────────
-// 2 つのブラウザのタブが同じ値を書くとき、このタブで変わった所だけを置き場の値に重ねる。
-// 古い状態のタブが書いても、ほかのタブの変更を消さない。
-// ─────────────────────────────
-
-// 変わったかは JSON の文字で比べる（保存領域に書く値はどれも JSON にできる）
 function same(a: unknown, b: unknown): boolean {
   return JSON.stringify(a) === JSON.stringify(b);
 }
 
-/**
- * 1 段目の項目ごとに重ねる。`previous` はこのタブが前に読んだ・書いた値、`next` はこれから書く値、
- * `stored` は今の置き場の値。`next` で `previous` から変わった項目と、`previous` から消えた項目だけを
- * `stored` に当てる。置き場が読めなければ `next` をそのまま使う
- */
 export function mergeChangedKeys(
   stored: unknown,
   previous: unknown,
@@ -33,10 +22,6 @@ export function mergeChangedKeys(
   return merged;
 }
 
-/**
- * 1 件ずつ（`id` ごと）に重ねる。このタブで足した・直した 1 件は `next` の内容に、消した 1 件は
- * 置き場からも外す。ほかは置き場のまま。並びは置き場の順で、足した 1 件は後ろに付ける
- */
 export function mergeChangedItems<T extends { readonly id: string }>(
   stored: unknown,
   previous: readonly T[],

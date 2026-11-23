@@ -3,11 +3,6 @@ import { describe, expect, it } from 'vitest';
 import { interruptRun, PromptRejectedError, submitPrompt } from '@/comfy/prompt';
 import type { ApiPrompt } from '@/graph/to-api-prompt';
 
-// ─────────────────────────────
-// `POST /prompt` の呼び出し。
-// **実物は叩かない**（GPU を消費する）。fetch を差し替えて検証する。
-// ─────────────────────────────
-
 const prompt: ApiPrompt = { '1': { class_type: 'LoadImage', inputs: { image: 'a.png' } } };
 
 function respond(status: number, body: unknown): typeof fetch {
@@ -48,7 +43,6 @@ describe('実行の送信', () => {
 
     expect(sent).toEqual({ url: 'http://x/prompt', body: { prompt, client_id: 'c9' } });
 
-    // ワークフローを渡せば、画像に埋め込ませる形（extra_pnginfo.workflow）で添える
     const workflow = { nodes: [], links: [] };
     await submitPrompt('http://x', { prompt, clientId: 'c9', workflow }, { fetchImpl });
     expect(sent).toEqual({
@@ -56,7 +50,6 @@ describe('実行の送信', () => {
       body: { prompt, client_id: 'c9', extra_data: { extra_pnginfo: { workflow } } },
     });
 
-    // セッションを渡せば `extra_data.kisara.session` に添える
     await submitPrompt('http://x', { prompt, clientId: 'c9', session: 's1' }, { fetchImpl });
     expect(sent).toEqual({
       url: 'http://x/prompt',
@@ -121,7 +114,6 @@ describe('実行の送信', () => {
 
 describe('実行が拒否されたとき', () => {
   it('403 は本文が空でも HTTP エラーとして上がる（案内は UI 側で出す）', async () => {
-    // ComfyUI は --enable-cors-header 無しだと、Origin が Host と違う POST を 403 で弾く
     const fetchImpl = (() =>
       Promise.resolve({
         ok: false,

@@ -10,21 +10,14 @@ import type { TaskNodeRow, TaskPrompt } from '@/queue/task-detail';
 import { useGraphStore } from '@/store/use-graph-store';
 import { useImageTabsStore } from '@/store/use-image-tabs-store';
 
-// ─────────────────────────────
-// 画像のタブ。ワークフローを持たない画像を、タスクの詳細と同じ並びで見せる。
-// ─────────────────────────────
-
-/** 他のツールが書く埋め込みの名前（A1111 / Forge） */
 const PARAMETERS_KEY = 'parameters';
 
-/** 段の出どころの表記。埋め込みの名前をそのまま出す */
 const sourceLabel = (): string => PARAMETERS_KEY;
 
 interface ImageSummary {
   readonly models: readonly string[];
   readonly prompts: readonly TaskPrompt[];
   readonly rows: readonly TaskNodeRow[];
-  /** 読み分けなかった埋め込み（名前と本文） */
   readonly others: readonly (readonly [string, string])[];
 }
 
@@ -63,13 +56,10 @@ function summarize(texts: readonly (readonly [string, string])[]): ImageSummary 
   };
 }
 
-/** 画像のタブの中身の props */
 export interface ImageTabPanelProps {
-  /** 開いている画像のタブの id */
   readonly tabId: string;
 }
 
-/** 画像の埋め込みを左に、画像を右に並べて出す。控えが無ければその旨を出す */
 export function ImageTabPanel({ tabId }: ImageTabPanelProps): React.ReactElement {
   const content = useImageTabsStore((state) => state.images[tabId]);
   const name = useGraphStore((state) => state.name);

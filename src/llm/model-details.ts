@@ -7,17 +7,9 @@ import type {
   ModelReasoning,
 } from '@/port/llm-port';
 
-// ─────────────────────────────
-// `GET /models` の項目の付帯情報（OpenRouter）の検証。形の合わない所は捨て、
-// 何も読めなければ付帯情報を作らない（返さないサーバーでは何も出さない）。
-// ─────────────────────────────
-
-/** 1 秒のミリ秒（`created` は秒で来る） */
 const MS_PER_SECOND = 1000;
-/** ISO 8601 の日付の部分（YYYY-MM-DD）の長さ */
 const ISO_DATE_LENGTH = 10;
 
-/** 1 トークンあたりの値の項目（公式の文書。`input_cache_write_1h` は名前からの推論） */
 const PER_TOKEN = new Set([
   'prompt',
   'completion',
@@ -27,7 +19,6 @@ const PER_TOKEN = new Set([
   'internal_reasoning',
 ]);
 
-/** 費用は文字列で返る（`"0.0000001"`）。数の形のものだけを読む */
 function usdOf(value: unknown): number | null {
   const number = typeof value === 'string' && value.trim().length > 0 ? Number(value) : value;
   return finiteNumber(number);
@@ -43,7 +34,6 @@ function pricesOf(pricing: Record<string, unknown>, skip: ReadonlySet<string>): 
   return prices;
 }
 
-/** 条件の項目（費用でないもの）。数のものだけを条件として読む */
 function tierOf(raw: unknown): ModelPriceTier | null {
   if (!isRecord(raw)) return null;
   const conditions: { name: string; value: number }[] = [];
@@ -64,7 +54,6 @@ function stringsOf(value: unknown): string[] {
   return isUnknownArray(value) ? value.filter((item) => typeof item === 'string') : [];
 }
 
-/** Artificial Analysis は名前ごとの数（null は捨てる）、Design Arena は分野ごとの並び */
 function benchmarksOf(raw: unknown): ModelBenchmark[] {
   if (!isRecord(raw)) return [];
   const benchmarks: ModelBenchmark[] = [];
@@ -105,13 +94,8 @@ function reasoningOf(raw: unknown): ModelReasoning | null {
 
 const OVERRIDES = new Set(['overrides']);
 
-/**
- * OpenAI 互換の一覧がどのサーバーでも返す項目。これだけなら付帯情報を作らない
- * （Ollama などで、思考を「非対応」と誤って出さないため）
- */
 const OPENAI_FIELDS = new Set(['object', 'created', 'owned_by']);
 
-/** 上の段で読む項目（ほかの項目には出さない）。`architecture` は入出力の 2 つだけ */
 const SHOWN = new Set([
   'id',
   'description',
@@ -122,7 +106,6 @@ const SHOWN = new Set([
   'architecture.output_modalities',
 ]);
 
-/** `created` は UNIX 時刻（秒）なので日付も添える */
 function formatScalar(name: string, value: unknown): string | null {
   if (typeof value === 'string') return value.length > 0 ? value : null;
   if (typeof value === 'boolean') return String(value);
@@ -133,7 +116,6 @@ function formatScalar(name: string, value: unknown): string | null {
   return `${String(number)} (${date})`;
 }
 
-/** 残りの項目を、入れ子を `.` でつないだ名前と文字の値の並びにする */
 function othersOf(value: unknown, name: string, out: { name: string; value: string }[]): void {
   if (SHOWN.has(name)) return;
   if (isRecord(value)) {
@@ -155,9 +137,6 @@ function othersOf(value: unknown, name: string, out: { name: string; value: stri
   if (text !== null) out.push({ name, value: text });
 }
 
-/**
- * 項目の付帯情報。どれも無ければ null。項目の形は公式の文書（Models の Overview）と、実際の一覧に合わせる
- */
 export function modelDetailsOf(item: Record<string, unknown>): ModelDetails | null {
   const pricing = isRecord(item.pricing) ? item.pricing : {};
   const architecture = isRecord(item.architecture) ? item.architecture : {};

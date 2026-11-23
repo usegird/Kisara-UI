@@ -7,12 +7,6 @@ import {
   droppedOrderStrategy,
 } from '@/components/llm/prompt/prompt-item-sorting';
 
-// ─────────────────────────────
-// プロンプトの項目の並べ替えの見せ方。運んでいる間も落としたときも、
-// 同じ「落としたあとの並び」を使う
-// ─────────────────────────────
-
-// 履歴の前の段 2 行・追加辞書の印・セッション要約・会話履歴・メッセージ・履歴の後の段 1 行・プレフィル
 const ids = ['a', 'b', 'info', 'summary', 'history', 'input', 'c', 'prefill'];
 const kinds: DropSlot[] = [
   'before',
@@ -24,7 +18,6 @@ const kinds: DropSlot[] = [
   'after',
   'fixed',
 ];
-// どの行も高さ 20px、行の間 4px
 const rects = ids.map((_, index) => ({
   top: index * 24,
   left: 0,
@@ -34,7 +27,6 @@ const rects = ids.map((_, index) => ({
   right: 100,
 }));
 
-/** 運ぶ行と指す行で、行ごとの見せる上端（ずらしたあと） */
 function tops(active: string, over: string): number[] {
   const strategy = droppedOrderStrategy(kinds);
   return ids.map(
@@ -53,7 +45,6 @@ function tops(active: string, over: string): number[] {
 const order = (active: string, over: string): string[] =>
   droppedOrder(ids, kinds, ids.indexOf(active), ids.indexOf(over));
 
-/** 見せる上端の並びが、落としたあとの並びと一致するか（重ならず、元の位置は詰まる） */
 function expectLaidOut(active: string, over: string): void {
   const shown = tops(active, over);
   const byTop = [...ids].sort(
@@ -76,12 +67,10 @@ describe('並べ替えの見せ方', () => {
       'prefill',
     ]);
     expectLaidOut('a', 'input');
-    // 下の段から上へ運んでメッセージを指しても、メッセージの下に入る（履歴の中へは入らない）
     expect(order('c', 'input')).toEqual(ids);
   });
 
   it('地をつなげた行（間 0）は、運んでいる間もつながったまま動く', () => {
-    // セッション要約・会話履歴・メッセージを間 0 でつなげた並び
     const joined = new Set(['history', 'input']);
     let top = 0;
     const tight = ids.map((id, index) => {
@@ -105,7 +94,6 @@ describe('並べ替えの見せ方', () => {
     const at = (id: string): number => shown[ids.indexOf(id)] ?? 0;
     expect(at('history') - at('summary')).toBe(20);
     expect(at('input') - at('history')).toBe(20);
-    // 運んだ行はメッセージの下に、行の間をあけて入る
     expect(at('a') - at('input')).toBe(24);
   });
 
@@ -141,7 +129,6 @@ describe('並べ替えの見せ方', () => {
 });
 
 describe('動かせない行の地のつなぎ方', () => {
-  // 上と同じ並び。動かせない行は追加辞書の印・セッション要約・会話履歴・メッセージ・プレフィル
   const locked = new Set(['info', 'summary', 'history', 'input', 'prefill']);
   const joinsOf = (order: readonly string[]): Record<string, string> => {
     const joins = bandJoins(
@@ -162,15 +149,12 @@ describe('動かせない行の地のつなぎ方', () => {
       summary: 'down',
       history: 'updown',
       input: 'up',
-      // メッセージの下には入れられる
       prefill: '',
     });
   });
 
   it('動かせない行でも、間に入れられる行どうしはつなげない', () => {
-    // 会話履歴の後ろに入れられる段がある（メッセージの無い構成）
     expect(joinsOf(['history', 'c', 'prefill'])).toEqual({ history: '', c: '', prefill: '' });
-    // 会話履歴の帯のすぐ後ろのプレフィル（その間には入れられない）
     expect(joinsOf(['summary', 'history', 'prefill'])).toEqual({
       summary: 'down',
       history: 'updown',

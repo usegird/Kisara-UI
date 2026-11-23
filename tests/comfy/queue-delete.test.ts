@@ -2,10 +2,6 @@ import { describe, expect, it } from 'vitest';
 
 import { deleteQueued } from '@/comfy/queue';
 
-// ─────────────────────────────
-// 実行前のタスクの取り消し（`POST /queue` の `delete`）。作り物の fetch で送る中身だけを見る
-// ─────────────────────────────
-
 describe('実行前のタスクの取り消し', () => {
   it('POST /queue に、そのタスクの prompt_id だけを delete で送る', async () => {
     let calledUrl = '';

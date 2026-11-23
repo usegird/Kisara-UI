@@ -10,11 +10,6 @@ import { t } from '@/i18n';
 import { entryKeyOf } from '@/lib/text-entry';
 import { useSettingsStore } from '@/store/use-settings-store';
 
-// ─────────────────────────────
-// 会話の大きさの上限と、一度に描く発言の数。会話の右の列の設定のタブに置く。
-// ─────────────────────────────
-
-/** 会話の大きさの上限と一度に描く発言の数の数の欄 */
 export function ChatLimitFields(): React.ReactElement {
   const maxMegabytes = useSettingsStore((state) => state.chatMaxMegabytes);
   const logWindow = useSettingsStore((state) => state.chatLogWindow);
@@ -57,10 +52,8 @@ function LimitField({
   readonly onCommit: (value: number) => void;
 }): React.ReactElement {
   const id = useId();
-  // 打ち込みの途中で範囲に丸めないよう、焦点が外れたとき（Enter を含む）に決める
   const commit = (input: HTMLInputElement): void => {
     const next = Number(input.value);
-    // 空や読めない値は決めず、今の値に戻す
     if (input.value === '' || !Number.isFinite(next)) input.value = String(value);
     else onCommit(next);
   };
@@ -70,7 +63,6 @@ function LimitField({
         {label}
       </label>
       <input
-        // 決めた値（丸めた値）で欄を置き直す
         key={value}
         id={id}
         type="number"

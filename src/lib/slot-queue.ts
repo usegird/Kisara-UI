@@ -1,21 +1,15 @@
-// ─────────────────────────────
-// 同時に走らせる数を絞る順番待ち（汎用）。枠が空いた順に、頼んだ順で知らせる。
-// 頼んだ側は、返った手続きで枠を返す（まだ待っていれば待ちから抜ける）。何度呼んでもよい。
-// ─────────────────────────────
-
-/** 同時に走らせる数を絞る順番待ち */
 interface SlotQueue {
-  /** 枠を頼む。枠が取れたら `onGrant` を呼ぶ（空いていればその場で）。返り値で返す・やめる */
   readonly request: (onGrant: () => void) => () => void;
+  readonly hold: () => () => void;
 }
 
-/** 同時に `limit` 個まで走らせる順番待ちを作る */
 export function createSlotQueue(limit: number): SlotQueue {
   let running = 0;
+  let holds = 0;
   const waiting: Array<() => void> = [];
 
   const next = (): void => {
-    while (running < limit) {
+    while (running < limit && holds === 0) {
       const grant = waiting.shift();
       if (grant === undefined) return;
       running += 1;
@@ -41,6 +35,16 @@ export function createSlotQueue(limit: number): SlotQueue {
           next();
         }
         state = 'done';
+      };
+    },
+    hold: () => {
+      holds += 1;
+      let held = true;
+      return () => {
+        if (!held) return;
+        held = false;
+        holds -= 1;
+        next();
       };
     },
   };

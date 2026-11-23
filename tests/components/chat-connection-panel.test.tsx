@@ -4,10 +4,6 @@ import { afterEach, describe, expect, it } from 'vitest';
 
 import { ChatConnectionPanel } from '@/components/llm/side-panel/ChatConnectionPanel';
 
-// ─────────────────────────────
-// 会話の右の列の設定のタブ
-// ─────────────────────────────
-
 afterEach(cleanup);
 
 describe('パラメタのタブへ移した欄', () => {
@@ -29,7 +25,6 @@ describe('ブラウザデータの管理', () => {
       ),
     ).toBeTruthy();
     expect(screen.queryByText(/対策のため/)).toBeNull();
-    // 説明はストレージの管理のボタンの下
     const hint = screen.getByText(/キャッシュクリアや自動整理で消失します/);
     const manage = screen.getByRole('button', { name: 'ストレージの管理' });
     expect(manage.compareDocumentPosition(hint) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();

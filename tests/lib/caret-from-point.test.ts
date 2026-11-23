@@ -3,10 +3,6 @@ import { afterEach, describe, expect, it } from 'vitest';
 
 import { caretOffsetAt } from '@/lib/caret-from-point';
 
-// ─────────────────────────────
-// カードのコメントで、押した位置の文字の位置
-// ─────────────────────────────
-
 function pointAt(node: Node, offset: number): void {
   Object.defineProperty(document, 'caretPositionFromPoint', {
     configurable: true,

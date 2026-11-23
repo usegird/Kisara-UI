@@ -15,11 +15,6 @@ import {
   type FakeLlmPort,
 } from '../helpers/llm';
 
-// ─────────────────────────────
-// 「ワークフローを実行」で、選んだワークフローの呼び出しを LLM に作らせる。
-// 作り物の窓口で受け取り、送る中身と、呼び出しを足す先を確かめる。
-// ─────────────────────────────
-
 let port: FakeLlmPort;
 
 const definition = (name: string) => ({
@@ -93,6 +88,7 @@ describe('呼び出しを作らせる', () => {
       callRequestKey('c1', attemptId),
     );
   });
+
   it('呼び出しが返らなければ失敗にして何も足さず、作らせた応答の記録と書いた本文を返す', async () => {
     const pending = useChatStore.getState().requestToolCall('c1', 'a1', 'make_image');
     port.emit({ kind: 'delta', content: 'I cannot', reasoning: 'hmm' });

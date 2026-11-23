@@ -6,11 +6,6 @@ import { arrangeByProcessing } from '@/graph/order';
 import type { Workflow } from '@/graph/types';
 import { isRecord } from '@/lib/guards';
 
-// ─────────────────────────────
-// 「全てのノード座標を再配置」。今の座標を捨てて、並びと所属だけから置く。
-// ─────────────────────────────
-
-/** 1→2→3 と 1→4→5 の 2 本。最後の列が 2 つ（3 と 5）あり、縦の差を今の座標から引きずりやすい */
 function forked(y5: number): Workflow {
   const node = (id: number, x: number, y: number) => ({
     id,
@@ -33,7 +28,6 @@ function forked(y5: number): Workflow {
 const positions = (workflow: Workflow): [number, [number, number]][] =>
   workflow.nodes.map((node) => [node.id, node.pos]);
 
-/** 最初のグループの枠 [x, y, w, h]。無ければ NaN */
 function frameOf(workflow: Workflow): number[] {
   const group: unknown = workflowGroups(workflow)[0];
   const bounding: unknown[] =
@@ -46,7 +40,6 @@ describe('全てのノード座標を再配置', () => {
     const near = arrangeByProcessing(forked(200), DEFAULT_ORDER_LAYOUT, { fromOrigin: true });
     const far = arrangeByProcessing(forked(900), DEFAULT_ORDER_LAYOUT, { fromOrigin: true });
     expect(positions(far)).toEqual(positions(near));
-    // 上端（枠を含む）は原点
     const tops = [...near.nodes.map((node) => node.pos[1] - TITLE_HEIGHT), frameOf(near)[1] ?? NaN];
     expect(Math.min(...tops)).toBe(0);
   });

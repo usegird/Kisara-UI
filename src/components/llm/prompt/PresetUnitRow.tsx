@@ -19,22 +19,14 @@ import {
 } from '@/store/chat/preset-import';
 import { usePresetsStore } from '@/store/use-presets-store';
 
-// ─────────────────────────────
-// プロンプトのタブのプリセットの行。画像は会話の画面のアバターで、アシスタント名はカードの欄の変数で直す。
-// ─────────────────────────────
-
-/** プリセットの行の props */
 export interface PresetUnitRowProps {
   readonly chatId: string;
   readonly chat: Chat;
-  /** リンク先。見つからなければ null */
   readonly preset: Preset | null;
 }
 
-/** 名前の欄の 1 行。左端はシステムプロンプトの本文の欄（項目の行の字下げ `px-1`）に揃える */
 const ROW = 'flex min-w-0 items-center gap-2 pl-1';
 
-/** カードのファイルを選ばせ、会話にリンクする。カードでなければ知らせる */
 function pickCardFile(chatId: string): void {
   const input = document.createElement('input');
   input.type = 'file';
@@ -54,18 +46,15 @@ function pickCardFile(chatId: string): void {
   input.click();
 }
 
-/** 会話の今の欄（写しが無ければ写したプリセットの欄、どちらも無ければ空の欄） */
 function fieldsOf(chat: Chat): CharacterFields {
   return characterOf(chat) ?? EMPTY_CHARACTER;
 }
 
-/** プリセットの名前の欄と保存・別名保存・削除のアイコンの 1 行 */
 export function PresetUnitRow({ chatId, chat, preset }: PresetUnitRowProps): React.ReactElement {
   return (
     <div className={ROW}>
       <div className="min-w-0 flex-1">
         <PresetNameBar
-          // リンク先が替わったら、名前の欄を作り直す
           key={`name:${preset?.id ?? ''}`}
           chatId={chatId}
           chat={chat}
@@ -76,10 +65,6 @@ export function PresetUnitRow({ chatId, chat, preset }: PresetUnitRowProps): Rea
   );
 }
 
-/**
- * プリセットの名前の欄と、保存・別名保存・削除のアイコン。保存（Enter）は会話の写しと名前でリンク先を
- * 上書きし（リンクしていなければ新しく作る）、別名保存は会話の写しから新しい 1 件を作ってリンクを替える
- */
 function PresetNameBar({
   chatId,
   chat,
@@ -90,7 +75,6 @@ function PresetNameBar({
   readonly preset: Preset | null;
 }): React.ReactElement {
   const presets = usePresetsStore((state) => state.presets);
-  // 打ちかけの名前はこの欄だけが持つ（リンク先が替わったら作り直す。呼び出し側の key）
   const [name, setName] = useState(preset?.name ?? '');
   const store = usePresetsStore.getState;
   const list = Object.values(presets).sort((a, b) => b.updatedAt - a.updatedAt);
@@ -113,7 +97,6 @@ function PresetNameBar({
       relinkPreset(chatId, created);
       return;
     }
-    // 会話のアバターと個別追加辞書もプリセットに書く
     store().update(preset.id, trimmed, fieldsOf(chat), {
       imageId: chatImageId(chat),
       lorebooks: chatLorebooks(chat),
@@ -126,7 +109,6 @@ function PresetNameBar({
         ? trimmed
         : t('llm.prompt.copyOf', { name: preset.name });
     if (base.length === 0) return;
-    // 会話と同じアバターを指し、個別追加辞書は中身を書く
     const created = store().add(
       freePresetName(base),
       fieldsOf(chat),
@@ -148,7 +130,6 @@ function PresetNameBar({
         label={t('llm.prompt.preset.nameField')}
         placeholder={t('llm.prompt.preset.choose')}
         actions={[
-          // リンクを外し、会話のプロンプトを初めの状態に戻す（プリセットはまだ作らない）
           {
             label: t('llm.prompt.preset.createNew'),
             onSelect: () => {
@@ -183,7 +164,6 @@ function PresetNameBar({
         }
         visible
         disabled={preset === null}
-        // 確かめずに消す。会話の写しと構成は残し、リンクだけ外す
         onClick={() => {
           if (preset === null) return;
           store().remove(preset.id);

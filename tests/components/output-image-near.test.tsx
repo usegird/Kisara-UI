@@ -6,11 +6,6 @@ import { OutputImage } from '@/components/comfy/queue/OutputImage';
 import { useConnectionStore } from '@/store/use-connection-store';
 import { useOutputImagesStore } from '@/store/use-output-images-store';
 
-// ─────────────────────────────
-// 結果画像は画面に近づいてから取りに行く。見張りは近づくまでだけ付け、
-// 近づいたら・部品を外したら外す。
-// ─────────────────────────────
-
 const fetchOutputImage = vi.hoisted(() =>
   vi.fn<() => Promise<{ blob: Blob; modifiedAt: number | null }>>(),
 );

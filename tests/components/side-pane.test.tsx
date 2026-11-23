@@ -5,10 +5,6 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { SidePane } from '@/components/ui/side-pane';
 import { useSettingsStore } from '@/store/use-settings-store';
 
-// ─────────────────────────────
-// ダイアログの左右・下の列。線で大きさを変え、列ごとに端末に残す。
-// ─────────────────────────────
-
 afterEach(() => {
   cleanup();
   useSettingsStore.setState({ dialogPaneWidths: {} });

@@ -13,16 +13,10 @@ import { usePlaybookAction } from '@/components/llm/playbook/use-playbook-action
 import { t } from '@/i18n';
 import { useChatStore } from '@/store/use-chat-store';
 
-// ─────────────────────────────
-// プレイブックのカードの部品（操作のリンク・縮めたときの段の行・末尾のアウトライン）。
-// ─────────────────────────────
-
-/** 縮めたカードの段の行の文字。「n/m 選択済み」は 1 文字ほど字下げする */
 const foldedLine = cva('min-w-0 flex-1 truncate pr-1 text-xs', {
   variants: { indent: { true: 'pl-[1em]', false: 'pl-1' } },
 });
 
-/** 操作のリンク（構成の相談を開く・次の段へ）。名前で出し、次の段への主の操作は文字を太くする */
 export function PlaybookActionLink({
   chatId,
   action,
@@ -33,7 +27,6 @@ export function PlaybookActionLink({
   readonly primary: boolean;
 }): React.ReactElement {
   const control = usePlaybookAction(chatId);
-  // 構成の相談を開く操作は「› コマンド」と同じ書式で出し、指したときにサブセッションを開くことを添える
   if (action.kind === 'consult') {
     return (
       <button
@@ -60,10 +53,6 @@ export function PlaybookActionLink({
   );
 }
 
-/**
- * 縮めたカードの末尾の段の行。有効な段が 1 つなら ‹ {i}/{n} {題} › で段を移り（読むだけのフェーズでは
- * 移れない）、そうでなければ {有効な数}/{n} 選択済み。段が無ければ出さない
- */
 export function FoldedStep({
   chatId,
   view,
@@ -132,10 +121,6 @@ export function FoldedStep({
   );
 }
 
-/**
- * プレイブックのカードの末尾のアウトライン。どのフェーズでも、縮めずに段の一覧を出す（段が無ければ
- * 出さない）。見出しの行は置かない
- */
 export function OutlineSection({
   chatId,
   view,
@@ -149,7 +134,6 @@ export function OutlineSection({
   });
   if (count === 0) return null;
   return (
-    // カードの末尾の区切り。角はカードの下の角に合わせる
     <div
       role="group"
       className="overflow-hidden rounded-b-md border-t px-1.5 py-1"

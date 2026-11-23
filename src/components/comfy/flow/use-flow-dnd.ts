@@ -19,52 +19,30 @@ import type { SortKey } from '@/graph/level-edit';
 import type { DropSide } from '@/graph/order-move';
 import { useGraphStore } from '@/store/use-graph-store';
 
-// ─────────────────────────────
-// フロー画面のドラッグ操作（カードとグループの並べ替えと、出力 → パラメータのリンク）。
-// ─────────────────────────────
-
-/** カーソルに付けて出すもの。リンクのドラッグ中だけ入る */
 interface DraggingChip {
   readonly type: string;
   readonly value: string;
 }
 
-/** フロー画面の DndContext に渡す設定と知らせの受け口 */
 export interface FlowDnd {
   readonly sensors: SensorDescriptor<SensorOptions>[];
-  /** 当たり判定。並べ替えは掴んだときの位置で判定する */
   readonly collisionDetection: CollisionDetection;
   readonly dragging: DraggingChip | null;
-  /** 並べ替えで指に付ける写し（掴んだときの見た目）。並べ替えでなければ null */
   readonly ghost: HTMLElement | null;
-  /** 枠をまたいでいる間の置き直し。またいでいなければ null */
   readonly preview: DragPreview | null;
-  /**
-   * 掴んでいる間 `data-dragging` を付ける要素を受け取る（カード・出力チップ・変数のどれでも）。
-   * 状態にすると掴んだ瞬間と離した瞬間に画面全体が描き直しになるので、要素へ直接付ける
-   */
   readonly draggingRoot: (element: HTMLElement | null) => void;
   readonly onDragStart: (event: DragStartEvent) => void;
-  /** 枠をまたいだら、掴んだカードを落とす先へ置き直して見せる */
   readonly onDragMove: (event: DragMoveEvent) => void;
   readonly onDragEnd: (event: DragEndEvent) => void;
   readonly onDragCancel: () => void;
 }
 
-/** 落とす先の相手（dnd-kit の `over`、または当たり判定の候補） */
 interface DropTarget {
   readonly id: UniqueIdentifier;
   readonly rect: ClientRect | null;
   readonly data: unknown;
 }
 
-/**
- * 指している所へ置き直す指定。**元の場所（自分）を指していれば null**（置き直しをやめる）。
- * 何も指していないときは undefined（今の置き直しを保つ）。
- * 相手の前か後ろかは、指している位置（列の外なら列の見えている端。`pointerInView`）が相手の中央より上なら前
- * （落とす先も指している位置で選ぶ。flow-dnd の `sortCollision`）。キーボードでは使わない
- * （`keyboardStep` が並びで数える）。落とす先の受け口で、枠の中へ入るか枠の外かが決まる
- */
 function previewAt(
   activeId: UniqueIdentifier,
   over: DropTarget | null,
@@ -82,7 +60,6 @@ function previewAt(
   return beside === null ? undefined : { id, group, beside, side };
 }
 
-/** 鍵を比べられる形に（カードは id、グループは鍵の文字列） */
 function toKeyString(key: SortKey): string {
   return typeof key === 'number' ? String(key) : `group:${key.group}`;
 }
@@ -97,10 +74,6 @@ function samePreview(a: DragPreview | null, b: DragPreview | null): boolean {
   );
 }
 
-/**
- * 掴んだものの写し。写しには鍵を残さない（同じ鍵の要素が 2 つにならないように）。
- * 入力欄の値は写らないものがあるが、見た目の目安なので扱わない
- */
 function snapshotOf(source: Element | null | undefined): HTMLElement | null {
   if (!source) return null;
   const copy = source.cloneNode(true);
@@ -112,13 +85,11 @@ function snapshotOf(source: Element | null | undefined): HTMLElement | null {
   copy.style.transform = '';
   copy.style.transition = '';
   copy.style.opacity = '';
-  // グループの枠はカードの外側へ広げてある（負の余白）。写しは枠の大きさで置くので打ち消す
   copy.style.marginLeft = '';
   copy.style.marginRight = '';
   return copy;
 }
 
-/** 縦に送れる一番近い祖先（カードの列）。無ければ null */
 function scrollerOf(element: Element | null | undefined): HTMLElement | null {
   for (let at = element?.parentElement; at; at = at.parentElement) {
     const { overflowY } = getComputedStyle(at);
@@ -131,7 +102,6 @@ function markDragging(element: HTMLElement | null, on: boolean): void {
   element?.toggleAttribute('data-dragging', on);
 }
 
-/** 置き直しの状態。`show` は同じ置き直しなら描き直さない。どちらの手続きも作り直さない */
 function useDropPreview(
   rectOf: RectOf,
   pointerNow: () => { readonly y: number } | null,
@@ -142,7 +112,6 @@ function useDropPreview(
   readonly previewOf: (event: DragMoveEvent | DragEndEvent) => DragPreview | null | undefined;
 } {
   const [preview, setPreview] = useState<DragPreview | null>(null);
-  // 今の置き直し（手続きの中で読む。購読はしない）
   const shown = useRef<DragPreview | null>(null);
   const show = useCallback((next: DragPreview | null): void => {
     if (samePreview(shown.current, next)) return;
@@ -151,7 +120,6 @@ function useDropPreview(
   }, []);
   const shownNow = useCallback(() => shown.current, []);
 
-  /** dnd-kit の知らせから置き直しを決める。指の位置は当たり判定と同じもの */
   const previewOf = useCallback(
     (event: DragMoveEvent | DragEndEvent): DragPreview | null | undefined => {
       const { active, over, activatorEvent, delta } = event;
@@ -165,22 +133,7 @@ function useDropPreview(
   return { preview, show, shownNow, previewOf };
 }
 
-/**
- * フロー画面のドラッグ操作の状態と手続きを持つ。
- * カードの並べ替えとリンクを 1 つの DndContext で受ける。掴む側（出力チップ・変数ボックス）と落とす側
- * （パラメータ行）がカードと変数パネルにまたがり、入れ子の DndContext では相手を見つけられないため。
- * アプリ入力の並べ替えは列の中で完結するので、列が自分の受け口で受ける。
- *
- * 並べ替えは掴んだものの写しを指に付け、元の要素は落とす先へ実際に置き直して薄く見せる。
- * 並びのずらし（dnd-kit の strategy）は同じ受け口の中しか効かず、枠をまたいでいる間は元の位置へ
- * 戻ってしまうので使わない。
- * 落とす先は掴んだときの並びの位置で決める。置き直した後の位置で決めると、枠の伸び縮みで指す先が
- * 行ったり来たりし、測り直しが描画より遅れると別の枠に入る（測り直しのたびに dnd-kit が全カードを
- * 描き直させるので、回数も増える）。
- */
 export function useFlowDnd(): FlowDnd {
-  // 手続きは手で固定してあり、ここで受ける戻り値を compiler に揃えさせない
-  // （揃えると、部品の分け方で描き直しの回数が変わる）
   'use no memo';
   const connect = useGraphStore((state) => state.connect);
   const connectToWidget = useGraphStore((state) => state.connectToWidget);
@@ -199,7 +152,6 @@ export function useFlowDnd(): FlowDnd {
 
   const onDragMove = useCallback(
     (event: DragMoveEvent) => {
-      // キーボードでは落とす先を並びで数える（重なりでは決めない）
       if (isKeyboard()) return;
       const next = previewOf(event);
       if (next !== undefined) show(next);
@@ -207,7 +159,6 @@ export function useFlowDnd(): FlowDnd {
     [isKeyboard, show, previewOf],
   );
 
-  /** 掴み終わり。写しと置き直しを片付け、留めた位置を捨てる */
   const finish = useCallback((): void => {
     setDragging(null);
     setGhost(null);
@@ -236,7 +187,6 @@ export function useFlowDnd(): FlowDnd {
   const onDragEnd = useCallback(
     (event: DragEndEvent) => {
       const placed = shownNow();
-      // キーボードでは見せていた所だけ（元の場所なら動かさない）
       const final = isKeyboard() ? placed : (placed ?? previewOf(event) ?? null);
       finish();
 
@@ -250,8 +200,6 @@ export function useFlowDnd(): FlowDnd {
         return;
       }
 
-      // 並べ替え。見せていた所へそのまま入れる。まだ置き直していなければ、その場で決める。
-      // カードの id は数値（ノード id）、グループは `group:<鍵>` なので、リンク用の id と区別できる
       if (final !== null) moveSortable(final.id, final.beside, final.side);
     },
     [connect, connectToWidget, moveSortable, finish, previewOf, shownNow, isKeyboard],

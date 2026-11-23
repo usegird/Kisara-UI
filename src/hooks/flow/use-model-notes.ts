@@ -4,26 +4,16 @@ import { formatComfyFailure } from '@/queue/comfy-failure-text';
 import { useModelNotesStore } from '@/store/use-model-notes-store';
 import { useSettingsStore } from '@/store/use-settings-store';
 
-// ─────────────────────────────
-// モデル1つぶんのメモを、選ばれたときだけ読み、保存を押したときだけ書く。
-// どこから読むかはストアが決める。
-// ─────────────────────────────
-
-/** メモの読み込みの段階 */
 type ModelNotesStatus = 'idle' | 'loading' | 'ready' | 'error';
 
-/** メモの読み込みの段階と中身 */
 interface ModelNotesState {
   readonly status: ModelNotesStatus;
-  /** ファイルの中身。無ければ null */
   readonly text: string | null;
   readonly error: string | null;
 }
 
-/** 書けたら null、書けなければ理由 */
 type SaveModelNotes = (text: string) => Promise<string | null>;
 
-/** メモの読み込みの状態と、保存の手続き */
 export interface ModelNotes extends ModelNotesState {
   readonly save: SaveModelNotes;
 }
@@ -36,11 +26,6 @@ interface Result {
   readonly state: ModelNotesState;
 }
 
-/**
- * モデル 1 つぶんのメモを読み、保存の手続きと合わせて返す。結果はどのモデルのものかを添えて持ち
- * （use-model-metadata と同じ）、別のモデルに切り替わった瞬間は描画中に「読み込み中」へ落ちる。
- * @param filename - 選択肢の文字列をそのまま渡す。null なら読まない
- */
 export function useModelNotes(folder: string, filename: string | null): ModelNotes {
   const baseUrl = useSettingsStore((state) => state.baseUrl);
   const route = useModelNotesStore((state) => (state.baseUrl === baseUrl ? state.status : 'idle'));

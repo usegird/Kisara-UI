@@ -21,11 +21,6 @@ import { SETTINGS_KEY, useSettingsStore } from '@/store/use-settings-store';
 import { connectComfy } from '../helpers/connection';
 import { fakeEmbeddingPort, type FakeEmbeddingPort } from '../helpers/embedding';
 
-// ─────────────────────────────
-// ストレージの管理。保存領域を種類ごと・1 件ずつ数え、消し、控えの一覧を読む。
-// 大きい保存領域はテストの環境に無いので、種類が空で出ることだけを見る
-// ─────────────────────────────
-
 let embedding: FakeEmbeddingPort;
 let port: ReturnType<typeof comfyPort>;
 
@@ -214,6 +209,7 @@ describe('エクスポートとファイルを開く', () => {
     const huge = { meta, chat: { chat: freshChat(), pad: 'x'.repeat(2 * 1024 * 1024) } };
     expect(await restoreStorageRaw(chat, 'c1', huge)).toBe('too-large');
   });
+
   it('会話は、一覧の項目が読めても本文が開くときの確かめを通らなければ戻さない', async () => {
     const table = { area: 'indexedDb', table: 'chat' } as const;
     const meta = chatMeta('c1', freshChat(), 10);

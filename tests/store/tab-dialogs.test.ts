@@ -9,11 +9,6 @@ import { useTaskDetailStore } from '@/store/use-task-detail-store';
 import { useViewerStore } from '@/store/use-viewer-store';
 import { useWildcardsStore } from '@/store/use-wildcards-store';
 
-// ─────────────────────────────
-// ダイアログはタブのもの。切り替えたら隠し、戻ったら開き直す。
-// 新しいタブは何も開いていない状態から始める。
-// ─────────────────────────────
-
 function resetTabs(): void {
   const { tabs, activeId } = useTabsStore.getState();
   for (const tab of tabs) if (tab.id !== activeId) useTabsStore.getState().closeTab(tab.id);
@@ -50,7 +45,6 @@ describe('タブごとのダイアログ', () => {
     expect(useWildcardsStore.getState().panelOpen).toBe(false);
     expect(useTabUiStore.getState().values).toEqual({});
 
-    // 2 つ目のタブで開いたものは、2 つ目のタブに残る
     useTaskDetailStore.getState().open('p2');
 
     useTabsStore.getState().selectTab(first);

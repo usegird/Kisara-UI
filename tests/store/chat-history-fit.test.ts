@@ -18,10 +18,6 @@ import {
   type FakeLlmPort,
 } from '../helpers/llm';
 
-// ─────────────────────────────
-// 上限を超える会話の送り方と、履歴の要約。作り物の窓口で受け取る
-// ─────────────────────────────
-
 let port: FakeLlmPort;
 
 beforeEach(() => {
@@ -67,7 +63,6 @@ describe('上限を超える会話', () => {
     expect(receiving()?.trimmed).toBeGreaterThan(0);
     expect(receiving()?.end.kind).toBe('streaming');
 
-    // 送り直しでも断られたら、それ以上は送らずに失敗を出す
     port.finish({
       ok: false,
       failure: { kind: 'rejected', status: 400, overflow: { context: 200, prompt: 300 } },
@@ -113,11 +108,9 @@ describe('履歴の要約', () => {
     port.finish();
     await done;
     expect(current()?.summary).toMatchObject({ content: 'They met.', upTo: 'm5' });
-    // 作った応答の記録も残す（「要約する」の右の i に出す）
     expect(current()?.summary?.response?.usage).toEqual({ prompt: 300, completion: 20 });
     expect(current()?.summary?.response?.timing?.firstMs).toBeTypeOf('number');
     expect(useChatSummaryStore.getState().states.c1).toBeUndefined();
-    // 縮めた分は次に送る中身から外れ、要約が入る
     send();
     const sent = port.requests[1]?.messages.map(contentText).join('|') ?? '';
     expect(sent).toContain('[Summary: They met.]');

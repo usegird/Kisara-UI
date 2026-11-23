@@ -6,11 +6,6 @@ import { focusTappedField } from '@/components/comfy/flow/tap-to-edit';
 
 import { stubMediaQuery } from '../helpers/dom';
 
-// ─────────────────────────────
-// 指では欄を押してから書き換える。
-// 指で触れる端末では焦点の無い欄が触れても受けないので、押した所の囲みから欄を探して開く
-// ─────────────────────────────
-
 function Card(): React.ReactElement {
   return (
     <div data-testid="root" onClick={focusTappedField}>

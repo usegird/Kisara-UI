@@ -14,17 +14,10 @@ import { usePlaybookPanelStore } from '@/store/use-playbook-panel-store';
 import { sessionIdsOf, usePromptAdvisorStore } from '@/store/use-prompt-advisor-store';
 import { useSettingsStore } from '@/store/use-settings-store';
 
-// ─────────────────────────────
-// 構成の相談のカードと滑り込む欄。欄は開いている間だけ置き、閉じたら外す（閉じた欄を下の部品の上に残さない）。
-// ─────────────────────────────
-
-/** 相談の見出しに使う、最初の発言の 1 行目の長さの上限 */
 const HEAD_MAX_CHARS = 80;
 
-/** カードと欄を置く側 */
 type AdvisorSide = 'left' | 'right';
 
-/** 相談 1 つに 1 枚のカードを始めた順に縦に重ね、押すと同じ側の端からその相談の欄を滑り込ませる */
 export function PromptAdvisor({
   chatId,
   side,
@@ -38,10 +31,8 @@ export function PromptAdvisor({
       Object.values(state.sessions).find((session) => session.chatId === chatId && session.isOpen)
         ?.id ?? null,
   );
-  // プレイブックのカードは並びの上に重ねる（選んでいるか、選ぶ所を開いている間）
   const chosen = useChatStore((state) => state.chats[chatId]?.playbook !== undefined);
   const choosing = usePlaybookPanelStore((state) => state.open[chatId] === true);
-  // 閉じたら、その相談のカードへ焦点を戻す（押した所へ戻すため）
   const cardButtons = useRef(new Map<string, HTMLButtonElement>());
   const cardWidth = useSettingsStore((state) => state.chatCardWidth);
   if (ids.length === 0 && !chosen && !choosing) return null;
@@ -54,7 +45,6 @@ export function PromptAdvisor({
   return (
     <>
       <div className={cardStack({ side })} style={{ width: cardWidth }}>
-        {/* 内側の縁を掴んで並びの幅を変える（全体で 1 つ。端末に残す） */}
         <ColumnDivider
           column="chatCards"
           label={t('llm.playbook.cardWidth')}
@@ -76,7 +66,6 @@ export function PromptAdvisor({
           ))}
         </div>
       </div>
-      {/* 滑り込む途中で横に送れないよう、重ねる層で切り取る。欄は開いている 1 つだけを置く */}
       {openId === null ? null : (
         <div className="pointer-events-none absolute inset-0 z-40 overflow-hidden">
           <AdvisorDrawer
@@ -92,9 +81,6 @@ export function PromptAdvisor({
   );
 }
 
-/**
- * 相談のカード。名前と、初めに送った発言の頭（受け取り中は印を回す）。押すと欄を開き、× で相談を終える
- */
 function AdvisorCard({
   id,
   attachButton,
@@ -103,7 +89,6 @@ function AdvisorCard({
   readonly attachButton: (element: HTMLButtonElement | null) => void;
 }): React.ReactElement {
   const streaming = usePromptAdvisorStore((state) => state.sessions[id]?.streaming === true);
-  // 初めに送った発言の頭だけを読む（本文が届いても描き直さない）
   const head = usePromptAdvisorStore((state) => {
     const first = state.sessions[id]?.messages.find((message) => message.role === 'user');
     return first === undefined
@@ -149,7 +134,6 @@ function AdvisorCard({
   );
 }
 
-/** 滑り込む欄。見出し・送る付加情報・初期メッセージ・やり取り・失敗・入力欄 */
 function AdvisorDrawer({
   id,
   chatId,
@@ -166,7 +150,6 @@ function AdvisorDrawer({
   const input = useRef<HTMLTextAreaElement>(null);
   const store = usePromptAdvisorStore.getState();
 
-  // 置いたら入力欄に焦点を移す（焦点という外の仕組みとの同期）
   useEffect(() => {
     input.current?.focus();
   }, []);
@@ -202,7 +185,6 @@ function AdvisorDrawer({
             title={t('llm.advisor.close')}
             onClick={onClose}
           >
-            {/* 欄を置いた側の端へ畳む形 */}
             {side === 'right' ? (
               <PanelRightClose className="size-4" aria-hidden />
             ) : (
@@ -217,10 +199,6 @@ function AdvisorDrawer({
   );
 }
 
-/**
- * プロンプトのタブの合計の行の左端に置く、相談を始めるアイコン。まだ送っていない相談があれば開き、
- * 無ければ新しい相談を始める
- */
 export function PromptAdvisorStartButton({
   chatId,
 }: {

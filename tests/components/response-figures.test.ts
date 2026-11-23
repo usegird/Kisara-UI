@@ -7,11 +7,6 @@ import {
 } from '@/components/llm/message/response-figures';
 import type { ResponseStats } from '@/store/use-response-stats-store';
 
-// ─────────────────────────────
-// 応答の情報の行。1 行目がサーバー側のツール、2 行目がトークンの処理で、
-// どちらも末尾に費用（参考）。受け取り中は測っている途中の値を同じ形にして使う。
-// ─────────────────────────────
-
 const usage = { prompt: 1000, completion: 50 };
 
 function stats(patch: Partial<ResponseStats> = {}): ResponseStats {
@@ -78,7 +73,6 @@ describe('応答の情報の行', () => {
   it('計算する費用はキャッシュの読み・書きをそれぞれの単価で数え、単価が無ければ prompt で数える', () => {
     const cached = { ...usage, cacheRead: 800, cacheWrite: 150 };
     const price = { prompt: 0.000001, completion: 0.000002, cacheRead: 1e-7, cacheWrite: 1.25e-6 };
-    // 50 × 1e-6 ＋ 800 × 1e-7 ＋ 150 × 1.25e-6 ＋ 50 × 2e-6
     expect(liveTiming(stats({ price }), cached)?.referenceUsd).toBeCloseTo(0.0004175, 10);
     expect(liveTiming(stats(), cached)?.referenceUsd).toBeCloseTo(0.0011, 10);
   });

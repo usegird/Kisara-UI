@@ -24,21 +24,12 @@ import {
   type WorkflowToolProblem,
 } from '@/store/use-workflow-tools-store';
 
-// ─────────────────────────────
-// 会話の右の列の機能のタブ。設定は会話ごとではなく全体で 1 つで、読み込んだ定義は画面を開いている間だけ。
-// ─────────────────────────────
-
 const BUTTON = smallButton({ fade: true });
 
-/**
- * 選んだワークフローの一覧。有効にしていなくても薄くしない（中の操作は押せるので文字の明度差を保つ。
- * WCAG 1.4.3）。入れ切りは上のチェックで分かる
- */
 const TOOL_LIST = 'flex flex-col gap-1';
 
 const GUIDE_FIELD = `${field({ size: 'xs' })} field-sizing-content max-h-60 min-h-16 w-full resize-y`;
 
-/** 1 行の状態の文。送れないものは失敗の色 */
 const rowStatusText = cva('', {
   variants: { usable: { true: 'text-muted-foreground', false: 'text-destructive' } },
 });
@@ -51,7 +42,6 @@ const PROBLEM_TEXT: Readonly<Record<WorkflowToolProblem, MessageKey>> = {
   'tab-closed': 'llm.extension.problem.tabClosed',
 };
 
-/** Comfy Workflow・追加辞書・プレイブックのカードを決まった順に並べる */
 export function ChatExtensionPanel(): React.ReactElement {
   return (
     <div className="flex flex-col gap-3 p-2">
@@ -71,9 +61,7 @@ function ComfyToolsCard(): React.ReactElement {
   const connected = useConnectionStore((state) => state.status === 'connected');
   const entries = useWorkflowToolsStore((state) => state.entries);
   const [picking, setPicking] = useState(false);
-  // Workflow 実行の確認スキップを入れる前の注意を出しているか（画面の中だけ）
   const [askingBypass, setAskingBypass] = useState(false);
-  // 設定を見ている 1 件の id（画面の中だけ）
   const [viewing, setViewing] = useState<string | null>(null);
   const duplicates = duplicateTargets(entries, targets);
   const viewed = targets.find((target) => target.id === viewing);
@@ -90,7 +78,6 @@ function ComfyToolsCard(): React.ReactElement {
       </label>
       <div className={CARD_BODY}>
         <p className="text-muted-foreground text-2xs">{t('llm.extension.comfy.hint')}</p>
-        {/* 入れるときだけ注意を出し、合意を利用規約・補足情報の一覧に残す */}
         <label className="flex items-center gap-1.5 text-xs">
           <input
             type="checkbox"
@@ -134,7 +121,6 @@ function ComfyToolsCard(): React.ReactElement {
             {t('llm.extension.comfy.refresh')}
           </button>
         </div>
-        {/* 共通の追加指示。説明の後ろに添えて会話の 1 回の要求で引数まで作らせる */}
         <label className="flex flex-col gap-1 text-xs">
           {t('llm.extension.comfy.argGuide')}
           <textarea
@@ -177,9 +163,7 @@ function ComfyToolsCard(): React.ReactElement {
   );
 }
 
-/** 1 行の状態の文。読めていれば機能名、読めなければ理由 */
 function rowStatus(entry: LoadedWorkflowTool | undefined, duplicate: boolean): string {
-  // まだ読んでいない（つないでいる間は、会話のタブを出したときに読む）
   if (entry === undefined) return t(PROBLEM_TEXT['no-definitions']);
   if (entry.kind === 'loading') return t('llm.extension.comfy.loading');
   if (entry.kind === 'problem') return t(PROBLEM_TEXT[entry.problem]);
@@ -234,7 +218,6 @@ function ToolRow({
   );
 }
 
-/** 読み込んだ設定を、ワークフローのタブと同じダイアログで読み取り専用で見せる */
 function ToolDetail({
   target,
   entry,

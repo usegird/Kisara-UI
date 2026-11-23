@@ -6,10 +6,6 @@ import type { ChatCompletionRequest, ChatStreamEvent } from '@/port/llm-port';
 
 import { deltaLine, sseResponse } from '../helpers/llm';
 
-// ─────────────────────────────
-// LLM の HTTP 呼び出し。作り物の fetch に答えさせ、本物には送らない。
-// ─────────────────────────────
-
 const ENDPOINT = { baseUrl: 'http://127.0.0.1:11434/v1/' };
 const REQUEST: ChatCompletionRequest = {
   model: 'm',
@@ -58,7 +54,6 @@ describe('モデルの一覧', () => {
       ok: true,
       value: { ids: ['a', 'b'], contexts: {}, details: {}, serverContext: null, truncated: false },
     });
-    // llama.cpp でなければ /props は読まない
     expect(calls).toHaveLength(1);
   });
 
@@ -156,7 +151,6 @@ describe('モデルの一覧', () => {
     );
     const result = await port.listModels(ENDPOINT);
     expect(result).toMatchObject({ failure: { kind: 'cors' } });
-    // 確かめる要求は同じ宛先へ、キーを付けずに送る
     expect(calls[1]?.url).toBe('http://127.0.0.1:11434/v1/models');
     expect(calls[1]?.init.headers).toBeUndefined();
   });
@@ -166,11 +160,11 @@ describe('モデルの一覧', () => {
     const result = await port.listModels({ ...ENDPOINT, baseUrl: 'http://192.168.0.5:8000/v1' });
     expect(result).toMatchObject({ failure: { kind: 'mixed-content' } });
     expect(calls).toHaveLength(0);
-    // 手元（ループバック）は通る
     await port.listModels(ENDPOINT);
     expect(calls).toHaveLength(1);
   });
 });
+
 describe('受け取った本文の控え', () => {
   it('ストリーミングは空でない行を、1 つの JSON は全文を、そのまま渡す', async () => {
     const lines: string[] = [];
@@ -343,7 +337,6 @@ describe('Chat Completions の受け取り', () => {
   it('止めたら、本文の読み取りを止めない実装でも待たずに止めたとして返す', async () => {
     const controller = new AbortController();
     const encoder = new TextEncoder();
-    // 終わらないストリーム（止めた合図を見ない）
     const body = new ReadableStream<Uint8Array>({
       start(stream) {
         stream.enqueue(encoder.encode(deltaLine('part')));
@@ -427,6 +420,7 @@ describe('Chat Completions の受け取り', () => {
       vi.useRealTimers();
     }
   });
+
   it('呼び出しが届いた後は、引数をまとめて送るサーバーを待つため 5 分まで待つ', async () => {
     vi.useFakeTimers();
     try {

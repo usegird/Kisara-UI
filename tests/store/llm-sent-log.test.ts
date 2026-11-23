@@ -12,11 +12,6 @@ import { useSentRequestsStore } from '@/store/use-sent-requests-store';
 
 import { fakeLlmPort } from '../helpers/llm';
 
-// ─────────────────────────────
-// 送った要求の本文の記録（発言の送った中身のアイコンで見る）。候補の鍵を添えた要求だけを、
-// 送る本文と同じ JSON で候補ごとの最新として残す。一覧の取得とキーの確認は記録しない
-// ─────────────────────────────
-
 afterEach(() => {
   useSentRequestsStore.setState({ byKey: {} });
   useReceivedStore.setState({ byKey: {} });
@@ -51,6 +46,7 @@ describe('送った要求の本文の記録', () => {
     expect(byKey['c1/a1/1']?.model).toBe('other');
     expect(inner.requests).toHaveLength(3);
   });
+
   it('鍵を添えた要求の受け取った本文を、受け取り終えたときに 1 度だけ残す', async () => {
     const inner = fakeLlmPort();
     const port = recordSentLlmPort({

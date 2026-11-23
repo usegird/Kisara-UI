@@ -3,10 +3,6 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { onStorageWriteFailure, safeStorage } from '@/lib/safe-storage';
 
-// ─────────────────────────────
-// 保存領域の入口。書けなかった値はページの間だけ持って読み、受けた側に伝える。
-// ─────────────────────────────
-
 afterEach(() => {
   vi.restoreAllMocks();
   localStorage.clear();
@@ -22,7 +18,6 @@ describe('保存領域の入口', () => {
 
     safeStorage().setItem('k', 'v');
 
-    // 別の入口から読んでも同じ写しを見る
     expect(safeStorage().getItem('k')).toBe('v');
     expect(failed).toHaveBeenCalledWith('local');
   });

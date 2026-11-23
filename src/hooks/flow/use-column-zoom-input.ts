@@ -10,18 +10,12 @@ import {
 import type { ZoomColumn } from '@/store/settings-fields/column-zoom';
 import { useSettingsStore } from '@/store/use-settings-store';
 
-// ─────────────────────────────
-// 列の倍率のホイールとキーの受け口。どこの列かの判定と送り直しの基準は `useColumnZoom` が受ける。
-// ─────────────────────────────
-
-/** 受け口が読む判定。`optionsNow` は最新の判定を返す（購読し直さない） */
 export interface ColumnZoomInput {
   readonly optionsNow: () => {
     readonly columnOf: (target: Element) => ZoomColumn | null;
     readonly columnAt: (clientX: number, clientY: number) => ZoomColumn | null;
     readonly unified: boolean;
   };
-  /** 倍率を変える。`clientY` が null ならキーからの操作 */
   readonly change: (column: ZoomColumn, clientY: number | null, apply: () => void) => void;
 }
 
@@ -31,7 +25,6 @@ interface PointerSpot {
   readonly y: number;
 }
 
-/** 1 刻み動かす。3 列で 1 つなら、列によらず同じ値を動かす */
 export function stepFor(unified: boolean, column: ZoomColumn, direction: number): void {
   const store = useSettingsStore.getState();
   if (unified) store.stepNarrowZoom(direction);
@@ -44,11 +37,6 @@ function resetFor(unified: boolean, column: ZoomColumn): void {
   else store.resetColumnZoom(column);
 }
 
-/**
- * ホイールを受ける（列を並べた枠の中だけ）。
- * 列の上ではページ全体の拡大縮小を止めるので、受け身でない購読で受ける（React の `onWheel` は
- * 受け身で既定の動きを止められない）。受け身でない購読は送りを待たせるので、列を並べた枠にだけ付ける
- */
 export function useZoomWheel(
   host: HTMLElement | null,
   { optionsNow, change }: ColumnZoomInput,
@@ -69,7 +57,6 @@ export function useZoomWheel(
       if (column === null) return;
       event.preventDefault();
 
-      // 少しずつ届くもの（トラックパッド）を貯めて、一定量で 1 刻み
       const { direction, held } = accumulateWheel(wheel.current, column, wheelPixels(event));
       wheel.current = held;
       if (direction === 0) return;
@@ -81,12 +68,10 @@ export function useZoomWheel(
   }, [host, optionsNow, change]);
 }
 
-/** キーを受ける。対象は焦点がある列 → ポインタがある列 */
 export function useZoomKeys(
   host: HTMLElement | null,
   { optionsNow, change }: ColumnZoomInput,
 ): void {
-  /** 最後にポインタがあった所。キーの操作で対象の列を決めるのに使う */
   const pointer = useRef<PointerSpot | null>(null);
 
   useEffect(() => {
@@ -115,10 +100,8 @@ export function useZoomKeys(
     const targetColumn = (): ZoomColumn | null => {
       const focused = document.activeElement;
       const focusedInside = focused instanceof Element && host.contains(focused);
-      // 列の外（右の列など）に焦点があるなら、そちらの操作として素通しする
       if (focused instanceof Element && focused !== document.body && !focusedInside) return null;
 
-      // ダイアログに焦点があるなら、ダイアログが自分で受ける
       if (focusedInside && insideOwnZoom(focused)) return null;
       const byFocus = focusedInside ? optionsNow().columnOf(focused) : null;
       if (byFocus !== null) return byFocus;
@@ -130,7 +113,6 @@ export function useZoomKeys(
 
     const onKeyDown = (event: KeyboardEvent): void => {
       if (event.defaultPrevented) return;
-      // 広げ縮めは Alt＋`+` / `-`（Ctrl＋`+` / `-` はブラウザのものなので使わない）
       const key = zoomKey(event);
       if (key === null) return;
 

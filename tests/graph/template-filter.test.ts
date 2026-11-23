@@ -10,10 +10,6 @@ import {
 
 import { template } from '../helpers/template';
 
-// ─────────────────────────────
-// テンプレートの絞り込みと並び替え。
-// ─────────────────────────────
-
 const SECTIONS: TemplateSection[] = [
   {
     title: 'Use Cases',

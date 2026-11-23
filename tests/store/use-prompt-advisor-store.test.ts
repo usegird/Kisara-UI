@@ -16,10 +16,6 @@ import {
   type FakeLlmPort,
 } from '../helpers/llm';
 
-// ─────────────────────────────
-// 構成の相談の始め方・やり取り・案の反映と元に戻す
-// ─────────────────────────────
-
 let port: FakeLlmPort;
 
 const rules = (): string | undefined =>
@@ -63,12 +59,10 @@ describe('構成の相談のやり取り', () => {
     store.setDraft(id, 'Help me');
     const sending = store.send(id);
     const sent = port.requests[0]?.messages ?? [];
-    // 案を書かせるツールだけを付ける（Web は切っている）
     const names = port.requests[0]?.tools?.map((tool) =>
       'function' in tool ? tool.function.name : tool.type,
     );
     expect(names).toEqual(['propose_prompt_changes']);
-    // 初期メッセージは見せる文の後ろに付加情報を埋め込んで送る
     const greeting = sent.at(-2);
     expect(greeting?.role).toBe('assistant');
     const content = greeting === undefined ? '' : contentText(greeting);
@@ -83,7 +77,6 @@ describe('構成の相談のやり取り', () => {
     expect(session(id)?.messages.map((message) => message.content)).toEqual(['Help me', 'Sure']);
     expect(session(id)?.messages.at(-1)?.usage).toEqual({ prompt: 900, completion: 40 });
     expect(session(id)?.streaming).toBe(false);
-    // 送った後は初期メッセージを替えない
     store.stepGreeting(id, 1);
     expect(session(id)?.greeting).toBe(1);
   });
@@ -101,7 +94,6 @@ describe('構成の相談のやり取り', () => {
     store.setDraft(id, 'Look it up');
     const sending = store.send(id);
     await expect.poll(() => port.requests.length).toBe(1);
-    // 案を書かせるツールと、Web の検索・取得
     expect(port.requests[0]?.tools).toHaveLength(3);
     port.emit({ kind: 'delta', content: 'A', reasoning: 'think' });
     port.emit({ kind: 'citations', citations: [{ url: 'https://a.example', title: 'A' }] });
@@ -117,7 +109,6 @@ describe('構成の相談のやり取り', () => {
     useWebSearchStore.setState({ modes: { chat: 'off', advisor: 'off' }, agreed: false });
   });
 
-  // 決まったことを入れるリンクは定型の文を送り、打ちかけは残す
   it('文を渡して送ると、その文を送り、打ちかけは残す', async () => {
     const store = usePromptAdvisorStore.getState();
     const id = store.start('c1');
@@ -140,6 +131,7 @@ describe('構成の相談のやり取り', () => {
     expect(session(id)).toBeUndefined();
   });
 });
+
 describe('付加情報と要約', () => {
   const greetingOf = (index: number): string => {
     const greeting = port.requests[index]?.messages.find((message) => message.role === 'assistant');
@@ -189,6 +181,7 @@ describe('付加情報と要約', () => {
     expect(sent).toContain('b');
   });
 });
+
 describe('案を書かせるツールの呼び出し', () => {
   const args = JSON.stringify({
     title: 'T',

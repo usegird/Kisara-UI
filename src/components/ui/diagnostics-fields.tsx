@@ -8,13 +8,8 @@ import { TRACE_LEVELS, type TraceArea } from '@/lib/trace';
 import { useDiagnosticsDialogStore } from '@/store/use-diagnostics-dialog-store';
 import { useSettingsStore } from '@/store/use-settings-store';
 
-// ─────────────────────────────
-// 設定の「ログ基準」の欄。そのタブの分野のログの段階と、ログをエクスポートするダイアログの入口。
-// ─────────────────────────────
-
 const SELECT = field({ size: 'xs', width: 'control' });
 
-/** 分野 `area` のログの段階を選ぶ欄と、ログをエクスポートするダイアログを開くボタン */
 export function DiagnosticsFields({ area }: { readonly area: TraceArea }): React.ReactElement {
   const id = useId();
   const level = useSettingsStore((state) => state.traceLevels[area]);

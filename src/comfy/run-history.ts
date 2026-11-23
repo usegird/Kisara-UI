@@ -16,21 +16,9 @@ import type {
   RunHistoryWorkflow,
 } from '@/port/run-history';
 
-// ─────────────────────────────
-// 実行の記録の読み書きと形の検証。読んだ中身は自分が書いたものでも未確定として受け、形を確かめてから使う。
-// ─────────────────────────────
-
-/** 記録を置くディレクトリ（ユーザーフォルダからの相対） */
 export const RUN_HISTORY_DIR = 'kisara/history';
 
-/**
- * 形式の版。この版だけを読み書きし、ほかの版は読まない
- */
 const RUN_HISTORY_VERSION = 5;
-
-// ─────────────────────────────
-// 形の検証
-// ─────────────────────────────
 
 const ROLE_MARKS: readonly unknown[] = ['posi', 'nega', null];
 
@@ -38,7 +26,6 @@ function isRoleMark(value: unknown): value is PromptRoleMark {
   return ROLE_MARKS.includes(value);
 }
 
-/** `[ノード id, 入力名, …]` */
 function slotHead(raw: unknown): ValueSlot | null {
   if (!isUnknownArray(raw)) return null;
   const [nodeId, input] = raw;
@@ -51,7 +38,6 @@ function parsePromptSlot(raw: unknown): PromptSlot | null {
   return head === null || !isRoleMark(role) ? null : [...head, role];
 }
 
-/** 並びのどれかが読めなければ null（置き場がずれるので骨組みごと外す） */
 function parseAll<T>(raw: unknown, parse: (item: unknown) => T | null): T[] | null {
   if (!isUnknownArray(raw)) return null;
   const items = raw.map(parse);
@@ -62,14 +48,12 @@ function parseNames(raw: unknown): string[] | null {
   return parseAll(raw, (item) => (typeof item === 'string' ? item : null));
 }
 
-/** `[ノード名]` か `[ノード名, コメント]` */
 function parseSlotNode(raw: unknown): SlotNode | null {
   if (!isUnknownArray(raw) || typeof raw[0] !== 'string') return null;
   const [name, comment] = raw;
   return typeof comment === 'string' ? [name, comment] : [name];
 }
 
-/** 置き場のノードの定義。読めない 1 件は外す（表示はノード id だけになる） */
 function parseSlotNodes(raw: unknown): Record<string, SlotNode> {
   if (!isRecord(raw)) return {};
   const nodes: Record<string, SlotNode> = {};
@@ -101,7 +85,6 @@ function parseWorkflowEntry(raw: unknown): RunHistoryWorkflow | null {
   };
 }
 
-/** 1 件を読む（`[開始, 完了, パス, 骨組みのキー, プロンプトのキー, シード]`） */
 function parseRun(raw: unknown): RunHistoryRun | null {
   if (!isUnknownArray(raw)) return null;
   const [start, finished, paths, workflow, prompt, seeds] = raw;
@@ -119,7 +102,6 @@ function parseRun(raw: unknown): RunHistoryRun | null {
   };
 }
 
-/** 記録のファイルを読む。形が違えば null（そのファイルだけを外し、上書きしない） */
 export function parseRunHistoryFile(raw: unknown): RunHistoryFile | null {
   if (!isRecord(raw) || raw.v !== RUN_HISTORY_VERSION) return null;
   if (!isRecord(raw.workflows) || !isRecord(raw.prompts) || !isUnknownArray(raw.runs)) return null;
@@ -138,9 +120,6 @@ export function parseRunHistoryFile(raw: unknown): RunHistoryFile | null {
   return { workflows, prompts, runs, ...(name === undefined ? {} : { name }) };
 }
 
-/**
- * 書く形の文字列にする。1 件は配列にし、無い項目は後ろから省く
- */
 export function serializeRunHistoryFile(file: RunHistoryFile): string {
   const runs = file.runs.map((run) => {
     if (run.workflow === null) return [run.start, run.end, run.paths];
@@ -155,11 +134,6 @@ export function serializeRunHistoryFile(file: RunHistoryFile): string {
   });
 }
 
-// ─────────────────────────────
-// `/history` から記録の材料を読む
-// ─────────────────────────────
-
-/** `status.messages` の最初と最後の時刻（種別名には依存しない） */
 function timestamps(status: unknown): { first: number | null; last: number | null } {
   if (!isRecord(status) || !isUnknownArray(status.messages)) return { first: null, last: null };
   let first: number | null = null;
@@ -180,7 +154,6 @@ function sentWorkflow(prompt: unknown): unknown {
   return isRecord(pnginfo) && pnginfo.workflow !== undefined ? pnginfo.workflow : null;
 }
 
-/** `GET /history` の応答から、記録の材料を 1 件ずつ取り出す。読めない 1 件は外す */
 export function parseHistoryRuns(raw: unknown): HistoryRunSource[] {
   if (!isRecord(raw)) return [];
 
@@ -190,7 +163,6 @@ export function parseHistoryRuns(raw: unknown): HistoryRunSource[] {
     const outputs = isRecord(value.outputs)
       ? Object.values(value.outputs).flatMap((output) => parseOutputFiles(output))
       : [];
-    // 保存していない出力（`temp`）も残す。置き場は LoadImage の値と同じ印で書く
     const paths = outputs.map(outputPath);
 
     const times = timestamps(value.status);
@@ -206,24 +178,17 @@ export function parseHistoryRuns(raw: unknown): HistoryRunSource[] {
   return sources;
 }
 
-// ─────────────────────────────
-// 読み書き
-// ─────────────────────────────
-
-/** 一覧の 1 件。`full_info` の形（`{path, modified}`）と、名前だけの形の両方を読む */
 function listEntry(raw: unknown): RunHistoryEntry | null {
   const name = isRecord(raw) ? raw.path : raw;
   if (typeof name !== 'string' || !name.endsWith('.json')) return null;
   return { name, modified: isRecord(raw) ? finiteNumber(raw.modified) : null };
 }
 
-/** 記録のファイルの一覧（名前と最後に書いた時刻）。ディレクトリがまだ無ければ空 */
 export async function listRunHistoryFiles(
   baseUrl: string,
   options: RequestOptions = {},
 ): Promise<RunHistoryEntry[]> {
   try {
-    // 書き足しの直後に読むので、ブラウザのキャッシュを通さない（古い中身で合わせない）
     const raw = await fetchJson(userdataListUrl(baseUrl, RUN_HISTORY_DIR), {
       cache: 'no-store',
       ...options,
@@ -236,7 +201,6 @@ export async function listRunHistoryFiles(
   }
 }
 
-/** 1 ファイルを読む。無い・形が違うも結果で返す（書き手は形の違うファイルを上書きしない） */
 export async function fetchRunHistoryFile(
   baseUrl: string,
   name: string,
@@ -248,7 +212,6 @@ export async function fetchRunHistoryFile(
     raw = await fetchJson(url, { cache: 'no-store', ...options });
   } catch (error) {
     if (isNotFound(error)) return { kind: 'missing' };
-    // JSON でない中身も形の違うファイルとして扱う
     if (error instanceof ComfyRequestError && error.kind === 'parse') return { kind: 'unreadable' };
     throw error;
   }
@@ -256,7 +219,6 @@ export async function fetchRunHistoryFile(
   return file === null ? { kind: 'unreadable' } : { kind: 'file', file };
 }
 
-/** ファイル全体を上書きする */
 export async function saveRunHistoryFile(
   baseUrl: string,
   name: string,

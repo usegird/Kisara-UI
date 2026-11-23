@@ -4,10 +4,6 @@ import { describe, expect, it } from 'vitest';
 
 import { MOTION_MS } from '@/lib/motion';
 
-// ─────────────────────────────
-// 滑り込み・抜け出しの長さは MOTION_MS が正。CSS は値を読めないので、書き写した値が揃っていることを確かめる
-// ─────────────────────────────
-
 const CSS = readFileSync('src/styles/globals.css', 'utf8');
 
 describe('滑り込み・抜け出しの長さ', () => {

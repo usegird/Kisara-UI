@@ -3,26 +3,15 @@ import { Check, ChevronRight } from 'lucide-react';
 
 import type { MenuAction, MenuActionSection } from '@/lib/menu-actions';
 
-// ─────────────────────────────
-// 右クリックメニューの見た目。開閉・矢印キー・焦点の持ち回り・メニューキー / Shift+F10 は
-// Base UI に任せ、ここは層をまたいで同じ見た目にするだけ。
-// ─────────────────────────────
-
-/** 右クリックメニューの根（Base UI のまま） */
 export const ContextMenuRoot = ContextMenu.Root;
-/** 右クリックで開く要素（Base UI のまま） */
 export const ContextMenuTrigger = ContextMenu.Trigger;
 
-/** メニューの中身の props */
 export interface ContextMenuContentProps {
   readonly children: React.ReactNode;
-  /** 読み上げのメニューの名前 */
   readonly label: string;
-  /** 閉じたあとの焦点。既定は基盤に任せる */
   readonly finalFocus?: (() => HTMLElement | true) | undefined;
 }
 
-/** メニューの浮かぶ枠 */
 export function ContextMenuContent({
   children,
   label,
@@ -44,15 +33,12 @@ export function ContextMenuContent({
   );
 }
 
-/** 操作のまとまりの props */
 export interface ContextMenuActionSectionsProps {
   readonly sections: readonly MenuActionSection[];
   readonly onChoose: (action: MenuAction) => void;
-  /** 各まとまりの末尾に足す項目（見出しの名前で引く） */
   readonly extra?: ((section: MenuActionSection, index: number) => React.ReactNode) | undefined;
 }
 
-/** 名前を key にする。同じ名前が続いたら何度目かを添える（位置そのものは key にしない） */
 function uniqueKeys(names: readonly string[]): string[] {
   const seen = new Map<string, number>();
   return names.map((name) => {
@@ -62,10 +48,6 @@ function uniqueKeys(names: readonly string[]): string[] {
   });
 }
 
-/**
- * Tab から外した操作のまとまり。見出しごとに区切り、最後にも区切りを置く
- * （続くいつもの項目と分ける）
- */
 export function ContextMenuActionSections({
   sections,
   onChoose,
@@ -99,16 +81,13 @@ export function ContextMenuActionSections({
   );
 }
 
-/** メニューの項目の props */
 export interface ContextMenuItemProps {
   readonly children: React.ReactNode;
   readonly onClick: () => void;
   readonly disabled?: boolean;
-  /** 押せない理由などの補足。指し示したときに出す */
   readonly title?: string | undefined;
 }
 
-/** メニューの項目 1 つ */
 export function ContextMenuItem({
   children,
   onClick,
@@ -129,19 +108,15 @@ export function ContextMenuItem({
   );
 }
 
-/** 項目の間の区切りの線 */
 export function ContextMenuSeparator(): React.ReactElement {
   return <ContextMenu.Separator className="bg-border mx-1 my-1 h-px" />;
 }
 
-/** 入れ子のメニューの props */
 export interface ContextMenuSubmenuProps {
-  /** 開く項目の名前。入れ子のメニューの読み上げの名前にもなる */
   readonly label: string;
   readonly children: React.ReactNode;
 }
 
-/** 入れ子のメニュー。指すか右キーで開く（開閉と焦点は Base UI に任せる） */
 export function ContextMenuSubmenu({
   label,
   children,
@@ -171,14 +146,12 @@ export function ContextMenuSubmenu({
   );
 }
 
-/** 1 つだけ選ぶ組の props */
 export interface ContextMenuRadioGroupProps<T> {
   readonly value: T;
   readonly onValueChange: (value: T) => void;
   readonly children: React.ReactNode;
 }
 
-/** 1 つだけ選ぶ項目の組。選んでいるものに印を付ける */
 export function ContextMenuRadioGroup<T>({
   value,
   onValueChange,
@@ -187,7 +160,6 @@ export function ContextMenuRadioGroup<T>({
   return (
     <ContextMenu.RadioGroup
       value={value}
-      // Base UI の値は any で渡ってくる。ここに並べた項目の値だけが来る
       onValueChange={(next: T) => onValueChange(next)}
     >
       {children}
@@ -195,15 +167,12 @@ export function ContextMenuRadioGroup<T>({
   );
 }
 
-/** 1 つだけ選ぶ項目の props */
 export interface ContextMenuRadioItemProps<T> {
   readonly value: T;
   readonly children: React.ReactNode;
-  /** 名前の前に置く色見本。無ければ出さない */
   readonly swatch?: string | undefined;
 }
 
-/** 1 つだけ選ぶ項目。選んだら閉じる */
 export function ContextMenuRadioItem<T>({
   value,
   children,

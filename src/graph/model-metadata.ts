@@ -1,37 +1,31 @@
 import { isRecord } from '@/lib/guards';
 import { truncate } from '@/lib/text';
 
-// ─────────────────────────────
-// safetensors に埋め込まれた metadata の読み解き。中身は学習側が書いた文字列の集まりでキーが揃って
-// いないので、sd-scripts の `ss_*` と modelspec の `modelspec.*` を拠り所にしつつ、無い前提で読む。
-// ─────────────────────────────
-
-/** metadata の生の 1 項目（長い値は表示上限で切ったもの） */
 interface ModelInfoEntry {
   readonly key: string;
   readonly value: string;
 }
 
-/**
- * metadata から拾った見出しの項目と、生の全項目。読めない値は捨てるが、生の一覧は必ず残す
- * （こちらの決めた項目だけに絞ると手掛かりが消える）。
- */
 export interface ModelInfo {
   readonly title: string | null;
-  /** 学習の土台になったモデル */
   readonly baseModel: string | null;
-  /** 網の大きさ（dim / alpha） */
   readonly network: string | null;
-  /** 学習で多く付いていた語＝呼び出しの手掛かり */
   readonly triggers: readonly string[];
-  /** 生の全項目（キー順） */
   readonly entries: readonly ModelInfoEntry[];
 }
 
-/** 1 項目の表示上限。学習データの一覧は数十 KB になることがある */
+export interface ModelJsonEntry {
+  readonly key: string;
+  readonly value: string;
+  readonly structured?: true;
+}
+
+const JSON_INDENT = 2;
+
+const NO_JSON_VALUES: ReadonlySet<string> = new Set(['', 'Unknown', '0']);
+
 const VALUE_LIMIT = 400;
 
-/** 呼び出しの手掛かりとして出す語の数 */
 const TRIGGER_LIMIT = 24;
 
 function pick(metadata: ReadonlyMap<string, string>, ...keys: readonly string[]): string | null {
@@ -52,10 +46,6 @@ function network(metadata: ReadonlyMap<string, string>): string | null {
     .join(' / ');
 }
 
-/**
- * 学習時のタグの出現数（`ss_tag_frequency`）から多い順に並べる。
- * 形は `{データセット: {語: 回数}}`。壊れていたら何も返さない。
- */
 export function triggerWords(raw: string | null): string[] {
   if (raw === null) return [];
 
@@ -87,7 +77,6 @@ export function triggerWords(raw: string | null): string[] {
     .map(([word]) => word);
 }
 
-/** metadata から題名・土台のモデル・網の大きさ・呼び出しの手掛かりを拾い、生の全項目を添える */
 export function summarizeModelMetadata(metadata: ReadonlyMap<string, string>): ModelInfo {
   const entries = [...metadata.entries()]
     .map(([key, value]) => ({
@@ -108,4 +97,18 @@ export function summarizeModelMetadata(metadata: ReadonlyMap<string, string>): M
     triggers: triggerWords(metadata.get('ss_tag_frequency') ?? null),
     entries,
   };
+}
+
+export function parseModelJsonEntries(raw: unknown): ModelJsonEntry[] | null {
+  if (!isRecord(raw)) return null;
+
+  return Object.entries(raw).map(([key, value]) =>
+    typeof value === 'string'
+      ? { key, value }
+      : { key, value: JSON.stringify(value, null, JSON_INDENT), structured: true },
+  );
+}
+
+export function hasModelJsonValue(entry: ModelJsonEntry): boolean {
+  return !NO_JSON_VALUES.has(entry.value.trim());
 }

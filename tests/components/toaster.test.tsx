@@ -5,10 +5,6 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { Toaster } from '@/components/ui/toast';
 import { toastManager } from '@/components/ui/toast-manager';
 
-// ─────────────────────────────
-// 知らせの並べ方。同じ文面は回数を増やして末尾へ、隠さずに並べ、すべて消せる。
-// ─────────────────────────────
-
 afterEach(() => {
   act(() => toastManager.close());
   cleanup();

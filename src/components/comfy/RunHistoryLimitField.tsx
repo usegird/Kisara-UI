@@ -9,21 +9,13 @@ import {
 } from '@/store/settings-fields/run-history-limit';
 import { useSettingsStore } from '@/store/use-settings-store';
 
-// ─────────────────────────────
-// 実行の記録の上限（1 セッションのファイルに残す実行の数）の欄。
-// 数の欄は自作せず基盤（Base UI の NumberField）に任せる。形はスライドショーの間隔の欄と同じ。
-// ─────────────────────────────
-
-/** 実行の記録の上限の欄の props */
 export interface RunHistoryLimitFieldProps {
-  /** 欄の id（設定のタブの見出しが指す） */
   readonly id: string;
 }
 
 const STEP_BUTTON = `text-muted-foreground hover:text-foreground flex h-3 items-center px-0.5
   data-disabled:opacity-40`;
 
-/** 設定のストアの上限を読み書きする数の欄。上下の三角で増減する */
 export function RunHistoryLimitField({ id }: RunHistoryLimitFieldProps): React.ReactElement {
   const limit = useSettingsStore((state) => state.runHistoryLimit);
   const setLimit = useSettingsStore((state) => state.setRunHistoryLimit);
@@ -35,7 +27,6 @@ export function RunHistoryLimitField({ id }: RunHistoryLimitFieldProps): React.R
       min={RUN_HISTORY_LIMIT_MIN}
       max={RUN_HISTORY_LIMIT_MAX}
       step={10}
-      // 空にした途中（null）は書かない。離れると基盤が今の値に戻す
       onValueChange={(value) => {
         if (value !== null) setLimit(normalizeRunHistoryLimit(value));
       }}

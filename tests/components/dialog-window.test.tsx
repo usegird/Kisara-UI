@@ -4,14 +4,10 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { DialogWindow } from '@/components/ui/dialog-window';
 import { PanelHeader } from '@/components/ui/panel-header';
+import { ABOVE_DIALOG_WINDOWS_LAYER } from '@/hooks/ui/use-dialog-window';
 import { normalizeDialogLayouts } from '@/lib/dialog-rect';
 import { topEmbedded, useDialogStore } from '@/store/use-dialog-store';
 import { useSettingsStore } from '@/store/use-settings-store';
-
-// ─────────────────────────────
-// ダイアログの出し方。既定は呼び出す側、切り替えたら端末に残す。
-// 埋め込みは嵌め先へ出し、一番上の 1 つだけを見せる。
-// ─────────────────────────────
 
 afterEach(() => {
   cleanup();
@@ -134,6 +130,21 @@ describe('自由移動の前後', () => {
 
     fireEvent.pointerDown(document.querySelector('[data-dialog-window="a"]') as HTMLElement);
     expect(z('a')).toBeGreaterThan(z('b'));
+  });
+
+  it('いくつ重ねても、その上の層（実行の枠）より下に収まる', () => {
+    const ids = Array.from({ length: 12 }, (_, i) => `w${String(i)}`);
+    render(
+      <>
+        {ids.map((id) => (
+          <Panel key={id} id={id} mode="floating" />
+        ))}
+      </>,
+    );
+    const layers = ids.map((id) =>
+      Number(document.querySelector<HTMLElement>(`[data-dialog-window="${id}"]`)?.style.zIndex),
+    );
+    expect(Math.max(...layers)).toBeLessThan(ABOVE_DIALOG_WINDOWS_LAYER);
   });
 });
 

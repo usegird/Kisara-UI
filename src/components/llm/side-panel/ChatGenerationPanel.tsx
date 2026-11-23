@@ -9,24 +9,17 @@ import { stepPowerOfTwo } from '@/lib/power-of-two';
 import type { GenerationParams } from '@/port/llm-port';
 import { useSettingsStore } from '@/store/use-settings-store';
 
-// ─────────────────────────────
-// 会話の右の列のパラメタのタブ。項目の名前は API の名前のまま出す（訳さない）。
-// ─────────────────────────────
-
 type NumberKey = Exclude<keyof GenerationParams, 'stop'>;
 
 interface NumberField {
   readonly key: NumberKey;
-  /** 決めたときに入れる値 */
   readonly initial: number;
-  /** 上下で 2 の累乗へ繰り上げ・繰り下げる */
   readonly powerOfTwo?: true;
   readonly min?: number;
   readonly max?: number;
   readonly step: number;
 }
 
-// 長さの上限はいちばんよく触るので先頭に置く
 const NUMBER_FIELDS: readonly NumberField[] = [
   { key: 'max_tokens', initial: 1024, min: 1, step: 1, powerOfTwo: true },
   { key: 'temperature', initial: 1, min: 0, max: 2, step: 0.05 },
@@ -40,12 +33,7 @@ const fieldRow = cva('flex flex-col gap-1 rounded-md py-1 pl-1', {
   variants: { set: { true: '', false: 'opacity-55' } },
 });
 
-/**
- * システムプロンプトを直す欄と生成の設定の欄。決めていない項目も欄とつまみを薄く出し（送らないことが
- * 見て分かる）、押す・動かす・打つと決めたことにする
- */
 export function ChatGenerationPanel({ chatId }: { readonly chatId: string }): React.ReactElement {
-  // 生成の設定もシステムプロンプトも全体で 1 つ
   const params = useSettingsStore((state) => state.llmParams);
   const setParam = useSettingsStore((state) => state.setLlmParam);
 
@@ -71,7 +59,6 @@ export function ChatGenerationPanel({ chatId }: { readonly chatId: string }): Re
                 {field.key}
               </label>
             </div>
-            {/* 決めていない間も欄とつまみを出す（薄く）。押す・動かす・打つと決めたことにする */}
             <div className="flex items-center gap-2">
               {field.min !== undefined && field.max !== undefined ? (
                 <input
@@ -107,7 +94,6 @@ export function ChatGenerationPanel({ chatId }: { readonly chatId: string }): Re
                 onChange={(event) => {
                   const next = Number(event.target.value);
                   if (event.target.value === '' || !Number.isFinite(next)) return;
-                  // つまみ（1 ずつの上下）は打ち込みと見分け、2 の累乗へ寄せる
                   const typed =
                     (event.nativeEvent as InputEvent).inputType !== undefined &&
                     (event.nativeEvent as InputEvent).inputType !== '';
@@ -127,21 +113,16 @@ export function ChatGenerationPanel({ chatId }: { readonly chatId: string }): Re
 
       <StopField chatId={chatId} stop={params.stop} onChange={(stop) => setParam('stop', stop)} />
 
-      {/* 送る中身の組み立てをモデルに合わせる（全体で 1 つ） */}
       <div className="flex flex-col gap-1">
         <span className={SETTING_HEADING_CLASS}>{t('llm.generation.compatHeading')}</span>
         <SquashField />
       </div>
 
-      {/* Web 検索のエンジンと上限 */}
       <WebSearchSettings />
     </div>
   );
 }
 
-/**
- * 隣り合う system のメッセージをまとめて送るか（SillyTavern の Squash system messages）
- */
 function SquashField(): React.ReactElement {
   const squash = useSettingsStore((state) => state.squashSystemMessages);
   return (

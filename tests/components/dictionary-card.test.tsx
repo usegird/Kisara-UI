@@ -14,12 +14,7 @@ import { fakeEmbeddingPort } from '../helpers/embedding';
 import { LEAK_ALLOWANCE, LEAK_ROUNDS, leakWatch } from '../helpers/leak';
 import { chat, loreEntry } from '../helpers/llm';
 
-// ─────────────────────────────
-// 拡張のタブの追加辞書のカードと辞書のダイアログ
-// ─────────────────────────────
-
 beforeEach(() => {
-  // カードの中の近似判定が、置いたモデルの一覧を読む
   installEmbeddingPort(fakeEmbeddingPort());
   installPresetTable(memoryTable());
   installDictionaryTable(memoryTable());
@@ -71,7 +66,6 @@ describe('一覧', () => {
     const book = adopt('Book', ['a']);
     useSettingsStore.setState({ loreDictionaryIds: [book.id] });
     render(<DictionaryCard />);
-    // 一覧の行には消すアイコンを置かない
     expect(screen.queryByRole('button', { name: 'Book を消す' })).toBeNull();
 
     fireEvent.click(screen.getByRole('button', { name: 'Book を編集' }));
@@ -119,7 +113,6 @@ describe('辞書のダイアログ', () => {
       fireEvent.click(screen.getByRole('button', { name: 'Book を編集' }));
       return screen.getByRole('dialog');
     };
-    // 足した項目は末尾に入る
     const added = (dialog: HTMLElement, role: string, name: string) =>
       within(dialog).getAllByRole(role, { name }).at(-1)!;
     const ok = (dialog: HTMLElement) =>
@@ -127,7 +120,6 @@ describe('辞書のダイアログ', () => {
 
     let dialog = open();
     fireEvent.click(within(dialog).getByRole('button', { name: '追加' }));
-    // 足した項目は末尾に入り、開いて出す。OK を押すまで辞書は変わらない
     expect(added(dialog, 'button', '追加条件と追加内容').getAttribute('aria-expanded')).toBe(
       'true',
     );

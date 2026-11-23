@@ -21,19 +21,12 @@ import {
 import { useChatSidePanelStore } from '@/store/use-chat-side-panel-store';
 import { useChatStore } from '@/store/use-chat-store';
 
-// ─────────────────────────────
-// 構成の相談（会話ごとに幾つでも。画面の中だけに持ち、残さない）。送る・要約するのは advisor-send.ts。
-// 受け取った案は利用者が押したときだけ会話に当てる（当てる直前の値を案ごとに控えて戻せる）。
-// ─────────────────────────────
-
 export { formatGreeting, greetingUse } from '@/store/chat/advisor-send';
 
-/** 案の控えの鍵。発言の id と、本文の区切りの中の位置 */
 export function proposalKey(messageId: string, index: number): string {
   return `${messageId}:${String(index)}`;
 }
 
-/** 会話の相談の id を始めた順に（セレクタから使う。useShallow で受ける） */
 export function sessionIdsOf(
   sessions: Readonly<Record<string, AdvisorSession>>,
   chatId: string,
@@ -45,32 +38,15 @@ export function sessionIdsOf(
 
 interface PromptAdvisorState {
   readonly sessions: Readonly<Record<string, AdvisorSession>>;
-  /**
-   * まだ送っていない相談があれば開き、無ければ新しく始めて開く。開いた相談の id を返す。勘所を渡すと
-   * （プレイブックの相談の操作）、同じ勘所の相談が残っていれば送った後でも開き直す（× で終えたものは無い）
-   */
   readonly start: (chatId: string, guide?: AdvisorGuide) => string;
-  /** 欄を開く・閉じる。開くと同じ会話のほかの相談の欄は閉じる */
   readonly setOpen: (id: string, open: boolean) => void;
-  /** 相談を終える（受け取り中・要約している間なら止め、やり取りを捨てる） */
   readonly end: (id: string) => void;
   readonly setDraft: (id: string, draft: string) => void;
-  /** 初期メッセージの候補を前後へ送る（送る前だけ） */
   readonly stepGreeting: (id: string, delta: number) => void;
-  /**
-   * 打ちかけを送る。`text` を渡すとその文を送り、打ちかけは残す（決まったことを入れる）。空・受け取り中・
-   * 要約している間は何もしない
-   */
   readonly send: (id: string, text?: string) => Promise<void>;
-  /**
-   * 新しい 4 件の手前までを要約する。縮めるものが無い・受け取り中・要約している間は何もしない
-   */
   readonly summarize: (id: string) => Promise<void>;
-  /** 受け取り・要約を止める */
   readonly stop: (id: string) => void;
-  /** 案を会話に当てる。当てた変える所の件数を返す（会話が無ければ 0） */
   readonly apply: (id: string, key: string, proposal: AdvisorProposal) => number;
-  /** 当てる直前の値に戻す */
   readonly revert: (id: string, key: string) => void;
 }
 
@@ -139,7 +115,6 @@ export const usePromptAdvisorStore = create<PromptAdvisorState>()((set, get) => 
       );
       if (applied === 0) return 0;
       useChatStore.getState().update(session.chatId, next);
-      // プロンプトのタブはすべて閉じ、変えた行だけを開く
       useChatSidePanelStore.getState().requestExpand(session.chatId, changedRows);
       patch(id, (current) => ({ ...current, applied: { ...current.applied, [key]: before } }));
       return applied;
@@ -159,7 +134,6 @@ export const usePromptAdvisorStore = create<PromptAdvisorState>()((set, get) => 
   };
 });
 
-/** 新しい相談。開いた状態で、まだ何も送っていない */
 function newSessionOf(id: string, chatId: string, guide: AdvisorGuide | undefined): AdvisorSession {
   return {
     id,
@@ -176,7 +150,6 @@ function newSessionOf(id: string, chatId: string, guide: AdvisorGuide | undefine
   };
 }
 
-/** その相談だけを開き、同じ会話のほかの欄を閉じる */
 function openOnly(
   sessions: Readonly<Record<string, AdvisorSession>>,
   id: string,
@@ -190,7 +163,6 @@ function openOnly(
   );
 }
 
-/** 案を当てるときの決め。個別追加辞書を作るときは、キャラクターの名前（無ければ会話の名前）を付ける */
 function proposalOptionsOf(
   session: AdvisorSession,
   chat: Chat,

@@ -9,11 +9,6 @@ import { useSettingsStore } from '@/store/use-settings-store';
 
 import { LEAK_ALLOWANCE, LEAK_ROUNDS, leakWatch } from '../helpers/leak';
 
-// ─────────────────────────────
-// 焦点を閉じ込める枠。埋め込みでも自由移動と同じ動き:
-// 画面全体を暗くして外を触れなくし、外を押したら閉じる。
-// ─────────────────────────────
-
 afterEach(() => {
   cleanup();
   useSettingsStore.setState({ dialogLayouts: {} });
@@ -75,7 +70,6 @@ describe('焦点を閉じ込める枠', () => {
 
 describe('小さいダイアログ', () => {
   it('帯の右端は × だけで、埋め込みを残していても自由移動で出す', async () => {
-    // 嵌め先があり、埋め込みを残していても
     const host = document.createElement('div');
     document.body.append(host);
     act(() => useDialogStore.getState().setEmbedHost(host));

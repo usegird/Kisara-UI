@@ -3,13 +3,6 @@ import { join } from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
-// ─────────────────────────────
-// 出てくるときの動き（`animate-in`）の長さは `animation-duration-*` で付ける。`duration-*` は
-// `transition-duration` も付け、`transition-property` の既定（all）で幅や位置の変化まで遅らせる
-// （引き出しの幅を変えるドラッグが遅れて追いかけた）
-// ─────────────────────────────
-
-/** `src/` の下の .ts・.tsx */
 function sources(dir: string): string[] {
   return readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
     const path = join(dir, entry.name);
@@ -22,7 +15,6 @@ describe('出てくるときの動きの長さ', () => {
   it('animate-in と同じクラスの並びに、素の duration-* を置かない', () => {
     const offenders = sources('src').flatMap((path) => {
       const text = readFileSync(path, 'utf8');
-      // クラスの並び（引用符か逆引用符の中）ごとに見る
       return [...text.matchAll(/['"`]([^'"`]*\banimate-in\b[^'"`]*)['"`]/gu)]
         .filter((match) => /(?<![\w-])duration-\d/u.test(match[1] ?? ''))
         .map(() => path);

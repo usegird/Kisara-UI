@@ -983,11 +983,7 @@
         "5:width": 4,
         "5:height": 4,
         "5:batch_size": 4
-      },
-      "switches": [
-        4,
-        5
-      ]
+      }
     }
   },
   "version": 0.4

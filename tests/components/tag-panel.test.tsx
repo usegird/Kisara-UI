@@ -11,10 +11,6 @@ import { useTagsStore } from '@/store/use-tags-store';
 import { LEAK_ALLOWANCE, LEAK_ROUNDS, leakWatch } from '../helpers/leak';
 import { tagEntry } from '../helpers/tags';
 
-// ─────────────────────────────
-// タグ辞書の画面。左で選んだ辞書を右の表で直し、左上の確定で書く。
-// ─────────────────────────────
-
 const base = 'http://127.0.0.1:8188';
 const initial = useTagsStore.getState();
 
@@ -23,7 +19,6 @@ afterEach(() => {
   useTagsStore.setState(initial, true);
 });
 
-/** 開く。既定の辞書のファイルは無く、ほかの辞書 1 つと pysssss の一覧がある */
 function open() {
   const mine = [tagEntry('blue_hair', 5)];
   const pysssss = [tagEntry('long_hair', 900), tagEntry('smile', 50)];
@@ -44,7 +39,6 @@ function open() {
   return { commit };
 }
 
-/** 開いて、中身（開いたときに読む）が出るまで待つ */
 async function show(): Promise<void> {
   render(<TagPanelOverlay />);
   await screen.findByLabelText('タグを絞り込む');
@@ -62,7 +56,6 @@ function confirmButton(): HTMLButtonElement {
   return screen.getByRole<HTMLButtonElement>('button', { name: '直した分を辞書へ書く' });
 }
 
-/** 確定を押す時刻。押すたびに進め、前の押下の見張りの間（PRESS_GUARD_MS）を外す */
 let pressedAt = Date.now();
 
 async function confirm(): Promise<void> {
@@ -94,7 +87,6 @@ describe('タグ辞書の画面', () => {
     fireEvent.change(tagInputs()[0] as HTMLInputElement, { target: { value: 'cat' } });
     expect(tagInputs()).toHaveLength(2);
 
-    // 選び直しても確かめず、直しかけも残る
     select(/^mine/);
     expect(screen.queryByText('編集中の内容')).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: 'blue_hair を消す' }));

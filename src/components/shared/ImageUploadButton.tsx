@@ -4,19 +4,13 @@ import { DIALOG_ICON_CLASS } from '@/components/ui/dialog';
 import { t } from '@/i18n';
 import { cn } from '@/lib/utils';
 
-// ─────────────────────────────
-// 画像を選ぶ枠の取り込みのボタン
-// ─────────────────────────────
-
 interface UploadButtonProps {
   readonly uploading: boolean;
-  /** つながっていない */
   readonly disabled: boolean;
   readonly fileInput: React.RefObject<HTMLInputElement | null>;
   readonly onFiles: (files: readonly File[]) => void;
 }
 
-/** ファイルを選ぶ画面を開くボタン。送っている間は回す */
 export function UploadButton({
   uploading,
   disabled,
@@ -27,7 +21,6 @@ export function UploadButton({
     <>
       <button
         type="button"
-        // 見出しの帯のアイコンと大きさを揃える
         className={cn(DIALOG_ICON_CLASS, 'shrink-0')}
         aria-label={t('imagePicker.upload.label')}
         title={t('imagePicker.upload.title')}
@@ -49,7 +42,6 @@ export function UploadButton({
         hidden
         onChange={(event) => {
           onFiles([...(event.target.files ?? [])]);
-          // 同じファイルを続けて選んでも知らせが来るよう空にする
           event.target.value = '';
         }}
       />

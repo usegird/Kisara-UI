@@ -1,5 +1,6 @@
 import type { StateCreator } from 'zustand';
 
+import { syncChoiceInputs } from '@/graph/choice-inputs';
 import { inLevel } from '@/graph/level-edit';
 import { writeNodeSettings } from '@/graph/node-settings';
 import { advanceSeeds } from '@/graph/seed-control';
@@ -10,22 +11,15 @@ import { writeWidgetValue } from '@/graph/widgets';
 import { createGraphKit } from '@/store/slices/graph-kit';
 import type { GraphState } from '@/store/use-graph-store';
 
-// ─────────────────────────────
-// グラフのストアの、ノードの値（widget・subgraph の昇格 widget・seed・カードに出していない設定）の操作。
-// ─────────────────────────────
-
-/** この slice が持つ操作 */
 type GraphNodeValueActions = Pick<
   GraphState,
   'setWidgetValue' | 'setProxyWidgetValue' | 'updateNodeSettings' | 'advanceSeeds'
 >;
 
-/** widget の値を書いたノードを載せた階層 */
 interface WrittenLevel {
   readonly level: Workflow;
 }
 
-/** ノードの値の操作を作る */
 export const createGraphNodeValueSlice: StateCreator<GraphState, [], [], GraphNodeValueActions> = (
   rawSet,
   get,
@@ -70,7 +64,6 @@ export const createGraphNodeValueSlice: StateCreator<GraphState, [], [], GraphNo
           node.id === nodeId ? writeNodeSettings(node, patch) : node,
         ),
       }));
-      // 幅が変わったら、変える前の並びで位置を求め直す（`settleLayout`）
       set(apply(workflow, next));
     },
 
@@ -83,9 +76,6 @@ export const createGraphNodeValueSlice: StateCreator<GraphState, [], [], GraphNo
   };
 };
 
-/**
- * 階層の中の 1 つのノードの widget に値を書く。位置対応を解決できないノードは編集させない
- */
 function writeWidgetIn(
   level: Workflow,
   nodeId: NodeId,
@@ -97,10 +87,9 @@ function writeWidgetIn(
     ? writeWidgetValue(target, definition, input.inputName, input.value)
     : null;
   if (!updated) return null;
-  return {
-    level: {
-      ...level,
-      nodes: level.nodes.map((node) => (node.id === nodeId ? updated : node)),
-    },
+  const written = {
+    ...level,
+    nodes: level.nodes.map((node) => (node.id === nodeId ? updated : node)),
   };
+  return { level: syncChoiceInputs(written, nodeId, definition) };
 }

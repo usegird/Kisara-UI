@@ -3,19 +3,12 @@ dist/
 dist-profiling/
 dist-demo/
 dist-gateway/
-# 開発用のデータ（HOWTO-MEASURE.dev-data）。手元の環境の情報を含む
 .dev-data/
 .vite/
-# 要求トレーサビリティマトリクス（HOWTO-RTM）。コードが変わるたびに変わるので入れない
-docs/_generated/rtm.html
 *.local
 .env
 .env.*
 !.env.example
-# 見本のワークフローを実行した生成画像（§9）。見本は JSON だけを入れる
-workflow_sample/*.png
-# 問い合わせのフォームの Worker は本体の外（source/kisara-contact。ADR-0090）。混ざらないように止める。
-# 追跡済みの中身は scripts/check-no-worker.ts（pnpm lint）が見る
 kisara-contact/
 wrangler.json
 wrangler.jsonc

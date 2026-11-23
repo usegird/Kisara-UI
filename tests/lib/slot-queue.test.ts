@@ -2,10 +2,6 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { createSlotQueue } from '@/lib/slot-queue';
 
-// ─────────────────────────────
-// 同時に走らせる数を絞る順番待ち。空いた順に、頼んだ順で知らせる。
-// ─────────────────────────────
-
 describe('createSlotQueue', () => {
   it('上限までその場で渡し、返されたら待っている先頭へ渡す', () => {
     const queue = createSlotQueue(2);
@@ -31,5 +27,21 @@ describe('createSlotQueue', () => {
     expect(dropped).not.toHaveBeenCalled();
     expect(later[0]).toHaveBeenCalledTimes(1);
     expect(later[1]).not.toHaveBeenCalled();
+  });
+
+  it('止めている間は空いても渡さず、重ねた止めを全部やめたら渡す', () => {
+    const queue = createSlotQueue(1);
+    const running = queue.request(vi.fn());
+    const waiting = vi.fn();
+    queue.request(waiting);
+    const first = queue.hold();
+    const second = queue.hold();
+
+    running();
+    first();
+    first();
+    expect(waiting).not.toHaveBeenCalled();
+    second();
+    expect(waiting).toHaveBeenCalledTimes(1);
   });
 });

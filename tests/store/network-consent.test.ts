@@ -12,10 +12,6 @@ import { TERMS_REVISION, useTermsStore } from '@/store/use-terms-store';
 import { fakeEmbeddingPort } from '../helpers/embedding';
 import { fakeLlmPort } from '../helpers/llm';
 
-// ─────────────────────────────
-// 通信の前の同意の関門。同意が無ければ、窓口のどの経路でも通信しない
-// ─────────────────────────────
-
 const BASE = 'http://comfy';
 const FILE = { filename: 'a.png', subfolder: '', type: 'output' } as const;
 

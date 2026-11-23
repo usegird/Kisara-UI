@@ -1,42 +1,28 @@
 import { t } from '@/i18n';
 import type { ConnectionFailureCode } from '@/port/connection';
 
-// ─────────────────────────────
-// 接続失敗の案内文。原因の推定は `diagnoseFailure` が返すコードだけで、文言はここが持つ
-// （取得・計算と表示を分ける）。どのコードでも「次にやること」が1つに決まるように書く。
-// ─────────────────────────────
-
 const HTTP_FORBIDDEN = 403;
 const HTTP_NOT_FOUND = 404;
-/** これ以上はサーバーの側の失敗 */
 const HTTP_SERVER_ERROR = 500;
 
-/** 接続失敗の案内。見出しの一文と、上から試す手順 */
 export interface FailureGuide {
   readonly summary: string;
-  /** 上から順に試す手順 */
   readonly steps: readonly string[];
 }
 
-/** 起動オプションの値。ページのオリジンが取れなければ `*` */
 function corsFlag(origin: string): string {
   return `--enable-cors-header ${origin.length > 0 ? origin : '*'}`;
 }
 
-/** 起動オプションを足した、ComfyUI の起動コマンドの見本 */
 interface LaunchSample {
-  /** 見本の見出し。打ち込む場所（シェル）を示す */
   readonly label: string;
-  /** ComfyUI を起動するコマンドに、起動オプションを足した形 */
   readonly command: string;
 }
 
-/** 起動の見本。シェルで `main.py` を直接起動する形に揃える */
 export function launchSample(origin: string): LaunchSample {
   return { label: 'shell', command: `python main.py ${corsFlag(origin)}` };
 }
 
-/** 応答が無いときの案内。接続先が分かれば文に入れる */
 function downGuide(target: string | undefined): FailureGuide {
   return {
     summary:
@@ -47,7 +33,6 @@ function downGuide(target: string | undefined): FailureGuide {
   };
 }
 
-/** HTTP エラーの案内。ステータスで次にやることが変わる */
 function httpErrorGuide(status: number | undefined, flag: string): FailureGuide {
   const summary =
     status === undefined
@@ -85,10 +70,6 @@ function httpErrorGuide(status: number | undefined, flag: string): FailureGuide 
   };
 }
 
-/**
- * 接続の失敗のコードから、見出しと次にやる手順を組み立てる。
- * @param target - 接続先の URL。応答が無いときの文に入れる
- */
 export function failureGuide(
   code: ConnectionFailureCode,
   origin: string,
@@ -169,12 +150,6 @@ export function failureGuide(
   }
 }
 
-/**
- * 実行が HTTP 403 で弾かれたときの案内。
- * ComfyUI は `--enable-cors-header` を付けずに起動していると、
- * **Origin が Host と食い違う変更系リクエスト（POST など）を 403 で拒否する**。
- * 読み取り（GET）は通るので、「繋がっているのに実行だけ失敗する」形で出る。
- */
 export function forbiddenRunGuide(origin: string): FailureGuide {
   return {
     summary: t('connection.guide.summary.forbiddenRun'),

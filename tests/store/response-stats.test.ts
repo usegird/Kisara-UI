@@ -19,17 +19,11 @@ import {
   type FakeLlmPort,
 } from '../helpers/llm';
 
-// ─────────────────────────────
-// 応答の受け取りの記録。送った・最初の文字・終わりの時刻と、
-// 送った時点の費用を、会話には足さずに持つ。
-// ─────────────────────────────
-
 let port: FakeLlmPort;
 
 beforeEach(() => {
   port = fakeLlmPort();
   installLlmPort(port);
-  // 接続の設定とモデルは全体で持つ
   setDefaultLlm();
   useLlmProfilesStore.setState({
     profiles: [profile()],
@@ -81,12 +75,10 @@ describe('受け取りの記録', () => {
     const price = { prompt: null, completion: null, cacheRead: null, cacheWrite: null };
     const tooling = () => useResponseStatsStore.getState().stats.k?.tooling;
     stats.start('k', price, 0, true);
-    // 送った直後の処理中の印はツールではない
     stats.processing('k', 2000);
     expect(tooling()).toBe(false);
     stats.first('k', 100);
     stats.resume('k', 100);
-    // 思考の塊の合間の短い途切れでは立てない（点滅させない）
     stats.processing('k', 100 + TOOLING_GAP_MS - 1);
     expect(tooling()).toBe(false);
     stats.processing('k', 100 + TOOLING_GAP_MS);
@@ -105,7 +97,6 @@ describe('受け取りの記録', () => {
     const last = useChatStore.getState().chats.c1?.messages.at(-1);
     const key = responseKey('c1', last?.id ?? '', last?.selected ?? 0);
     const stats = () => useResponseStatsStore.getState().stats[key];
-    // 決まっていない費用（負の値）は無いものとして持つ
     expect(stats()?.price).toEqual({
       prompt: 0.000001,
       completion: null,
@@ -114,7 +105,6 @@ describe('受け取りの記録', () => {
     });
     expect(stats()?.firstAt).toBeNull();
 
-    // 中身の無い塊は最初の文字に数えない
     port.emit({ kind: 'delta', content: '', reasoning: '' });
     expect(stats()?.firstAt).toBeNull();
     port.emit({ kind: 'delta', content: 'Hi', reasoning: '' });
@@ -125,7 +115,6 @@ describe('受け取りの記録', () => {
 
     port.finish();
     await vi.waitFor(() => expect(stats()?.endedAt).not.toBeNull());
-    // 会話の中身には足さない（残さない）
     expect(Object.keys(useChatStore.getState().chats.c1?.messages.at(-1) ?? {})).not.toContain(
       'stats',
     );

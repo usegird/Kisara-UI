@@ -12,10 +12,6 @@ import { useLlmProfilesStore } from '@/store/use-llm-profiles-store';
 
 import { chat, chatTurns, profile, setDefaultLlm } from '../helpers/llm';
 
-// ─────────────────────────────
-// 会話履歴の件数・要約の欄・外して送った知らせ
-// ─────────────────────────────
-
 afterEach(cleanup);
 
 beforeEach(() => {
@@ -24,7 +20,6 @@ beforeEach(() => {
   setDefaultLlm();
 });
 
-/** 最後の発言に、使ったトークン数と外した件数を持たせた会話 */
 function answered(prompt: number, trimmed?: number): ChatMessage[] {
   const messages = chatTurns(10);
   const last = messages.at(-1)!;
@@ -73,7 +68,6 @@ describe('セッション要約とセッション履歴の行', () => {
     render(<ChatPromptPanel chatId="c1" />);
     fireEvent.click(screen.getByText(/^履歴 \d+ 件、除外 \d+ 件$/));
     const button = screen.getByRole('button', { name: '要約する' });
-    // 「履歴 N 件」と同じ行に並ぶ
     expect(button.closest('li')?.textContent).toMatch(/^履歴 \d+ 件/u);
   });
 });
@@ -129,6 +123,7 @@ describe('除外して送った知らせ', () => {
     expect(screen.getByRole('button', { name: '要約する' })).toBeTruthy();
   });
 });
+
 describe('上限に近い知らせ', () => {
   const lastItem = (): React.ReactElement => (
     <ChatMessageItem
@@ -143,7 +138,6 @@ describe('上限に近い知らせ', () => {
   );
 
   it('使った数が送れる上限（文脈長 − 返答の分）の 8 割以上なら、外す前に「要約する」を出す', () => {
-    // 文脈長 8000・max_tokens なし → 送れる上限 6000、8 割は 4800
     useLlmProfilesStore.getState().learnContext('p1', 'model-a', 8000);
     useChatStore.setState({ chats: { c1: chat(answered(4900)) } });
     const { unmount } = render(lastItem());
@@ -164,6 +158,7 @@ describe('上限に近い知らせ', () => {
     expect(screen.getAllByRole('button', { name: '要約する' })).toHaveLength(1);
   });
 });
+
 describe('応答の注記', () => {
   it('本文の外の話は書かれた位置に畳んだ「注記」で出し、本文はそのまま出す', () => {
     const messages = chatTurns(2);

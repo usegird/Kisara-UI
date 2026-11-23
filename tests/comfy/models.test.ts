@@ -1,19 +1,22 @@
 import { describe, expect, it, vi } from 'vitest';
 
 import type { FetchLike } from '@/comfy/client';
-import { modelListUrl, modelMetadataUrl, modelNotesUrl, modelPreviewUrl } from '@/comfy/endpoints';
+import {
+  modelJsonUrl,
+  modelListUrl,
+  modelMetadataUrl,
+  modelNotesUrl,
+  modelPreviewUrl,
+} from '@/comfy/endpoints';
 import {
   fetchModelFiles,
+  fetchModelJson,
   fetchModelNotes,
   hasModelNotesRoute,
   modelPreviewSrc,
 } from '@/comfy/models';
 import { parseModelFiles, parseModelMetadata } from '@/comfy/schema';
 import { LORA_FOLDER } from '@/graph/model-files';
-
-// ─────────────────────────────
-// モデル一覧の取得。持たない接続先があるので、想定外の形でも落ちないこと。
-// ─────────────────────────────
 
 const base = 'http://127.0.0.1:8188';
 
@@ -122,6 +125,40 @@ describe('同名の .txt（メモ。pysssss の経路。読むだけ）', () => 
     await expect(fetchModelNotes(base, 'loras', 'a.safetensors', { fetchImpl })).resolves.toBe(
       'メモ',
     );
+  });
+});
+
+describe('同名の .json（pysssss の経路。読むだけ）', () => {
+  it('読みは拡張子を json に替え、種別ごと 1 つの要素として符号化する', () => {
+    expect(modelJsonUrl(base, 'loras', 'back/a b.safetensors')).toBe(
+      `${base}/pysssss/view/loras%2Fback%2Fa%20b.json`,
+    );
+  });
+
+  it('無い（404）は失敗ではなく null', async () => {
+    const fetchImpl = vi.fn<FetchLike>().mockResolvedValue(new Response('', { status: 404 }));
+
+    await expect(fetchModelJson(base, 'loras', 'a.safetensors', { fetchImpl })).resolves.toBeNull();
+  });
+
+  it('あれば項目を読む（見出しが JSON でなくても中身で読む）', async () => {
+    const body = JSON.stringify({ 'activation text': 'kisara', 'preferred weight': 0.8 });
+    const fetchImpl = vi.fn<FetchLike>().mockResolvedValue(new Response(body, { status: 200 }));
+
+    const entries = await fetchModelJson(base, 'loras', 'a.safetensors', { fetchImpl });
+
+    expect(entries).toEqual([
+      { key: 'activation text', value: 'kisara' },
+      { key: 'preferred weight', value: '0.8', structured: true },
+    ]);
+  });
+
+  it('JSON でない・物でない中身は失敗として投げる（無いのと書き分ける）', async () => {
+    const broken = vi.fn<FetchLike>().mockResolvedValue(new Response('{', { status: 200 }));
+    const list = vi.fn<FetchLike>().mockResolvedValue(new Response('[1]', { status: 200 }));
+
+    await expect(fetchModelJson(base, 'loras', 'a', { fetchImpl: broken })).rejects.toThrow();
+    await expect(fetchModelJson(base, 'loras', 'a', { fetchImpl: list })).rejects.toThrow();
   });
 });
 

@@ -23,11 +23,6 @@ import { useLlmProfilesStore } from '@/store/use-llm-profiles-store';
 import { callRequestKey, useSentRequestsStore } from '@/store/use-sent-requests-store';
 import { useSettingsStore } from '@/store/use-settings-store';
 
-// ─────────────────────────────
-// 会話のストアの、発言を直す操作と、ワークフローの呼び出しの状態を変える・LLM に作らせる操作。
-// ─────────────────────────────
-
-/** この slice が持つ操作 */
 type ChatMessageActions = Pick<
   ChatState,
   | 'respondWith'
@@ -39,10 +34,8 @@ type ChatMessageActions = Pick<
   | 'restartToolCall'
 >;
 
-/** 呼び出しを作らせた結果（`requestToolCall` の戻り値） */
 type ToolCallAnswer = Awaited<ReturnType<ChatState['requestToolCall']>>;
 
-/** 呼び出しを作らせる 1 回の材料 */
 interface ToolCallAsk {
   readonly chatId: string;
   readonly chat: Chat;
@@ -52,18 +45,14 @@ interface ToolCallAsk {
   readonly definition: ToolDefinition;
 }
 
-/** 呼び出しを作らせて受け取ったもの */
 interface ToolCallReply {
   readonly result: LlmResult<null>;
   readonly calls: readonly ToolCallRecord[];
   readonly generation: () => ToolCallGeneration;
-  /** 受け取った本文 */
   readonly text: () => string;
-  /** 送った中身を、呼び出しの id が決まるまで記録しておく仮の鍵 */
   readonly pendingKey: string;
 }
 
-/** 発言を直す操作と、ワークフローの呼び出しの操作を作る */
 export const createChatMessageSlice: StateCreator<ChatState, [], [], ChatMessageActions> = (
   set,
   get,
@@ -93,7 +82,6 @@ export const createChatMessageSlice: StateCreator<ChatState, [], [], ChatMessage
     setToolCall: (chatId, messageId, callId, state) => {
       const chat = get().chats[chatId];
       if (chat === undefined) return;
-      // 呼び出しの結果では LLM の続きを受け取らない（ワークフローは別に動かす）
       change(chatId, setToolCallState(chat, messageId, callId, state));
     },
 
@@ -116,7 +104,6 @@ export const createChatMessageSlice: StateCreator<ChatState, [], [], ChatMessage
         profile,
         definition,
       });
-      // 呼び出しが返らなかった失敗も、作らせた応答の記録と本文を返す（失敗の行で見られるように）
       if (!reply.result.ok) {
         return { ok: false, failure: reply.result.failure, attempt: attemptOf(chatId, reply) };
       }
@@ -143,14 +130,9 @@ export const createChatMessageSlice: StateCreator<ChatState, [], [], ChatMessage
   };
 };
 
-/**
- * 選んだワークフローの呼び出しを LLM に作らせる。作らせた応答の記録（呼び出しのカードに出す）も取る。
- * 送った中身は呼び出しの id が決まるまで仮の鍵で記録する
- */
 async function generateToolCalls(ask: ToolCallAsk): Promise<ToolCallReply> {
   const { chat, target } = ask;
   let calls: ToolCallRecord[] = [];
-  // 呼び出しの代わりに書いた本文（呼び出しが返らなかったときに見せる）
   let text = '';
   const recorder = startResponseRecord(target);
   const request = buildToolCallRequest(
@@ -167,7 +149,6 @@ async function generateToolCalls(ask: ToolCallAsk): Promise<ToolCallReply> {
       if (event.kind === 'tool-call') calls = addToolCallPart(calls, event);
       if (event.kind === 'delta') text = textWithDelta(text, event);
     },
-    // 止める口は置かない（引数を作らせるだけの短い受け取り）
     signal: new AbortController().signal,
   });
   const generation = (): ToolCallGeneration => ({
@@ -177,10 +158,6 @@ async function generateToolCalls(ask: ToolCallAsk): Promise<ToolCallReply> {
   return { result, calls, generation, text: () => text, pendingKey };
 }
 
-/**
- * 受け取った呼び出しに、会話の中で重ならない id と作らせた応答の記録を付け、確かめた状態にする
- * （LLM の id は送り返すときにしか使わない）
- */
 function settledCalls(reply: ToolCallReply, current: Chat): ToolCallRecord[] {
   const generation = reply.generation();
   return reply.calls.map((call) => {
@@ -189,15 +166,10 @@ function settledCalls(reply: ToolCallReply, current: Chat): ToolCallRecord[] {
   });
 }
 
-/** 理由だけの失敗 */
 function failed(kind: LlmFailure['kind']): ToolCallAnswer {
   return { ok: false, failure: { kind } };
 }
 
-/**
- * 呼び出しが返らなかった 1 回の記録。送った中身は、記録の id を呼び出しの id の位置に置いた鍵へ移す
- * （失敗の行の送った中身のアイコンが引く）
- */
 function attemptOf(chatId: string, reply: ToolCallReply): ToolCallAttempt {
   const id = `attempt_${newShortId()}`;
   useSentRequestsStore.getState().move(reply.pendingKey, [callRequestKey(chatId, id)]);

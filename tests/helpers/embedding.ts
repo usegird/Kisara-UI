@@ -5,11 +5,6 @@ import type {
   StoredEmbeddingModel,
 } from '@/port/embedding-port';
 
-// ─────────────────────────────
-// 作り物の近似判定の窓口。決めた語を含むかで次元を立て、長さ 1 にそろえる。
-// どの語も含まない文（ありふれた発言）は、どの次元にも少しずつ寄る
-// ─────────────────────────────
-
 const WORDS = ['treasure', 'gate', 'dragon'] as const;
 
 function vectorOf(text: string): Float32Array {
@@ -20,15 +15,11 @@ function vectorOf(text: string): Float32Array {
 }
 
 export interface FakeEmbeddingPort extends EmbeddingPort {
-  /** 埋め込んだ文（種類ごと） */
   readonly embedded: { readonly texts: readonly string[]; readonly kind: EmbeddingKind }[];
-  /** メモリから降ろした回数 */
   readonly unloaded: () => number;
-  /** 消したモデルの id */
   readonly removed: readonly string[];
 }
 
-/** `stored` は初めからこのブラウザに置いてあるモデル。読めたモデルも加わる */
 export function fakeEmbeddingPort(
   load: EmbeddingLoad | null = null,
   stored: readonly StoredEmbeddingModel[] = [],

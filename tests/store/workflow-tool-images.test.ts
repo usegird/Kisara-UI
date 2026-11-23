@@ -12,11 +12,6 @@ import { useChatStore } from '@/store/use-chat-store';
 
 import { chat, toolCallMessage } from '../helpers/llm';
 
-// ─────────────────────────────
-// 会話から呼んだワークフローの画像の引数。参照名の画像を `temp/` に置いて値を
-// 差し替え、同じ画像は置き直さない。置く通信は作り物（接続先へ書かない）
-// ─────────────────────────────
-
 const BASE = 'http://comfy';
 
 const imageArg: ToolArgument = {
@@ -45,9 +40,6 @@ const values = new Map([
 
 let uploadTemp: ReturnType<typeof vi.fn<(file: File, subfolder: string) => Promise<string>>>;
 
-/**
- * 会話が写したアバター（プリセットは読まない）
- */
 function setAvatar(image: Blob | null): void {
   useAvatarsStore.setState({
     avatars: image === null ? {} : { a1: { id: 'a1', name: 'A', image, hash: 'h', createdAt: 0 } },
@@ -79,7 +71,6 @@ describe('画像の引数を置いて差し替える', () => {
   it('アバターを temp の kisara に中身のハッシュの名前で置き、置いた値にする', async () => {
     setAvatar(new Blob(['png'], { type: 'image/png' }));
     const placed = await placeArgumentImages('c1', BASE, [imageArg, textArg], values);
-    // 'png' の SHA-256 の先頭 16 字
     const name = /^avatar-[0-9a-f]{16}\.png$/u;
     expect(uploadTemp).toHaveBeenCalledTimes(1);
     expect(uploadTemp.mock.calls[0]?.[0].name).toMatch(name);

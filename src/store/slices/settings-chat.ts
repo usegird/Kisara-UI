@@ -8,11 +8,6 @@ import {
 import { normalizingSetterOf, setterOf } from '@/store/settings-fields/settings-table';
 import type { SettingsState } from '@/store/use-settings-store';
 
-// ─────────────────────────────
-// 設定のストアの、会話の設定（ComfyUI の控えと呼べるワークフロー・送る形・大きさの上限・アバターの画像・タブの並び）の操作。
-// ─────────────────────────────
-
-/** この slice が持つ操作 */
 type SettingsChatActions = Pick<
   SettingsState,
   | 'setChatComfyBackup'
@@ -32,7 +27,6 @@ type SettingsChatActions = Pick<
   | 'setChatImageSize'
 >;
 
-/** 会話の設定（ComfyUI の控えと呼べるワークフロー・送る形・大きさの上限・アバターの画像・タブの並び）の操作を作る */
 export const createSettingsChatSlice: StateCreator<
   SettingsState,
   [['zustand/persist', unknown]],

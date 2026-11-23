@@ -5,16 +5,10 @@ import { t } from '@/i18n';
 import { splitPath } from '@/lib/path-tree';
 import type { ModelDetails } from '@/port/llm-port';
 
-// ─────────────────────────────
-// 会話のモデルを選ぶダイアログの一覧の 1 行。
-// ─────────────────────────────
-
-/** 一覧の行。選んでいる行は地の色で示す。2 行目に費用を出すので縦に積む */
 const row = cva('hover:bg-accent flex w-full flex-col rounded px-2 py-1 text-left', {
   variants: { selected: { true: 'bg-accent', false: '' } },
 });
 
-/** 一覧の 1 行。押すと選び、ダブルクリックか Enter で決める */
 export function ModelRow({
   model,
   custom,
@@ -25,11 +19,8 @@ export function ModelRow({
   onDecide,
 }: {
   readonly model: string;
-  /** 一覧に無い、打った名前を使う行 */
   readonly custom: boolean;
-  /** 付帯情報（あれば 2 行目に費用を出す） */
   readonly details: ModelDetails | undefined;
-  /** 「すべて」で見ているとき、どのディレクトリのものかを薄く添える */
   readonly showDirectory: boolean;
   readonly selected: boolean;
   readonly onSelect: () => void;
@@ -61,7 +52,6 @@ export function ModelRow({
           ) : null}
         </span>
       )}
-      {/* 費用は 1 行に収まるだけ出し、はみ出た分は省く */}
       {prices.length === 0 ? null : (
         <span className="text-muted-foreground truncate tabular-nums">{prices}</span>
       )}

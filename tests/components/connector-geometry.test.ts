@@ -28,10 +28,6 @@ import { arcPath, bezierPath } from '@/lib/bezier';
 import { anchorRect } from '../helpers/anchors';
 import { nodeRow } from '../helpers/views';
 
-// ─────────────────────────────
-// 接続線の幾何（位置の表 → 線の一覧・⊕ の置き場所）。描画を通さず、純関数だけを見る
-// ─────────────────────────────
-
 const OPTIONS: VariableLineOptions = {
   showPassed: false,
   chipOutputs: false,
@@ -41,7 +37,6 @@ const NO_PROXY_ROWS = new Map();
 
 const rect = anchorRect;
 
-/** 1 の出力から 2 の image へ。結線 7 */
 const box: VariableBox = {
   key: '1:0',
   nodeId: 1,
@@ -54,7 +49,6 @@ const box: VariableBox = {
   targets: [{ nodeId: 2, inputName: 'image', linkId: 7 }],
 };
 
-/** 列と変数の位置。`output` を変えて、出す側のカードが見えているかを切り替える */
 function rectsWith(output: AnchorRect): Map<string, AnchorRect> {
   return new Map([
     [VIEWPORT_ANCHOR_KEY, rect(0, 600)],
@@ -77,9 +71,19 @@ describe('buildConnectors（変数の線）', () => {
     expect(connectors.map((connector) => connector.id)).toEqual(['d:link:7']);
     expect(connectors[0]?.kind).toBe('direct');
     expect(connectors[0]?.insert).toEqual({ linkIds: [7], type: 'IMAGE' });
-    // 直結は出力の右端から入力行の右端へ
     expect(connectors[0]?.from).toEqual({ x: 100, y: 95 });
     expect(connectors[0]?.to).toEqual({ x: 100, y: 220 });
+  });
+
+  it('直結の弧の膨らみはカードの列の高さに比例し、低い列では下限で止める', () => {
+    const tall = new Map(rectsWith(rect(90, 100)));
+    tall.set(VIEWPORT_ANCHOR_KEY, rect(0, 1920));
+    const landscape = new Map(rectsWith(rect(90, 100)));
+    landscape.set(VIEWPORT_ANCHOR_KEY, rect(0, 1000));
+
+    expect(build(tall)[0]?.bulge).toBe(96);
+    expect(build(landscape)[0]?.bulge).toBe(50);
+    expect(build(rectsWith(rect(90, 100)))[0]?.bulge).toBe(48);
   });
 
   it('出す側が列の外なら、変数を経由する 2 本にし、カードの列の高さで見切る', () => {
@@ -88,9 +92,7 @@ describe('buildConnectors（変数の線）', () => {
     expect(connectors.map((connector) => connector.kind)).toEqual(['to-card', 'to-variable']);
     const source = connectors[1];
     expect(source?.id).toBe('o:1:0');
-    // 元のカードが見えていないので、その線は見えている高さで切る
     expect(source?.clip).toEqual({ top: 0, bottom: 600 });
-    // 変数 → カードの線は両端が見えているので切らない。押すと変数の列を揃える
     expect(connectors[0]?.clip).toBeUndefined();
     expect(connectors[0]?.align).toEqual({ column: 'variables', other: 50, card: 220 });
   });
@@ -112,7 +114,6 @@ describe('buildConnectors（変数の線）', () => {
   it('開いた subgraph の境界をまたぐ線には挟まない', () => {
     const crossing: VariableBox = {
       ...box,
-      // 線だけが subgraph 5 の中にある
       targets: [{ nodeId: 2, inputName: 'image', linkId: scopedId(5, 7) }],
     };
 
@@ -195,6 +196,7 @@ describe('pathOf', () => {
     const base = { id: 'p', from: { x: 0, y: 0 }, to: { x: 0, y: 100 }, type: 'A', label: '' };
 
     expect(pathOf({ ...base, kind: 'direct' })).toBe(arcPath(base.from, base.to));
+    expect(pathOf({ ...base, kind: 'direct', bulge: 96 })).toBe(arcPath(base.from, base.to, 96));
     expect(pathOf({ ...base, kind: 'to-card' })).toBe(bezierPath(base.from, base.to));
   });
 });

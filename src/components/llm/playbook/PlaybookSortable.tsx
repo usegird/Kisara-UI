@@ -20,11 +20,6 @@ import { MOUSE_ACTIVATION, TOUCH_ACTIVATION } from '@/components/ui/drag-activat
 import { dragAccessibility, sortableAttributes } from '@/components/ui/drag-announcements';
 import { sortableStyle } from '@/components/ui/sortable-style';
 
-// ─────────────────────────────
-// プレイブックを作るダイアログの並べ替え。フェーズの並びと、フェーズの操作・常設の操作の並びで使う。
-// ─────────────────────────────
-
-/** 掴みのボタンかキーボードで並べ替えられる縦の並び。動かしたら元と先の位置を渡す */
 export function SortableRows({
   ids,
   onMove,
@@ -59,14 +54,12 @@ export function SortableRows({
   );
 }
 
-/** 並べ替えられる 1 行。掴みのボタンを左に置き、中身は `children` */
 export function SortableRow({
   id,
   label,
   children,
 }: {
   readonly id: string;
-  /** 掴みのボタンの読み上げ */
   readonly label: string;
   readonly children: React.ReactNode;
 }): React.ReactElement {

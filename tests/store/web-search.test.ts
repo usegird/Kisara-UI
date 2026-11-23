@@ -18,11 +18,6 @@ import { useWebSearchStore, webToolsFor } from '@/store/use-web-search-store';
 
 import { chat, fakeLlmPort, profile, setDefaultLlm, type FakeLlmPort } from '../helpers/llm';
 
-// ─────────────────────────────
-// Web 検索・取得。OpenRouter のときだけ送り、使用状況と出典を候補に残す。
-// 状態は会話と構成の相談で分ける（有効にするときの確認は tests/components/web-search-toggle）
-// ─────────────────────────────
-
 const OPENROUTER = 'https://openrouter.ai/api/v1';
 const SEARCH = {
   type: 'openrouter:web_search',
@@ -33,7 +28,6 @@ const FETCH = {
   parameters: { engine: 'parallel', max_content_tokens: 32768 },
 };
 
-/** 設定の Web 検索の項目を既定に戻す */
 function resetWebSettings(): void {
   const settings = useSettingsStore.getState();
   settings.setWebSearchEngine('parallel:fast');
@@ -140,7 +134,6 @@ describe('使用状況と出典', () => {
         },
       }),
     ).toEqual({ kind: 'billing', billing: { searches: 3, fetches: 2, cost: 0.0123 } });
-    // 実際の応答は `server_tool_use_details` で返る
     expect(
       billingOf({
         usage: {
@@ -189,7 +182,6 @@ describe('使用状況と出典', () => {
     port.finish();
     await expect.poll(() => lastCandidate()?.end.kind).toBe('done');
     expect(lastCandidate()?.billing).toEqual({ searches: 2, cost: 0.02 });
-    // 受け取りの記録も候補に残る（読み込み直しても消えない）
     expect(lastCandidate()?.timing?.firstMs).toBeGreaterThanOrEqual(0);
     expect(lastCandidate()?.timing?.receivingMs).toBeGreaterThanOrEqual(0);
     expect(lastCandidate()?.citations).toEqual([
@@ -242,7 +234,6 @@ describe('送る中身と設定', () => {
 
   it('取得のエンジンは使用ツールの提供元から決め、OpenRouter 自身の取得は使わない', () => {
     const base = { search: 'auto', calls: 3, contentTokens: 1000 } as const;
-    // 自動は検索・取得ともエンジンを付けない
     expect(webToolsOf('search', base)?.tools).toEqual([
       { type: 'openrouter:web_search' },
       { type: 'openrouter:web_fetch', parameters: { max_content_tokens: 1000 } },
@@ -260,7 +251,6 @@ describe('送る中身と設定', () => {
       type: 'openrouter:web_search',
       parameters: { engine: 'exa', mode: 'deep' },
     });
-    // Perplexity は取得のエンジンを持たないので検索だけ
     expect(webToolsOf('search', { ...base, search: 'perplexity' })?.tools).toEqual([
       { type: 'openrouter:web_search', parameters: { engine: 'perplexity' } },
     ]);

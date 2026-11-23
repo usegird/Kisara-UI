@@ -12,10 +12,6 @@ import { useSettingsStore } from '@/store/use-settings-store';
 import { modelFile, modelFolder } from '../helpers/model-files';
 import { nodeRow } from '../helpers/views';
 
-// ─────────────────────────────
-// パラメータ1つ分の編集。カードと App 列で同じ部品を使うので、両方の出し方を確かめる。
-// ─────────────────────────────
-
 afterEach(() => {
   cleanup();
 });
@@ -47,7 +43,6 @@ describe('カード側', () => {
     const field = screen.getByLabelText('text');
     fireEvent.focus(field);
     fireEvent.blur(field);
-    // 打って元に戻した場合も同じ
     fireEvent.change(field, { target: { value: '元の値x' } });
     fireEvent.change(field, { target: { value: '元の値' } });
     fireEvent.blur(field);
@@ -82,13 +77,11 @@ describe('カード側', () => {
     fireEvent.keyDown(field, { key: 'ArrowDown', ctrlKey: true });
     expect(field.value).toBe('cat, dog');
 
-    // 括弧の外でも、キャレットが語の上ならその語を包む
     field.setSelectionRange(6, 6);
     fireEvent.keyDown(field, { key: 'ArrowUp', ctrlKey: true });
     expect(field.value).toBe('cat, (dog:1.1)');
     expect(field.selectionStart).toBe(7);
 
-    // 語の上でなければ何もしない
     field.setSelectionRange(4, 4);
     fireEvent.keyDown(field, { key: 'ArrowUp', ctrlKey: true });
     expect(field.value).toBe('cat, (dog:1.1)');
@@ -157,7 +150,6 @@ describe('選択肢（COMBO）', () => {
 
     expect(field.value).toBe('');
     expect(field.className).toContain('text-muted-foreground');
-    // 「未入力」の項目としても出るので、選び直せば戻せる
     expect([...field.options].map((option) => option.text)).toContain('a.safetensors');
   });
 
@@ -217,12 +209,21 @@ describe('選択肢（COMBO）', () => {
     expect(field.textContent).toBe('a.safetensors');
     expect(field.className).toContain('text-muted-foreground');
   });
-});
 
-// ─────────────────────────────
-// モデルのディレクトリを参照する選択肢はカードで選ぶ。
-// 判定は選択肢と一覧の突き合わせだけ。ノード名では分岐しない
-// ─────────────────────────────
+  it('選択肢が未取得で、カードの値も空なら「未選択」と出す（文字が無いと欄が潰れる）', () => {
+    render(
+      <WidgetControl
+        row={row({ ...combo(), options: null })}
+        onCommit={vi.fn()}
+        onNeedOptions={vi.fn()}
+        value=""
+        placeholder=""
+      />,
+    );
+
+    expect(screen.getByLabelText('ckpt_name（選択肢を読み込む）').textContent).toBe('未選択');
+  });
+});
 
 describe('モデルの選択', () => {
   const loraRow = (): NodeRow =>
@@ -267,14 +268,12 @@ describe('モデルの選択', () => {
     fireEvent.click(screen.getByLabelText('lora_name（Loraを選ぶ）'));
     expect(await screen.findByRole('separator', { name: '情報の幅' })).toBeDefined();
 
-    // 右に置いたときの置き場の切り替えは、情報の右下に浮かせている
     fireEvent.click(await screen.findByRole('button', { name: '情報を下に出す' }));
 
     expect(screen.getByRole('separator', { name: '情報の高さ' })).toBeDefined();
     expect(await screen.findByLabelText('モデルの情報')).toBeDefined();
-    // 名前の写し取りは、同じ文字を出しているパスの右（名前だけの行は置かない）
     const copy = screen.getByRole('button', { name: 'a の名前を写す' });
-    expect(copy.parentElement?.textContent).toContain('パスstyle/a.safetensors');
+    expect(copy.parentElement?.nextElementSibling?.textContent).toBe('style/a');
     expect(useSettingsStore.getState().dialogPaneDocks).toEqual({ 'model-picker:info': 'bottom' });
   });
 
@@ -286,17 +285,14 @@ describe('モデルの選択', () => {
     fireEvent.click(screen.getByLabelText('lora_name（Loraを選ぶ）'));
     const card = await screen.findByTitle('b.safetensors');
 
-    // カードの高さは設定から来る（画像の有無で変えない）
     expect(card.closest('div')?.style.height).toBe('240px');
 
-    // 押すだけでは書き込まない（選んで情報を出す）
     fireEvent.click(card);
     expect(onCommit).not.toHaveBeenCalled();
-    expect((await screen.findByLabelText('モデルの情報')).textContent).toContain('b.safetensors');
+    expect((await screen.findByLabelText('モデルの情報')).textContent).toContain('nameb');
 
     fireEvent.click(screen.getByRole('button', { name: /を決定する$/ }));
 
-    // 書き込むのは選択肢の文字列そのもの（一覧側の表記に置き換えない）
     expect(onCommit.mock.calls[0]?.[1]).toBe('b.safetensors');
     await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
   });
@@ -308,7 +304,6 @@ describe('モデルの選択', () => {
     fireEvent.click(screen.getByLabelText('lora_name（Loraを選ぶ）'));
     const dialog = await screen.findByRole('dialog');
 
-    // 閉じ込めているので、外側は基盤が触れなくする（印が付く）
     expect(document.querySelector('[data-base-ui-inert]')).not.toBeNull();
     expect(dialog.querySelector('[draggable="true"]')).toBeNull();
   });
@@ -319,10 +314,9 @@ describe('モデルの選択', () => {
 
     fireEvent.click(screen.getByLabelText('lora_name（Loraを選ぶ）'));
     const place = await screen.findByRole<HTMLButtonElement>('button', { name: /を決定する$/ });
-    expect((await screen.findByLabelText('モデルの情報')).textContent).toContain('a.safetensors');
+    expect((await screen.findByLabelText('モデルの情報')).textContent).toContain('namestyle/a');
     expect(place.disabled).toBe(false);
 
-    // 情報の × で選択を外す
     fireEvent.click(screen.getByLabelText('情報を閉じる'));
     expect(place.disabled).toBe(true);
   });
@@ -336,14 +330,19 @@ describe('モデルの選択', () => {
 
     fireEvent.click(screen.getByLabelText('lora_nameを未入力に戻す'));
     expect(onCommit.mock.calls[0]?.[1]).toBe('');
-    // ダイアログは開かない
     expect(screen.queryByRole('dialog')).toBeNull();
 
-    // 未入力なら × は出さない
     rerender(
       <WidgetControl row={loraRow()} onCommit={onCommit} placeholder="カードの値" value="" />,
     );
     expect(screen.queryByLabelText('lora_nameを未入力に戻す')).toBeNull();
+  });
+
+  it('アプリ入力の列で、カードの値も空なら「未選択」と出す（文字が無いと欄が潰れる）', () => {
+    seed(LORA_FOLDER, ['style/a.safetensors', 'b.safetensors']);
+    render(<WidgetControl row={loraRow()} onCommit={vi.fn()} placeholder="" value="" />);
+
+    expect(screen.getByLabelText('lora_name（Loraを選ぶ）').textContent).toBe('未選択');
   });
 
   it('カードでは × で空にし、空は「未選択」と薄く出す', () => {
@@ -367,8 +366,6 @@ describe('モデルの選択', () => {
 
     fireEvent.click(screen.getByLabelText('ckpt_name（モデルを選ぶ）'));
     const dialog = await screen.findByRole('dialog');
-    // ダブルクリックは配置と同じ
-    // 開いたときはいまの値のカードを選んでいる
     fireEvent.doubleClick(within(dialog).getByRole('button', { name: /いまの値/ }));
 
     expect(onCommit.mock.calls[0]?.[1]).toBe('sdxl.safetensors');
@@ -393,18 +390,15 @@ describe('モデルの選択', () => {
     const second = render(<WidgetControl row={loraRow()} onCommit={vi.fn()} />);
 
     fireEvent.click(within(first.container).getByLabelText('lora_name（Loraを選ぶ）'));
-    // 選んでいない種類は押すと昇順。選んでいるものをもう一度押すと降順
     fireEvent.click(await screen.findByLabelText('大きさで並べる'));
     fireEvent.click(screen.getByLabelText('大きさ・昇順（押すと降順）'));
     fireEvent.change(screen.getByLabelText('カードの高さ（px）'), { target: { value: '300' } });
     fireEvent.keyDown(screen.getByRole('dialog'), { key: 'Escape' });
     await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
 
-    // 画面は選択肢ごとにある。別の画面でも、手元の古い値ではなく残した値を出す
     fireEvent.click(within(second.container).getByLabelText('lora_name（Loraを選ぶ）'));
     const dialog = await screen.findByRole('dialog');
     expect(within(dialog).getByLabelText('大きさ・降順（押すと昇順）')).toBeDefined();
-    // 三角を押すと、その種類をその向きで直接並べる
     fireEvent.click(within(dialog).getByLabelText('名前・昇順で並べる'));
     expect(within(dialog).getByLabelText('名前・昇順（押すと降順）')).toBeDefined();
     expect(within(dialog).getByLabelText('名前・昇順で並べる').getAttribute('aria-pressed')).toBe(
@@ -494,6 +488,7 @@ describe('数値の欄', () => {
     expect(field.value).toBe('1024');
   });
 });
+
 describe('画像の選択肢', () => {
   const BASE = 'http://127.0.0.1:8188';
 
@@ -522,7 +517,6 @@ describe('画像の選択肢', () => {
 
     fireEvent.click(screen.getByLabelText('image（画像を選ぶ）'));
     const card = await screen.findByTitle('b.png');
-    // 画像は入力フォルダから `/view` で引く（同時に読む数は順番待ちで抑える）
     await waitFor(() => expect(card.querySelector('img')?.getAttribute('src')).toContain('/view?'));
 
     fireEvent.click(card);
@@ -557,9 +551,7 @@ describe('画像の選択肢', () => {
 
     await waitFor(() => expect(reloadOptions).toHaveBeenCalledWith(BASE, 'LoadImage'));
     expect(fetchMock.mock.calls[0]?.[0]).toBe(`${BASE}/upload/image`);
-    // 名前が変わったことを知らせ、値は書かない（決定で書く）
     expect(await within(dialog).findByText(/c \(1\)\.png/)).toBeDefined();
-    // 絞り込みは変えず、既存の画像も出したまま（上げた画像はそのカードまで送って見せる）
     expect(within(dialog).getByRole<HTMLInputElement>('searchbox').value).toBe('');
     expect(within(dialog).getByTitle('a.png')).toBeDefined();
     expect(within(dialog).getByTitle('b.png')).toBeDefined();

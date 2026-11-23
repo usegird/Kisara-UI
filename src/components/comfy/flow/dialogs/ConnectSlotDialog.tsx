@@ -6,25 +6,15 @@ import type { ConnectChoice } from '@/hooks/flow/use-node-editing';
 import { t } from '@/i18n';
 import { slotColor } from '@/styles/slot-color';
 
-// ─────────────────────────────
-// 足すノードの繋ぎ先が型で決まらないときに、どの口へ繋ぐかを尋ねる。
-// フォーカストラップ・Escape・読み上げは Base UI に任せる。
-// ─────────────────────────────
-
-/** 口の型。型が合う口を濃く出す */
 const slotType = cva('ml-auto shrink-0 tabular-nums', {
   variants: { matches: { true: 'text-foreground', false: 'text-muted-foreground' } },
 });
 
-/** 繋ぎ先を尋ねるダイアログの props */
 export interface ConnectSlotDialogProps {
-  /** null なら閉じている */
   readonly choice: ConnectChoice | null;
-  /** 選ばれた口。null なら繋がずに足す */
   readonly onResolve: (slot: number | null) => void;
 }
 
-/** 口の候補を並べ、選んだ口か「繋がずに足す」を返す */
 export function ConnectSlotDialog({
   choice,
   onResolve,
@@ -34,7 +24,6 @@ export function ConnectSlotDialog({
       id="connect-slot"
       open={choice !== null}
       onOpenChange={(next) => {
-        // 閉じただけなら繋がずに足す（選んだノードは足す）
         if (!next) onResolve(null);
       }}
       size="sm"

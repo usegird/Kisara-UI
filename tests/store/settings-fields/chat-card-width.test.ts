@@ -3,10 +3,6 @@ import { describe, expect, it } from 'vitest';
 import { CHAT_CARD_WIDTH, normalizeChatCardWidth } from '@/store/settings-fields/chat-card-width';
 import { useSettingsStore } from '@/store/use-settings-store';
 
-// ─────────────────────────────
-// 会話の画面のカードの並びの幅。端末に残すので範囲に収める
-// ─────────────────────────────
-
 describe('カードの並びの幅', () => {
   it('読めない値は既定、範囲の外は端に寄せる', () => {
     expect(normalizeChatCardWidth('wide')).toBe(CHAT_CARD_WIDTH.initial);

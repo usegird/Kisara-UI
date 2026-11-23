@@ -2,11 +2,6 @@ import { beforeEach, describe, expect, it } from 'vitest';
 
 import { repeatOutcome, useRepeatStore, type RepeatSignals } from '@/store/use-repeat-store';
 
-// ─────────────────────────────
-// 繰り返し実行。正常に終わったときと実行中の失敗では続け、
-// 中断でも止まらない。通知で見ていなかった分は履歴の控えで決める。
-// ─────────────────────────────
-
 function signals(
   status: string,
   { promptId = 'p1', logged = null as boolean | null } = {},

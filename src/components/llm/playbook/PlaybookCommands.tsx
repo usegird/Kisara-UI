@@ -7,16 +7,10 @@ import { PLAYBOOK_TOGGLE, playbookLink } from '@/components/llm/playbook/playboo
 import { usePlaybookAction } from '@/components/llm/playbook/use-playbook-action';
 import { t } from '@/i18n';
 
-// ─────────────────────────────
-// プレイブックのカードの開閉する段（「› コマンド」）。初めは閉じる。
-// ─────────────────────────────
-
-/** 開閉の三角 */
 const fold = cva('size-3.5 shrink-0 transition-transform', {
   variants: { open: { true: 'rotate-90', false: '' } },
 });
 
-/** コマンドのリンク 1 つ。`action` が null なら続きを書く。押したら `onDone` で一覧を閉じる */
 function CommandLink({
   chatId,
   action,
@@ -45,9 +39,6 @@ function CommandLink({
   );
 }
 
-/**
- * 「› コマンド」。送るの操作をリンクで並べ、押すと指示の枠に入れる。並べるものが無ければ出さない
- */
 export function PlaybookCommands({
   chatId,
   phase,

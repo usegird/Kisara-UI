@@ -7,14 +7,9 @@ import { t } from '@/i18n';
 import { useSettingsStore } from '@/store/use-settings-store';
 import { useStorageDialogStore } from '@/store/use-storage-dialog-store';
 
-// ─────────────────────────────
-// 会話の右の列の設定のタブの、ブラウザデータの管理の欄。
-// ─────────────────────────────
-
 const BUTTON = 'hover:bg-muted rounded-md border px-2 py-1 text-xs disabled:opacity-40';
 const HINT = 'text-muted-foreground px-1 text-2xs';
 
-/** ストレージの管理を開くボタンと、ComfyUI に控えを書くかのスイッチ（入れるときだけ確かめる） */
 export function ComfyBackupField(): React.ReactElement {
   const backup = useSettingsStore((state) => state.chatComfyBackup);
   const [confirming, setConfirming] = useState(false);

@@ -5,10 +5,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { usePopupContainer } from '@/hooks/ui/use-popup-container';
 import type { Popup } from '@/lib/popup';
 
-// ─────────────────────────────
-// 別ウィンドウの見張り。jsdom は窓を開けないので、窓の代役で確かめる。
-// ─────────────────────────────
-
 interface FakeView {
   closed: boolean;
   readonly close: ReturnType<typeof vi.fn>;
@@ -41,7 +37,6 @@ afterEach(() => {
 });
 
 describe('別ウィンドウの見張り', () => {
-  // 受け口を依存に入れると、変わるたびに見張りを張り直し、その後始末で窓を閉じてしまう
   it('受け口が変わっても窓を閉じず張り直さず、閉じられたら最新の受け口を呼ぶ', () => {
     const { popup, view } = fakePopup();
     const first = vi.fn();
@@ -62,7 +57,6 @@ describe('別ウィンドウの見張り', () => {
     unmount();
   });
 
-  // 別窓の出し先は窓を預かった時点で現れるので、開発時の StrictMode は置いた直後に後始末を一度走らせる
   it('置いた直後に後始末と張り直しが続いても、窓を閉じない', () => {
     const { popup, view } = fakePopup();
     const { unmount } = renderHook(() => usePopupContainer(popup, vi.fn()), {

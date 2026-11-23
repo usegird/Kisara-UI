@@ -3,10 +3,6 @@ import { describe, expect, it, vi } from 'vitest';
 import type { FetchLike } from '@/comfy/client';
 import { removeLibraryItem, saveLibraryItem } from '@/comfy/library-backup';
 
-// ─────────────────────────────
-// プリセットとテンプレートの控え。`kisara/` の下にだけ書き・消す。
-// ─────────────────────────────
-
 const base = 'http://127.0.0.1:8188';
 
 function okFetch() {

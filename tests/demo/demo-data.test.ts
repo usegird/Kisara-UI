@@ -13,10 +13,6 @@ import { useSettingsStore } from '@/store/use-settings-store';
 
 import { png, textChunk } from '../helpers/png';
 
-// ─────────────────────────────
-// 公開用のデモ。埋め込んだ定義で見本が描け、通信の要る欄が残らないこと
-// ─────────────────────────────
-
 beforeEach(() => installDemoDefinitions());
 
 describe('installDemoDefinitions', () => {

@@ -3,11 +3,6 @@ import { afterEach, describe, expect, it } from 'vitest';
 
 import { menuActionSections } from '@/lib/menu-actions';
 
-// ─────────────────────────────
-// Tab から外した操作を、キーボードで開くメニューへ並べる。
-// 印の付いた操作を、開いた所の行とカード（枠）に分けて集める。
-// ─────────────────────────────
-
 afterEach(() => {
   document.body.innerHTML = '';
 });
@@ -16,7 +11,6 @@ function mount(html: string): void {
   document.body.innerHTML = html;
 }
 
-/** まとまりごとの「見出し: 操作の名前」 */
 function summary(origin: string): string[][] {
   const element = document.querySelector(origin);
   if (element === null) throw new Error(`${origin} が無い`);

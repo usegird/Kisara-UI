@@ -1,0 +1,99 @@
+@import '../styles/globals.css';
+
+@source '../../index.html';
+
+@layer components {
+  .welcome-body {
+    @apply bg-logo-bottom text-foreground relative isolate;
+  }
+
+  .welcome-background {
+    @apply pointer-events-none fixed right-0 bottom-0 -z-10 w-[min(1100px,100vw)] dark:opacity-60;
+  }
+
+  .welcome-band {
+    @apply from-logo-top roomy:sticky roomy:-top-[5px] roomy:z-10 pointer-events-none -mt-[5px]
+      flex items-start gap-1 bg-linear-to-b from-50% to-transparent to-50% px-6 py-1;
+  }
+
+  .welcome-main {
+    --muted-foreground: var(--logo-muted-foreground);
+    @apply mx-auto flex max-w-2xl flex-col gap-8 px-6 pt-5 pb-10 text-sm min-[1240px]:-mt-[15px]
+      min-[1240px]:pt-0;
+  }
+
+  .welcome-consent {
+    @apply border-border bg-muted/40 rounded-md border px-[15px] py-[11px];
+  }
+
+  .agreement-link {
+    @apply text-foreground underline underline-offset-2 hover:opacity-80;
+  }
+
+  .welcome-primary {
+    @apply bg-primary text-primary-foreground rounded-md px-3 py-1 text-sm disabled:opacity-50;
+  }
+
+  .document-text {
+    @apply text-muted-foreground flex flex-col gap-2 text-xs leading-relaxed;
+  }
+
+  .welcome-dialog {
+    @apply bg-popover text-popover-foreground m-auto max-h-[80vh] w-full max-w-xl flex-col
+      overflow-hidden rounded-lg border p-0 shadow-lg backdrop:bg-black/40 open:flex
+      max-sm:m-0 max-sm:h-full max-sm:max-h-none max-sm:w-full max-sm:max-w-none
+      max-sm:rounded-none max-sm:border-0;
+  }
+
+  .welcome-dialog-wide {
+    @apply max-w-4xl;
+  }
+
+  .welcome-dialog-header {
+    @apply bg-muted box-content flex h-6 shrink-0 items-center gap-2 border-b px-3 py-1;
+  }
+
+  .welcome-dialog-close {
+    @apply text-muted-foreground hover:bg-muted hover:text-foreground ml-auto rounded p-[3px];
+  }
+
+  .welcome-dialog-body {
+    @apply min-h-0 flex-1 overflow-y-auto p-4;
+  }
+
+  .route-figure {
+    @apply bg-figure-bg text-figure-ink flex flex-col items-stretch gap-1 rounded-md
+      bg-[size:16px_16px] p-4 [background-image:var(--figure-paper)];
+  }
+
+  .route-box {
+    @apply bg-figure-box relative flex flex-col items-start gap-1 px-3 py-2
+      [border-radius:255px_12px_225px_12px/12px_225px_12px_255px] sm:flex-row sm:gap-2;
+  }
+
+  .route-box-browser {
+    @apply [background-image:var(--figure-hatch)];
+  }
+
+  .sketch-line {
+    @apply border-figure-ink pointer-events-none absolute inset-0 border-2
+      [border-radius:255px_12px_225px_12px/12px_225px_12px_255px] [filter:url(#route-figure-sketch)];
+  }
+
+  .sketch-line-device {
+    @apply border-figure-device-line border-dashed;
+  }
+
+  .route-device {
+    @apply relative flex flex-col gap-1 border-2 border-transparent p-3
+      [border-radius:255px_12px_225px_12px/12px_225px_12px_255px];
+  }
+
+  .route-mark {
+    @apply size-6 shrink-0;
+  }
+
+  .route-connector {
+    @apply text-figure-muted flex items-center justify-center gap-1.5 py-1 text-center text-xs;
+  }
+}

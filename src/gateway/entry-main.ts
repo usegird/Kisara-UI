@@ -9,18 +9,10 @@ import type { LlmKeyOutcome } from '@/port/llm-port';
 
 import './entry.css';
 
-// ─────────────────────────────
-// キーの入力の窓。ベース URL（利用者名）と API キー（パスワード）のフォームを DOM で組み、送ったら
-// 開いた本体の窓のゲートウェイへキーを渡し、確かめた結果を出す。文字はすべて `textContent` で入れる。
-// ─────────────────────────────
-
-/** 確かめた結果を待つ上限（モデルの一覧とキーの確かめが返るまで） */
 const VERIFY_TIMEOUT_MS = 30_000;
 
-/** 窓を開いた本体の窓。別のオリジンなので、読めるのは `frames` だけ */
 type Opener = NonNullable<Parameters<typeof postKeyToOpener>[0]>;
 
-/** フォームの欄 */
 interface EntryFields {
   readonly url: HTMLInputElement;
   readonly key: HTMLInputElement;
@@ -39,7 +31,6 @@ async function start(): Promise<void> {
   if (root !== null) renderEntry(root, params.get('base') ?? '');
 }
 
-/** フォームを組む。開いた本体の窓が無ければ、その旨だけを出す */
 function renderEntry(root: HTMLElement, initialUrl: string): void {
   const opener = openerOf();
   root.append(element('h1', t('gateway.entry.title')));
@@ -60,12 +51,10 @@ function renderEntry(root: HTMLElement, initialUrl: string): void {
     fields.error,
     submitButton(),
   );
-  // 直した URL の断りを、打ち直したら消す
   fields.url.addEventListener('input', () => {
     fields.error.textContent = '';
   });
   form.addEventListener('submit', (event) => {
-    // 送り先へは移らない（CSP の form-action 'none'）。キーは開いた本体の窓のゲートウェイへ渡す
     event.preventDefault();
     submit(form, fields, opener);
   });
@@ -73,9 +62,6 @@ function renderEntry(root: HTMLElement, initialUrl: string): void {
   (initialUrl.length > 0 ? fields.key : fields.url).focus();
 }
 
-/**
- * キーを渡し、確かめた結果を待って表示を替える。通ったら保存を頼む。ベース URL が組み立てられなければ断りを出す
- */
 function submit(form: HTMLFormElement, fields: EntryFields, opener: Opener): void {
   const parsed = parseHttpBaseUrl(fields.url.value);
   const key = fields.key.value.trim();
@@ -95,18 +81,12 @@ function submit(form: HTMLFormElement, fields: EntryFields, opener: Opener): voi
       checking.replaceWith(failedView(outcome, form, fields.key));
       return;
     }
-    // 打った値（整える前のベース URL）を保存する。パスワード管理が次に入れる値と欄の値を揃える
     void requestSave(fields.url.value, key);
-    // 自分では閉じない。パスワード管理は送れたと見たあとにこの窓へ保存を尋ねるので、その場を残す
     checking.replaceWith(doneView());
   });
   postKeyToOpener(opener, { type: KEY_TYPE, baseUrl: parsed.url, key }, GATEWAY_ORIGIN);
 }
 
-/**
- * ゲートウェイから確かめた結果が来るのを待つ。本体が閉じたなどで来なければ、時間で切って失敗にする。
- * 受けるのはゲートウェイのオリジンからだけ
- */
 function waitForOutcome(): Promise<LlmKeyOutcome> {
   return new Promise((resolve) => {
     const finish = (outcome: LlmKeyOutcome): void => {
@@ -124,7 +104,6 @@ function waitForOutcome(): Promise<LlmKeyOutcome> {
   });
 }
 
-/** 通らなかった旨と、戻るボタン。戻ると打った値のままフォームを戻す */
 function failedView(
   outcome: 'auth' | 'failed',
   form: HTMLFormElement,
@@ -145,10 +124,6 @@ function failedView(
   return view;
 }
 
-/**
- * パスワード管理に保存を頼む（Credential Management API。Chromium 系だけにある）。
- * 無いブラウザや断られたときは何もしない（フォームが消える合図で尋ねるブラウザに任せる）
- */
 async function requestSave(id: string, password: string): Promise<void> {
   const Credential: unknown = Reflect.get(globalThis, 'PasswordCredential');
   if (typeof Credential !== 'function' || !('credentials' in navigator)) return;
@@ -156,11 +131,9 @@ async function requestSave(id: string, password: string): Promise<void> {
     const credential = Reflect.construct(Credential, [{ id, password }]) as Credential;
     await navigator.credentials.store(credential);
   } catch {
-    // 保存は利用者の便宜なので、失敗してもキーの受け渡しは済んでいる
   }
 }
 
-/** 通ったことと、閉じるボタン */
 function doneView(): HTMLElement {
   const view = element('div', '', 'done');
   const message = element('p', t('gateway.entry.verified'));
@@ -169,19 +142,16 @@ function doneView(): HTMLElement {
   close.setAttribute('type', 'button');
   close.addEventListener('click', () => globalThis.close());
   view.append(message, close);
-  // 押せる物を手元に置く（フォームが消えて焦点が body に落ちるため）
   queueMicrotask(() => close.focus());
   return view;
 }
 
-/** 送るボタン。やめるのはブラウザの閉じるに任せる（一番上の窓なので） */
 function submitButton(): HTMLButtonElement {
   const button = element('button', t('gateway.entry.submit'));
   button.setAttribute('type', 'submit');
   return button;
 }
 
-/** API キーの欄と、欄の右端の見せる・伏せるの目のアイコン */
 function keyField(key: HTMLInputElement): HTMLElement {
   const label = element('label', t('llm.connection.apiKey'));
   const box = element('div', '', 'key-box');
@@ -190,7 +160,6 @@ function keyField(key: HTMLInputElement): HTMLElement {
   return label;
 }
 
-/** 目のアイコンのボタン。名前は今押すと起きること（見せる・伏せる） */
 function eyeToggle(key: HTMLInputElement): HTMLButtonElement {
   const button = element('button', '', 'eye');
   button.setAttribute('type', 'button');
@@ -207,7 +176,6 @@ function eyeToggle(key: HTMLInputElement): HTMLButtonElement {
   return button;
 }
 
-/** 開いた本体の窓。開いた窓との繋がりが無ければ null */
 function openerOf(): Opener | null {
   const opener: unknown = Reflect.get(globalThis, 'opener');
   return isOpener(opener) ? opener : null;

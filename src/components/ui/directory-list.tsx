@@ -1,34 +1,23 @@
 import { cva } from 'class-variance-authority';
-import { Folder } from 'lucide-react';
+import { FileText, Folder, FolderOpen } from 'lucide-react';
 
+import { textDragProps } from '@/components/ui/text-drag';
 import { t } from '@/i18n';
-import type { PathDirectory } from '@/lib/path-tree';
+import { pathTreeRows, visibleTreeRows, type PathDirectory, type PathLeaf } from '@/lib/path-tree';
 
-// ─────────────────────────────
-// 階層の絞り込みの一覧。モデルを選ぶ画面とワイルドカードの画面で同じ見た目にする。
-// 階層の組み立ては `lib/path-tree`、幅と境目は置く側の列（`SidePane`）が持つ。
-// ─────────────────────────────
-
-/** 階層の行の左の余白（`px-2` と同じ） */
 export const TREE_INDENT_BASE = 8;
 
-/** 階層 1 段ごとに足す字下げ */
 export const TREE_INDENT_STEP = 12;
 
-/** 階層 1 つの行 */
 const entry = cva(
   'hover:bg-accent flex w-full items-center gap-1.5 rounded px-2 py-1 text-left text-xs',
   { variants: { active: { true: 'bg-accent', false: '' } } },
 );
 
-/** 階層の一覧の props */
 export interface DirectoryListProps {
-  /** 読み上げの名前 */
   readonly label: string;
-  /** 全部の件数（「すべて」に添える） */
   readonly total: number;
   readonly directories: readonly PathDirectory[];
-  /** 選んでいる階層。空文字は「すべて」 */
   readonly selected: string;
   readonly onSelect: (path: string) => void;
 }
@@ -57,16 +46,13 @@ function Entry({
       aria-pressed={active}
       onClick={onClick}
     >
-      {/* 列を狭めたとき（Lora の左の列）は絵を隠して名前に幅を回す */}
       <Folder className="size-3.5 shrink-0 @max-[8rem]:hidden" aria-hidden />
       <span className="truncate">{label}</span>
-      {/* 件数も狭めたときは隠す（名前だけ残す） */}
       <span className="text-muted-foreground ml-auto tabular-nums @max-[8rem]:hidden">{count}</span>
     </button>
   );
 }
 
-/** 先頭に「すべて」、下に入れ子の階層と件数を並べ、押した階層を選ぶ */
 export function DirectoryList({
   label,
   total,
@@ -94,6 +80,92 @@ export function DirectoryList({
           onClick={() => onSelect(entry.path)}
         />
       ))}
+    </nav>
+  );
+}
+
+export interface PathTreeListProps {
+  readonly label: string;
+  readonly directories: readonly PathDirectory[];
+  readonly leaves: readonly PathLeaf[];
+  readonly all: {
+    readonly total: number;
+    readonly active: boolean;
+    readonly onSelect: () => void;
+  };
+  readonly expanded: ReadonlySet<string> | 'all';
+  readonly onToggle: (path: string) => void;
+  readonly activeDirectory: string | null;
+  readonly selected: string | null;
+  readonly onSelect: (key: string) => void;
+  readonly onPlace: (key: string, origin: DOMRect) => void;
+}
+
+export function PathTreeList({
+  label,
+  directories,
+  leaves,
+  all,
+  expanded,
+  onToggle,
+  activeDirectory,
+  selected,
+  onSelect,
+  onPlace,
+}: PathTreeListProps): React.ReactElement {
+  const isOpen = (path: string): boolean => expanded === 'all' || expanded.has(path);
+  const rows = visibleTreeRows(pathTreeRows(directories, leaves), isOpen);
+  return (
+    <nav aria-label={label} className="min-h-0 flex-1 overflow-y-auto p-1">
+      <Entry
+        label={t('ui.directory.all')}
+        count={all.total}
+        depth={0}
+        active={all.active}
+        onClick={all.onSelect}
+      />
+      {rows.map((row) => {
+        const indent = { paddingLeft: TREE_INDENT_BASE + row.depth * TREE_INDENT_STEP };
+        if (row.kind === 'directory') {
+          const open = isOpen(row.path);
+          const Icon = open ? FolderOpen : Folder;
+          return (
+            <button
+              key={`d:${row.path}`}
+              type="button"
+              className={entry({ active: activeDirectory === row.path })}
+              style={indent}
+              title={row.path}
+              aria-expanded={open}
+              onClick={() => onToggle(row.path)}
+            >
+              <Icon className="size-3.5 shrink-0 @max-[8rem]:hidden" aria-hidden />
+              <span className="truncate">{row.label}</span>
+              <span className="text-muted-foreground ml-auto tabular-nums @max-[8rem]:hidden">
+                {row.count}
+              </span>
+            </button>
+          );
+        }
+        const onLeafDoubleClick = (event: React.MouseEvent<HTMLButtonElement>): void =>
+          onPlace(row.key, event.currentTarget.getBoundingClientRect());
+        return (
+          <button
+            key={`l:${row.key}`}
+            type="button"
+            className={entry({ active: selected === row.key })}
+            style={indent}
+            title={row.key}
+            aria-pressed={selected === row.key}
+            onClick={() => onSelect(row.key)}
+            onDoubleClick={onLeafDoubleClick}
+            {...textDragProps(row.key)}
+          >
+            <FileText className="size-3.5 shrink-0 @max-[8rem]:hidden" aria-hidden />
+            <span className="truncate">{row.label}</span>
+          </button>
+        );
+      })}
     </nav>
   );
 }

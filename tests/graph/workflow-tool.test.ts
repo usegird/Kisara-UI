@@ -21,11 +21,6 @@ import {
 import { definition, definitionMap, widget } from '../helpers/definitions';
 import { bareNode } from '../helpers/workflow';
 
-// ─────────────────────────────
-// ワークフローのツール。`extra.kisara.tool` の読み書き、
-// 送る引数の形、確かめた値の重ね方。
-// ─────────────────────────────
-
 const definitions = definitionMap(
   definition('Prompt', [
     widget('text', 'STRING'),
@@ -37,7 +32,6 @@ const definitions = definitionMap(
   ]),
 );
 
-/** 線がつながったノード 1 つ（線の無いノードは引数にしない） */
 function workflow(inputs: readonly string[], mode = 0, linked = true): Workflow {
   const links = linked ? [{ name: 'in', type: 'IMAGE', link: 1 }] : [];
   return {
@@ -156,7 +150,6 @@ describe('無効・線の無いノード', () => {
     ['線が無い', workflow(['text'], 0, false)],
   ])('%s のノードの欄は、設定してあっても送らない', (_label, wf) => {
     expect(toolArguments(wf, definitions, tool(params))).toEqual([]);
-    // 定義そのものは残る（ノードを戻せばまた送る）
     expect(readWorkflowTool(withWorkflowTool(wf, tool(params)))?.params).toHaveLength(1);
   });
 });
@@ -194,7 +187,6 @@ describe('確かめた値の重ね方', () => {
       const merged = overlayArgumentValues(wf, definitions, base, { args, values: values(empty) });
       expect(merged.get('3')).toEqual({ text: 'dog' });
     }
-    // 足す入れ方でも区切りだけを足さない
     const appending = toolArguments(wf, definitions, tool([param('text', 'prompt', 'append')]));
     const merged = overlayArgumentValues(wf, definitions, base, {
       args: appending,
@@ -262,6 +254,7 @@ describe('アプリ入力の列の引数の印', () => {
     expect(argumentInputNames(null)).toEqual([]);
   });
 });
+
 describe('画像の引数', () => {
   const pictureDefinitions = definitionMap(
     definition('Prompt', [

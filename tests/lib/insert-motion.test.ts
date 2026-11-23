@@ -3,16 +3,9 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { playInsertMotion } from '@/lib/insert-motion';
 
-// ─────────────────────────────
-// 入れた文字の動き。札を飛ばし、写しを重ねて入った文字を広げ、終われば欄を元に戻す。
-// 動きを減らす設定では何もしない。
-// ─────────────────────────────
-
-/** 動きの終わりを手で起こせる `animate` の代わり。呼ばれた要素を覚える */
 function stubAnimate(): { readonly animated: Element[]; readonly finish: () => Promise<void> } {
   const animated: Element[] = [];
   const endings: (() => void)[] = [];
-  // jsdom は `animate` を持たないので、試験の間だけ足す（後で外す）
   Object.defineProperty(Element.prototype, 'animate', {
     configurable: true,
     value: function (this: Element) {
@@ -50,14 +43,12 @@ describe('入れた文字の動き', () => {
     const text = '<lora:x:1>\n';
     playInsertMotion(field, { start: 1, text, origin: new DOMRect(0, 0, 10, 10) });
 
-    // 札と、写しの中の後ろの文字の 2 つが動く。入った文字は打つまで透明で場所だけ取る
     expect(motion.animated).toHaveLength(2);
     expect(motion.animated[1]?.textContent).toBe('b');
     const typed = motion.animated[1]?.previousElementSibling;
     expect(typed?.lastElementChild?.textContent).toBe(text);
     expect(field.style.color).toBe('transparent');
 
-    // 空け終えたら先頭から打ち、打ち終えたら写しを外す
     await motion.finish();
     await vi.waitFor(() => expect(field.style.color).toBe(''));
     expect(document.body.children).toHaveLength(1);

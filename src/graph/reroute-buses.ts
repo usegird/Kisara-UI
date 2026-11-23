@@ -3,26 +3,14 @@ import { linkIndex } from '@/graph/link-read';
 import { rectOf, TITLE_HEIGHT, type NodeRect, type OrderLayout } from '@/graph/node-box';
 import type { LinkId, NodeId, ResolvedLink, Workflow, WorkflowNode } from '@/graph/types';
 
-// ─────────────────────────────
-// 中継する束を探す。列を読み、出力スロットごとに遠い線と、それらが貫通するノードを数える。
-// ─────────────────────────────
-
-/** 出力元の列から、これだけ右の列へ入る線を「遠い」とみなす */
 const FAR_COLUMNS = 5;
-/** 1 つの出力スロットから出る遠い線がこれ以上あるとき、中継の候補にする */
 const MIN_FAR_LINKS = 2;
-/** 遠い線が合わせて貫通するノード（重複なし）がこれ以上なら中継する */
 const MIN_PIERCED_NODES = 3;
-/** 線が箱の幅のこの割合以上を横に走れば「貫通」。それ未満（角かすめ・縦の突き抜け）は数えない */
 export const PIERCE_COVERAGE = 0.5;
-/** スロットの高さの刻み（本体の見た目の近似。入出力口の縦位置を数えるときに使う） */
 const SLOT_HEIGHT = 20;
-/** 横断率を測るときに箱の幅を分ける数 */
 const COVERAGE_STEPS = 50;
-/** 刻みの真ん中（口の縦位置・調べる点を刻みの中央に置く） */
 const STEP_MIDDLE = 0.5;
 
-/** 左端の差が `COLUMN_TOLERANCE` 以内のノードを同じ列として、ノードごとの列の番号を返す */
 export function columnIndexes(workflow: Workflow, layout: OrderLayout): Map<NodeId, number> {
   const lefts = workflow.nodes
     .map((node) => ({ id: node.id, left: rectOf(node, layout).left }))
@@ -40,22 +28,16 @@ export function columnIndexes(workflow: Workflow, layout: OrderLayout): Map<Node
   return columns;
 }
 
-/** 線の端（箱と、入出力口の縦位置） */
 interface End {
   readonly rect: NodeRect;
   readonly y: number;
 }
 
-/** 入出力口の縦位置は本体の見た目の近似（見出しの下から `SLOT_HEIGHT` 刻み） */
 function endOf(node: WorkflowNode, slot: number, layout: OrderLayout): End {
   const rect = rectOf(node, layout);
   return { rect, y: rect.top + TITLE_HEIGHT + (slot + STEP_MIDDLE) * SLOT_HEIGHT };
 }
 
-/**
- * 出力口から入力口へ直線を引いたとき、箱（上下 `margin` 広げた範囲）の中を横に走る割合。
- * 箱が線の横の範囲の外（出力元より左、接続先より右）なら 0
- */
 function coverage(from: End, to: End, box: NodeRect, margin: number): number {
   const x0 = from.rect.right;
   const x1 = to.rect.left;
@@ -69,7 +51,6 @@ function coverage(from: End, to: End, box: NodeRect, margin: number): number {
   return inside / COVERAGE_STEPS;
 }
 
-/** 出力スロットの鍵（束の単位） */
 export function outputKey(originId: NodeId, originSlot: number): string {
   return `${originId}:${originSlot}`;
 }
@@ -79,7 +60,6 @@ interface FarLink {
   readonly targetId: NodeId;
 }
 
-/** 出力スロットから出る遠い線の集まり（まだ中継の条件は見ていない） */
 export interface Candidate {
   readonly originId: NodeId;
   readonly originSlot: number;
@@ -88,18 +68,15 @@ export interface Candidate {
   readonly pierced: Set<NodeId>;
 }
 
-/** 中継する束（1 つの出力スロットから出る遠い線） */
 export interface Bus {
   readonly key: string;
   readonly originId: NodeId;
   readonly originSlot: number;
   readonly fromColumn: number;
   readonly toColumn: number;
-  /** 中継する線（接続先の列の順、同じ列なら線の id の順） */
   readonly links: readonly FarLink[];
 }
 
-/** 出力スロットごとの遠い線と、それらが貫通するノード */
 export function farLinksByOutput(
   workflow: Workflow,
   layout: OrderLayout,
@@ -135,7 +112,6 @@ export function farLinksByOutput(
   return byOutput;
 }
 
-/** 中継する対象。列の範囲が短い順（同じなら左から、出力元・スロットの順） */
 export function findBuses(
   candidates: ReadonlyMap<string, Candidate>,
   columns: ReadonlyMap<NodeId, number>,
@@ -167,7 +143,6 @@ export function findBuses(
   );
 }
 
-/** 本体の中継点（`extra.reroutes` の 1 つ）。`pos` は中継点の中心 */
 export interface Reroute {
   readonly id: number;
   readonly parentId?: number;
@@ -176,20 +151,11 @@ export interface Reroute {
   readonly [key: string]: unknown;
 }
 
-// ─────────────────────────────
-// 置いてある束（こちらの中継点を出力スロットごとにまとめたもの）
-// ─────────────────────────────
-
-/** こちらが置いた 1 つの束。`head` は出力元の中継点、`members` は head と接続先ごとの中継点 */
 export interface OwnBus {
   readonly head: Reroute;
   readonly members: readonly Reroute[];
 }
 
-/**
- * こちらの中継点を束にまとめる。出力スロットは head を通る線から読む。
- * 線が読めない・同じスロットに head が 2 つ・親の無い端は、束にならない（置き直しで消える）
- */
 export function ownBuses(
   reroutes: readonly Reroute[],
   own: ReadonlySet<number>,
@@ -216,7 +182,6 @@ export function ownBuses(
   return buses;
 }
 
-/** 束の出力元も接続先も動いておらず、遠い線の顔ぶれも同じなら、置いたままにする */
 export function untouched(
   bus: OwnBus,
   candidate: Candidate | undefined,

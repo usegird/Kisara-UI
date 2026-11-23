@@ -16,33 +16,20 @@ import { t, tPath } from '@/i18n';
 import { usePlaybooksStore, type OwnPlaybook } from '@/store/use-playbooks-store';
 import { useSettingsStore } from '@/store/use-settings-store';
 
-// ─────────────────────────────
-// プレイブックの一覧の行と、行の右端のメニューとそのダイアログ。選ぶ所と機能のタブのカードで同じものを使う。
-// 要素を返すフック（ダイアログを開いているかは使う側の部品の中だけ）。
-// ─────────────────────────────
-
-/** プレイブックの一覧の 1 行 */
 export interface PlaybookRow {
-  /**
-   * `builtin:<id>`・`own:<id>`（選ぶ所から外す設定の鍵にも使う）
-   */
   readonly key: string;
   readonly playbook: () => Playbook;
   readonly name: string;
   readonly description: string;
-  /** 自分のものの id（標準は null） */
   readonly ownId: string | null;
-  /** 標準・自分のものの中での id（選んでいるかを見るため） */
   readonly id: string;
   readonly origin: Playbook['origin'];
 }
 
-/** 標準と自分のもの（作った順）の行 */
 export function playbookRows(own: Readonly<Record<string, OwnPlaybook>>): {
   readonly builtin: readonly PlaybookRow[];
   readonly mine: readonly PlaybookRow[];
 } {
-  // 保留のものは出さない
   const offered = BUILTIN_PLAYBOOKS.filter((shape) => !HELD_PLAYBOOK_IDS.includes(shape.id));
   const builtin = offered.map((shape): PlaybookRow => ({
     key: `builtin:${shape.id}`,
@@ -67,15 +54,11 @@ export function playbookRows(own: Readonly<Record<string, OwnPlaybook>>): {
   return { builtin, mine };
 }
 
-/** 行のメニューを描く関数と、メニューから開くダイアログ */
 interface PlaybookManage {
-  /** その行の右端のメニュー */
   readonly menu: (row: PlaybookRow, className: string) => React.ReactElement;
-  /** 作る・直すのダイアログと、消す確かめ */
   readonly dialogs: React.ReactElement;
 }
 
-/** 行の右端のメニュー（写して作る・直す・消す）と、そこから開く作る・直すダイアログと消す確かめを返す */
 export function usePlaybookManage(): PlaybookManage {
   const [editing, setEditing] = useState<PlaybookEditing | null>(null);
   const [removing, setRemoving] = useState<{ id: string; name: string } | null>(null);
@@ -114,7 +97,6 @@ export function usePlaybookManage(): PlaybookManage {
           setRemoving(null);
           if (target === null) return;
           usePlaybooksStore.getState().remove(target.id);
-          // 消したものの「選ぶ所から外す」も外す
           useSettingsStore.getState().setPlaybookShown(`own:${target.id}`, true);
         }}
         onCancel={() => setRemoving(null)}

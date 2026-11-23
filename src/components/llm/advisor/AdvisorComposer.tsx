@@ -6,11 +6,6 @@ import { t } from '@/i18n';
 import { isComposingKey } from '@/lib/text-entry';
 import { usePromptAdvisorStore } from '@/store/use-prompt-advisor-store';
 
-// ─────────────────────────────
-// 構成の相談の欄の入力欄。
-// ─────────────────────────────
-
-/** 入力欄。Enter で送り、Shift+Enter で改行（変換中の Enter は送らない） */
 export function AdvisorComposer({
   id,
   streaming,
@@ -22,7 +17,6 @@ export function AdvisorComposer({
 }): React.ReactElement {
   const draft = usePromptAdvisorStore((state) => state.sessions[id]?.draft ?? '');
   const target = useLlmTarget();
-  // 接続の設定とモデルを選んでいなければ送れない（送るボタンを薄くし、その旨を出す）
   const chosen = target.profileId !== null && target.model.trim().length > 0;
   const store = usePromptAdvisorStore.getState();
   const send = (): void => {
@@ -51,7 +45,6 @@ export function AdvisorComposer({
             }
           }}
         />
-        {/* 会話の入力欄と同じく、送るボタンの左に Web のアイコン */}
         <div className="mb-1.5 flex shrink-0 items-center gap-0.5">
           <WebSearchToggle scope="advisor" />
           {streaming ? (

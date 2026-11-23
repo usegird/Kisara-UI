@@ -94,8 +94,8 @@
       "chatFirst": "会話のタブを左に寄せる"
     },
     "loraFormat": {
-      "label": "Lora の写し取りの書式",
-      "note": "[loraname] は拡張子を除いた名前、[learntext] は学習で多かった語、[memo] はメモに置き換わります。空にすると既定に戻ります。"
+      "label": "Lora プロンプト書式",
+      "note": "[activation text]など、[]でキー名を指定できます。| で区切ると値が未設定の場合、右のキーを使用します。"
     },
     "nodeDisplay": {
       "heading": "ノード表示"
@@ -338,7 +338,8 @@
     "decide": {
       "toolbar": "{kind}の決定",
       "label": "{kind}を決定する",
-      "title": "{name} に決めて閉じます（ダブルクリック・Enter でも決まります）"
+      "title": "{name} に決めて閉じます（ダブルクリック・Enter でも決まります）",
+      "insertTitle": "{kind}を設定して閉じる"
     },
     "insert": {
       "label": "{kind}を閉じずにキャレットの位置へ入れる"
@@ -382,32 +383,42 @@
     },
     "info": {
       "panel": "モデルの情報",
+      "preview": "{name} のプレビュー",
       "close": "情報を閉じる",
-      "path": "パス",
+      "type": "type",
       "copyName": "{name} の名前を写す",
-      "size": "大きさ",
-      "modified": "更新",
-      "created": "作成",
-      "name": "名称",
-      "baseModel": "ベースモデル",
+      "size": "サイズ",
+      "modified": "更新日",
+      "created": "作成日",
+      "name": "name",
+      "baseModel": "base model",
       "network": "ネットワーク",
       "loading": "情報を読み込み中…",
       "error": "情報を取得できません: {error}",
       "noEmbedded": "埋め込みの情報はありません",
-      "triggerWords": "学習で多かった語",
+      "triggerWords": "ss_tag_frequency",
       "copyTriggerWords": "学習で多かった語をまとめて写す",
       "insertTriggerWords": "学習で多かった語をキャレットの位置へ入れる",
-      "notes": "メモ",
-      "notesNone": "メモのファイルはまだありません。保存すると作られます",
-      "notesLoading": "メモを読み込み中…",
-      "notesFailed": "メモを読めません: {error}",
-      "notesSave": "メモを保存",
+      "notes": "txt",
+      "notesLoading": "txt を読み込み中…",
+      "notesFailed": "txt を読めません: {error}",
+      "notesSave": "txt を保存",
+      "notesEdit": "txt を編集",
+      "notesCancel": "txt の編集をやめる",
       "notesSaving": "保存中…",
       "notesSaved": "保存しました",
       "notesSaveFailed": "保存できません: {error}",
-      "copyNotes": "メモを写す",
-      "insertNotes": "メモをキャレットの位置へ入れる",
-      "allEntries": "埋め込みの全項目"
+      "copyNotes": "txt を写す",
+      "insertNotes": "txt をキャレットの位置へ入れる",
+      "json": "JSON",
+      "jsonLoading": "JSON を読み込み中…",
+      "jsonFailed": "JSON を読めません: {error}",
+      "jsonEdit": "{key} を編集",
+      "jsonCancel": "{key} の編集をやめる",
+      "jsonSave": "{key} を保存",
+      "copyActivationText": "activation text を写す",
+      "insertActivationText": "activation text をキャレットの位置へ入れる",
+      "allEntries": "model data"
     }
   },
   "imagePicker": {
@@ -440,14 +451,13 @@
   "insertBar": {
     "label": "差し込み",
     "waiting": "一覧を読み込んでいます",
-    "noTarget": "挿入先を選択してから選択するか、アイコンをドロップしてください",
-    "caretMarker": "挿入位置（掴んでほかの位置・欄へ動かせます）",
-    "caretHandle": "複数行の入力欄へ落とすと、そこを挿入先にします",
+    "noTarget": "挿入先を選択してから選択してください",
     "lora": {
       "title": "Lora を選んでキャレットの位置へ入れます",
       "label": "Lora を差し込む",
       "triggersFailed": "学習で多かった語を取れませんでした: {message}",
-      "memoFailed": "メモを取れませんでした: {message}"
+      "memoFailed": "txt を取れませんでした: {message}",
+      "jsonFailed": "JSON を取れませんでした: {message}"
     },
     "style": {
       "title": "スタイルの編集の画面を開きます（決定・ダブルクリックでキャレットの位置へ入れます）",
@@ -551,7 +561,7 @@
     },
     "insert": {
       "noFieldTitle": "この画面の外にある複数行の入力欄にキャレットを置いてから押してください",
-      "title": "選んでいる入力欄のキャレット位置に差し込みます"
+      "title": "選んでいる入力欄のキャレット位置に差し込んで閉じます"
     },
     "saveAs": {
       "title": "名前を付けて保存",
@@ -597,7 +607,7 @@
       "builtin": {
         "a1111Txt2img": {
           "title": "txt2img（A1111 風）",
-          "description": "Stable Diffusion web UI と同じ並びの画像生成。プロンプトに LoRA とワイルドカード、Hires. fix と ADetailer の切り替え。Impact Pack が要ります（ADetailer は Impact Subpack も）"
+          "description": "Stable Diffusion web UI と同じ並びの画像生成。プロンプトに LoRA とワイルドカード、Hires. fix と ADetailer のグループ（初めはバイパス）。Impact Pack が要ります（ADetailer は Impact Subpack も）"
         }
       }
     },
@@ -618,6 +628,7 @@
       "empty": "該当するワークフローがありません"
     },
     "tabMenu": {
+      "duplicate": "タブを複製",
       "save": "上書き保存",
       "saveAs": "名前を付けて保存…",
       "export": "エクスポート",
@@ -719,7 +730,17 @@
     "copy": "ワイルドカードを写す",
     "noMatch": "当てはまるものがありません",
     "list": "ワイルドカードの一覧",
-    "itemTitle": "{name}（ダブルクリック・掴んで欄へ落とすと取り込む）"
+    "itemTitle": "{name}（ダブルクリック・掴んで欄へ落とすと取り込む）",
+    "back": "プレビューを閉じて一覧へ戻る",
+    "preview": {
+      "title": "プレビュー",
+      "note": "プレビュー（ネストやワイルドカード、重みが適用済のため実際の記述とは異なります）",
+      "loading": "中身を読み込んでいます…",
+      "unavailable": "接続先がワイルドカードを展開できないので、プレビューを出せません（名前の取り込みは使えます）",
+      "failed": "中身を読めませんでした: {error}",
+      "empty": "このワイルドカードには候補がありません",
+      "entries": "ワイルドカードの候補"
+    }
   },
   "tagComplete": {
     "list": "タグの候補",
@@ -785,6 +806,7 @@
     "overwrite": {
       "title": "上書きしますか？",
       "description": "同じ名前のワークフローが ComfyUI にあります（workflows/{path}）。上書きすると元に戻せません。",
+      "shared": "別のタブでも同じファイルを開いています。\n上書きしても良いですか？",
       "confirm": "上書きする"
     },
     "rootFallback": {
@@ -941,6 +963,7 @@
       "danglingReference": "入力 \"{name}\" の接続先（{source}）が実行対象に含まれていません",
       "namedMismatch": "パラメータの名前の並びが定義と食い違うため、このノードは実行しません（値がずれているおそれがあります）",
       "typeMismatch": "パラメータの値の型が定義と合わないため、このノードは実行しません（値がずれているおそれがあります）",
+      "linkedChoice": "続く入力を切り替える選択の欄に線が繋がっているため、このノードは実行しません（ComfyUI は線で来た値では入力を選べません）",
       "excludedDownstream": "入力元のノード {source} を実行しないため、このノードも実行しません",
       "subgraphCycle": "subgraph「{name}」が自分自身を含んでいるため、開けません",
       "noOutputLeft": "実行できる出力ノードが残らないため、投入しません"
@@ -1104,6 +1127,7 @@
       "appInputOffTitle": "アプリ入力（App Mode）の対象にする",
       "disconnectLabel": "{name} の接続を解除",
       "disconnect": "接続を解除",
+      "dragLinkLabel": "{name} の接続元を別の行へもつなぐ",
       "unconnected": "未接続",
       "unconnectedRequired": "未接続（必須）",
       "unknownName": "パラメータ名を特定できません",
@@ -1144,15 +1168,10 @@
       "toSubgraphTitle": "メンバーとグループを新しい subgraph にする",
       "deleteGroup": "グループごと削除",
       "deleteGroupTitle": "枠と中のカードをまとめて外す",
-      "switchShow": "アプリ入力に切り替えを出す",
-      "switchHide": "切り替えを外す",
-      "switchTitle": "このグループのカードをまとめてバイパスする切り替え"
-    },
-    "groupSwitch": {
-      "title": "切り替え",
-      "clearLabel": "切り替えをまとめて外す",
-      "clearTitle": "切り替えをこの列から外す（カードはそのまま）",
-      "mixed": "一部"
+      "bypass": "全てバイパスする",
+      "bypassTitle": "このグループのカード（子のグループの中も）をまとめてバイパスにします",
+      "enable": "全て有効にする",
+      "enableTitle": "このグループのカードをまとめて通常に戻します（ミュートのカードも）"
     },
     "subgraph": {
       "mark": "subgraph",
@@ -1265,11 +1284,43 @@
       "otherWriter": "「{name}」の一時保存は、ほかのブラウザのタブで書き換えられていました（{time}）",
       "parallelEdit": "「{name}」は、ほかのブラウザのタブでも編集されています（最後の編集 {time}）",
       "untitledTab": "名称未設定",
-      "noIssues": "問題はありません"
+      "noIssues": "問題はありません",
+      "missingModel": "モデルが接続先の ComfyUI にありません: {name}",
+      "model": {
+        "place": "置き場: models/{directory}/",
+        "openSource": "取得先を開く",
+        "copyUrl": "取得先の URL を写す",
+        "copyPlace": "置き場を写す",
+        "source": "取得先: {url}"
+      },
+      "manager": {
+        "title": "定義の無いノード: {count} 種類",
+        "find": "ComfyUI-Manager で探す",
+        "finding": "探しています…",
+        "noManager": "接続先の ComfyUI に ComfyUI-Manager がありません。足りないパックは手で導入してください。",
+        "failed": "探せませんでした: {reason}",
+        "version": "ComfyUI-Manager {version}",
+        "packNodes": "入るノード: {nodes}",
+        "install": "導入する",
+        "installing": "導入しています…",
+        "installed": "導入しました（使うには再起動が要ります）",
+        "installFailed": "導入できませんでした: {reason}",
+        "unresolved": "どのパックにも見つかりません: {nodes}",
+        "forbidden": "ComfyUI-Manager に断られました（security_level）。config.ini と ComfyUI の端末のログを確かめてください。",
+        "restart": "ComfyUI を再起動する",
+        "restarting": "再起動しています…",
+        "restarted": "再起動を頼みました。つながり直したら、ノード定義を更新してください。",
+        "restartFailed": "再起動できませんでした: {reason}",
+        "refreshDefinitions": "ノード定義を更新する",
+        "confirmInstallTitle": "ノードのパックを導入する",
+        "confirmInstall": "「{title}」を ComfyUI-Manager で接続先の ComfyUI に導入しますか？\nComfyUI のサーバーにファイルが入ります。ノードを使うには再起動が要ります。",
+        "confirmRestartTitle": "ComfyUI を再起動する",
+        "confirmRestart": "接続先の ComfyUI を再起動しますか？\n実行中・待っている実行は止まり、この ComfyUI を使っているほかの人の接続も切れます。"
+      }
     },
     "control": {
       "repeatHint": "このタブのワークフローを、止めるまで 1 件ずつ投げ続けます（GPU を使い続けます）。ほかのタブの繰り返しも続き、交互に処理されます。中断では止まります",
-      "repeatActive": "このタブは繰り返しの最中です。止めるのはタスクの列から",
+      "repeatStop": "繰り返し中止",
       "blocked": {
         "noWorkflow": "ワークフローを開いてください",
         "notConnected": "先に接続してください",
@@ -1308,7 +1359,7 @@
       "openDetailHint": "押すと実行内容と結果を開きます",
       "cancel": "キューから外す",
       "cancelHint": "実行前のこのタスクをキューから外します",
-      "nodeProgress": "{finished}/{total} ノード"
+      "nodeProgress": "{finished}/{total}"
     },
     "panel": {
       "fetchFailed": "キューを取得できません: {error}",
@@ -1347,9 +1398,11 @@
       "following": "追従中: タスクが終わったら、そこへ移ります",
       "openViewer": "ビューワーで開く",
       "openViewerHint": "この画像からビューワーに切り替えます",
+      "copyOutputText": "出力の文字を写す",
       "section": {
         "models": "モデル",
         "prompts": "プロンプト",
+        "outputTexts": "出力の文字",
         "settingsTimed": "実行順・所要時間と設定",
         "settings": "設定（seed・steps など）"
       },
@@ -1458,8 +1511,11 @@
       "openImages": "{name} の画像を開く",
       "openImagesHint": "このワークフローの画像をすべてビューワーで開く",
       "openDetailHint": "このワークフローの実行の詳細を開く",
-      "noModel": "モデル不明",
-      "dateRuns": "{date} / {runs} 回"
+      "runsWorkflow": "{runs} / {workflow}",
+      "remove": "{name} の履歴を消す",
+      "removeHint": "このセッションの実行の記録のファイルを消す",
+      "removeTitle": "履歴を削除",
+      "removeDescription": "「{name}」の実行記録を削除します。この操作は元に戻せません。"
     },
     "detail": {
       "title": "履歴の詳細",
@@ -1485,7 +1541,9 @@
       "session": "session: {id}",
       "sessionNamed": "{name}（{id}）",
       "sessionLabel": "セッション",
-      "typeLabel": "タイプ"
+      "typeLabel": "タイプ",
+      "rename": "セッション名を変える",
+      "renameInput": "セッション名"
     },
     "panel": {
       "notRecording": "実行の記録はオフです。",
@@ -1516,7 +1574,7 @@
       "apiKey": "API キー",
       "showKey": "API キーを見せる",
       "hideKey": "API キーを伏せる",
-      "enterKey": "API キーをセット",
+      "enterKey": "API キーを設定",
       "keyEntered": "設定済",
       "keyVerified": "API キー検証済み",
       "removeKey": "API キーを消す",
@@ -1678,7 +1736,7 @@
       "stop": "止める",
       "cannotSend": "先に接続の設定とモデルを選んでください",
       "chooseModel": "先にモデルを選んでください",
-      "setKeyFirst": "先に API キーをセットしてください",
+      "setKeyFirst": "先に API キーを設定してください",
       "aiNotice": "応答は AI が生成します。誤りや不正確な内容が含まれることがあります。",
       "attach": "画像を添える",
       "attachedImage": "添えた画像 {index}",
@@ -1992,14 +2050,7 @@
       "cleanup": {
         "heading": "クリーンアップ",
         "description": "ブラウザ側に無い30日以前のバックアップデータ",
-        "none": "該当するバックアップはありません。",
-        "notice": {
-          "title": "クリーンアップ",
-          "description": "古いバックアップデータが残っています。確認しますか？",
-          "confirm": "確認する",
-          "later": "あとで"
-        }
-      },
+        "none": "該当するバックアップはありません。"      },
       "userFiles": {
         "history": "実行の記録",
         "historyHint": "KisaraUI が ComfyUI のユーザーフォルダに書く実行の記録（kisara/history）。",
@@ -2050,6 +2101,7 @@
       "newChat": "新しい会話",
       "openFile": "ファイルから開く",
       "openFileTitle": "書き出した会話を取り込むか、キャラクターカードから新しい会話を始めます",
+      "tidyBackups": "古いデータを整理",
       "list": "会話の一覧を出す",
       "empty": "メッセージを送った会話がここに並びます。",
       "place": "会話の保存先",
@@ -2752,7 +2804,7 @@
   },
   "gateway": {
     "entry": {
-      "title": "API キーをセット",
+      "title": "API キーを設定",
       "submit": "接続",
       "invalidUrl": "ベース URL を http:// か https:// から入れてください。",
       "noOpener": "KisaraUI の画面から開いてください。",

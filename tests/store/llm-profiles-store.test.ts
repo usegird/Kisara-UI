@@ -15,10 +15,6 @@ import { useTermsStore } from '@/store/use-terms-store';
 
 import { fakeLlmPort, profile } from '../helpers/llm';
 
-// ─────────────────────────────
-// 接続の設定の置き場。API キーは持たない（ゲートウェイが持つ）。
-// ─────────────────────────────
-
 afterEach(() => {
   localStorage.clear();
   sessionStorage.clear();
@@ -36,7 +32,6 @@ describe('接続の設定の置き場', () => {
     const mine = profile({ id: 'a', baseUrl: 'http://a/v1' });
     useLlmProfilesStore.setState({ profiles: [mine] });
     saveProfiles([mine]);
-    // ほかのタブが 1 件足した
     saveProfiles([mine, profile({ id: 'b', baseUrl: 'http://b/v1' })]);
 
     useLlmProfilesStore.getState().update('a', { defaultModel: 'changed' });

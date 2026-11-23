@@ -11,11 +11,6 @@ import { useSettingsStore } from '@/store/use-settings-store';
 import { useStylesStore } from '@/store/use-styles-store';
 import { useWildcardsStore } from '@/store/use-wildcards-store';
 
-// ─────────────────────────────
-// スタイルの編集。アプリ入力の列の右のアイコンから重ねて開く。
-// **書き戻しは押したときだけ**なので、保存の呼び出しは差し替えて確かめる。
-// ─────────────────────────────
-
 const SAMPLE = '﻿name,prompt,negative_prompt\r\nanima,"1girl, solo",bad hands\r\n';
 
 function seed(): void {
@@ -36,7 +31,6 @@ afterEach(() => {
   useSettingsStore.setState({ baseUrl: '' });
 });
 
-/** 開いて、中身（開いたときに読む）が出るまで待つ */
 async function show(): Promise<void> {
   render(<StyleEditorOverlay />);
   await screen.findByLabelText('肯定の文面');
@@ -70,6 +64,7 @@ describe('編集', () => {
     fireEvent.click(screen.getByText('削除する'));
     expect(remove.mock.calls[0]?.[1]).toBe('anima');
   });
+
   it('読み終えていない接続先では保存も削除も押せない', async () => {
     seed();
     useStylesStore.setState({ editing: { name: 'anima' }, loadedFrom: 'http://other' });
@@ -79,7 +74,7 @@ describe('編集', () => {
     expect(screen.getByText('削除').closest('button')).toHaveProperty('disabled', true);
   });
 
-  it('外の複数行の入力欄へ差し込む', async () => {
+  it('外の複数行の入力欄へ差し込み、画面を閉じる', async () => {
     seed();
     const field = document.createElement('textarea');
     field.value = 'head: tail';
@@ -93,9 +88,9 @@ describe('編集', () => {
 
     fireEvent.click(screen.getByLabelText('肯定の文面をキャレット位置に取り込む'));
 
-    // 末尾に改行を足し、キャレットは入れた文字の先頭に戻す
-    expect(field.value).toBe('head: 1girl, solo\ntail');
-    expect(field.selectionStart).toBe(6);
+    expect(field.value).toBe('head: 1girl, solotail');
+    expect(field.selectionStart).toBe(17);
+    expect(useStylesStore.getState().editing).toBeNull();
 
     field.remove();
   });
@@ -111,7 +106,6 @@ describe('編集', () => {
     expect(buttons).toEqual(['肯定', '否定']);
     expect(screen.getByLabelText('肯定の文面を写す')).toBeDefined();
 
-    // 見出しの帯の × と同じ働き（左の列のものは後に並ぶ）
     const closes = screen.getAllByRole('button', { name: 'スタイルの編集を閉じる' });
     expect(closes).toHaveLength(2);
     fireEvent.click(closes[1] as HTMLElement);
@@ -123,7 +117,6 @@ describe('編集', () => {
     useStylesStore.setState({ editing: { name: 'anima' } });
     await show();
 
-    // 直しかけが無ければそのまま閉じる
     act(() => useStylesStore.getState().requestCloseEditor());
     expect(useStylesStore.getState().editing).toBeNull();
     act(() => useStylesStore.getState().openEditor('anima'));
@@ -140,13 +133,11 @@ describe('編集', () => {
   it('アプリ入力から送った文面は、肯定に入れた新規として開き、直しかけがあれば確かめる', async () => {
     seed();
     useStylesStore.setState({ newStyleRequest: null });
-    // 閉じていればすぐ新規として開く
     act(() => useStylesStore.getState().requestNewStyle('1girl, smile'));
     await show();
     expect(screen.getByLabelText<HTMLTextAreaElement>('肯定の文面').value).toBe('1girl, smile');
     expect(screen.getByLabelText<HTMLInputElement>('名前').value).toBe('');
 
-    // 送った文面は直しかけなので、次を送ると確かめる。やめれば今の内容のまま
     act(() => useStylesStore.getState().requestNewStyle('2girls'));
     expect(await screen.findByText('編集中の内容')).toBeDefined();
     fireEvent.click(screen.getByText('キャンセル'));
@@ -256,7 +247,7 @@ describe('編集', () => {
     fireEvent.focusIn(field);
     fireEvent.doubleClick(screen.getByRole('button', { name: 'anima' }));
 
-    expect(field.value).toBe('a:1girl, solo\nb');
+    expect(field.value).toBe('a:1girl, solob');
 
     field.remove();
   });

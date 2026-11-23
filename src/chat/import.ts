@@ -8,12 +8,6 @@ import { clamp } from '@/lib/clamp';
 import { MEGABYTE } from '@/lib/file-size';
 import { finiteNumber, isRecord, isUnknownArray, stringOr } from '@/lib/guards';
 
-// ─────────────────────────────
-// 会話のファイルの読み込み。どの形かは中身で見分ける（拡張子に頼らない）。
-// ChatGPT・Claude・SillyTavern の形は公開の仕様が無いので、読める項目だけで組む。
-// ─────────────────────────────
-
-/** 読み込む会話のファイルの大きさの上限（MB） */
 const CHAT_FILE_MAX_MEGABYTES = 512;
 
 function done(content: string): Candidate {
@@ -25,17 +19,11 @@ function time(value: unknown): number {
   return Number.isNaN(parsed) ? 0 : parsed;
 }
 
-// ─────────────────────────────
-// Claude の書き出し
-// ─────────────────────────────
-
-/** Claude の書き出しの話し手を、会話の役にする。知らない話し手は null */
 function claudeRoleOf(sender: unknown): 'user' | 'assistant' | null {
   if (sender === 'human') return 'user';
   return sender === 'assistant' ? sender : null;
 }
 
-/** 時刻の候補のうち、最初の正の値。どれも無ければ `fallback` */
 function firstTimeOf(times: readonly number[], fallback: number): number {
   return times.find((value) => value > 0) ?? fallback;
 }
@@ -45,7 +33,6 @@ function isClaudeFile(raw: unknown): raw is unknown[] {
   return isRecord(first) && isUnknownArray(first.chat_messages);
 }
 
-/** 発言の本文。`text` が無ければ `content` の文の部分をつなぐ */
 function claudeText(message: Record<string, unknown>): string {
   if (typeof message.text === 'string' && message.text.length > 0) return message.text;
   if (!isUnknownArray(message.content)) return '';
@@ -91,10 +78,6 @@ function parseClaude(raw: readonly unknown[]): ParsedChats {
   return { chats, skipped, dropped };
 }
 
-// ─────────────────────────────
-// SillyTavern の会話
-// ─────────────────────────────
-
 function jsonLines(source: string): unknown[] | null {
   const lines = source.split(/\r?\n/).filter((line) => line.trim().length > 0);
   if (lines.length === 0) return null;
@@ -109,7 +92,6 @@ function isSillyTavern(lines: readonly unknown[]): boolean {
   return lines.some((line) => isRecord(line) && typeof line.mes === 'string');
 }
 
-/** 1 件の発言。候補（`swipes`）と選んでいる候補（`swipe_id`）、思考の本文を読む */
 function sillyTavernMessage(line: Record<string, unknown>, id: string): ChatMessage | null {
   if (line.is_system === true) return null;
   const role = line.is_user === true ? 'user' : 'assistant';
@@ -148,24 +130,12 @@ function parseSillyTavern(lines: readonly unknown[], fileName: string): ParsedCh
   };
 }
 
-// ─────────────────────────────
-// 見分けて読む
-// ─────────────────────────────
-
-/** 拡張子を除いたファイル名（名前の無い会話の名前に使う） */
 function baseName(fileName: string): string {
   return fileName.replace(/\.[^.]*$/, '').replace(/\.chat$/, '');
 }
 
-/**
- * 読み込む会話のファイルの大きさの上限。ChatGPT の書き出しは全部の会話をまとめるので大きくなる
- */
 export const CHAT_FILE_MAX_BYTES = CHAT_FILE_MAX_MEGABYTES * MEGABYTE;
 
-/**
- * 会話のファイルを読む。読めない形なら null。名前の無い会話 1 つのファイルはファイル名を名前にし、
- * 時刻の無い会話は `now` にする
- */
 export function readChatFile(source: string, fileName: string, now: number): ParsedChats | null {
   let raw: unknown;
   let parsed: ParsedChats | null = null;

@@ -8,15 +8,6 @@ import { t } from '@/i18n';
 import { useChatStore } from '@/store/use-chat-store';
 import { useLlmConnectDialogStore } from '@/store/use-llm-connect-dialog-store';
 
-// ─────────────────────────────
-// 会話の入力欄の中の部品。添えた画像、送る・止めるボタン、プレイブックの操作の注記と指示の枠。
-// 打ちかけの本文と送る手続きは ChatComposer が持つ（注記と指示の枠は自分の欄だけを購読する）。
-// ─────────────────────────────
-
-/**
- * 送るボタン。送れるときは青、つないでいないときは接続断のアイコンを赤、
- * モデルだけを選んでいないときは接続のアイコンを青、キーが要るのに無いときは鍵のアイコンを青で出す
- */
 const sendButton = cva(
   `hover:bg-background/60 inline-flex h-6 w-8 items-center justify-center rounded-md
     disabled:opacity-40`,
@@ -33,16 +24,12 @@ const sendButton = cva(
   },
 );
 
-/**
- * 送れない理由を片付ける手のボタンの、アイコンと名前（押すと起きること）と説明
- */
 const PROMPT_BUTTONS = {
   connect: { Icon: Unplug, label: 'llm.onboarding.title', title: 'llm.chat.cannotSend' },
   model: { Icon: Plug, label: 'llm.modelPicker.title', title: 'llm.chat.chooseModel' },
   key: { Icon: KeyRound, label: 'llm.connection.enterKey', title: 'llm.chat.setKeyFirst' },
 } as const;
 
-/** 添えた画像と、1 枚ずつ外すボタン。添えていなければ出さない */
 export function AttachedImages({
   images,
   onRemove,
@@ -79,10 +66,6 @@ export function AttachedImages({
   );
 }
 
-/**
- * 送る・止めるボタン。受け取り中は止める、つないでいない間は接続断のアイコン（押すと接続の案内）、
- * つながっていてモデルを選んでいない間は接続のアイコン（押すとモデルを選ぶ）、ほかは送る
- */
 export function SendButton({
   streaming,
   sendState,
@@ -94,13 +77,10 @@ export function SendButton({
 }: {
   readonly streaming: boolean;
   readonly sendState: SendState;
-  /** 送る中身が無い */
   readonly empty: boolean;
   readonly onStop: () => void;
   readonly onSend: () => void;
-  /** モデルを選ぶダイアログを開く */
   readonly onChooseModel: () => void;
-  /** API キーの入力の窓を開く */
   readonly onSetKey: () => void;
 }): React.ReactElement {
   if (streaming) {
@@ -118,7 +98,6 @@ export function SendButton({
     );
   }
   if (sendState === 'connect' || sendState === 'model' || sendState === 'key') {
-    // 送れない理由を 1 手で片付けられる間は、その手のアイコンにし、本文が無くても押せる
     const prompt = PROMPT_BUTTONS[sendState];
     const handlers = {
       connect: () => useLlmConnectDialogStore.getState().open(),
@@ -151,10 +130,6 @@ export function SendButton({
   );
 }
 
-/**
- * 注記の枠。プレイブックの操作の指示に添えた送らない注記を、入力欄の中の上に読むだけで出す。
- * 上下の `<comment>` の行は指示の枠と同じく直せない文字。送らず、送るか × で外す
- */
 export function NoteBox({ chatId }: { readonly chatId: string }): React.ReactElement | null {
   const note = useChatStore((state) => state.draftNotes[chatId]);
   if (note === undefined) return null;
@@ -187,10 +162,6 @@ export function NoteBox({ chatId }: { readonly chatId: string }): React.ReactEle
   );
 }
 
-/**
- * 入力欄の上の指示の枠。プレイブックの操作で入れた指示を、打った文と分けて直せる欄に出す。
- * 送るときに囲む `<direction>` の行は直せない文字で出す。× で外す
- */
 export function DirectionBox({ chatId }: { readonly chatId: string }): React.ReactElement | null {
   const text = useChatStore((state) => state.draftDirections[chatId]?.text);
   if (text === undefined) return null;

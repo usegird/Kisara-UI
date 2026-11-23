@@ -16,18 +16,12 @@ import {
 import { writeWidgetValue } from '@/graph/widgets';
 import { isRecord } from '@/lib/guards';
 
-// ─────────────────────────────
-// 画像に `workflow` が無く `prompt` だけがあるときに、API Prompt Format から Workflow JSON を組み立てる。
-// ─────────────────────────────
-
-/** API Prompt Format のノード 1 つ。種類・値・線しか無いので、位置・大きさ・グループなどは戻らない */
 interface PromptNode {
   readonly class_type: string;
   readonly inputs: Readonly<Record<string, unknown>>;
   readonly _meta?: unknown;
 }
 
-/** API Prompt Format か。どのノードも `class_type`（文字列）と `inputs`（オブジェクト）を持つ */
 export function isApiPrompt(raw: unknown): raw is Readonly<Record<string, PromptNode>> {
   if (!isRecord(raw)) return false;
   const nodes = Object.values(raw);
@@ -39,7 +33,6 @@ export function isApiPrompt(raw: unknown): raw is Readonly<Record<string, Prompt
   );
 }
 
-/** 線の参照 `[ノード id, 出力の番号]` */
 function linkRef(value: unknown): { readonly id: string; readonly slot: number } | null {
   if (!Array.isArray(value) || value.length !== 2) return null;
   const [id, slot] = value as unknown[];
@@ -47,10 +40,6 @@ function linkRef(value: unknown): { readonly id: string; readonly slot: number }
   return { id: String(id), slot: slot as number };
 }
 
-/**
- * prompt の id → ノード id。数値の id はそのまま使い、`68:12` のような名前空間つきの id
- * （サブグラフを平らにしたもの）には空いている番号を振る
- */
 function nodeIds(keys: readonly string[]): Map<string, NodeId> {
   const ids = new Map<string, NodeId>();
   const numeric = (key: string): boolean => /^\d+$/.test(key);
@@ -65,7 +54,6 @@ function titleOf(node: PromptNode): string | null {
   return isRecord(meta) && typeof meta.title === 'string' ? meta.title : null;
 }
 
-/** 定義のあるノード。値は定義どおりの位置へ書き、線の入力は後で口に繋ぐ */
 function knownNode(node: PromptNode, id: NodeId, definition: NodeDefinition): WorkflowNode {
   let built = createNode(definition, id);
   for (const [name, value] of Object.entries(node.inputs)) {
@@ -75,7 +63,6 @@ function knownNode(node: PromptNode, id: NodeId, definition: NodeDefinition): Wo
   return title === null || title === definition.displayName ? built : { ...built, title };
 }
 
-/** 定義の無いノード。線の入力を口に、残りの値を書かれた順に並べる（位置対応は保証しない） */
 function unknownNode(node: PromptNode, id: NodeId): WorkflowNode {
   const entries = Object.entries(node.inputs);
   const inputs: WorkflowNodeInput[] = entries
@@ -95,7 +82,6 @@ function unknownNode(node: PromptNode, id: NodeId): WorkflowNode {
   };
 }
 
-/** 定義の無いノードは出力の口を持たないので、参照された番号まで `*` の口を足す */
 function withOutputUpTo(workflow: Workflow, id: NodeId, slot: number): Workflow {
   const node = workflow.nodes.find((candidate) => candidate.id === id);
   if (!node) return workflow;
@@ -110,7 +96,6 @@ function withOutputUpTo(workflow: Workflow, id: NodeId, slot: number): Workflow 
   };
 }
 
-/** 線を受ける入力の口。無ければパラメータを入力の口に変える（本家と同じ形） */
 function inputSlot(
   workflow: Workflow,
   id: NodeId,
@@ -124,10 +109,6 @@ function inputSlot(
   return withWidgetInput(workflow, id, name, type);
 }
 
-/**
- * API Prompt Format から Workflow JSON を組み立て、処理順に並べて位置を決める。
- * 参照先が prompt に無い線は張らない
- */
 export function workflowFromApiPrompt(
   prompt: Readonly<Record<string, PromptNode>>,
   definitions: NodeDefinitionMap,

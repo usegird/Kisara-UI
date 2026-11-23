@@ -16,10 +16,6 @@ import {
   traceVerbose,
 } from '@/lib/trace';
 
-// ─────────────────────────────
-// 診断のログの入れ物。段階の下は作らない・失敗を押し出さない・URL とパスを入れない
-// ─────────────────────────────
-
 afterEach(() => {
   setTraceLevels(DEFAULT_TRACE_LEVELS);
   clearTrace();

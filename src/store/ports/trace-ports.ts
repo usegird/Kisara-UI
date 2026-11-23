@@ -4,12 +4,6 @@ import type { ComfyPort, EventOptions } from '@/port/comfy-port';
 import type { LlmPort, LlmResult } from '@/port/llm-port';
 import { ConsentRequiredError } from '@/store/ports/network-consent';
 
-// ─────────────────────────────
-// 通信の窓口を包み、要求の結果を診断のログの出来事にする。
-// 残すのは経路の名前（窓口の関数の名前）・成否・番号・失敗の種類・所要時間だけ。**URL と本文は残さない。**
-// 段階の下なら時刻も測らない。成功は `info`、失敗は `warn`、通知の 1 件ずつは `debug`
-// ─────────────────────────────
-
 type AnyFunction = (...args: unknown[]) => unknown;
 
 function now(): number {
@@ -20,7 +14,6 @@ function elapsed(start: number): number {
   return Math.round(now() - start);
 }
 
-/** 要求の失敗を種類と番号だけにする */
 function comfyFailure(port: ComfyPort, error: unknown): TraceDetail {
   if (error instanceof ConsentRequiredError) return { failure: 'consent', status: null };
   if (error instanceof DOMException && error.name === 'AbortError') {
@@ -31,7 +24,6 @@ function comfyFailure(port: ComfyPort, error: unknown): TraceDetail {
   return { failure: port.run.rejectionOf(error) === null ? 'unknown' : 'rejected', status: null };
 }
 
-/** 通知の口の出来事。呼ぶ側の受け取りはそのまま呼ぶ */
 function tracedEventOptions(options: EventOptions): EventOptions {
   return {
     ...options,
@@ -54,7 +46,6 @@ function tracedEventOptions(options: EventOptions): EventOptions {
   };
 }
 
-/** ComfyUI の窓口を包む。Promise を返す関数の結果だけを残し、URL を作る関数などはそのまま通す */
 export function traceComfyPort(port: ComfyPort): ComfyPort {
   const traced: Record<string, Record<string, unknown>> = {};
   for (const [group, functions] of Object.entries(port) as [string, Record<string, unknown>][]) {
@@ -73,12 +64,10 @@ export function traceComfyPort(port: ComfyPort): ComfyPort {
     }
     traced[group] = wrapped;
   }
-  // 包んだ物は元と同じ群と関数を持つ
   return traced as unknown as ComfyPort;
 }
 
 function traceComfyCall(port: ComfyPort, route: string, call: () => unknown): unknown {
-  // 失敗は `warn` で残すので、`warn` 以上なら測る
   const measuring = traceEnabled('comfy', 'warn');
   const start = measuring ? now() : 0;
   const result = call();
@@ -86,7 +75,6 @@ function traceComfyCall(port: ComfyPort, route: string, call: () => unknown): un
   return result.then(
     (value: unknown) => {
       traceEvent('comfy', 'info', 'request', () => ({ route, ok: true, ms: elapsed(start) }));
-      // 診断の結果は物で返る（配列は来ない）
       if (route === 'connection.diagnose' && isRecord(value)) {
         const { code, status } = value;
         traceEvent('comfy', 'warn', 'connection.diagnosis', () => ({
@@ -108,7 +96,6 @@ function traceComfyCall(port: ComfyPort, route: string, call: () => unknown): un
   );
 }
 
-/** LLM の窓口を包む。結果の成否と失敗の種類・番号だけを残す（本文・モデル名は残さない） */
 export function traceLlmPort(port: LlmPort): LlmPort {
   return {
     listModels: (endpoint, signal) =>

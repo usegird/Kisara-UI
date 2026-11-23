@@ -2,10 +2,6 @@ import { describe, expect, it } from 'vitest';
 
 import { approxBytes } from '@/lib/approx-bytes';
 
-// ─────────────────────────────
-// 保存領域に書いたときの大きさの見積もり
-// ─────────────────────────────
-
 describe('approxBytes', () => {
   it('文字は UTF-8 の長さで数える（サロゲートの組は 4）', () => {
     expect(approxBytes('abc')).toBe(3);

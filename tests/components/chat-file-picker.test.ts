@@ -5,11 +5,6 @@ import { pickChatFile } from '@/components/llm/chat-list/chat-file-picker';
 import { importChatFile } from '@/store/chat/chat-transfer';
 import { openCardFile } from '@/store/chat/preset-import';
 
-// ─────────────────────────────
-// 会話の一覧の「ファイルから開く」。カードなら新しい会話を始め、
-// カードでなければ会話のファイルとして取り込む。
-// ─────────────────────────────
-
 vi.mock('@/store/chat/preset-import', () => ({ openCardFile: vi.fn() }));
 vi.mock('@/store/chat/chat-transfer', () => ({ importChatFile: vi.fn() }));
 
@@ -17,7 +12,6 @@ const card = vi.mocked(openCardFile);
 const chats = vi.mocked(importChatFile);
 const RESULT = { added: [], skipped: 0, dropped: 0, full: false, unreadable: true };
 
-/** 選ばせる欄を作らせ、ファイルを選んだことにする */
 function choose(file: File): HTMLInputElement {
   const click = vi.spyOn(HTMLInputElement.prototype, 'click').mockImplementation(() => undefined);
   const create = vi.spyOn(document, 'createElement');

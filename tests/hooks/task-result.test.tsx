@@ -8,10 +8,6 @@ import { useTaskResult } from '@/hooks/run/use-task-result';
 
 import { queueTask } from '../helpers/queue';
 
-// ─────────────────────────────
-// キューの詳細の実行内容の取り方。控えが変わると読み直すので、取り直し続けないことを確かめる。
-// ─────────────────────────────
-
 const ID = 'p1';
 const fetched = vi.hoisted(() => ({ count: 0, respond: (): unknown => null }));
 
@@ -28,7 +24,6 @@ const TASK = queueTask(ID, []);
 function mount() {
   return renderHook(() => {
     const [cached, setCached] = useState<unknown>(null);
-    // ストアの手続きと同じく作り直さない
     const [onDetail] = useState(() => (_id: string, raw: unknown) => setCached(raw));
     const result = useTaskResult(TASK, 'http://127.0.0.1:8188', {
       cached,

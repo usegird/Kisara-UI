@@ -10,11 +10,6 @@ import { useConnectionStore } from '@/store/use-connection-store';
 import { useDefinitionsStore } from '@/store/use-definitions-store';
 import { useSettingsStore } from '@/store/use-settings-store';
 
-// ─────────────────────────────
-// 接続ステータス。接続の状況とノード定義の取得の状況を、点の色と短い文で出す。
-// ─────────────────────────────
-
-// 色の分岐は cva の variants 1 か所に寄せる
 const dot = cva('size-2 shrink-0 rounded-full', {
   variants: {
     tone: {
@@ -30,7 +25,6 @@ const dot = cva('size-2 shrink-0 rounded-full', {
 
 interface ConnectionSummary {
   readonly view: ConnectionStatusView;
-  /** 指したときに出す詳しい中身（接続先・補足・ノード定義） */
   readonly title: string;
   readonly definitions: string;
 }
@@ -72,13 +66,10 @@ function useConnectionSummary(): ConnectionSummary {
   return { view, title, definitions };
 }
 
-/** 接続ステータスの受け取り物 */
 export interface ConnectionStatusProps {
-  /** 狭い列に置くとき。補足とノード定義は説明（ホバー）へ寄せる */
   readonly compact?: boolean | undefined;
 }
 
-/** 接続の状況の点と文。指すと接続先と詳しい状況を出す */
 export function ConnectionStatus({ compact = false }: ConnectionStatusProps): React.ReactElement {
   const { view, title, definitions } = useConnectionSummary();
 

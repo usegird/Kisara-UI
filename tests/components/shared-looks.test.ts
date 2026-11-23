@@ -13,11 +13,6 @@ import {
 } from '@/components/ui/toast-manager';
 import { entryKeyOf } from '@/lib/text-entry';
 
-// ─────────────────────────────
-// 画面の部品の側で 1 か所にまとめた見た目と判定。部品に書いてあったときと同じクラスの並び・同じ判定を返す
-// （クラスの並びが変わると DOM が変わる）
-// ─────────────────────────────
-
 const BUTTON = 'hover:bg-muted inline-flex items-center gap-1 rounded-md border px-2 py-1 text-xs';
 
 afterEach(() => {

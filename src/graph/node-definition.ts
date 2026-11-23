@@ -1,4 +1,5 @@
 import type {
+  InputBranch,
   InputDefinition,
   NodeDefinition,
   NodeDefinitionMap,
@@ -8,23 +9,14 @@ import { t } from '@/i18n';
 import { reportFault } from '@/lib/fault';
 import { isRecord, isUnknownArray } from '@/lib/guards';
 
-// ─────────────────────────────
-// /object_info のレスポンス（未検証の外部入力）を NodeDefinition へ射影する。
-// 受け取りは unknown 固定。想定外の形は握り潰さず「そのクラスを落とす」で処理する。
-// ─────────────────────────────
-
-/**
- * widget として描画される型。それ以外は入力ソケット扱い
- */
 const WIDGET_TYPES = new Set(['INT', 'FLOAT', 'STRING', 'BOOLEAN', 'COMBO']);
 
-/** 説明は検索の候補に 1 行出すだけなので、先頭だけ残す（長いもので 8 千字ある） */
 const DESCRIPTION_LIMIT = 500;
 
-/**
- * 入力仕様は `[type, config?]`。type は文字列のほか、レガシー形式では
- * 選択肢の配列そのものが入る（`[["euler","heun"], {...}]`）。
- */
+const DYNAMIC_COMBO_TYPE = 'COMFY_DYNAMICCOMBO_V3';
+
+const BRANCH_SEPARATOR = '.';
+
 function parseInputSpec(
   name: string,
   raw: unknown,
@@ -35,12 +27,12 @@ function parseInputSpec(
 
   const rawType: unknown = raw[0];
   const config = isRecord(raw[1]) ? raw[1] : {};
+  if (rawType === DYNAMIC_COMBO_TYPE) return parseDynamicCombo(name, config, required, dropOptions);
 
   let type: string;
   let options: readonly unknown[] | null = null;
 
   if (isUnknownArray(rawType)) {
-    // レガシー COMBO: 選択肢の配列が直接入っている
     type = 'COMBO';
     options = rawType;
   } else if (typeof rawType === 'string') {
@@ -57,14 +49,54 @@ function parseInputSpec(
   return { name, type, required, isWidget, options: dropOptions ? null : options, config };
 }
 
-/**
- * input_order があればそれを正とする（キー順ではない）
- */
+function parseDynamicCombo(
+  name: string,
+  config: Record<string, unknown>,
+  required: boolean,
+  dropOptions: boolean,
+): InputDefinition {
+  const rawOptions = isUnknownArray(config.options) ? config.options : [];
+  const branches = rawOptions.flatMap((option): InputBranch[] => {
+    if (!isRecord(option) || typeof option.key !== 'string') return [];
+    const inputs = isRecord(option.inputs) ? option.inputs : {};
+    return [{ key: option.key, inputs: parseGroups(inputs, null, dropOptions, name) }];
+  });
+  const rest = Object.fromEntries(
+    Object.entries(config).filter(([key]) => key !== 'options' && key !== 'default'),
+  );
+  return {
+    name,
+    type: 'COMBO',
+    required,
+    isWidget: true,
+    options: branches.map((branch) => branch.key),
+    config: rest,
+    branches,
+  };
+}
+
+function parseGroups(
+  input: Record<string, unknown>,
+  inputOrder: Record<string, unknown> | null,
+  dropOptions: boolean,
+  prefix: string | null = null,
+): InputDefinition[] {
+  const inputs: InputDefinition[] = [];
+  for (const group of ['required', 'optional'] as const) {
+    const specs = isRecord(input[group]) ? input[group] : {};
+    for (const name of inputNames(inputOrder?.[group], specs)) {
+      const fullName = prefix === null ? name : `${prefix}${BRANCH_SEPARATOR}${name}`;
+      const parsed = parseInputSpec(fullName, specs[name], group === 'required', dropOptions);
+      if (parsed) inputs.push(parsed);
+    }
+  }
+  return inputs;
+}
+
 function inputNames(order: unknown, specs: Record<string, unknown>): string[] {
   if (isUnknownArray(order)) {
     const ordered = order.filter((n): n is string => typeof n === 'string');
     const known = new Set(ordered);
-    // input_order に載っていない入力があっても落とさない
     return [...ordered, ...Object.keys(specs).filter((n) => !known.has(n))];
   }
   return Object.keys(specs);
@@ -81,16 +113,10 @@ function parseOutputs(entry: Record<string, unknown>): OutputDefinition[] {
   });
 }
 
-/** 射影の選び方 */
 interface BuildDefinitionOptions {
-  /**
-   * COMBO の選択肢を落とす。全体射影ではモデルファイル一覧が容量の 85% を占めるため
-   * 既定で落とし、必要になった時点で `/object_info/{class}` から取り直す。
-   */
   readonly dropOptions?: boolean;
 }
 
-/** 1 クラスの定義を射影する。読めない形なら null */
 export function buildNodeDefinition(
   className: string,
   raw: unknown,
@@ -101,17 +127,8 @@ export function buildNodeDefinition(
 
   const input = isRecord(raw.input) ? raw.input : {};
   const inputOrder = isRecord(raw.input_order) ? raw.input_order : {};
-  const inputs: InputDefinition[] = [];
+  const inputs = parseGroups(input, inputOrder, dropOptions);
 
-  for (const group of ['required', 'optional'] as const) {
-    const specs = isRecord(input[group]) ? input[group] : {};
-    for (const name of inputNames(inputOrder[group], specs)) {
-      const parsed = parseInputSpec(name, specs[name], group === 'required', dropOptions);
-      if (parsed) inputs.push(parsed);
-    }
-  }
-
-  // display_name は null のことがある
   const displayName =
     typeof raw.display_name === 'string' && raw.display_name.length > 0
       ? raw.display_name
@@ -130,10 +147,6 @@ export function buildNodeDefinition(
   };
 }
 
-/**
- * `/object_info` 全体（クラス名 → 定義）の射影。
- * 選択肢は既定で落とす（20 MB を超える全体が 2 MB ほどになる）。
- */
 export function buildNodeDefinitions(
   raw: unknown,
   options: BuildDefinitionOptions = { dropOptions: true },
@@ -146,15 +159,8 @@ export function buildNodeDefinitions(
   return map;
 }
 
-/**
- * 小分けにする 1 回のクラス数（200 クラスで約 5ms）
- */
 const SLICE_SIZE = 200;
 
-/**
- * `buildNodeDefinitions` と同じ射影を、`SLICE_SIZE` クラスずつに分けて行う。分けた合間に
- * `pause` を待つ（呼び出し側がブラウザへ処理を返す。全体を 1 回で射影すると画面が止まる）
- */
 export async function buildNodeDefinitionsInSlices(
   raw: unknown,
   pause: () => Promise<void>,
@@ -172,9 +178,6 @@ export async function buildNodeDefinitionsInSlices(
   return map;
 }
 
-/**
- * 1 クラスずつ閉じ込める。読めない定義だけを外し、ほかは使う
- */
 function addDefinition(
   map: Map<string, NodeDefinition>,
   className: string,
@@ -189,7 +192,14 @@ function addDefinition(
   }
 }
 
-/** COMBO 入力を持つのに選択肢が未取得なら、遅延取得が必要 */
 export function needsOptions(definition: NodeDefinition): boolean {
-  return definition.inputs.some((input) => input.type === 'COMBO' && input.options === null);
+  return someMissingOptions(definition.inputs);
+}
+
+function someMissingOptions(inputs: readonly InputDefinition[]): boolean {
+  return inputs.some(
+    (input) =>
+      (input.type === 'COMBO' && input.options === null) ||
+      (input.branches ?? []).some((branch) => someMissingOptions(branch.inputs)),
+  );
 }

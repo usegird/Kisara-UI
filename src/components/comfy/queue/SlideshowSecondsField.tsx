@@ -9,25 +9,14 @@ import {
 } from '@/store/settings-fields/slideshow';
 import { useSettingsStore } from '@/store/use-settings-store';
 
-// ─────────────────────────────
-// スライドショーの送りの間隔（秒）の欄。ビューワーの帯と設定のタブで同じものを使う。
-// ─────────────────────────────
-
-/** 送りの間隔の欄の受け取り物 */
 export interface SlideshowSecondsFieldProps {
-  /** 欄の id（設定のタブの見出しが指す） */
   readonly id?: string | undefined;
-  /** 欄そのものの見た目 */
   readonly className: string;
 }
 
 const STEP_BUTTON = `text-muted-foreground hover:text-foreground flex h-3 items-center px-0.5
   data-disabled:opacity-40`;
 
-/**
- * 送りの間隔の数の欄。打鍵の途中の扱い・上下キー・読み上げは基盤（Base UI の NumberField）に任せる。
- * 増減は欄の左に上下の三角で置く（ブラウザの数の欄の送りは右にしか出せないため、自前のボタンにする）
- */
 export function SlideshowSecondsField({
   id,
   className,
@@ -42,7 +31,6 @@ export function SlideshowSecondsField({
       min={SLIDESHOW_SECONDS_MIN}
       max={SLIDESHOW_SECONDS_MAX}
       step={1}
-      // 空にした途中（null）は書かない。離れると基盤が今の値に戻す
       onValueChange={(value) => {
         if (value !== null) setSeconds(normalizeSlideshowSeconds(value));
       }}

@@ -6,10 +6,6 @@ import type { Workflow } from '@/graph/types';
 
 import { bareNode } from '../helpers/workflow';
 
-// ─────────────────────────────
-// 編集の対象が属する階層の解き方と、階層の中での編集
-// ─────────────────────────────
-
 const INSTANCE = 5;
 const INNER_ID = 3;
 

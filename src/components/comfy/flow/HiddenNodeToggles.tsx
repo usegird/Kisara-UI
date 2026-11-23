@@ -5,22 +5,15 @@ import { t } from '@/i18n';
 import { useSettingsStore } from '@/store/use-settings-store';
 import { useTabsStore } from '@/store/use-tabs-store';
 
-// ─────────────────────────────
-// 実行に関わらないノード（操作系・繋がっていない）を出すかどうかの切り替え。
-// 文字は持たない（列の幅を食わないため）。
-// ─────────────────────────────
-
 const toggle = cva('hover:bg-muted rounded p-1 transition-opacity', {
   variants: {
     shown: {
       true: 'text-foreground opacity-90',
-      // 隠しているかは斜線で見せる。アイコンは薄くしすぎない（WCAG 1.4.11）
       false: 'text-muted-foreground',
     },
   },
 });
 
-/** 出す・隠すの切り替え */
 function ShowToggle({
   shown,
   label,
@@ -31,9 +24,7 @@ function ShowToggle({
 }: {
   readonly shown: boolean;
   readonly label: string;
-  /** 出しているときのホバー説明 */
   readonly shownTitle: string;
-  /** 隠しているときのホバー説明 */
   readonly hiddenTitle: string;
   readonly icon: typeof StickyNote;
   readonly onChange: (shown: boolean) => void;
@@ -49,7 +40,6 @@ function ShowToggle({
     >
       <span className="relative block">
         <Icon className="size-4" aria-hidden />
-        {/* 隠しているときの斜線（左下から右上へ） */}
         {shown ? null : (
           <span
             aria-hidden
@@ -62,13 +52,11 @@ function ShowToggle({
   );
 }
 
-/** 操作系と繋がっていないノードの、出す・隠すの切り替えを縦に並べる */
 export function HiddenNodeToggles(): React.ReactElement {
   const control = useSettingsStore((state) => state.showControlNodes);
   const setControl = useSettingsStore((state) => state.setShowControlNodes);
   const unlinked = useSettingsStore((state) => state.showUnlinkedNodes);
   const setUnlinked = useSettingsStore((state) => state.setShowUnlinkedNodes);
-  // 切り替えたときにだけ、隠す相手を今の線で決め直す（編集では増やさない）
   const refresh = useTabsStore((state) => state.refreshHiddenCandidates);
 
   return (

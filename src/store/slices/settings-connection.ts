@@ -6,11 +6,6 @@ import { forgetDefinitionsOf } from '@/store/persist/object-info-cache';
 import { setterOf } from '@/store/settings-fields/settings-table';
 import type { SettingsState } from '@/store/use-settings-store';
 
-// ─────────────────────────────
-// 設定のストアの、接続先の URL と履歴・LLM の接続の設定とモデル・生成の設定・近似判定のモデル・追跡の段の操作。
-// ─────────────────────────────
-
-/** この slice が持つ操作 */
 type SettingsConnectionActions = Pick<
   SettingsState,
   | 'setBaseUrl'
@@ -27,7 +22,6 @@ type SettingsConnectionActions = Pick<
   | 'setTraceLevel'
 >;
 
-/** 接続先の URL と履歴・LLM の接続の設定とモデル・生成の設定・近似判定のモデル・追跡の段の操作を作る */
 export const createSettingsConnectionSlice: StateCreator<
   SettingsState,
   [['zustand/persist', unknown]],
@@ -47,7 +41,6 @@ export const createSettingsConnectionSlice: StateCreator<
     set((state) => ({
       baseUrlHistory: state.baseUrlHistory.filter((item) => item !== baseUrl),
     }));
-    // その接続先のノード定義の控えも消す（今の接続先・残る履歴と同じ相手なら残す）
     const { baseUrl: current, baseUrlHistory } = get();
     void forgetDefinitionsOf(baseUrl, [current, ...baseUrlHistory]);
   },

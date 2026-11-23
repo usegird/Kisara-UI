@@ -5,11 +5,6 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { HistoryCombobox } from '@/components/ui/history-combobox';
 
-// ─────────────────────────────
-// 打ち込める一覧つきの欄。開いたときは中身にかかわらず全部を出し、
-// 打ち込んだときだけ絞る。
-// ─────────────────────────────
-
 afterEach(cleanup);
 
 function Field({

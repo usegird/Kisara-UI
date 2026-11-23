@@ -8,10 +8,6 @@ import {
   widenFromShown,
 } from '@/store/settings-fields/column-widths';
 
-// ─────────────────────────────
-// 3列の幅。ドラッグ量を足すだけだが、**下限・上限で止める**。
-// ─────────────────────────────
-
 describe('列幅の変更', () => {
   it('ドラッグ量を足す', () => {
     expect(resizeColumn('cards', 400, 40)).toBe(440);
@@ -21,7 +17,6 @@ describe('列幅の変更', () => {
   it('下限・上限で止める', () => {
     expect(resizeColumn('cards', 400, -9999)).toBe(COLUMN_LIMITS.cards.min);
     expect(resizeColumn('cards', 400, 9999)).toBe(COLUMN_LIMITS.cards.max);
-    // App Mode の列は 0 まで畳める
     expect(resizeColumn('app', 100, -9999)).toBe(0);
   });
 

@@ -7,10 +7,6 @@ import {
   sortImageItems,
 } from '@/graph/image-options';
 
-// ─────────────────────────────
-// 画像を読み込む選択肢の加工。
-// ─────────────────────────────
-
 describe('画像を読み込む選択肢か', () => {
   it('image_upload が有効なときだけ', () => {
     expect(isImageUpload({ image_upload: true })).toBe(true);

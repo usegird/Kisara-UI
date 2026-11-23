@@ -12,10 +12,6 @@ import { useSettingsStore } from '@/store/use-settings-store';
 
 import { chat, loreEntry } from '../helpers/llm';
 
-// ─────────────────────────────
-// プロンプトのタブの合計の下のカードの欄
-// ─────────────────────────────
-
 const fields = {
   ...EMPTY_CHARACTER,
   name: 'Aria',
@@ -32,7 +28,6 @@ beforeEach(() => {
   const lorebooks = [
     { id: 'b1', name: '', entries: [loreEntry({ keys: ['castle'], content: 'A castle.' })] },
   ];
-  // 会話はプリセットを選んだときに辞書の中身を写している
   const preset = usePresetsStore.getState().add('Aria', fields, null, lorebooks);
   useChatStore.setState({
     chats: {
@@ -63,7 +58,6 @@ describe('カードの欄', () => {
       { name: '新しい辞書', entries: [] },
     ]);
     expect(useDictionariesStore.getState().dictionaries).toEqual({});
-    // プリセットは作らない
     expect(useChatStore.getState().chats.c2?.preset).toBeNull();
     expect(screen.getByRole('dialog', { name: '新しい辞書' })).toBeTruthy();
   });
@@ -82,7 +76,6 @@ describe('カードの欄', () => {
       target: { value: 'Edited.' },
     });
     expect(useChatStore.getState().chats.c1?.character?.creatorNotes).toBe('Edited.');
-    // プリセットは保存するまで変えない
     expect(presetOf()?.fields.creatorNotes).toBe('Made for tests.');
   });
 
@@ -98,7 +91,6 @@ describe('カードの欄', () => {
     expect(screen.queryByRole('dialog')).toBeNull();
     expect(bookOf()?.name).toBe('Aria book');
     expect(bookOf()?.entries).toHaveLength(2);
-    // プリセットは保存するまで変えない
     expect(presetOf()?.lorebooks[0]?.entries).toHaveLength(1);
   });
 
@@ -109,7 +101,6 @@ describe('カードの欄', () => {
     fireEvent.click(screen.getByRole('button', { name: '削除する' }));
     expect(booksOf()).toEqual([]);
     expect(presetOf()?.lorebooks[0]?.entries).toHaveLength(1);
-    // 辞書が無ければ行は出さず、新規作成と jsonから開く だけを出す
     expect(screen.queryByRole('button', { name: 'Aria を編集' })).toBeNull();
     expect(screen.getByRole('button', { name: 'jsonを開く' })).toBeTruthy();
   });
@@ -120,11 +111,9 @@ describe('カードの欄', () => {
     expect(booksOf().map((book) => book.name)).toEqual(['', '新しい辞書']);
     expect(booksOf()[0]?.entries).toHaveLength(1);
     expect(screen.getByRole('dialog', { name: '新しい辞書' })).toBeTruthy();
-    // 2 冊とも行に出す
     fireEvent.click(screen.getByRole('button', { name: 'キャンセル' }));
     expect(screen.getByRole('button', { name: 'Aria を編集' })).toBeTruthy();
     expect(screen.getByRole('button', { name: '新しい辞書 を編集' })).toBeTruthy();
-    // プリセットは保存するまで変えない
     expect(presetOf()?.lorebooks).toHaveLength(1);
   });
 
@@ -148,7 +137,6 @@ describe('カードの欄', () => {
 
     fireEvent.click(next());
     expect(field().value).toBe('Hi.');
-    // 最後の 1 件に本文があるので、› で空の欄を開く（まだ足さない）
     fireEvent.click(next());
     expect(screen.getByText('3/3')).toBeTruthy();
     expect(field().value).toBe('');
@@ -158,7 +146,6 @@ describe('カードの欄', () => {
     fireEvent.change(field(), { target: { value: 'Hey.' } });
     expect(character()?.alternateGreetings).toEqual(['Hi.', 'Hey.']);
 
-    // 空にして離れた別の挨拶は除く
     fireEvent.change(field(), { target: { value: '' } });
     fireEvent.click(screen.getByRole('button', { name: '前の候補' }));
     expect(character()?.alternateGreetings).toEqual(['Hi.']);
@@ -182,6 +169,7 @@ describe('カードの欄', () => {
     fireEvent.click(screen.getByRole('button', { name: '{{place}} を消す' }));
     expect(variables()).toEqual([]);
   });
+
   it('戻すを入れても左右の文字はそのまま。左は {{}} を外した元の文字、右は送る文字', () => {
     render(<CardFieldsSection chatId="c1" />);
     fireEvent.click(screen.getByRole('button', { name: '変数を足す' }));
@@ -194,12 +182,10 @@ describe('カードの欄', () => {
     const row = () => useChatStore.getState().chats.c1?.character?.variables?.[0];
     const box = (label: string) => screen.getByRole('checkbox', { name: `${label} を戻す` });
     fireEvent.click(box('{{アオバネ}}'));
-    // 保存の形では送る文字が名前、元の文字が値
     expect(row()).toMatchObject({ name: '青い鳥', value: 'アオバネ', restore: true });
     expect(left().value).toBe('アオバネ');
     const right = screen.getByRole<HTMLInputElement>('textbox', { name: 'アオバネ の値' });
     expect(right.value).toBe('青い鳥');
-    // 右の送る文字は確定しても {{}} を付けない
     fireEvent.change(right, { target: { value: '{{ミドリ}}' } });
     fireEvent.blur(right);
     expect(row()?.name).toBe('ミドリ');
@@ -213,7 +199,6 @@ describe('カードの欄', () => {
     fireEvent.click(screen.getByRole('button', { name: '変数を足す' }));
     const name = () => screen.getByRole('textbox', { name: '変数の名前' });
     expect(name().getAttribute('placeholder')).toBe('{{name}}');
-    // 名前が空の行の読み上げの名前は、空白を詰めて「を戻す」「の値」になる
     fireEvent.click(screen.getByRole('checkbox', { name: 'を戻す' }));
     expect(name().getAttribute('placeholder')).toBe('りんご');
     const value = screen.getByRole('textbox', { name: 'の値' });

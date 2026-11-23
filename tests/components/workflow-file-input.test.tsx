@@ -4,10 +4,6 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { WorkflowFileInput } from '@/components/comfy/WorkflowFileInput';
 
-// ─────────────────────────────
-// 画面へ落としたファイルで開く。ファイルを運ぶドラッグだけを受ける。
-// ─────────────────────────────
-
 afterEach(cleanup);
 
 function setup(): ReturnType<typeof vi.fn> {
@@ -52,11 +48,9 @@ describe('画面へ落としたファイル', () => {
 
       dragOver(['Files']);
       expect(screen.getByRole('status').textContent).toBe('ファイルを開く');
-      // 運ぶのが途切れたら（画面の外へ出たら）消す
       act(() => void vi.advanceTimersByTime(200));
       expect(screen.queryByRole('status')).toBeNull();
 
-      // 落としたら消す
       dragOver(['Files']);
       act(() => void drop(['Files'], [new File(['{}'], 'flow.json')]));
       expect(screen.queryByRole('status')).toBeNull();

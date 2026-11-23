@@ -3,11 +3,6 @@ import { CARD_BODY } from '@/components/llm/side-panel/extension-card';
 import { t } from '@/i18n';
 import { useSettingsStore } from '@/store/use-settings-store';
 
-// ─────────────────────────────
-// 機能のタブのプレイブックのカード。
-// ─────────────────────────────
-
-/** プレイブックを使うかと、選ぶ所に出す標準のプレイブックを決めるカード */
 export function PlaybookSettingsCard(): React.ReactElement {
   const on = useSettingsStore((state) => state.playbooksOn);
   const hidden = useSettingsStore((state) => state.playbooksHidden);
@@ -15,7 +10,6 @@ export function PlaybookSettingsCard(): React.ReactElement {
 
   return (
     <section className="flex flex-col gap-2 rounded-md border p-2" aria-labelledby="playbooks">
-      {/* 切っても 1 件ずつのチェックは残す。既に選んだ会話はそのまま使える */}
       <label className="flex items-center gap-1.5 text-sm font-medium">
         <input
           type="checkbox"

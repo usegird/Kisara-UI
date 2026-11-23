@@ -3,20 +3,11 @@ import { useEffect, useRef, useState } from 'react';
 import { accumulateWheel, wheelPixels, zoomKey, type WheelHeld } from '@/lib/zoom-input';
 import { stepZoom, ZOOM_DEFAULT, zoomFactor } from '@/store/settings-fields/column-zoom';
 
-// ─────────────────────────────
-// ダイアログの中身の倍率。列と同じ操作で、ダイアログの上では列ではなく中身を広げ縮めする。
-// 開いている間だけ持つ（保存しない）。
-// ─────────────────────────────
-
-/** 倍率を受ける枠の受け口と、今の倍率 */
 interface DialogZoom {
-  /** 倍率を受ける枠（ダイアログの外枠）に付ける */
   readonly attachZoom: (element: HTMLElement | null) => void;
-  /** CSS の `zoom` に渡す倍率（1 が等倍） */
   readonly zoom: number;
 }
 
-/** ダイアログの外枠の上の Ctrl＋ホイールと倍率のキーで、中身の倍率を変える */
 export function useDialogZoom(): DialogZoom {
   const [element, attachZoom] = useState<HTMLElement | null>(null);
   const [percent, setPercent] = useState(ZOOM_DEFAULT);

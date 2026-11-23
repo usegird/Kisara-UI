@@ -4,14 +4,8 @@ import { TOAST_TIMEOUT, toastManager } from '@/components/ui/toast-manager';
 import { t } from '@/i18n';
 import { useWriteConflictsStore } from '@/store/use-write-conflicts-store';
 
-// ─────────────────────────────
-// ほかのタブで変わった・消えた 1 件を、書かずにトーストで知らせる。
-// ─────────────────────────────
-
-/** 食い違いの知らせを 1 件に 1 つ出す。描くものは無い（知らせの出し入れは外の仕組み） */
 export function WriteConflictToasts(): null {
   const conflicts = useWriteConflictsStore((state) => state.conflicts);
-  /** 知らせを出した 1 件（同じ 1 件に 2 つ出さない） */
   const shown = useRef(new Set<string>());
 
   useEffect(() => {

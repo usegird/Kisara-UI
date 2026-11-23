@@ -23,12 +23,6 @@ import { t } from '@/i18n';
 import type { usePresetsStore } from '@/store/use-presets-store';
 import type { toChatTools } from '@/store/use-workflow-tools-store';
 
-// ─────────────────────────────
-// 会話の右の列のプロンプトのタブの行の組み立て。項目の補足・開いて直すもの・見積もりの上限と内訳・
-// プレイブックの行を、会話と見積もりから導く（描かない）。
-// ─────────────────────────────
-
-/** 補足の無い項目の既定（出どころ・注記・ロア・欄） */
 export const NONE: Pick<ItemSummary, 'source' | 'note' | 'lore' | 'card'> = {
   source: '',
   note: '',
@@ -36,14 +30,10 @@ export const NONE: Pick<ItemSummary, 'source' | 'note' | 'lore' | 'card'> = {
   card: null,
 };
 
-/**
- * 追加辞書の当たりと、会話履歴の件数（そのまま送る・除外する）
- */
 export interface HistoryInput extends AdditionalInfoInput {
   readonly counts: { readonly kept: number; readonly dropped: number };
 }
 
-/** 名前の右に出す補足（本文の頭・出どころ）と、開いたときに直すもの */
 export function summaryOf(
   chat: Chat,
   item: PromptItem,
@@ -91,12 +81,10 @@ export function summaryOf(
   }
 }
 
-/** 追加辞書の印の項目か（動的追加辞書を切っているときは出さない） */
 export function isAdditionalInfo(item: PromptItem): boolean {
   return item.marker === 'additionalInfo';
 }
 
-/** 会話の写しの欄を、辞書を添えて見る形にする。キャラクターカードの欄が無ければ null */
 export function characterViewOf(
   fields: ReturnType<typeof characterOf>,
   books: ReturnType<typeof chatLorebooks>,
@@ -104,7 +92,6 @@ export function characterViewOf(
   return fields === null ? null : characterView(fields, lorebookEntries(books));
 }
 
-/** 中身のある項目か。目印の項目は、カードが無ければ固定の項目と差し込みの位置だけを数える */
 export function isFilledItem(
   item: PromptItem,
   card: ReturnType<typeof characterView> | null,
@@ -115,7 +102,6 @@ export function isFilledItem(
   return markerHasContent(card, item.marker, persona);
 }
 
-/** 会話が使うプリセット。選んでいない・消えていれば null */
 export function presetOf(
   chat: Chat,
   presets: ReturnType<typeof usePresetsStore.getState>['presets'],
@@ -123,7 +109,6 @@ export function presetOf(
   return chat.preset === null ? null : (presets[chat.preset.id] ?? null);
 }
 
-/** 当てる冊（会話で切った冊・空の冊は出さない）。名前が空ならプリセットの名前で出す */
 export function ownLoreOf(
   chat: Chat,
   books: ReturnType<typeof chatLorebooks>,
@@ -135,20 +120,15 @@ export function ownLoreOf(
   );
 }
 
-/** 送るワークフローの定義（`tools`）の見積もり。定義が無ければ 0 */
 export function toolTokensOf(tools: ReturnType<typeof toChatTools>, ratio: number): number {
   if (tools.length === 0) return 0;
   return estimateMessage(JSON.stringify(tools.map((item) => item.definition)), ratio);
 }
 
-/** 前回の送信が上限を超えたか。どちらかが分からなければ超えていないとみなす */
 export function isOverLimit(lastActual: number | null, limit: number | null): boolean {
   return limit !== null && lastActual !== null && lastActual > limit;
 }
 
-/**
- * 上限の内訳の文。文脈の長さが分からなければ空
- */
 export function limitDetailOf(context: number | null, maxTokens: number | undefined): string {
   if (context === null) return '';
   if (maxTokens === undefined) {
@@ -158,10 +138,6 @@ export function limitDetailOf(context: number | null, maxTokens: number | undefi
   return t('llm.prompt.limitDetail', { context, maxTokens });
 }
 
-/**
- * プロンプトのタブのプレイブックの行。補足はプレイブックの名前と今のフェーズ
- * （今の段はプレイブックの辞書の項目として追加辞書の行に出る）
- */
 export function playbookRow(
   state: ChatPlaybook,
   sources: PromptSources,
@@ -181,10 +157,6 @@ function headOf(text: string): string {
   return text.trim().split('\n')[0] ?? '';
 }
 
-/**
- * 項目が会話の写しのどの欄を直すか。印はいつも、メインプロンプトと履歴後の指示は
- * 欄に値があるとき（置き換えているとき）だけ。写しもプリセットも無ければ null
- */
 function cardEditOf(chat: Chat, item: PromptItem, view: CardView | null): ItemSummary['card'] {
   const field = cardFieldOf(item);
   if (view === null || field === null) return null;

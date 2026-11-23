@@ -16,12 +16,6 @@ import { t } from '@/i18n';
 import { entryKeyOf } from '@/lib/text-entry';
 import { useChatStore } from '@/store/use-chat-store';
 
-// ─────────────────────────────
-// 会話の 1 件のメッセージの描く部分。本文・思考・終わりの印・要約を促す知らせ・編集の欄。
-// 購読と表示の状態は ChatMessageItem が持つ。例外は最後の 1 件にだけ出す知らせの購読。
-// ─────────────────────────────
-// ─────────────────────────────
-
 const bubble = cva('max-w-full min-w-0 text-sm leading-relaxed break-words', {
   variants: {
     role: {
@@ -31,17 +25,13 @@ const bubble = cva('max-w-full min-w-0 text-sm leading-relaxed break-words', {
   },
 });
 
-/** 受け取り中の測った値 */
 type LiveStats = ReturnType<typeof useResponseStats>;
 
-/** 思考の本文の props */
 export interface ReasoningProps {
   readonly candidate: Candidate | undefined;
-  /** 画面に出す文の置き換え */
   readonly show: (text: string) => string;
 }
 
-/** 思考の本文。開閉の行にし、文字のまま出す。思考が無ければ出さない */
 export function Reasoning({ candidate, show }: ReasoningProps): React.ReactElement | null {
   if (candidate === undefined || candidate.reasoning.length === 0) return null;
   return (
@@ -52,25 +42,18 @@ export function Reasoning({ candidate, show }: ReasoningProps): React.ReactEleme
   );
 }
 
-/** 本文の props */
 export interface MessageBodyProps {
   readonly message: ChatMessage;
   readonly candidate: Candidate | undefined;
-  /** 画面に出す本文（置き換えを掛けたもの） */
   readonly content: string;
   readonly streaming: boolean;
   readonly stats: LiveStats;
-  /** 直している本文。直していなければ null */
   readonly editing: string | null;
   readonly onEditChange: (value: string) => void;
   readonly onEditSave: () => void;
   readonly onEditCancel: () => void;
 }
 
-/**
- * 本文。プレイブックの指示は開閉の行、ほかは吹き出し（`user`）か枠の無い本文（`assistant`）で、
- * 直している間は編集の欄。直していなければ本文の下に出典を並べる
- */
 export function MessageBody({
   message,
   candidate,
@@ -111,7 +94,6 @@ export function MessageBody({
         ) : (
           <MarkdownText text={content} />
         )}
-        {/* 受け取り中は回る印と、送ってからの経過時間 */}
         {streaming ? (
           <div className="mt-1">
             <ReceivingIndicator
@@ -127,9 +109,6 @@ export function MessageBody({
   );
 }
 
-/**
- * 応答の本文。注記（本文の外の話）は書かれた位置に、思考と同じ畳んだ枠で出す
- */
 function CommentedText({
   text,
   streaming,
@@ -142,7 +121,6 @@ function CommentedText({
   return (
     <div className="flex flex-col gap-2">
       {segments.map((segment) =>
-        // 本文の頭からの位置を鍵にする（並べ替えず、受け取り中は後ろだけが伸びる）
         segment.kind === 'text' ? (
           <MarkdownText key={segment.start} text={segment.text} />
         ) : (
@@ -156,7 +134,6 @@ function CommentedText({
   );
 }
 
-/** 送った画像。無ければ出さない */
 function SentImages({
   images,
 }: {
@@ -178,13 +155,11 @@ function SentImages({
   );
 }
 
-/** 上限に収めるため古い履歴を外して送った候補には、要約を促す（受け取り中は出さない） */
 export function TrimmedNotice({
   chatId,
   trimmed,
 }: {
   readonly chatId: string;
-  /** 外した件数。外していなければ無し */
   readonly trimmed: number | undefined;
 }): React.ReactElement | null {
   if (trimmed === undefined) return null;
@@ -196,10 +171,6 @@ export function TrimmedNotice({
   );
 }
 
-/**
- * 最後の応答の使った数が送れる上限に近ければ、外す前に要約を促す。縮める発言が無ければ出さない。
- * 上限の購読はこの部品だけに置く（最後の 1 件のほかのメッセージに購読を足さない）
- */
 export function NearLimitNotice({
   chatId,
   candidate,
@@ -221,10 +192,6 @@ export function NearLimitNotice({
   );
 }
 
-/**
- * プレイブックの指示の発言。吹き出しにせず、思考と同じ開閉の行にする。本文は画面に出す置き換えを
- * 掛けたもの（持つ本文は置き換える前のまま）
- */
 function DirectionMark({ content }: { readonly content: string }): React.ReactElement {
   return (
     <details className="text-muted-foreground max-w-full px-1 text-xs">
@@ -236,7 +203,6 @@ function DirectionMark({ content }: { readonly content: string }): React.ReactEl
   );
 }
 
-/** 中断・失敗したの印。失敗には原因と、最後のメッセージならもう一度のボタン */
 export function MessageEnd({
   message,
   canRetry,

@@ -5,17 +5,8 @@ import { estimateMessages } from '@/chat/tokens';
 import type { Chat } from '@/chat/types';
 import type { ChatRequestMessage } from '@/port/llm-port';
 
-// ─────────────────────────────
-// 会話履歴の要約で、前の要約と縮める発言のうち何を LLM に渡すかを決める。送るのは会話のストア。
-// ─────────────────────────────
-
-/** 要約せずに残す新しい発言の件数 */
 export const SUMMARY_KEEP = 4;
 
-/**
- * 要約の指示（送る文。画面には出さない）。用途（雑談・作業・相談・創作など）を決めない汎用の文。
- * 会話の続きを書かせないよう、書き起こしはタグで囲んで渡す
- */
 const SUMMARY_INSTRUCTION = [
   'You summarize a conversation so that it can continue with less context.',
   'The conversation can be of any kind: casual chat, work, consultation, creative writing,',
@@ -37,31 +28,23 @@ const SUMMARY_INSTRUCTION = [
   'Output only the summary.',
 ].join('\n');
 
-/** 縮める発言の範囲（会話の発言の位置。`from` から `to` の手前まで）。縮めるものが無ければ null */
 export interface SummaryRange {
   readonly from: number;
   readonly to: number;
 }
 
-/**
- * 次に縮められる範囲。要約した後ろから、新しい `SUMMARY_KEEP` 件の手前まで。
- * 受け取り中の会話では呼ばない（最後の発言も履歴として数える）
- */
 export function summaryRange(chat: Chat): SummaryRange | null {
   const from = summarizedMessages(chat);
   const to = chat.messages.length - SUMMARY_KEEP;
   return to > from ? { from, to } : null;
 }
 
-/** 受け取り中でない会話で、要約が縮めた発言の件数（最後の発言まで数える） */
 function summarizedMessages(chat: Chat): number {
-  // 受け取る `assistant` が無い会話なので、仮の末尾を足して数える
   return summarizedCount({ ...chat, messages: [...chat.messages, PLACEHOLDER] });
 }
 
 const PLACEHOLDER = { id: ':placeholder', role: 'assistant', candidates: [], selected: 0 } as const;
 
-/** 縮める発言を「名前: 本文」で並べた文 */
 function transcript(chat: Chat, sources: PromptSources, range: SummaryRange): string {
   const charName = sources.charName ?? 'Assistant';
   return chat.messages
@@ -69,14 +52,12 @@ function transcript(chat: Chat, sources: PromptSources, range: SummaryRange): st
     .flatMap((message) => {
       const content = selectedCandidate(message)?.content.trim() ?? '';
       if (content.length === 0) return [];
-      // 名前にも戻すの行を掛ける（本文の中の名前と同じ文字で送る）
       const name = applyMacros(message.role === 'user' ? sources.userName : charName, sources);
       return [`${name}: ${applyMacros(content, sources)}`];
     })
     .join('\n\n');
 }
 
-/** 要約を作らせる `messages`。指示の `system` と、前の要約と縮める発言の `user` */
 export function summaryMessages(
   chat: Chat,
   sources: PromptSources,
@@ -85,10 +66,6 @@ export function summaryMessages(
   return summaryRequestMessages(chat.summary?.content ?? '', transcript(chat, sources, range));
 }
 
-/**
- * 前の要約と、縮める発言を「名前: 本文」で並べた文から、要約を作らせる `messages` を組む
- * （会話と構成の相談で同じ指示を使う）
- */
 export function summaryRequestMessages(
   previousSummary: string,
   body: string,
@@ -105,16 +82,11 @@ export function summaryRequestMessages(
   ];
 }
 
-/** 要約の要求を収める上限と、見積もりの補正の比 */
 export interface SummaryFit {
   readonly limit: number | null;
   readonly ratio: number;
 }
 
-/**
- * 上限に収まる範囲。古い方から、見積もりが上限に収まるだけ縮める（少なくとも 1 件）。
- * 上限が分からなければ範囲のまま
- */
 export function fitSummaryRange(
   chat: Chat,
   sources: PromptSources,
@@ -127,9 +99,6 @@ export function fitSummaryRange(
   return fitRangeEnd(range, fits);
 }
 
-/**
- * 範囲の終わりを、`fits` が通る所まで縮める（少なくとも 1 件）。`fits` は終わりが前ほど通りやすい
- */
 export function fitRangeEnd(range: SummaryRange, fits: (to: number) => boolean): SummaryRange {
   if (fits(range.to)) return range;
   let low = range.from + 1;

@@ -13,10 +13,6 @@ import {
 
 import { chatPlaybook } from '../helpers/llm';
 
-// ─────────────────────────────
-// プレイブックを作るときの直しかけ
-// ─────────────────────────────
-
 const draft = chatPlaybook().playbook;
 
 describe('プレイブックの直しかけ', () => {

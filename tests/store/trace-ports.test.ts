@@ -5,10 +5,6 @@ import type { ComfyPort } from '@/port/comfy-port';
 import type { LlmPort } from '@/port/llm-port';
 import { traceComfyPort, traceLlmPort } from '@/store/ports/trace-ports';
 
-// ─────────────────────────────
-// 通信の窓口の包み。経路の名前と成否だけを残し、URL を残さない
-// ─────────────────────────────
-
 afterEach(() => {
   setTraceLevels(DEFAULT_TRACE_LEVELS);
   clearTrace();

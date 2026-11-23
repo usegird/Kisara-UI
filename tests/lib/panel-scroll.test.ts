@@ -9,7 +9,6 @@ import {
   type PanelScrollItem,
 } from '@/lib/panel-scroll';
 
-// グループ1件 = 高さ 43 + 間隔 6 = 49px 刻み
 const STEP = 49;
 const HEIGHT = 43;
 
@@ -21,13 +20,12 @@ function items(cardBottoms: readonly number[]): PanelScrollItem[] {
   }));
 }
 
-/** 出力欄が出たカードを count 件、残りは画面の下 */
 function appeared(count: number, total: number): PanelScrollItem[] {
   return items(Array.from({ length: total }, (_, index) => (index < count ? -1 : 900)));
 }
 
 describe('変数パネルのスクロール位置', () => {
-  const view = 850; // 17グループ（下端 832px）が収まる高さ
+  const view = 850;
 
   it('カードがまだ1つも出ていなければ先頭', () => {
     expect(panelScrollTop({ viewHeight: view, appearHeight: view, items: appeared(0, 20) })).toBe(
@@ -42,7 +40,6 @@ describe('変数パネルのスクロール位置', () => {
   });
 
   it('18件目の出力欄が現れたら、その変数が入るまで送る', () => {
-    // 18件目の下端 = 17*49 + 43 = 876 → 876 - 850 = 26
     expect(panelScrollTop({ viewHeight: view, appearHeight: view, items: appeared(18, 20) })).toBe(
       26,
     );
@@ -65,7 +62,6 @@ describe('変数パネルのスクロール位置', () => {
   });
 
   it('出力欄が出たとみなす下限にはフロー全体の表示領域を使う', () => {
-    // パネル（850）には収まらないが、フロー全体（1200）には出ているカード
     const list = items([...Array.from({ length: 18 }, () => -1), 1000, 1500]);
 
     expect(panelScrollTop({ viewHeight: view, appearHeight: 1200, items: list })).toBe(75);
@@ -76,22 +72,18 @@ describe('手動スクロールとの折り合い', () => {
   it('手でずらしたら、全体スクロールが追い付くまで戻さない', () => {
     let state = INITIAL_PANEL_SYNC;
 
-    // 連動で 100 まで送られている
     let result = syncPanelScroll(state, { current: 0, target: 100 });
     expect(result.scroll).toBe(100);
     state = result.state;
 
-    // 手で 20 まで戻した → 触らない
     result = syncPanelScroll(state, { current: 20, target: 150 });
     expect(result.scroll).toBeNull();
     state = result.state;
 
-    // 全体をさらに送っても、まだ戻さない
     result = syncPanelScroll(state, { current: 20, target: 300 });
     expect(result.scroll).toBeNull();
     state = result.state;
 
-    // 全体が戻って連動位置が手動位置に追い付いたら再開する
     result = syncPanelScroll(state, { current: 20, target: 20 });
     expect(result.scroll).toBe(20);
     expect(result.state.manual).toBeNull();
@@ -100,7 +92,6 @@ describe('手動スクロールとの折り合い', () => {
   it('手で先に進めた場合は、全体が追い越したところで再開する', () => {
     let state = syncPanelScroll(INITIAL_PANEL_SYNC, { current: 0, target: 100 }).state;
 
-    // 手で 400 まで進めた
     let result = syncPanelScroll(state, { current: 400, target: 120 });
     expect(result.scroll).toBeNull();
     state = result.state;
@@ -124,13 +115,11 @@ describe('手動スクロールとの折り合い', () => {
 
 describe('線を押して揃えている間', () => {
   it('送りの途中で連動の位置が揃えた位置を越えても、引き戻さない', () => {
-    // 揃えた位置 300。送りの途中で連動の位置が 320 まで越えた（止めている間は覚え直すだけ）
     const state = [280, 300, 320].reduce(
       (_, target) => holdPanelSync(300, target),
       holdPanelSync(300, 280),
     );
 
-    // 送り終わった後、連動の位置がそのままなら動かさない
     expect(syncPanelScroll(state, { current: 300, target: 320 }).scroll).toBeNull();
   });
 
@@ -154,7 +143,6 @@ describe('隠したカードの位置', () => {
   });
 
   it('末尾の隠したカードがあっても、上へ送れば連動の位置が戻る', () => {
-    // 20 件目だけが隠したカード。出ているのは先頭 18 件ぶんまで
     const bottoms = fillCardBottoms([
       ...Array.from({ length: 19 }, (_, index) => (index < 18 ? -1 : 900)),
       null,

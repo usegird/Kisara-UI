@@ -11,10 +11,6 @@ import { indexTags } from '@/graph/tag-dictionary';
 
 import { tagEntry } from '../helpers/tags';
 
-// ─────────────────────────────
-// タグ補完の当て方。打ちかけの語の切り出し・並び・差し込む文字。
-// ─────────────────────────────
-
 function tags(...rows: [string, number, string[]?][]): ReturnType<typeof indexTags> {
   return indexTags(
     rows.map(([tag, priority, aliases]) => tagEntry(tag, priority, aliases)),
@@ -43,9 +39,25 @@ describe('tagTokenAt', () => {
     expect(tagTokenAt('a, ', 3)).toBeNull();
   });
 
-  it('頭の @ は語に含めず、置き換える範囲からも外す（@ は残る）', () => {
+  it('@ ~ { } [ ] も空白と同じに区切り、記号は置き換える範囲から外す（記号は残る）', () => {
     expect(tagTokenAt('1girl, @wlo', 11)).toEqual({ start: 8, end: 11, word: 'wlo' });
     expect(tagTokenAt('a, @', 4)).toBeNull();
+    expect(tagTokenAt('cat~smi', 7)?.word).toBe('smi');
+    expect(tagTokenAt('{red|blu', 8)?.word).toBe('blu');
+  });
+
+  it(': は括弧の中でだけ区切る。外では語の一部（顔文字のタグ）', () => {
+    expect(tagTokenAt('[a:smi', 6)).toEqual({ start: 3, end: 6, word: 'smi' });
+    expect(tagTokenAt('(cat:1.2), {x:blu', 17)?.word).toBe('blu');
+    expect(tagTokenAt('artist:wlo', 10)?.word).toBe('artist:wlo');
+    expect(tagTokenAt('(a:1.1), :3', 11)?.word).toBe(':3');
+    expect(tagTokenAt('\\(a:smi', 7)?.word).toBe('\\(a:smi');
+  });
+
+  it('括弧の中の Lora の書式は : で切っても当てない。閉じた後ろと別の区切りでは当てる', () => {
+    expect(tagTokenAt('(<lora:nam', 10)).toBeNull();
+    expect(tagTokenAt('(<lora:x:0.8> smi', 17)?.word).toBe('smi');
+    expect(tagTokenAt('(<3, smi', 8)?.word).toBe('smi');
   });
 });
 
@@ -57,11 +69,14 @@ describe('canCompleteWord', () => {
     expect(canCompleteWord('a', true)).toBe(true);
   });
 
-  it('Lora・ワイルドカードの書式と重みの入力では出さない。頭の : は顔文字なので出す', () => {
+  it('Lora・ワイルドカードの書式と重みでは出さない。頭の : は顔文字なので出す', () => {
     expect(canCompleteWord('<lora:x', false)).toBe(false);
-    expect(canCompleteWord('__wild', false)).toBe(false);
     expect(canCompleteWord('cat:1.2', false)).toBe(false);
     expect(canCompleteWord(':3', false)).toBe(true);
+    expect(canCompleteWord('__wild', false)).toBe(false);
+    expect(canCompleteWord('1.2', false)).toBe(false);
+    expect(canCompleteWord('1.2', true)).toBe(false);
+    expect(canCompleteWord('1girl', false)).toBe(true);
   });
 });
 

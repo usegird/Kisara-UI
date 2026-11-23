@@ -31,20 +31,10 @@ import { sortableStyle } from '@/components/ui/sortable-style';
 import { t, type MessageKey } from '@/i18n';
 import { entryKeyOf } from '@/lib/text-entry';
 
-// ─────────────────────────────
-// 追加辞書のダイアログの 1 項目の行と、開いた段（追加条件・追加内容）。
-// ─────────────────────────────
-
-/** 見出しの行と項目の行で同じ列（dictionary-entry-grid） */
 const GRID = ENTRY_GRID;
 
-/**
- * 開いた段の見出し。取っ手の列から三角の列までの幅に右寄せで置き、欄との間を列の間 1 つ分にする。
- * 欄はトリガーワードの列から
- */
 const OPEN_LABEL = `text-muted-foreground ${ENTRY_LEAD} self-start justify-self-end pt-1`;
 
-/** 追加条件の欄はトリガーワードの列から位置の列まで、論理の選択は発言者の列から右端まで */
 const CONDITION_FIELD = 'col-[4/8]';
 const CONDITION_LOGIC = 'col-[8/-1]';
 
@@ -60,7 +50,6 @@ const LOGIC_LABEL: Readonly<Record<LoreLogic, MessageKey>> = {
   rag: 'llm.dictionary.logic.rag',
 };
 
-/** 追加条件の空の欄に出す説明。選んだ論理に合わせて替える */
 const LOGIC_HINT: Readonly<Record<LoreLogic, MessageKey>> = {
   or: 'llm.dictionary.conditionHint.or',
   and: 'llm.dictionary.conditionHint.and',
@@ -69,12 +58,10 @@ const LOGIC_HINT: Readonly<Record<LoreLogic, MessageKey>> = {
   rag: 'llm.dictionary.conditionHint.rag',
 };
 
-/** 送らない項目の欄は灰色の文字 */
 const lineField = cva(`${FIELD_XS} min-w-0`, {
   variants: { enabled: { true: '', false: 'text-muted-foreground' } },
 });
 
-/** 項目の行。運んでいる間は元の場所を薄く出す */
 const entryRow = cva(`${GRID} group/entry hover:bg-muted/50 rounded-md px-1 py-0.5`, {
   variants: { dragging: { true: 'opacity-30', false: '' } },
 });
@@ -83,7 +70,6 @@ const triangle = cva('size-2.5 fill-current transition-transform', {
   variants: { open: { true: 'rotate-90', false: '' } },
 });
 
-/** 項目の 1 行の props */
 export interface EntryRowProps {
   readonly id: string;
   readonly entry: LoreEntry;
@@ -94,7 +80,6 @@ export interface EntryRowProps {
   readonly onRemove: () => void;
 }
 
-/** 1 項目の行。欄の打ちかけは行の中だけで持ち、離れるか Enter で決める */
 export function EntryRow({
   id,
   entry,
@@ -189,7 +174,6 @@ export function EntryRow({
   );
 }
 
-/** 開いた段（追加条件と論理、追加内容）。行の格子に乗せ、欄の左端をトリガーワードに揃える */
 function OpenFields({
   entry,
   onChange,
@@ -201,7 +185,6 @@ function OpenFields({
   const contentId = useId();
   const [condition, setCondition] = useState(entry.secondaryKeys.join(', '));
   const [content, setContent] = useState(entry.content);
-  // RAG の追加条件は区切らず 1 つの文として持つ
   const rag = entry.logic === 'rag';
   const commitCondition = (): void => {
     const sentence = condition.trim();
@@ -262,7 +245,6 @@ function OpenFields({
   );
 }
 
-/** 追加先・位置・発言者の 3 列。位置と発言者は履歴末尾のときだけ出す（列は空けて揃える） */
 function PlacementCells({
   entry,
   onChange,

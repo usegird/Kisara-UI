@@ -1,9 +1,3 @@
-// ─────────────────────────────
-// 保存した値を見るための文字にする（字下げした JSON）。Blob・バイト列と長い data URL は中身を出さず、
-// 種類と大きさだけの印に替える。長ければ先頭だけを返す。印は記号で、画面の文言ではない。
-// ─────────────────────────────
-
-/** data URL をこの長さより長ければ印に替える */
 const DATA_URL_LIMIT = 200;
 
 function replaced(value: unknown): unknown {
@@ -18,16 +12,12 @@ function replaced(value: unknown): unknown {
   return value;
 }
 
-/** 見るための文字と、先頭だけに切ったか */
 export interface RawText {
   readonly text: string;
-  /** 長いので先頭だけにしたか */
   readonly truncated: boolean;
 }
 
-/** 値を字下げした JSON の文字にする。`limit` 文字より長ければ先頭だけ */
 export function rawText(value: unknown, limit: number): RawText {
-  // 文字の値は JSON の引用符を付けずにそのまま出す
   const full =
     typeof value === 'string'
       ? value

@@ -12,10 +12,6 @@ import type { GenerationParams } from '@/port/llm-port';
 
 import { chat, chatMessage, llm } from '../helpers/llm';
 
-// ─────────────────────────────
-// 送る中身の組み立て。
-// ─────────────────────────────
-
 describe('送る中身', () => {
   it('システムプロンプトを先頭に置き、受け取る assistant の手前までを選んでいる候補で送る', () => {
     const base = chat([
@@ -65,6 +61,7 @@ describe('送る中身', () => {
     expect('top_p' in request).toBe(false);
   });
 });
+
 describe('添えた画像', () => {
   const png = 'data:image/png;base64,iVBORw0KGgo=';
   const jpg = 'data:image/jpeg;base64,/9j/4AAQ';
@@ -116,6 +113,7 @@ describe('添えた画像', () => {
 
 describe('構成の相談の送る中身', () => {
   const messages = [{ role: 'user' as const, content: 'q' }];
+
   it('Web 検索を有効にしていれば Web のツールと手数の上限を付け、無ければ付けない', () => {
     const web = {
       mode: 'search' as const,

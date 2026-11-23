@@ -3,15 +3,6 @@ import { useExecutionStore } from '@/store/use-execution-store';
 import { useQueueStore } from '@/store/use-queue-store';
 import { useTabsStore } from '@/store/use-tabs-store';
 
-// ─────────────────────────────
-// そのタブから投げたタスクが実行中か（上の帯のタブの見出しに回るアイコンを出すかの判定）。
-// ─────────────────────────────
-
-/**
- * そのタブから投げたタスクが実行中か。投げたときのセッション（`extra_data.kisara.session`）で見分ける。
- * 手元の実行は、キューの写しに載るまでの間も、写しの待ちの中にあればそのセッションで見分ける。
- * 通知がタイムアウトしたら回さない（キューの写しは古く、動いているとは言えない）
- */
 export function useTabRunning(tabId: string): boolean {
   const session = useTabsStore(
     (state) => state.tabs.find((tab) => tab.id === tabId)?.runSession ?? null,

@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { act, cleanup, render } from '@testing-library/react';
+import { act, cleanup, fireEvent, render } from '@testing-library/react';
 import { useEffect } from 'react';
 import { afterEach, describe, expect, it } from 'vitest';
 
@@ -7,10 +7,6 @@ import { useTextFieldWhile } from '@/hooks/flow/use-text-field-focus';
 import type { TextField } from '@/lib/insert-at-caret';
 
 import { LEAK_ALLOWANCE, LEAK_ROUNDS, leakWatch } from '../helpers/leak';
-
-// ─────────────────────────────
-// スタイルの取り込みの差し込み先の見張り。値が変わるときだけ更新しても、返す欄が変わらないこと
-// ─────────────────────────────
 
 afterEach(() => {
   cleanup();
@@ -100,8 +96,61 @@ describe('useTextFieldWhile', () => {
   });
 });
 
+describe('画面の切り替えでの引き継ぎ', () => {
+  const second: { current: TextField | null } = { current: null };
+
+  function Second({ value }: { readonly value: TextField | null }): null {
+    useEffect(() => {
+      second.current = value;
+    }, [value]);
+    return null;
+  }
+
+  function Pair({ first }: { readonly first: boolean | null }): React.ReactElement {
+    return (
+      <>
+        <While active={first === true} />
+        <Second value={useTextFieldWhile(onlyTextarea, first === false)} />
+      </>
+    );
+  }
+
+  it('切り替える前の画面の差し込み先を、焦点が外れていても引き継ぐ', () => {
+    const area = field('textarea');
+    const card = field('input');
+    focus(area);
+    const view = render(<Pair first />);
+    focus(card);
+    view.rerender(<Pair first={false} />);
+
+    expect(second.current).toBe(area);
+  });
+
+  it('切り替えで開く画面が後から始まっても（読み込みを待つ）、操作が挟まらなければ引き継ぐ', () => {
+    const area = field('textarea');
+    focus(area);
+    const view = render(<Pair first />);
+    blur(area);
+    view.rerender(<Pair first={null} />);
+    view.rerender(<Pair first={false} />);
+
+    expect(second.current).toBe(area);
+  });
+
+  it('どの画面も閉じてから、押して開き直したときは引き継がない', () => {
+    const area = field('textarea');
+    focus(area);
+    const view = render(<Pair first />);
+    blur(area);
+    view.rerender(<Pair first={null} />);
+    fireEvent.pointerDown(document.body);
+    view.rerender(<Pair first={false} />);
+
+    expect(second.current).toBeNull();
+  });
+});
+
 describe('漏れ', () => {
-  /** 欄を足して焦点を出し入れし、外す。外した欄を追う */
   function focusAndRemove(watch: (target: object) => void): void {
     const box = document.createElement('div');
     const input = document.createElement('input');

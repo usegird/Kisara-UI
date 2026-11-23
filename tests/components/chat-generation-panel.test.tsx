@@ -8,11 +8,6 @@ import { useSettingsStore } from '@/store/use-settings-store';
 
 import { chat } from '../helpers/llm';
 
-// ─────────────────────────────
-// 会話の右の列の生成のタブ。決めていない項目も欄とつまみを出し、
-// 触ると決めたことにする。
-// ─────────────────────────────
-
 beforeEach(() => {
   useChatStore.setState({ chats: {}, places: {}, saveStates: {}, pending: {}, drafts: {} });
   useChatStore.getState().put('c1', chat());
@@ -21,7 +16,6 @@ beforeEach(() => {
 
 afterEach(cleanup);
 
-// 生成の設定は全体で 1 つ
 const params = () => useSettingsStore.getState().llmParams;
 
 describe('生成のタブ', () => {
@@ -57,6 +51,7 @@ describe('パラメタの末尾（モデル互換・Web 検索）', () => {
     expect(stop.compareDocumentPosition(compat) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     expect(compat.compareDocumentPosition(web) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
+
   it('システムメッセージをまとめるは既定で外し、スイッチで全体の設定を切り替える', () => {
     useSettingsStore.setState({ squashSystemMessages: false });
     render(<ChatGenerationPanel chatId="c1" />);

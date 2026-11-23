@@ -2,10 +2,6 @@ import { describe, expect, it } from 'vitest';
 
 import { allowedHtml, allowedScriptUrl } from '@/lib/trusted-types';
 
-// ─────────────────────────────
-// Trusted Types の既定の方針で通す形
-// ─────────────────────────────
-
 describe('通す HTML', () => {
   it('文字の参照 1 つと空の文字列だけを通す', () => {
     expect(allowedHtml('&amp;')).toBe('&amp;');

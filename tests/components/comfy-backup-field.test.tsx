@@ -5,10 +5,6 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { ComfyBackupField } from '@/components/llm/side-panel/ComfyBackupField';
 import { useSettingsStore } from '@/store/use-settings-store';
 
-// ─────────────────────────────
-// ComfyUI に控えを書くかのスイッチ。入れるときだけ確かめる
-// ─────────────────────────────
-
 beforeEach(() => {
   useSettingsStore.setState({ chatComfyBackup: false });
 });

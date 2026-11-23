@@ -10,10 +10,6 @@ import { useTabsStore } from '@/store/use-tabs-store';
 
 import { queueEntry } from '../helpers/queue';
 
-// ─────────────────────────────
-// 上の帯のタブに回るアイコンを出すのは、そのタブから投げたタスクが実行中の間だけ。
-// ─────────────────────────────
-
 const initialTabs = useTabsStore.getState();
 const initialQueue = useQueueStore.getState();
 const initialExecution = useExecutionStore.getState();

@@ -7,13 +7,8 @@ import { ActionList } from '@/components/llm/playbook/PlaybookActionList';
 import { FIELD_XS } from '@/components/ui/field';
 import { t } from '@/i18n';
 
-// ─────────────────────────────
-// プレイブックを作る・直すダイアログの、フェーズを選んだときの欄。
-// ─────────────────────────────
-
 const KINDS: readonly PhaseKind[] = ['decide', 'proceed', 'close'];
 
-/** フェーズの名前・種類・アウトラインの見せ方・目的・操作の並びの欄と、フェーズを消すボタン */
 export function PlaybookPhaseFields({
   draft,
   phase,
@@ -23,7 +18,6 @@ export function PlaybookPhaseFields({
   readonly draft: Playbook;
   readonly phase: PlaybookPhase;
   readonly onChange: (next: Playbook) => void;
-  /** フェーズを消したあと（全体の欄へ戻す） */
   readonly onRemoved: () => void;
 }): React.ReactElement {
   return (
@@ -56,7 +50,6 @@ export function PlaybookPhaseFields({
             ))}
           </select>
         </label>
-        {/* このフェーズでアウトラインを出すか・読むだけにするか */}
         <label className={LABEL}>
           {t('llm.playbook.editor.outlineView')}
           <select

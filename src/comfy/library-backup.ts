@@ -11,11 +11,6 @@ import { isMissing, isNotFound } from '@/comfy/request-error';
 import { listUserdataPaths } from '@/comfy/userdata';
 import type { LibraryItemFile, LibraryKind } from '@/port/comfy-port';
 
-// ─────────────────────────────
-// プリセット・システムプロンプトのテンプレート・追加辞書・プレイブック・アバターの控えを読み書きする。
-// 中身は文字のまま受け渡し、形は上の層が読む。
-// ─────────────────────────────
-
 const DIRS: Readonly<Record<LibraryKind, string>> = {
   presets: 'kisara/presets',
   'system-prompts': 'kisara/system-prompts',
@@ -24,7 +19,6 @@ const DIRS: Readonly<Record<LibraryKind, string>> = {
   avatars: 'kisara/avatars',
 };
 
-/** id として受け付ける形（ほかのフォルダへ出る経路を作らない） */
 const ITEM_ID = /^[a-z0-9]+$/;
 
 function itemPath(kind: LibraryKind, id: string, suffix: '.json' | '.png'): string {
@@ -32,7 +26,6 @@ function itemPath(kind: LibraryKind, id: string, suffix: '.json' | '.png'): stri
   return `${DIRS[kind]}/${id}${suffix}`;
 }
 
-/** 控えの全件（`<id>.json` の中身）。読めない 1 件は外す。フォルダが無ければ空 */
 export async function listLibraryItems(
   baseUrl: string,
   kind: LibraryKind,
@@ -55,7 +48,6 @@ export async function listLibraryItems(
   return items.filter((item) => item !== null);
 }
 
-/** 1 件の控えを書く（上書きする）。画像を渡せば画像も書く */
 export async function saveLibraryItem(
   baseUrl: string,
   { kind, id, body, image }: LibraryItemFile,
@@ -67,7 +59,6 @@ export async function saveLibraryItem(
   await postText(userdataWriteUrl(baseUrl, itemPath(kind, id, '.json'), true), body, options);
 }
 
-/** 1 件の画像の控え。無ければ null */
 export async function fetchLibraryImage(
   baseUrl: string,
   kind: LibraryKind,
@@ -83,10 +74,6 @@ export async function fetchLibraryImage(
   }
 }
 
-/**
- * 1 件の控え（本文と画像）を消す。無ければ済み。
- * ファイルを消さない決まりの例外で、消すのは KisaraUI が書いたこれらのフォルダの、その id のファイルだけ
- */
 export async function removeLibraryItem(
   baseUrl: string,
   kind: LibraryKind,

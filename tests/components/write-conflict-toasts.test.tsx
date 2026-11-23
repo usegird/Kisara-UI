@@ -6,10 +6,6 @@ import { WriteConflictToasts } from '@/components/app/WriteConflictToasts';
 import { toastManager } from '@/components/ui/toast-manager';
 import { useWriteConflictsStore } from '@/store/use-write-conflicts-store';
 
-// ─────────────────────────────
-// ほかのタブで変わった 1 件の知らせ。1 件に 1 つ出し、閉じたら外す。
-// ─────────────────────────────
-
 afterEach(() => {
   cleanup();
   vi.restoreAllMocks();

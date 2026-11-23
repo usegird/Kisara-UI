@@ -7,11 +7,6 @@ import { useSettingsStore } from '@/store/use-settings-store';
 
 import { LEAK_ALLOWANCE, LEAK_ROUNDS, leakWatch } from '../helpers/leak';
 
-// ─────────────────────────────
-// ダイアログの左の列の出し方。一時的に出す → ピン止め → 隠すと巡り、一時的に出した列は
-// その外（切り替えのアイコンを除く）を押すか Esc で閉じる。閉じた列を残さない。
-// ─────────────────────────────
-
 const PIN_KEY = 'test:directory';
 
 afterEach(() => {
@@ -19,7 +14,6 @@ afterEach(() => {
   useSettingsStore.setState({ dialogPanePins: {} });
 });
 
-/** フックを使う小さな画面。外の領域・切り替え・一時的に出した列を置く */
 function Pane(): React.ReactElement {
   const { pinned, shown, state, cycle, hide, overlay, closesOnPointer, closesOnKey } =
     useTemporaryPane(PIN_KEY);
@@ -86,7 +80,6 @@ describe('閉じる', () => {
 });
 
 describe('幅で決める既定のピン止め', () => {
-  /** 枠の幅の知らせを手で起こすための ResizeObserver の代わり */
   let notify: ((width: number) => void) | null = null;
   class FakeResizeObserver {
     constructor(callback: ResizeObserverCallback) {
@@ -133,7 +126,6 @@ describe('幅で決める既定のピン止め', () => {
     vi.stubGlobal('ResizeObserver', FakeResizeObserver);
     render(<WidePane />);
     act(() => notify?.(900));
-    // ピン止めから押すと、やめる（隠す）を残す
     fireEvent.click(screen.getByRole('button', { name: '切り替え' }));
     expect(useSettingsStore.getState().dialogPanePins[PIN_KEY]).toBe(false);
     act(() => notify?.(1200));

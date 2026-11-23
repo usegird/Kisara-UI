@@ -29,31 +29,18 @@ import type {
   ModelList,
 } from '@/port/llm-port';
 
-// ─────────────────────────────
-// LLM の HTTP 呼び出しの唯一の入口。失敗は原因ごとに分け、投げずに `LlmResult` で返す。
-// ─────────────────────────────
-
 const HTTP_UNAUTHORIZED = 401;
 const HTTP_FORBIDDEN = 403;
 const HTTP_NOT_FOUND = 404;
 const HTTP_TOO_MANY_REQUESTS = 429;
-/** これ以上の状態は接続先の側の失敗 */
 const HTTP_SERVER_ERROR = 500;
-/** `redirect: 'manual'` で転送が返ったときの応答の種類 */
 const OPAQUE_REDIRECT = 'opaqueredirect';
 
-/** 差し替えられる `fetch`（テストでは作り物を渡す） */
 export type FetchLike = (input: string, init: RequestInit) => Promise<Response>;
 
-/** LLM の窓口を作るときに渡すもの */
 export interface LlmClientOptions {
   readonly fetch: FetchLike;
-  /** 開いているページの経路（'https:' など）。ブラウザの外では null */
   readonly pageProtocol: () => string | null;
-  /**
-   * 整えたベース URL に付ける API キー。空なら認証のヘッダーを付けない。
-   * キーを持つのはゲートウェイだけなので、本体の窓口は渡さない
-   */
   readonly keyOf?: ((base: string) => string) | undefined;
 }
 
@@ -74,7 +61,6 @@ function headers(apiKey: string, json: boolean): Record<string, string> {
   return result;
 }
 
-/** 送り先に付ける API キー。整えられないベース URL には付けない */
 function keyFor(options: LlmClientOptions, endpoint: LlmEndpoint): string {
   const base = normalizeLlmBaseUrl(endpoint.baseUrl);
   return base === null ? '' : (options.keyOf?.(base) ?? '');
@@ -88,13 +74,7 @@ async function readJson(response: Response): Promise<unknown> {
   }
 }
 
-// ─────────────────────────────
-// 待つ時間と受け取る量の上限
-// ─────────────────────────────
-
-/** モデルの一覧・キーの確かめ・文脈長の問い合わせを打ち切るまで（本文を読み終えるまで） */
 const QUERY_TIMEOUT_MS = 10_000;
-/** 生成で、最初の応答（本文の最初のひとかたまり）が来るまで */
 const FIRST_RESPONSE_MS = 60_000;
 function parseJsonText(text: string): unknown {
   try {
@@ -114,7 +94,6 @@ interface Sent {
   readonly failure?: LlmResult<never>;
 }
 
-/** 送る。届かなければ原因を返す */
 async function send(
   options: LlmClientOptions,
   endpoint: LlmEndpoint,
@@ -126,7 +105,6 @@ async function send(
   if (base === null) return { failure: fail('not-found') };
   const url = toUrl(base);
   if (isMixedContent(url, options.pageProtocol())) return { failure: fail('mixed-content') };
-  // キーを付けた要求は転送をたどらない。別のオリジンへの転送で認証のヘッダーを外すかはブラウザの版に任されるため
   const keyed = keyFor(options, endpoint).length > 0;
   try {
     if (!keyed) return { response: await options.fetch(url, init) };
@@ -139,10 +117,6 @@ async function send(
   }
 }
 
-/**
- * 中身を読まない要求（`no-cors`）が届くか。届けばサーバーは応答していて、
- * 断ったのは CORS。届かなければ応答が無い。キーは付けない（読めない応答に渡さない）
- */
 async function answers(options: LlmClientOptions, url: string): Promise<boolean> {
   try {
     await options.fetch(url, { method: 'GET', mode: 'no-cors' });
@@ -152,7 +126,6 @@ async function answers(options: LlmClientOptions, url: string): Promise<boolean>
   }
 }
 
-/** 問い合わせ（一覧・キー・文脈長）を送り、本文を上限の大きさまで読む */
 async function query(
   options: LlmClientOptions,
   endpoint: LlmEndpoint,
@@ -178,7 +151,6 @@ async function query(
   }
 }
 
-/** llama.cpp の起動時の文脈長を読む。読めなければ null（一覧は返す） */
 async function serverContext(
   options: LlmClientOptions,
   endpoint: LlmEndpoint,
@@ -189,10 +161,6 @@ async function serverContext(
   return parsePropsContext(parseJsonText(result.value.text));
 }
 
-/**
- * ストリーミングに応じないサーバーは 1 つの JSON で返す。本文を文字のまま読み、控えるときは
- * 控えに渡してから JSON にする
- */
 async function readWholeReply(
   response: Response,
   { onEvent, signal, onRaw }: ChatStreamReceiver,
@@ -216,7 +184,6 @@ async function readWholeReply(
   return state.received ? { ok: true, value: null } : fail('bad-response');
 }
 
-/** OpenAI 互換の API を HTTP で叩く LLM の窓口を作る */
 export function createLlmClient(options: LlmClientOptions): LlmPort {
   return {
     listModels: async (endpoint, signal) => {

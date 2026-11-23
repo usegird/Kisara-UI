@@ -2,10 +2,6 @@ import { describe, expect, it } from 'vitest';
 
 import { fetchHistory, HISTORY_PAGE_SIZE } from '@/comfy/queue';
 
-// ─────────────────────────────
-// 履歴を全件読むときは `max_items` と `offset` で分けて取る。作り物の fetch で答える
-// ─────────────────────────────
-
 function entries(from: number, count: number): Record<string, unknown> {
   return Object.fromEntries(
     Array.from({ length: count }, (_, at) => [`p${String(from + at)}`, { outputs: {} }]),

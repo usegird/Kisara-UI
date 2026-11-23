@@ -1,8 +1,3 @@
-// テストのファイルごとに、空の鍵（Web Locks）を入れる。Node の `navigator.locks` はプロセス全体で 1 つで、
-// テストは vm の文脈でプロセスを使い回す（vite.config.ts の pool: 'vmForks'）。前に走ったファイルが
-// 持ったままの鍵（会話の id など）が残ると、次のファイルで同じ名前の鍵が取れず、テストが時々落ちる。
-// 取る・待つ・調べるだけの小さな置き換え（会話の鍵 chat-persist とタブの id tab-id が使う分）
-
 type Grant = (lock: { readonly name: string } | null) => unknown;
 
 interface Waiting {

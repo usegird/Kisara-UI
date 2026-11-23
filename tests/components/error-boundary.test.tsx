@@ -5,10 +5,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ErrorBoundary } from '@/components/ui/error-boundary';
 import { installFaultHandlers, useFaultStore } from '@/store/use-fault-store';
 
-// ─────────────────────────────
-// 描けなかった部品だけを差し替える。外へは広げず、帯にも残す。
-// ─────────────────────────────
-
 let broken = true;
 function Fragile(): React.ReactElement {
   if (broken) throw new Error('読めない形');
@@ -18,7 +14,6 @@ function Fragile(): React.ReactElement {
 beforeEach(() => {
   broken = true;
   useFaultStore.getState().clear();
-  // 受け止めた失敗は React がコンソールに出す。テストの出力を汚さない
   vi.spyOn(console, 'error').mockImplementation(() => {});
 });
 

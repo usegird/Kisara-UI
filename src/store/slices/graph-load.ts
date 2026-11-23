@@ -5,17 +5,11 @@ import { unlinkedDisplayIds } from '@/graph/subgraph-display';
 import { createGraphKit, EMPTY_HISTORY, NO_SELECTION } from '@/store/slices/graph-kit';
 import type { GraphState } from '@/store/use-graph-store';
 
-// ─────────────────────────────
-// グラフのストアの、ワークフローを載せる・保存の印・控えから戻す操作。
-// ─────────────────────────────
-
-/** この slice が持つ操作 */
 type GraphLoadActions = Pick<
   GraphState,
   'loadWorkflow' | 'setName' | 'markDirty' | 'markSaved' | 'disownSaved' | 'clear' | 'restore'
 >;
 
-/** ワークフローを載せる・保存の印・控えから戻す操作を作る */
 export const createGraphLoadSlice: StateCreator<GraphState, [], [], GraphLoadActions> = (
   rawSet,
   get,
@@ -23,7 +17,6 @@ export const createGraphLoadSlice: StateCreator<GraphState, [], [], GraphLoadAct
   const { set } = createGraphKit(rawSet, get);
   return {
     loadWorkflow: (raw, name = '', saved = null) => {
-      // どこで作ったものでも並べ直さない（並びは X 軸の順で読む）
       const workflow = removeDanglingLinks(parseWorkflow(raw));
       rawSet({
         workflow,

@@ -4,12 +4,6 @@ import { createOutputValues } from '@/graph/output-values';
 
 import { definition, definitionMap, socket, widget } from '../helpers/definitions';
 
-// ─────────────────────────────
-// 出力スロットに「何が入っているか」の目安。
-// 素通し系のノード（`ModelSamplingDiscrete` / `RescaleCFG` / `Reroute` など）では、
-// **上流の値を引き継いで前に置く**。ノード名では判定せず、**入力と出力の型**で決める。
-// ─────────────────────────────
-
 const definitions = definitionMap(
   definition('CheckpointLoaderSimple', [widget('ckpt_name', 'COMBO')], {
     displayName: 'Load Checkpoint',
@@ -28,7 +22,6 @@ const definitions = definitionMap(
   }),
 );
 
-/** 4 → 46(ModelSamplingDiscrete) → 47(RescaleCFG) */
 const workflow = {
   nodes: [
     {
@@ -66,9 +59,7 @@ const workflow = {
 
 describe('出力に流れる値', () => {
   const resolve = createOutputValues(workflow, definitions);
-  /** 1行表示に使う素の文字列 */
   const value = (nodeId: number, slot: number) => resolve(nodeId, slot).map((part) => part.text);
-  /** ホバー用（数値・真偽にはパラメータ名が付く） */
   const labels = (nodeId: number, slot: number) => resolve(nodeId, slot).map((part) => part.label);
 
   it('自分の設定値だけのノードはそのまま', () => {

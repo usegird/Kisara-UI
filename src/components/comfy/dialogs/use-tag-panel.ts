@@ -38,12 +38,6 @@ import { useDialogStore } from '@/store/use-dialog-store';
 import { useSettingsStore } from '@/store/use-settings-store';
 import { TAG_PANEL_DIALOG, useTagsStore, type TagCommitFailure } from '@/store/use-tags-store';
 
-// ─────────────────────────────
-// タグ辞書の画面の状態と手続き（見ている一覧・辞書をまたいだ直しかけ・閉じる前の確かめ）。
-// 直しかけは辞書を選び直しても持ち続け、確定でまとめて書く。
-// ─────────────────────────────
-
-/** 表に出す行の上限（10 万件を描かないため） */
 const MAX_ROWS = 200;
 
 const FAILURE_TEXT = {
@@ -54,7 +48,6 @@ const FAILURE_TEXT = {
 
 type Sources = TagSources & { readonly merged: readonly IndexedTag[] };
 
-/** タグ辞書の画面の状態と手続き */
 export function useTagPanel() {
   const baseUrl = useSettingsStore((state) => state.baseUrl);
   const store = useTagsData(baseUrl);
@@ -63,11 +56,9 @@ export function useTagPanel() {
 
   const [draft, setDraft] = useState(() => startDraft({ kind: 'all' }, store));
   const [query, setQuery] = useState('');
-  // 並べ替えは画面の中だけ（閉じたら今までの並びに戻る）
   const [sort, setSort] = useState<TagSort | null>(null);
   const [error, setError] = useState<string | null>(null);
   const dirty = isDirty(draft);
-  // ストアの材料が変わった（取り直した・確定した）ら、直しかけが無ければ描画中に作り直す
   const stale =
     draft.baseDictionaries !== store.dictionaries || draft.baseOverrides !== store.overrides;
   if (stale && !dirty) setDraft(startDraft(draft.view, store));
@@ -125,7 +116,6 @@ export function useTagPanel() {
   };
 }
 
-/** 画面が読むストアの値 */
 function useTagsData(baseUrl: string) {
   return {
     status: useTagsStore((state) => state.status),
@@ -138,10 +128,6 @@ function useTagsData(baseUrl: string) {
   };
 }
 
-/**
- * 直しかけを捨てることになる閉じ方の前に確かめる。外（アイコンの押し直し・ほかの埋め込み）から
- * 閉じるよう頼まれたときも、直しかけがあれば確かめる
- */
 function useCloseGuard(dirty: boolean) {
   const close = useTagsStore((state) => state.closePanel);
   const closeRequested = useTagsStore((state) => state.closeRequested);
@@ -165,18 +151,12 @@ function useCloseGuard(dirty: boolean) {
     },
     cancelDiscard: () => {
       setPending(false);
-      // ほかの埋め込みが開いて閉じるよう頼まれていたなら、この画面に留まる（開いた方を閉じる）
       if (closeRequested) reclaimDialog(TAG_PANEL_DIALOG);
       clearCloseRequest();
     },
   };
 }
 
-// ─────────────────────────────
-// 表の行
-// ─────────────────────────────
-
-/** 表に出す行と、当たった件数（直せる辞書・pysssss・読むだけのどれか 1 つ） */
 function tableOf(draft: Draft, sources: Sources, query: string, sort: TagSort | null) {
   const viewed = viewedDictionary(draft);
   if (viewed !== undefined && !viewed.removed) {
@@ -193,15 +173,11 @@ function tableOf(draft: Draft, sources: Sources, query: string, sort: TagSort | 
     tag: tag.entry.tag,
     aliases: tag.entry.aliases,
     priority: tag.entry.priority,
-    // 消す印の辞書は全行に取り消し線を引く
     struck: viewed !== undefined,
   }));
   return { editable: null, readOnly: { rows, total: matched.total }, pysssss: null };
 }
 
-/**
- * pysssss の表の行。直しかけ・上書きを当てた値で当て、並べる。消した行も取り消し線で出す
- */
 function pysssssRows(draft: Draft, sources: Sources, query: string, sort: TagSort | null) {
   const overrides = overrideMap(sources.overrides);
   const rowOf = new Map<TagEntry, PysssssRowView>();
@@ -217,7 +193,6 @@ function pysssssRows(draft: Draft, sources: Sources, query: string, sort: TagSor
   return { rows: rows.filter((row) => row !== undefined), total: matched.total };
 }
 
-/** 直せる表の行。語が無ければ辞書の行の順、あれば補完と同じ当て方で並べる */
 function editableRows(rows: readonly TagRowDraft[], query: string, sort: TagSort | null) {
   if (query.trim().length === 0) {
     const sorted = sortTagRows(rows, sort, (row) => fieldsOf(entryOfRow(row)));
@@ -234,10 +209,6 @@ function editableRows(rows: readonly TagRowDraft[], query: string, sort: TagSort
   return { rows: found.filter((row) => row !== undefined), total: matched.total };
 }
 
-/**
- * 当てて、並べ替えを選んでいれば当たった全部を並べ替えてから上限で切る
- * （先に切ると、並べ替えた先頭が当て方の上位 200 件の中だけになる）
- */
 function sortedMatches(
   tags: readonly IndexedTag[],
   query: string,

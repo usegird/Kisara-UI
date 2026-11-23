@@ -21,10 +21,6 @@ import type { ToolDefinition } from '@/port/llm-port';
 
 import { chat, chatMessage, llm, toolCallMessage } from '../helpers/llm';
 
-// ─────────────────────────────
-// ワークフローの呼び出しの列。受け取り・確かめ・続き・送る中身への展開・読み戻し。
-// ─────────────────────────────
-
 function call(id: string, state: ToolCallState, name = 'make_image'): ToolCallRecord {
   return { id, name, arguments: '{"prompt":"cat"}', state };
 }
@@ -89,7 +85,6 @@ describe('送る中身', () => {
     streaming,
   ]);
 
-  // 前の応答の呼び出しを履歴に入れる形（既定は入れない）
   const withCalls = { ...NO_SOURCES, toolHistory: true };
 
   it('呼び出しを tool_calls と tool の発言に分け、tools を添える', () => {
@@ -115,6 +110,7 @@ describe('送る中身', () => {
     ]);
     expect(buildChatRequest(history, llm()).tools).toBeUndefined();
   });
+
   it('JSON の物として読めない引数は {} にして送る', () => {
     const argumentsSent = (raw: string): unknown => {
       const broken = {
@@ -136,7 +132,6 @@ describe('送る中身', () => {
   });
 
   it('既定では、呼び出しと結果を送らず本文だけを送る', () => {
-    // 本文が空の応答は、その発言ごと送らない
     const roles = buildChatRequest(history, llm(), undefined, { tools }).messages.map(
       (m) => m.role,
     );
@@ -202,6 +197,7 @@ describe('送る中身', () => {
     expect(findQueuedCall(unknown, 'p1')).toBeNull();
   });
 });
+
 describe('本文を書かせる', () => {
   const tools: ToolDefinition[] = [
     { type: 'function', function: { name: 'make_image', description: '', parameters: {} } },
@@ -238,7 +234,6 @@ describe('本文を書かせる', () => {
       content: toolResultText({ kind: 'queued', promptId: 'p1' }),
     });
     expect(request.tool_choice).toBe('none');
-    // ふつうの送信では呼ばせないにしない
     expect(buildChatRequest(history(), llm(), undefined, { tools }).tool_choice).toBeUndefined();
   });
 
@@ -342,6 +337,7 @@ describe('読み戻し', () => {
     expect(read({ kind: 'unknown' })?.kind).toBe('failed');
   });
 });
+
 describe('受け取った画像', () => {
   const file = (filename: string, type = 'output') => ({ filename, subfolder: '', type });
   const done = (id: string, names: readonly string[]): ToolCallRecord =>

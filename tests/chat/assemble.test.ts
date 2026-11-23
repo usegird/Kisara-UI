@@ -19,17 +19,12 @@ import { type PromptComposition } from '@/chat/types';
 
 import { chat, chatMessage, llm, sampleComposition } from '../helpers/llm';
 
-// ─────────────────────────────
-// プロンプトの構成からの組み立て。
-// ─────────────────────────────
-
 function compose(edits: ((c: PromptComposition) => PromptComposition | null)[]): PromptComposition {
   return edits.reduce((current, edit) => edit(current) ?? current, sampleComposition());
 }
 
 const history = [chatMessage('u1', 'user', ['hi']), chatMessage('a1', 'assistant', ['hello'])];
 
-/** システムプロンプトは 'SYS'（ほかを指定すればそれ）。`squash` は system をまとめる設定 */
 function send(prompt: PromptComposition, text = 'Q', systemPrompt = 'SYS', squash = false) {
   return buildChatRequest(
     appendTurn(chat(history, { prompt }), { text, userId: 'u2', assistantId: 'a2' }),
@@ -74,7 +69,6 @@ describe('組み立て', () => {
   it('発言に添える指示をメッセージの前へ動かすと、その順で並ぶ', () => {
     const prompt = compose([
       (c) => updatePromptItem(c, 'task', { content: 'Summarize.' }),
-      // 画面の並べ替えでは置けない位置（読み込んだ構成で起こる）なので、並びを直に組む
       (c) => {
         const task = c.items.find((item) => item.id === 'task');
         const rest = c.items.filter((item) => item !== task);
@@ -236,6 +230,7 @@ describe('変数', () => {
     expect(normalizeVariableName(' {{ }} ')).toBe('');
   });
 });
+
 describe('戻すの行', () => {
   const sources: PromptSources = {
     userName: 'ケイ',
@@ -269,6 +264,7 @@ describe('戻すの行', () => {
     expect(normalizeVariableName('アオバネ', true)).toBe('アオバネ');
   });
 });
+
 describe('{{user}}・{{char}} の既定と戻す', () => {
   const character = { ...EMPTY_CHARACTER, name: 'ミナ' };
 
@@ -290,10 +286,10 @@ describe('{{user}}・{{char}} の既定と戻す', () => {
       { id: 'b', name: 'A', value: 'B', restore: true as const },
     ];
     const names = nameSources({ ...character, name: 'A', variables }, null);
-    // A → B（1 行目）、B → A（2 行目）。掛け直さない
     expect(applyMacros('{{char}}', names)).toBe('A');
   });
 });
+
 describe('指示で作り直す', () => {
   it('土台の候補と指示を履歴の末尾に置き、受け取り終えた後の送信には入れない', () => {
     const base = chat(history, { prompt: sampleComposition() });
@@ -314,6 +310,7 @@ describe('指示で作り直す', () => {
     expect(next.messages.map((message) => message.content)).not.toContain('hello');
   });
 });
+
 describe('送らない注記', () => {
   it('<comment> の間を外す。行まるごとなら行ごと、閉じていなければ残す', () => {
     expect(stripComments('Fix it.\n<comment>Not sent.</comment>')).toBe('Fix it.');
@@ -328,6 +325,7 @@ describe('送らない注記', () => {
     expect(send(sampleComposition(), 'Q <comment>note</comment>').at(-1)?.content).toBe('Q');
     expect(applyMacros('Q <comment>note</comment>', NO_SOURCES, 'show')).toContain('note');
   });
+
   it('応答の本文の外の話（注記）は、次に送る履歴から外す', () => {
     const story = [
       chatMessage('u1', 'user', ['Go.']),
@@ -342,6 +340,7 @@ describe('送らない注記', () => {
     expect(contents).toContain('Rain fell.');
     expect(JSON.stringify(contents)).not.toMatch(/Sure|Next\?/u);
   });
+
   it('本文を注記とそれ以外に分け、受け取り中だけ閉じていない注記も注記にする', () => {
     const kinds = (text: string, open: boolean): string =>
       splitComments(text, open)
@@ -357,6 +356,7 @@ describe('送らない注記', () => {
     ]);
   });
 });
+
 describe('画像', () => {
   it('画像を持つ発言は本文が先、続けて画像。隣の user とはつながない（まとめる設定でも）', () => {
     const png = 'data:image/png;base64,iVBORw0KGgo=';
@@ -375,7 +375,6 @@ describe('画像', () => {
         ],
       },
     ]);
-    // 画像だけの発言は画像だけ
     const only = mergeParts([{ itemId: null, role: 'user', content: '', images: [png] }]);
     expect(only[0]?.content).toEqual([{ type: 'image_url', image_url: { url: png } }]);
   });

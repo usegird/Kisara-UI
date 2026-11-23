@@ -33,15 +33,6 @@ export { orderedNodeIds } from '@/graph/layout-read';
 export { relayout, type RelayoutOptions } from '@/graph/layout-place';
 export { topologicalOrder } from '@/graph/processing-order';
 
-// ─────────────────────────────
-// 一本道の並び順と、並びを変える操作。独自キーを足さないので、順序は `pos` の横位置に写して保存する。
-// 変更箇所だけを動かすのは `layout-shift.ts`、全部の位置を求めるのは処理順に並べるときだけ。
-// ─────────────────────────────
-
-/**
- * 指定順に位置を求め直す。orderedIds に載っていないノードは現在の順序を保ったまま
- * 末尾に送る（欠落で消さない）。size は書き換えない
- */
 export function applyOrder(
   workflow: Workflow,
   orderedIds: readonly NodeId[],
@@ -57,13 +48,6 @@ export function applyOrder(
   });
 }
 
-/**
- * **処理の順**（同じ順位は横位置の順）に位置を置き直す。
- * 処理順に並べるアイコンと、ComfyUI で作ったものを読み込んだときに使う。
- * `fromOrigin` なら**今の座標を捨てて**置き直す（アイコンの確かめで選べる）: 並びとグループの
- * 所属を今の位置から読んでから全ノードを原点に置き、そこから求める。縦位置は右に接続先の
- * 無い列を入力元の今の範囲に揃えるので、座標を残したままだと今の縦の差を引きずる
- */
 export function arrangeByProcessing(
   workflow: Workflow,
   layout: OrderLayout = DEFAULT_ORDER_LAYOUT,
@@ -79,18 +63,10 @@ export function arrangeByProcessing(
   return relayout(zeroed, order, layout, { membership, ...options });
 }
 
-// ─────────────────────────────
-// 並びを変える操作。新しい並びと所属を決め、変わったものだけを動かす。
-// ─────────────────────────────
-
 function toShiftUnit(item: LevelItem): ShiftUnit {
   return item.kind === 'node' ? item : { kind: 'group', index: item.index };
 }
 
-/**
- * 並びの `at` の位置へ入れるときの入れる先。`container` の階層で見た前後のもの（直下のノードか、
- * 子のグループの箱）を基準にする。基準が無ければ階層の末尾
- */
 export function spotAt(
   { rest, at }: { readonly rest: readonly NodeId[]; readonly at: number },
   membership: Membership,
@@ -112,10 +88,6 @@ interface Tree {
   readonly parents: GroupParents;
 }
 
-/**
- * グループを外して、残りの所属と親の添字を詰める。外したグループの直下のものと子のグループは、
- * 残る外側のグループ（無ければ外）へ移る。外すものが無ければそのまま返す
- */
 export function dropGroups(
   workflow: Workflow,
   membership: Membership,
@@ -139,7 +111,6 @@ export function dropGroups(
   return { workflow: next, membership: kept, parents: keptParents };
 }
 
-/** `before` で中にノードが居て、`after` で 1 つも残らなかったグループ（子のグループを通しても） */
 export function emptied(
   before: Membership,
   after: Membership,
@@ -150,10 +121,6 @@ export function emptied(
   return new Set([...occupiedGroups(before, parentsBefore)].filter((group) => !left.has(group)));
 }
 
-/**
- * ノードを抜いたところを詰める（削除の前）。抜いたノードの位置は変えない。
- * メンバーが居なくなったグループは消す
- */
 export function removeFromX(
   workflow: Workflow,
   nodeId: NodeId,
@@ -167,9 +134,6 @@ export function removeFromX(
   return dropGroups(shifted, after, parents, emptied(before, after, parents)).workflow;
 }
 
-/**
- * ノードを `previousId` の直後に入れる（並べ替えの移動先・追加）。`previousId` が null なら先頭
- */
 export function insertAfterX(
   workflow: Workflow,
   nodeId: NodeId,
@@ -179,20 +143,11 @@ export function insertAfterX(
   return insertNodesAfter(workflow, [nodeId], { previousId }, layout);
 }
 
-/** 足すノードを入れる場所 */
 export interface InsertSpot {
-  /** この直後に入れる。null なら先頭 */
   readonly previousId: NodeId | null;
-  /**
-   * 入るグループ（添字。null ならどこにも入らない）。省くと、
-   * 前後のノードが共に入っているいちばん内側のグループに入る
-   */
   readonly group?: number | null | undefined;
 }
 
-/**
- * 足したノードをまとめて `previousId` の直後に入れる（渡した順のまま）
- */
 export function insertNodesAfter(
   workflow: Workflow,
   nodeIds: readonly NodeId[],
@@ -203,7 +158,6 @@ export function insertNodesAfter(
   const adding = [...new Set(nodeIds)].filter((id) => present.has(id));
   if (adding.length === 0) return workflow;
 
-  // 足すノードの今の位置で他の並びと所属を読み違えないよう、外して読む
   const excluded = new Set(adding);
   const others = orderedNodeIds({
     ...workflow,
@@ -216,12 +170,10 @@ export function insertNodesAfter(
     group !== undefined ? group : sharedGroup(membership, parents, others[at - 1], others[at]);
   if (joined !== null) for (const id of adding) membership.set(id, joined);
 
-  // 前後の間へ入れる（変わったところだけを動かす）
   const spot = spotAt({ rest: others, at }, membership, parents, joined);
   return shiftInsert(workflow, { nodeIds: adding, membership }, spot, layout);
 }
 
-/** 前後のノードが共に入っている、いちばん内側のグループ。どちらかが無い・共に無ければ null */
 function sharedGroup(
   membership: Membership,
   parents: GroupParents,
@@ -233,14 +185,6 @@ function sharedGroup(
   return lineage(membership.get(previous), parents).find((group) => outer.includes(group)) ?? null;
 }
 
-// ─────────────────────────────
-// グループの顔ぶれを変える操作。動かすものだけを動かし、枠を求め直す。
-// ─────────────────────────────
-
-/**
- * 選んだノードで新しいグループを作る。並びは抜いて詰め、先頭の位置へ並べて入れる。
- * 一部だけ選んだグループには選ばなかったノードが残るので、空になるグループは無い
- */
 export function groupNodes(
   workflow: Workflow,
   nodeIds: readonly NodeId[],
@@ -251,7 +195,6 @@ export function groupNodes(
   const membership = groupMembership(workflow, layout);
   const parents = groupParents(workflow);
 
-  // 入れるもの（並びの順）。中を全部選んだグループは箱ごと
   const whole = (group: number): boolean =>
     groupNodeIds(order, group, membership, parents).every((id) => chosen.has(id));
   const units = new Map<string, LevelItem>();
@@ -263,7 +206,6 @@ export function groupNodes(
   }
   if (units.size === 0) return workflow;
 
-  // 新しいグループの親: 入れるものが共に入っている、いちばん内側のグループ
   const levelOf = (unit: LevelItem): number | undefined =>
     unit.kind === 'node' ? membership.get(unit.id) : parents.get(unit.index);
   const shared = [...units.values()]
@@ -271,7 +213,6 @@ export function groupNodes(
     .reduce((common, chain) => common.filter((group) => chain.includes(group)));
   const container = shared[0] ?? null;
 
-  // 入れる先: 選んだものを抜いた並びで、先頭が居た位置（箱ごと入るグループの中も全部選んである）
   const rest = order.filter((id) => !chosen.has(id));
   const at = order.findIndex((id) => chosen.has(id));
 
@@ -289,10 +230,6 @@ export function groupNodes(
   );
 }
 
-/**
- * グループを解く。枠だけを消し、ノードの位置は変えない。直下のものと子のグループは
- * 親のグループ（無ければ外）に移る
- */
 export function ungroup(
   workflow: Workflow,
   index: number,
@@ -303,10 +240,6 @@ export function ungroup(
   return dropGroups(workflow, membership, groupParents(workflow), new Set([index])).workflow;
 }
 
-/**
- * 編集のあとの置き直し。大きさ・折りたたみが伸びたノードの分だけ送る。
- * 線・値・ノードの顔ぶれの変化では動かさない（足したもの・消したものは操作の側で置いてある）
- */
 export function settleLayout(
   before: Workflow,
   after: Workflow,
@@ -315,23 +248,13 @@ export function settleLayout(
   return shiftGrown(before, after, layout);
 }
 
-// ─────────────────────────────
-// 新しいノードの置き場所。基準ノードの隣に入れる（`insertAfterX` の直前を決める）。
-// ─────────────────────────────
-
-/** `after`=基準ノードの右隣に置く / `before`=基準ノードの位置に割り込む */
 type PlacementSide = 'after' | 'before';
 
-/** 足すノードを置く基準のノードと、その左右のどちらか */
 export interface PlacementAnchor {
   readonly nodeId: NodeId;
   readonly side: PlacementSide;
 }
 
-/**
- * 基準ノードの隣に入れるときの「直前のノード」。`before` は基準の 1 つ前（先頭なら null）。
- * 基準が見つからなければ undefined（呼び出し側で末尾に足す）
- */
 export function previousFor(
   workflow: Workflow,
   { nodeId, side }: PlacementAnchor,

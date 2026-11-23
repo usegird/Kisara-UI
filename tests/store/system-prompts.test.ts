@@ -3,10 +3,6 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { memoryTable } from '@/store/persist/chat-repo';
 import { installSystemPromptTable, useSystemPromptsStore } from '@/store/use-system-prompts-store';
 
-// ─────────────────────────────
-// システムプロンプトのテンプレート。別名保存・上書き保存・削除と、置き場からの読み戻し。
-// ─────────────────────────────
-
 beforeEach(() => {
   installSystemPromptTable(memoryTable());
   useSystemPromptsStore.setState({ templates: {} });

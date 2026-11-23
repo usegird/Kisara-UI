@@ -14,14 +14,8 @@ import { sendableArgumentsOf } from '@/chat/tool-arguments';
 import type { Chat, PromptItem } from '@/chat/types';
 import type { ChatRequestMessage } from '@/port/llm-port';
 
-// ─────────────────────────────
-// 構成の相談で LLM に渡す指示の本文と、初期メッセージ・送る `messages` の組み立て。
-// ─────────────────────────────
-
-/** コードの囲み（```）の最短の長さ（Markdown の決まり） */
 const MIN_FENCE_LENGTH = 3;
 
-/** 用途ごとの勘所（送る文。画面には出さない） */
 const USE_GUIDE: Readonly<Record<AdvisorUse, readonly string[]>> = {
   blank: [],
   work: [
@@ -71,7 +65,6 @@ const USE_GUIDE: Readonly<Record<AdvisorUse, readonly string[]>> = {
   ],
 };
 
-/** どの用途でも渡す、構成の仕組み */
 const BASICS = [
   'This consultation designs the prompt composition of a chat app (KisaraUI).',
   '',
@@ -89,7 +82,6 @@ const BASICS = [
   '- Empty or disabled items are not sent.',
 ];
 
-/** カードの欄と個別追加辞書を使う用途だけに渡す仕組み */
 const CARD_BASICS = [
   '- More "filledFrom" sources: characterDescription / personalitySummary /',
   '  currentSituation / dialogueExamples (card fields), userProfile (the user profile).',
@@ -102,10 +94,6 @@ const CARD_BASICS = [
   '- The variables {{char}} and {{user}} stand for the assistant name and the user name.',
 ];
 
-/**
- * プレイブックから開いた相談に足す、今の構成を土台にする決まり。勘所の段階は一から作る書き方なので、
- * 既に書いた前提・人物・舞台を作り直させない
- */
 const BUILD_ON_CURRENT = [
   '',
   'The chat may already have a composition, card fields and dictionaries (see the current',
@@ -164,13 +152,8 @@ const TAIL = [
   'Reply in the same language as the user.',
 ];
 
-/** 付加情報を埋め込む記法の言語名 */
 const CONTEXT_FENCE = 'kisara-context';
 
-/**
- * 初期メッセージに埋め込む付加情報。用途で絞った指示と、今の値。外から渡す勘所が
- * あれば、用途の勘所の後ろにその勘所と段の書き方を足す
- */
 export function advisorContextText(
   chat: Chat,
   use: AdvisorUse,
@@ -195,23 +178,12 @@ export function advisorContextText(
   ].join('\n');
 }
 
-/**
- * 初期メッセージの本文。見せる文の後ろに、付加情報を言語名 `kisara-context` のコードブロックで
- * 埋め込む。中身に続くバッククォートより長い囲みにして、中身で閉じないようにする
- */
 export function advisorGreeting(visible: string, context: string): string {
   const longest = Math.max(0, ...[...context.matchAll(/`+/gu)].map((run) => run[0].length));
   const fence = '`'.repeat(Math.max(MIN_FENCE_LENGTH, longest + 1));
   return `${visible}\n\n${fence}${CONTEXT_FENCE}\n${context}\n${fence}`;
 }
 
-/**
- * 相談で送る `messages`。会話と同じくシステムプロンプト（全体の設定。`{{char}}` などは `expand` で
- * 置き換える）を先頭に置き、付加情報を埋め込んだ初期メッセージ（`assistant`）、要約（`system`。
- * 要約した相談だけ）、相談のやり取りの順。空の発言は送らない。案を書かせるツールの呼び出しがある
- * 発言は呼び出しを付けて送り、その後ろに呼び出しごとの結果（`callResult` が作る）を `tool` で置く
- * （ほかの名前の呼び出しは送らない）
- */
 export function advisorMessages(
   systemPrompt: string,
   messages: readonly AdvisorMessage[],
@@ -232,7 +204,6 @@ export function advisorMessages(
   ];
 }
 
-/** 相談の発言 1 件を送る形。呼び出しがあれば呼び出しと結果、無ければ本文（空なら送らない） */
 function messageParts(
   message: AdvisorMessage,
   callResult: (call: AdvisorToolCall, messageId: string) => string,
@@ -260,12 +231,6 @@ function messageParts(
   return [{ role: message.role, content: message.content }];
 }
 
-/**
- * 段ごとのプロンプトを辞書に書かせる指示。次の段の項目は送らないので、段の終わりの状態は
- * 次の段の始まりにつながる形で書かせる。勘所は「アウトラインの段」と呼ぶので同じ呼び名で指し、
- * 構成の項目に書かれると段にならないので、ほかの書き先を名指しで断る。この辞書の項目は
- * どれも段になるので、前提や舞台などの常時の項目は別の辞書へ書かせる
- */
 function outlineFormat(name: string): string[] {
   return [
     '',
@@ -293,15 +258,10 @@ function outlineFormat(name: string): string[] {
   ];
 }
 
-/**
- * 今の値を渡す文。送るたびに読む。カードの欄と個別追加辞書は使う用途だけ。段を書かせる辞書は、
- * どの用途でも渡す
- */
 function stateText(chat: Chat, use: AdvisorUse, outline: string | null): string {
   const character = chat.character ?? EMPTY_CHARACTER;
   const card = usesCard(use);
   const books = (chat.lorebooks ?? []).filter((book) => card || book.name === outline);
-  // 空の欄は渡さない（字下げもしない。送る量を抑える）
   const state = {
     items: chat.prompt.items.map((item) => itemView(chat.prompt.items, item)),
     ...(chat.prompt.prefill.content.length > 0 ? { prefill: chat.prompt.prefill } : {}),
@@ -332,7 +292,6 @@ function stateText(chat: Chat, use: AdvisorUse, outline: string | null): string 
   return `Current composition (JSON):\n${JSON.stringify(state)}`;
 }
 
-/** 構成の項目を渡す形。中身を外から入れる項目は出どころだけを渡す */
 function itemView(items: readonly PromptItem[], item: PromptItem): Record<string, unknown> {
   const history = items.findIndex((entry) => entry.marker === 'chatHistory');
   const section =

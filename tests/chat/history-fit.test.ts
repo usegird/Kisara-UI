@@ -19,11 +19,6 @@ import { parseContextOverflow } from '@/llm/schema';
 
 import { chat, chatMessage, chatTurns, contentText } from '../helpers/llm';
 
-// ─────────────────────────────
-// 上限に収める古い履歴の外し方と、会話履歴の要約
-// ─────────────────────────────
-
-/** 受け取る `assistant` を末尾に足した、送るときの形 */
 function sending(base: Chat): Chat {
   const receiving: ChatMessage = {
     id: 'r',
@@ -102,7 +97,6 @@ describe('古い履歴を外す', () => {
     expect(sent(shape, 2)).not.toContain('m0 ');
     expect(sent(shape, 2)).not.toContain('m1 ');
     expect(sent(shape, 2)).toContain('m2 ');
-    // 外せるのは 3 件まで（最後の m3 は残す）
     expect(sent(shape, 99)).toBe(sent(shape, 3));
     expect(sent(shape, 3)).toContain('m3 ');
   });
@@ -135,7 +129,6 @@ describe('古い履歴を外す', () => {
     );
     expect(fitted.drop).toBe(drop);
     expect(fitted.estimate).toBeLessThanOrEqual(whole * 0.6);
-    // ワークフローの定義の分も上限から引く
     const withTools = fitDrop(
       { chat: shape, composition: shape.prompt, sources: NO_SOURCES },
       { limit: whole * 0.6, tools: 50 },
@@ -203,7 +196,6 @@ describe('要約', () => {
     expect(messages[0]).toEqual({ role: 'system', content: '[Summary: They met.]' });
     expect(messages.map(contentText).join('|')).not.toContain('m2 ');
     expect(messages.map(contentText).join('|')).toContain('m3 ');
-    // 外すのは要約していない発言から
     expect(sent(shape, 1)).not.toContain('m3 ');
     expect(sent(shape, 1)).toContain('[Summary: They met.]');
   });
@@ -236,11 +228,9 @@ describe('要約', () => {
     const params = { stop: ['\n'], max_tokens: 300 };
     const request = buildSummaryRequest(messages, { model: 'm', params });
     expect(request).not.toHaveProperty('stop');
-    // 名前にも戻すの行を掛ける
     const restore = { id: 'r', name: 'Cat', value: 'Aria', restore: true as const };
     const renamed = summaryMessages(base, { ...sources, variables: [restore] }, { from: 4, to: 6 });
     expect(renamed[1]?.content).toContain('Cat: m5 ');
-    // 会話の max_tokens（返答の長さ）ではなく要約用の上限
     expect(request.max_tokens).toBe(SUMMARY_MAX_TOKENS);
     expect(request).not.toHaveProperty('tools');
   });
@@ -293,6 +283,7 @@ describe('読み戻し', () => {
     });
   });
 });
+
 describe('画像の見積もり', () => {
   it('画像 1 枚を決めた数で数え、履歴にも全体にも入れる', () => {
     const png = 'data:image/png;base64,iVBORw0KGgo=';
@@ -304,6 +295,7 @@ describe('画像の見積もり', () => {
     expect(b.total - a.total).toBe(2 * IMAGE_TOKENS);
   });
 });
+
 describe('返答の分と、上限に近い知らせ', () => {
   it('max_tokens が無ければ文脈長の 4 分の 1（4096 まで）を返答の分として引く', () => {
     expect(inputLimitOf(8000, undefined)).toBe(6000);

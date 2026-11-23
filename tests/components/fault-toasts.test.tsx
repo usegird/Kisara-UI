@@ -6,10 +6,6 @@ import { FaultToasts } from '@/components/app/FaultToasts';
 import { Toaster } from '@/components/ui/toast';
 import { useFaultStore } from '@/store/use-fault-store';
 
-// ─────────────────────────────
-// 想定外の失敗は帯に積まず、画面上部の知らせ（トースト）に出す
-// ─────────────────────────────
-
 afterEach(() => {
   cleanup();
   useFaultStore.getState().clear();

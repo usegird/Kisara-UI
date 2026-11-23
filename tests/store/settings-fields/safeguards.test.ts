@@ -6,10 +6,6 @@ import {
   safeguardOverrides,
 } from '@/store/settings-fields/safeguards';
 
-// ─────────────────────────────
-// 防御機構の値。既定と違う値だけを残し、壊れた値は既定に落とす。
-// ─────────────────────────────
-
 describe('防御機構の値', () => {
   it('既定は繰り返しの連続失敗 5 回・最短の間隔 1000ms・上限 1000 回', () => {
     expect(DEFAULT_SAFEGUARDS).toMatchObject({

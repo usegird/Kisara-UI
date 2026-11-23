@@ -24,10 +24,6 @@ import { type ChatMessage, type PromptComposition } from '@/chat/types';
 import { cardView, chat, chatMessage, contentText, sampleComposition } from '../helpers/llm';
 import { png, textChunk } from '../helpers/png';
 
-// ─────────────────────────────
-// キャラクターカードの読み取りと、送る中身への差し込み。
-// ─────────────────────────────
-
 const encoder = new TextEncoder();
 
 function base64Json(value: unknown): string {
@@ -157,10 +153,6 @@ describe('送る中身への差し込み', () => {
       { text: 'Q', userId: 'u2', assistantId: 'a2' },
     );
 
-  /**
-   * カードの構成の main と jailbreak に、構成の側の本文を入れたもの。欄が空のカードには jailbreak を
-   * 置かないので、利用者が足した項目として足す
-   */
   const ownText = (main: string, post: string): PromptComposition => {
     const card = cardComposition(view);
     const withMain = updatePromptItem(card, 'main', { content: main, enabled: true }) ?? card;
@@ -169,6 +161,7 @@ describe('送る中身への差し込み', () => {
       : addPromptItem(withMain, 'jailbreak', 'after');
     return updatePromptItem(withPost, 'jailbreak', { content: post, enabled: true }) ?? withPost;
   };
+
   it('毎回同じ印は追加辞書の印の直前に、状況は直後に足す', () => {
     const prompt = withSourceMarkers(sampleComposition());
     const ids = prompt.items.map((item) => item.id);
@@ -202,6 +195,7 @@ describe('送る中身への差し込み', () => {
     const at = ids.indexOf('dialogueExamples');
     expect(ids.slice(at, at + 3)).toEqual(['dialogueExamples', 'additionalInfo', 'scenario']);
   });
+
   it('メインプロンプトと履歴後の指示は、欄に中身があるときだけ普通の項目として置く', () => {
     const empty = cardComposition(cardView(v2({}))).items.map((item) => item.id);
     expect(empty).not.toContain('main');
@@ -211,7 +205,6 @@ describe('送る中身への差し込み', () => {
     );
     expect(filled.items[0]?.id).toBe('main');
     expect(filled.items.at(-1)?.id).toBe('jailbreak');
-    // 無効にでき、消せる
     expect(updatePromptItem(filled, 'jailbreak', { enabled: false })).not.toBeNull();
     expect(removePromptItem(filled, 'jailbreak')).not.toBeNull();
   });
@@ -274,6 +267,7 @@ describe('ロアブック', () => {
     ]);
     expect(parseCharacterFields({ name: 'ミナ' })?.variables).toBeUndefined();
   });
+
   it('戻すの印は true のときだけ読む', () => {
     const rows = [
       { id: 'x', name: 'アオバネ', value: '花子', restore: true },
@@ -319,6 +313,7 @@ describe('ロアブック', () => {
       priority: 7,
     });
   });
+
   it('会話に当たった項目だけを World Info の印に入れて送る', () => {
     const view = cardView(
       v2({
@@ -352,6 +347,7 @@ describe('ロアブック', () => {
     expect(sent).not.toContain('The sea lore.');
   });
 });
+
 describe("Character's Note", () => {
   const base = (prompt: PromptComposition) =>
     appendTurn(chat([chatMessage('u1', 'user', ['hi'])], { prompt }), {
@@ -362,7 +358,6 @@ describe("Character's Note", () => {
   const noteCard = (role: string) =>
     v2({ extensions: { depth_prompt: { prompt: 'Note.', depth: 0, role } } });
 
-  /** カードの個別追加辞書を当てて送る中身にする */
   function sendCard(card: Record<string, unknown>): ReturnType<typeof mergeParts> {
     const view = cardView(card);
     const prompt = cardComposition(view);

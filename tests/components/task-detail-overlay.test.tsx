@@ -8,13 +8,8 @@ import { useTaskDetailStore } from '@/store/use-task-detail-store';
 
 import { queueTask } from '../helpers/queue';
 
-// 並びはここで決める（キューの取り直しを作り物にする）
 const queue = vi.hoisted(() => ({ tasks: [] as QueueTask[] }));
 vi.mock('@/hooks/run/use-queue-tasks', () => ({ useQueueTasks: () => queue.tasks }));
-
-// ─────────────────────────────
-// タスクの詳細の追従。終わった時点で移り、開いた時点では移らない
-// ─────────────────────────────
 
 afterEach(() => {
   cleanup();

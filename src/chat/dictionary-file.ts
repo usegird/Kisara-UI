@@ -2,25 +2,16 @@ import type { LoreEntry } from '@/chat/lore';
 import { DEFAULT_ORDER, readWorldInfo } from '@/chat/world-info';
 import { MEGABYTE } from '@/lib/file-size';
 
-// ─────────────────────────────
-// 取り込む追加辞書のファイルの読み取り（World Info の JSON・用語と定義の表）。
-// ─────────────────────────────
-
-/** 取り込むファイルを読めなかった理由 */
 export type DictionaryFileProblem = 'format' | 'empty' | 'size';
 
-/** 取り込む追加辞書のファイルの大きさの上限（MB） */
 const DICTIONARY_FILE_MAX_MEGABYTES = 32;
 
-/** 取り込む追加辞書のファイルの大きさの上限 */
 export const DICTIONARY_FILE_MAX_BYTES = DICTIONARY_FILE_MAX_MEGABYTES * MEGABYTE;
 
-/** 取り込むファイルを読んだ結果。読めた名前と項目か、読めなかった理由 */
 type DictionaryFile =
   | { readonly kind: 'ok'; readonly name: string; readonly entries: readonly LoreEntry[] }
   | { readonly kind: 'error'; readonly problem: DictionaryFileProblem };
 
-/** 区切り文字の表を行と欄に分ける（`"` で囲んだ欄の中の区切り・改行・`""` を扱う） */
 function splitTable(source: string, delimiter: string): string[][] {
   const rows: string[][] = [];
   let row: string[] = [];
@@ -59,7 +50,6 @@ function splitTable(source: string, delimiter: string): string[][] {
   return rows;
 }
 
-// 表の 1 行目が見出しかを見分ける語（ファイルの中身と比べるだけで、画面には出さない）
 // eslint-disable-next-line no-restricted-syntax -- 見出しの語。画面の文言ではない
 const TERM_HEADERS = new Set(['用語', 'term', 'word', 'key']);
 
@@ -71,10 +61,6 @@ function isHeader(row: readonly string[]): boolean {
   return TERM_HEADERS.has(term) && DEFINITION_HEADERS.has(definition);
 }
 
-/**
- * 用語と定義の表。1 列目が用語、2 列目が定義、3 列目が別名（「、」か「/」で区切る）。
- * 本文は「用語: 定義」（定義だけでは、どの用語の定義かが送る中身から読めないため）
- */
 function readTermTable(source: string, delimiter: string): LoreEntry[] {
   const rows = splitTable(source, delimiter);
   const body = rows.length > 0 && isHeader(rows[0] ?? []) ? rows.slice(1) : rows;
@@ -108,7 +94,6 @@ function readTermTable(source: string, delimiter: string): LoreEntry[] {
   });
 }
 
-/** バイト順マーク */
 const BOM = 0xfeff;
 
 function baseName(fileName: string): string {
@@ -117,12 +102,7 @@ function baseName(fileName: string): string {
   return dot > 0 ? name.slice(0, dot) : name;
 }
 
-/**
- * 取り込むファイルを読む。形は拡張子で分け、`.json` は World Info、
- * `.csv`・`.tsv` は用語と定義の表。名前は World Info の `name`、無ければファイル名
- */
 export function readDictionaryFile(fileName: string, content: string): DictionaryFile {
-  // 先頭の BOM（表計算ソフトが書き出す CSV に付く）を除く
   const source = content.charCodeAt(0) === BOM ? content.slice(1) : content;
   const extension = fileName.toLowerCase().split('.').pop() ?? '';
   let name = baseName(fileName);

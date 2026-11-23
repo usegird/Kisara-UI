@@ -1,7 +1,3 @@
-/*
- * キーの入力の窓の見た目。本体の CSS は読まない（ゲートウェイは本体の部品を持たない）
- */
-
 :root {
   color-scheme: light dark;
   font-family: system-ui, sans-serif;
@@ -63,13 +59,11 @@ form > button {
   align-self: flex-start;
 }
 
-/* 明るい背景でも暗い背景でも 4.5:1 を保つ組 */
 .error {
   margin: 0;
   color: light-dark(#b00020, #ff6b6b);
 }
 
-/* 目のアイコンは欄の右端に重ね、打った文字が下に潜らないよう欄の右を空ける */
 .key-box {
   position: relative;
   display: flex;
@@ -81,7 +75,6 @@ form > button {
   padding-right: 36px;
 }
 
-/* 押せる大きさは 24px 以上（WCAG 2.5.8） */
 button.eye {
   position: absolute;
   top: 50%;

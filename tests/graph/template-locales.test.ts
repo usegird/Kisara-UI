@@ -6,10 +6,6 @@ import {
   TEMPLATE_LOCALES,
 } from '@/graph/template-locales';
 
-// ─────────────────────────────
-// 同梱テンプレートの一覧の言語と、初めに選ぶ言語。
-// ─────────────────────────────
-
 describe('pickTemplateLocale', () => {
   it('ブラウザの優先言語から最初に合うもの', () => {
     expect(pickTemplateLocale(['xx', 'ja-JP', 'en'])).toBe('ja');

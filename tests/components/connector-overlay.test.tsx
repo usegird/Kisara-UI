@@ -25,11 +25,6 @@ import { useSettingsStore } from '@/store/use-settings-store';
 import { anchorRect, fixedAnchors } from '../helpers/anchors';
 import { nodeRow } from '../helpers/views';
 
-// ─────────────────────────────
-// 接続線の引き分け（直結か、変数ボックスを経由する 2 本か）。
-// jsdom はレイアウトを持たないので、測定結果を直接差し込んで判定だけを見る。
-// ─────────────────────────────
-
 afterEach(() => {
   cleanup();
   useSettingsStore.setState({ showPassedLines: false });
@@ -37,7 +32,6 @@ afterEach(() => {
 
 const rect = anchorRect;
 
-/** 1→2 は両端が画面内。2→3 はカード3の入力行が画面下で切れている */
 function registry(): AnchorRegistry {
   const rects = new Map<string, AnchorRect>([
     [VIEWPORT_ANCHOR_KEY, rect(0, 600)],
@@ -49,7 +43,6 @@ function registry(): AnchorRegistry {
     [outputAnchorKey(2), rect(290, 300)],
     [inputAnchorKey(2, 'image'), rect(210, 230)],
     [inputAnchorKey(3, 'image'), rect(590, 610)],
-    // パラメタ部分。カード3は下が切れている
     [bodyAnchorKey(1), rect(20, 80)],
     [bodyAnchorKey(2), rect(205, 285)],
     [bodyAnchorKey(3), rect(570, 880)],
@@ -121,7 +114,6 @@ describe('接続線の引き分け', () => {
   it('直結したリンクには変数経由の線も破線も引かない', () => {
     const drawn = draw();
 
-    // 1→2 は直結済み。変数 1:0 宛の破線も、1:0 からの実線も出ない
     expect(drawn.filter((path) => path.title === 'IMAGE → image' && path.arrow)).toHaveLength(1);
     expect(drawn.filter((path) => path.title === 'Load Image / IMAGE')).toHaveLength(0);
   });
@@ -129,7 +121,6 @@ describe('接続線の引き分け', () => {
   it('直結できないリンクは、変数宛の破線と入力行への実線で辿らせる', () => {
     const drawn = draw();
 
-    // 2→3 は入力行が画面下で切れているので直結しない
     expect(drawn.some((path) => path.title.startsWith('Scale / IMAGE →'))).toBe(false);
 
     const dashed = drawn.filter((path) => path.dash === '4 3');
@@ -144,7 +135,6 @@ describe('接続線の引き分け', () => {
   });
 
   it('接続元のパラメタが欠けていても、出力と受ける行が見えていれば直結する', () => {
-    // カード1（接続元）のパラメタ部分だけを画面からはみ出させる（出力の点は見えている）
     const cutSource = (): AnchorRegistry => {
       const base = registry();
       const rects = new Map(base.positions.getState().rects);
@@ -160,12 +150,10 @@ describe('接続線の引き分け', () => {
 
     const titles = [...container.querySelectorAll('svg title')].map((node) => node.textContent);
     expect(titles.some((title) => title === 'Load Image / IMAGE → image')).toBe(true);
-    // 直結したリンクは変数経由にしない（2→3 の 1 本だけが経由）
     expect(titles.filter((title) => title === 'IMAGE → image')).toHaveLength(1);
   });
 
   it('宛先はパラメータ行さえ見えていれば直結する', () => {
-    // カード2（宛先）のパラメタ部分は下が切れているが、image 行そのものは見えている
     const cutTarget = (): AnchorRegistry => {
       const base = registry();
       const rects = new Map(base.positions.getState().rects);
@@ -186,7 +174,6 @@ describe('接続線の引き分け', () => {
   it('見えていないカードへも、あるはずの位置へ向けて引き、カードの列の高さで見切る', () => {
     const base = registry();
     const rects = new Map(base.positions.getState().rects);
-    // カード2の出力も、カード3の入力行も、列の外（下）へ送られている
     rects.set(outputAnchorKey(2), rect(700, 710));
     rects.set(inputAnchorKey(3, 'image'), rect(900, 920));
     const { container } = render(
@@ -207,9 +194,7 @@ describe('接続線の引き分け', () => {
   it('見えていない変数からの線は、変数の実際の位置へ向けて引き、列の見えている高さで見切る', () => {
     const base = registry();
     const rects = new Map(base.positions.getState().rects);
-    // 変数 2:0 だけが変数の列の外（下）。消費先のカード 3 の入力行は見えている
     rects.set(inputAnchorKey(3, 'image'), rect(400, 420));
-    // 接続元の出力の点が下で欠けているので直結せず、変数を経由させる
     rects.set(outputAnchorKey(2), rect(595, 605));
     rects.set(variableAnchorKey('2:0'), {
       left: 500,
@@ -229,9 +214,7 @@ describe('接続線の引き分け', () => {
     const clipId = /url\(#(.+)\)/.exec(group?.getAttribute('clip-path') ?? '')?.[1] ?? '';
     const area = container.querySelector(`clipPath[id="${clipId}"] rect`);
 
-    // 列の端に寄せず、変数のある高さ（810）から引く
     expect(group?.querySelector('path')?.getAttribute('d')).toMatch(/^M 500 810 /);
-    // 横には切らず、両方の列の見えている高さ（0〜600）で切る
     expect([area?.getAttribute('y'), area?.getAttribute('height')]).toEqual(['0', '600']);
   });
 
@@ -240,7 +223,6 @@ describe('接続線の引き分け', () => {
     const rects = new Map(base.positions.getState().rects);
     rects.set(outputAnchorKey(2), rect(700, 710));
     rects.set(inputAnchorKey(3, 'image'), rect(900, 920));
-    // 変数 2:0 も変数の列の外（下）へ送られている
     rects.set(variableAnchorKey('2:0'), rect(800, 820));
     const { container } = render(
       <AnchorContext.Provider value={fixedAnchors(rects)}>
@@ -249,10 +231,8 @@ describe('接続線の引き分け', () => {
     );
     const titles = [...container.querySelectorAll('svg > g title')].map((t) => t.textContent);
 
-    // 変数 2:0 から出る線（元のカードへの破線・消費先への実線）はどちらも引かない
     expect(titles).not.toContain('Scale / IMAGE');
     expect(titles).not.toContain('IMAGE → image');
-    // 見えているもの同士の直結はそのまま
     expect(titles.some((title) => title?.startsWith('Load Image / IMAGE →'))).toBe(true);
   });
 
@@ -260,7 +240,6 @@ describe('接続線の引き分け', () => {
     const base = registry();
     const rects = new Map(base.positions.getState().rects);
     rects.delete(outputAnchorKey(2));
-    // 変数の列はカードの列（右端 100）より右
     rects.set(variableAnchorKey('2:0'), {
       left: 500,
       right: 600,
@@ -277,7 +256,6 @@ describe('接続線の引き分け', () => {
       (group) => group.querySelector('title')?.textContent === 'Scale / IMAGE',
     );
 
-    // 変数の左端 500 から、カードの列の右端 100 までの 3/4（300）左で見切る
     expect(stub?.querySelector('path')?.getAttribute('d')).toMatch(/^M 200 40 /);
   });
 
@@ -294,7 +272,6 @@ describe('接続線の引き分け', () => {
 });
 
 describe('上へ過ぎた宛先への線', () => {
-  /** カード3の入力行を `top` へ送って、引いた線の題名を集める */
   function titlesWithTargetAt(top: number): string[] {
     const rects = new Map(registry().positions.getState().rects);
     rects.set(inputAnchorKey(3, 'image'), rect(top, top + 20));
@@ -431,7 +408,6 @@ describe('線の ⊕', () => {
         <ConnectorOverlay boxes={linked} onInsert={onInsert} />
       </AnchorContext.Provider>,
     );
-    // カード 3 の行が下で切れているので、2 の出力は変数を経由する（点線）
     const dashed = [...container.querySelectorAll('svg > g')].find(
       (g) => g.querySelector('title')?.textContent === 'Scale / IMAGE',
     );
@@ -455,10 +431,6 @@ describe('アプリ入力からカードへの線', () => {
     rows: [nodeRow({ name: 'seed', widgetName: 'seed' })],
   };
 
-  /**
-   * 左の列の枠（右端 100）の項目は見えていて、カードの行は位置 targetTop にある。
-   * `appBottom` は左の列の見えている範囲の下端（狭い画面では中身の高さで止まる）
-   */
   function drawApp(targetTop: number, appBottom = 600): Element | undefined {
     const base = registry();
     const rects = new Map(base.positions.getState().rects);
@@ -490,7 +462,6 @@ describe('アプリ入力からカードへの線', () => {
     const line = drawApp(-400);
     const d = line?.querySelector('path')?.getAttribute('d') ?? '';
 
-    // 列の端に寄せず、行のある高さ（-390）へ向かう
     expect(d).toMatch(/ 300 -390$/);
     expect(line?.getAttribute('clip-path')).toMatch(/^url\(#kisara-clip-/);
   });
@@ -501,7 +472,6 @@ describe('アプリ入力からカードへの線', () => {
     const clip = document.getElementById(id)?.querySelector('rect');
     const viewport = registry().positions.getState().rects.get(VIEWPORT_ANCHOR_KEY);
 
-    // 見切る高さは左の列（0〜300）ではなく、カードの列の見えている下端まで
     expect(Number(clip?.getAttribute('y')) + Number(clip?.getAttribute('height'))).toBe(
       viewport?.bottom,
     );

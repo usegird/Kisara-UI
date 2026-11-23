@@ -11,10 +11,6 @@ import { stubMissingDom } from '../helpers/dom';
 import { LEAK_ALLOWANCE, LEAK_ROUNDS, leakWatch } from '../helpers/leak';
 import { nodeView } from '../helpers/views';
 
-// ─────────────────────────────
-// ノード検索。分類の木・よく使うもの・呼び出し元のスロットから入る絞り込みの初期値を確かめる。
-// ─────────────────────────────
-
 beforeAll(stubMissingDom);
 
 afterEach(() => {
@@ -51,10 +47,8 @@ function show(overrides: Partial<React.ComponentProps<typeof NodeSearchDialog>> 
   );
 }
 
-/** 候補の 1 行目の表示名と分類（右寄せの型と 2 行目の説明は含めない） */
 const names = (): string[] =>
   [...document.querySelectorAll('[cmdk-item]')].map((item) => {
-    // 行の中身は見本を出すきっかけ（行いっぱい）に包んである
     const [name, category] = [...(item.firstElementChild?.firstElementChild?.children ?? [])];
     return `${name?.textContent ?? ''}${category?.textContent ?? ''}`;
   });
@@ -65,18 +59,15 @@ const treeLabels = (): (string | null)[] =>
 describe('カードの見本', () => {
   it('候補の行を指すと、少し待ってダイアログの外にカードの見本を出し、離れると消す', async () => {
     show();
-    // 名前でなく行のどこでも（行いっぱいのきっかけ）
     const item = within(screen.getByRole('dialog')).getByText('MyUpscale').closest('[cmdk-item]');
     const name = item?.firstElementChild as HTMLElement;
 
     fireEvent.pointerEnter(name);
     fireEvent.mouseEnter(name);
-    // なぞっただけでは出さない
     expect(screen.queryByRole('article', { name: 'MyUpscale' })).toBeNull();
 
     const card = await screen.findByRole('article', { name: 'MyUpscale' });
     expect(screen.getByRole('dialog').contains(card)).toBe(false);
-    // 足したときと同じカード（入力の行と出力）。操作はできない
     expect(within(card).getByText('image')).toBeDefined();
     expect(card.closest('[inert]')).not.toBeNull();
 
@@ -118,7 +109,6 @@ describe('分類の木', () => {
     const tree = screen.getByLabelText('分類');
 
     fireEvent.click(within(tree).getByText('カスタムノード'));
-    // カスタムノードの下はパックでなく分類。image の下の upscaling は閉じている
     expect(treeLabels()).toEqual(['すべて3', 'image1', 'カスタムノード2', 'image2']);
 
     fireEvent.click(within(tree).getAllByText('image')[1] as HTMLElement);
@@ -180,10 +170,6 @@ describe('呼び出し元からの絞り込み', () => {
   });
 });
 
-// ─────────────────────────────
-// ノード追加 / ノード参照の切り替え
-// ─────────────────────────────
-
 describe('ノード参照', () => {
   const views = [
     nodeView({
@@ -220,7 +206,6 @@ describe('ノード参照', () => {
     const entries = within(nav)
       .getAllByRole('button')
       .map((button) => button.textContent);
-    // 起点（3）は出さない
     expect(entries).toEqual(['すべて1', '1Load Image1']);
 
     const list = screen.getByRole('listbox', { name: '接続元の出力' });
@@ -242,7 +227,6 @@ describe('候補の行', () => {
         definition('Loader', []),
       ),
     });
-    // 並びは表示名の順
     const [loader, upscale] = [...document.querySelectorAll('[cmdk-item]')];
     const lines = (item: Element | undefined): (string | null)[][] =>
       [...(item?.firstElementChild?.children ?? [])].map((line) =>
@@ -253,7 +237,6 @@ describe('候補の行', () => {
       ['Upscale', '', 'IMAGE, MASK'],
       ['画像を拡大します', 'IMAGE'],
     ]);
-    // 口も説明も無いものは — を出す
     expect(lines(loader)).toEqual([
       ['Loader', '', '—'],
       ['', '—'],
@@ -262,7 +245,6 @@ describe('候補の行', () => {
 });
 
 describe('漏れ', () => {
-  /** 画面と同じく、開いている間だけ置き、焦点を戻す枠で包む */
   function Placed({ open }: { readonly open: boolean }): React.ReactElement | null {
     return open ? (
       <ReturnFocus>

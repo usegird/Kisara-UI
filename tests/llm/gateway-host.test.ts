@@ -7,10 +7,6 @@ import type { ChatCompletionRequest, ChatStreamEvent } from '@/port/llm-port';
 
 import { fakeLlmPort } from '../helpers/llm';
 
-// ─────────────────────────────
-// 本体の側。ゲートウェイがキーを持つ接続先への要求だけをゲートウェイへ回し、ほかは直に送る。
-// ─────────────────────────────
-
 const GATEWAY = 'https://gateway.example';
 const BASE = 'https://openrouter.ai/api/v1';
 const LOCAL = 'http://127.0.0.1:11434/v1';
@@ -25,7 +21,6 @@ afterEach(() => {
   document.body.replaceChildren();
 });
 
-/** 本体の側を作り、iframe の読み込みを起こして、ゲートウェイの側の通り道を取る */
 function setup() {
   const direct = fakeLlmPort(['direct']);
   const open = vi.fn((): unknown => ({}));

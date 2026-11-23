@@ -7,21 +7,15 @@ import {
   type LinkId,
   type NodeId,
   type Workflow,
+  type WorkflowLink,
   type WorkflowNode,
 } from '@/graph/types';
 import { nextLinkId, nextNodeId } from '@/graph/workflow-ids';
 
-// ─────────────────────────────
-// リンク操作。すべて純関数で、入力の Workflow は変更しない。
-// リンクはルートがタプル、subgraph の中がオブジェクトの形なので、書くのはルートだけ（読むのは link-read.ts）。
-// ─────────────────────────────
-
-/** id でノードを探す */
 export function findNode(workflow: Workflow, id: NodeId): WorkflowNode | undefined {
   return workflow.nodes.find((node) => node.id === id);
 }
 
-/** 対象ノードだけ差し替えた nodes 配列を返す */
 function replaceNode(
   nodes: readonly WorkflowNode[],
   id: NodeId,
@@ -55,7 +49,6 @@ function removeOutputLink(node: WorkflowNode, slot: number, linkId: LinkId): Wor
   };
 }
 
-/** リンクを 1 本外し、両端の口の参照も外す。無ければ同じものを返す */
 export function removeLink(workflow: Workflow, linkId: LinkId): Workflow {
   const target = linkIndex(workflow.links).get(linkId);
   if (!target) return workflow;
@@ -74,10 +67,6 @@ export function removeLink(workflow: Workflow, linkId: LinkId): Workflow {
   };
 }
 
-/**
- * ノードを外す。**繋がっているリンクもすべて外す**（相手側の入力・出力からも消す）。
- * 無い id なら同じものを返す
- */
 export function removeNode(workflow: Workflow, nodeId: NodeId): Workflow {
   if (!findNode(workflow, nodeId)) return workflow;
 
@@ -89,12 +78,29 @@ export function removeNode(workflow: Workflow, nodeId: NodeId): Workflow {
   return { ...next, nodes: next.nodes.filter((node) => node.id !== nodeId) };
 }
 
-/**
- * ノードを外し、**前後の線をつなぎ直す**（本体の既定に合わせる）。
- * 本体と同じ順で試す: 線が来ている入力ごとに ① 同じ番号の出力 ② 型が合う最初の出力。
- * 選んだ出力の先すべてへ、その入力の元から張る。先 1 本につき最初に張れた 1 回だけが効き、
- * 元の出力と先の入力の型が合わなければ張らずに次を試す。どれでも張れなかった先は外れる
- */
+export function removeInputSlots(
+  workflow: Workflow,
+  nodeId: NodeId,
+  slots: ReadonlySet<number>,
+): Workflow {
+  if (slots.size === 0) return workflow;
+  let next = workflow;
+  for (const link of linkIndex(workflow.links).values()) {
+    if (link.targetId === nodeId && slots.has(link.targetSlot)) next = removeLink(next, link.id);
+  }
+  const moved = (slot: number): number => slot - [...slots].filter((gone) => gone < slot).length;
+  const links = next.links.map((link): WorkflowLink => {
+    if (!Array.isArray(link))
+      return link.target_id === nodeId ? { ...link, target_slot: moved(link.target_slot) } : link;
+    return link[3] === nodeId ? [link[0], link[1], link[2], nodeId, moved(link[4]), link[5]] : link;
+  });
+  const nodes = replaceNode(next.nodes, nodeId, (node) => ({
+    ...node,
+    inputs: nodeInputs(node).filter((_, slot) => !slots.has(slot)),
+  }));
+  return { ...next, nodes, links };
+}
+
 export function removeNodeKeepingLinks(workflow: Workflow, nodeId: NodeId): Workflow {
   const node = findNode(workflow, nodeId);
   if (!node) return workflow;
@@ -104,7 +110,6 @@ export function removeNodeKeepingLinks(workflow: Workflow, nodeId: NodeId): Work
   const outputs = nodeOutputs(node);
   const outputType = (slot: number): string => slotTypeName(outputs[slot]?.type);
 
-  // 線が来ている入力と、その元
   const sources = inputs.flatMap((input, slot) => {
     const link = typeof input.link === 'number' ? links.get(input.link) : undefined;
     if (!link || link.targetId !== nodeId || link.originId === nodeId) return [];
@@ -112,7 +117,6 @@ export function removeNodeKeepingLinks(workflow: Workflow, nodeId: NodeId): Work
     const originType = slotTypeName(nodeOutputs(origin)[link.originSlot]?.type);
     return [{ slot, type: slotTypeName(input.type), link, originType }];
   });
-  // 試す順（入力 → 出力の組）
   const tries = [
     ...sources.flatMap((source) =>
       source.slot < outputs.length && typesMatch(source.type, outputType(source.slot))
@@ -146,20 +150,11 @@ export function removeNodeKeepingLinks(workflow: Workflow, nodeId: NodeId): Work
   return bridges.reduce(addLink, removeNode(workflow, nodeId));
 }
 
-/**
- * その**入力スロット**に入っているリンク。
- * パラメータの ▶ から「この入力の手前へ」ノードを挿し込むときの対象。
- */
 export function incomingLinkTo(workflow: Workflow, targetId: NodeId, slot: number): LinkId | null {
   const link = nodeInputs(findNode(workflow, targetId))[slot]?.link;
   return typeof link === 'number' ? link : null;
 }
 
-/**
- * パラメータ（widget）を**線で受けられる入力**にする。`inputs[]` に同じ名前があればその位置、
- * 無ければ `widget` 付きの項目を末尾に足してその位置を返す（ComfyUI 本体が widget を入力に
- * 変えたときと同じ形）。値の並び（`widgets_values`）は触らない。ノードが無ければ null。
- */
 export function withWidgetInput(
   workflow: Workflow,
   nodeId: NodeId,
@@ -186,7 +181,6 @@ export function withWidgetInput(
   };
 }
 
-/** 張るリンクの両端 */
 interface AddLinkParams {
   readonly originId: NodeId;
   readonly originSlot: number;
@@ -194,10 +188,6 @@ interface AddLinkParams {
   readonly targetSlot: number;
 }
 
-/**
- * リンクを1本張る。入力は1本しか受けられないため、既存リンクがあれば先に外す。
- * 型不一致は許容する（型不一致のバリデーションは据え置き）。
- */
 export function addLink(workflow: Workflow, params: AddLinkParams): Workflow {
   const { originId, originSlot, targetId, targetSlot } = params;
 
@@ -240,25 +230,15 @@ export function addLink(workflow: Workflow, params: AddLinkParams): Workflow {
   };
 }
 
-/**
- * 新しいノードを、呼び出し元のスロットへ繋ぐ指定。
- *   ・`after` : そのスロット（出力）から新しいノードの入力へ
- *   ・`before`: 新しいノードの出力からそのスロット（入力）へ
- * **型が合う位置に繋ぐ**。合うものが無ければ繋がない（勝手な相手を選ばない）。
- */
 export interface ConnectRequest {
   readonly kind: 'after' | 'before';
   readonly nodeId: NodeId;
-  /** 呼び出し元の口。`before` でパラメータから足すとき、項目がまだ無ければ null */
   readonly slot: number | null;
   readonly type: string;
-  /** `before` でパラメータから足すときの widget 名。繋ぐ前に入力へ変える */
   readonly widget?: string | undefined;
-  /** 新しいノード側の口。決まっていなければ型で選ぶ */
   readonly newSlot?: number | undefined;
 }
 
-/** 足したノードを、指定どおり呼び出し元のスロットへ繋ぐ。繋げなければそのまま返す */
 export function linkNewNode(
   workflow: Workflow,
   node: WorkflowNode,
@@ -291,7 +271,6 @@ export function linkNewNode(
   });
 }
 
-/** `before` で繋ぐ先の入力。パラメータへ繋ぐときは、先に `inputs[]` へ項目を用意する */
 function beforeTarget(
   workflow: Workflow,
   connect: ConnectRequest,
@@ -302,18 +281,11 @@ function beforeTarget(
   return connect.slot === null ? null : { workflow, slot: connect.slot };
 }
 
-/** リンクの間にノードを挟むときの、挟むノードの繋ぐ口 */
 export interface InsertNodeOptions {
-  /** 挿入するノードのどの入力へ繋ぐか */
   readonly inputSlot?: number;
-  /** 挿入するノードのどの出力から繋ぐか */
   readonly outputSlot?: number;
 }
 
-/**
- * A→B のリンクを削除し、A→N・N→B の2本を張り直す。
- * 型不一致は許容し、ユーザーの手動修正に委ねる。
- */
 export function insertNodeBetween(
   workflow: Workflow,
   linkId: LinkId,
@@ -323,10 +295,6 @@ export function insertNodeBetween(
   return insertNodeAcross(workflow, [linkId], node, options);
 }
 
-/**
- * **同じ出力から出ている**リンク（A→B, A→C …）をまとめて外し、A→N と N→B, N→C … を張る
- * （出力から変数への点線の ⊕）。出どころが違うリンクが混じれば何もしない。
- */
 export function insertNodeAcross(
   workflow: Workflow,
   linkIds: readonly LinkId[],

@@ -1,53 +1,86 @@
 import { create } from 'zustand';
 
+import { setOwn } from '@/lib/own-key';
+import { formatComfyFailure } from '@/queue/comfy-failure-text';
 import { createBaseUrlActions } from '@/store/kit/base-url-resource';
 import { registerTabScopedValue } from '@/store/kit/tab-scoped';
 import { comfyPort } from '@/store/ports/comfy-port';
 
-// ─────────────────────────────
-// ワイルドカードの名前の一覧（接続先の Impact Pack から、接続したときに 1 回だけ取る）と、
-// 一覧の画面（ノードの上に重ねる）を開いているか。
-// ─────────────────────────────
-
-/** 一覧の取得の段階。`unavailable` は接続先に経路が無い */
 type WildcardsStatus = 'idle' | 'loading' | 'ready' | 'unavailable' | 'error';
 
-/** ワイルドカードの名前の一覧と、取る操作・画面の開閉 */
+export type WildcardEntries =
+  | { readonly status: 'loading' }
+  | { readonly status: 'ready'; readonly values: readonly string[] }
+  | { readonly status: 'unavailable' }
+  | { readonly status: 'error'; readonly error: string };
+
 interface WildcardsState {
   readonly status: WildcardsStatus;
   readonly names: readonly string[];
-  /** どの接続先の一覧か。変わったら取り直す */
   readonly baseUrl: string;
   readonly error: string | null;
-  /** その接続先の分が未取得のときだけ取る */
+  readonly entries: Readonly<Record<string, WildcardEntries>>;
   readonly ensure: (baseUrl: string) => Promise<void>;
-  /** 手動の取り直し */
   readonly refresh: (baseUrl: string) => Promise<void>;
-  /** 未取得に戻す（接続し直すとき）。一覧は残し、次の `ensure` で取り直す */
   readonly invalidate: () => void;
-  /** ワイルドカードの画面を重ねているか（重ねる先は別の部品なので、状態で受け渡す） */
+  readonly ensureEntries: (baseUrl: string, name: string) => Promise<void>;
   readonly panelOpen: boolean;
   readonly openPanel: () => void;
   readonly closePanel: () => void;
 }
 
-export const useWildcardsStore = create<WildcardsState>()((set, get) => ({
-  status: 'idle',
-  names: [],
-  baseUrl: '',
-  error: null,
-  ...createBaseUrlActions(set, get, async (baseUrl): Promise<Partial<WildcardsState>> => {
-    const names = await comfyPort().assets.fetchWildcards(baseUrl, {});
-    return names === null
-      ? { status: 'unavailable', names: [] }
-      : { status: 'ready', names, error: null };
-  }),
-  panelOpen: false,
-  openPanel: () => set({ panelOpen: true }),
-  closePanel: () => set({ panelOpen: false }),
-}));
+export function wildcardEntriesOf(
+  entries: Readonly<Record<string, WildcardEntries>>,
+  name: string,
+): WildcardEntries | null {
+  return Object.hasOwn(entries, name) ? (entries[name] ?? null) : null;
+}
 
-// ワイルドカードの画面はタブのもの
+export const useWildcardsStore = create<WildcardsState>()((set, get) => {
+  const writeEntries = (baseUrl: string, name: string, next: WildcardEntries): void => {
+    const state = get();
+    if (state.baseUrl !== baseUrl) return;
+    const current = wildcardEntriesOf(state.entries, name);
+    if (next.status !== 'loading' && current?.status !== 'loading') return;
+    const entries = { ...state.entries };
+    setOwn(entries, name, next);
+    set({ entries });
+  };
+
+  return {
+    status: 'idle',
+    names: [],
+    baseUrl: '',
+    error: null,
+    entries: {},
+    ...createBaseUrlActions(set, get, async (baseUrl): Promise<Partial<WildcardsState>> => {
+      const names = await comfyPort().assets.fetchWildcards(baseUrl, {});
+      return names === null
+        ? { status: 'unavailable', names: [], entries: {} }
+        : { status: 'ready', names, error: null, entries: {} };
+    }),
+    ensureEntries: async (baseUrl, name) => {
+      const current = wildcardEntriesOf(get().entries, name);
+      if (current !== null && current.status !== 'error') return;
+      if (baseUrl.length === 0 || get().baseUrl !== baseUrl) return;
+      writeEntries(baseUrl, name, { status: 'loading' });
+      try {
+        const values = await comfyPort().assets.fetchWildcardEntries(baseUrl, name, {});
+        writeEntries(
+          baseUrl,
+          name,
+          values === null ? { status: 'unavailable' } : { status: 'ready', values },
+        );
+      } catch (error) {
+        writeEntries(baseUrl, name, { status: 'error', error: formatComfyFailure(error) });
+      }
+    },
+    panelOpen: false,
+    openPanel: () => set({ panelOpen: true }),
+    closePanel: () => set({ panelOpen: false }),
+  };
+});
+
 registerTabScopedValue('wildcards', {
   current: () => (useWildcardsStore.getState().panelOpen ? true : null),
   isValue: (saved): saved is true => saved === true,

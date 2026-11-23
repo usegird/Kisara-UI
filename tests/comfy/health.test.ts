@@ -3,10 +3,6 @@ import { describe, expect, it, vi } from 'vitest';
 import type { FetchLike } from '@/comfy/client';
 import { probeReachability } from '@/comfy/health';
 
-// ─────────────────────────────
-// 到達確認。中身を読まない要求で、届くか届かないかだけを見る。
-// ─────────────────────────────
-
 const BASE_URL = 'http://127.0.0.1:8188';
 
 describe('到達確認', () => {

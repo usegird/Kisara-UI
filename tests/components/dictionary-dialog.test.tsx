@@ -6,10 +6,6 @@ import { DictionaryDialog } from '@/components/llm/dictionary/DictionaryDialog';
 
 import { loreEntry } from '../helpers/llm';
 
-// ─────────────────────────────
-// 追加辞書のダイアログ。「⊕ 追加」は一覧の末尾にあり、末尾に足す。
-// ─────────────────────────────
-
 afterEach(() => {
   cleanup();
 });
@@ -33,7 +29,6 @@ describe('項目を足す', () => {
     );
 
     const add = screen.getByRole('button', { name: '追加' });
-    // ボタンは一覧の中（最後の行）にある
     expect(add.closest('ul')).not.toBeNull();
     fireEvent.click(add);
 
@@ -70,6 +65,7 @@ describe('トリガー検索範囲', () => {
     expect(onSave).toHaveBeenCalledWith({ name: 'D', entries: [], scanDepth: 5 });
   });
 });
+
 describe('予約の名前', () => {
   const dialog = (name: string, onSave = vi.fn()) =>
     render(

@@ -14,13 +14,8 @@ import { t } from '@/i18n';
 import { importDictionaryFile, useDictionariesStore } from '@/store/use-dictionaries-store';
 import { useSettingsStore } from '@/store/use-settings-store';
 
-// ─────────────────────────────
-// 機能のタブの動的追加辞書のカード。端末にある全体の辞書だけを並べる（個別追加辞書は会話の中にある）。
-// ─────────────────────────────
-
 const BUTTON = smallButton();
 
-/** 全体の辞書の並び。全体で有効にした辞書を有効にした順に上へ、ほかは作った時刻の古い順にその下へ */
 function orderedDictionaries(
   dictionaries: Readonly<Record<string, Dictionary>>,
   enabledIds: readonly string[],
@@ -35,20 +30,16 @@ function orderedDictionaries(
   return [...enabled, ...rest];
 }
 
-/** 全体の辞書を 1 冊 1 行で並べ、全体で有効にする・編集する・作る・取り込む */
 export function DictionaryCard(): React.ReactElement {
   const dictionaries = useDictionariesStore((state) => state.dictionaries);
   const enabledIds = useSettingsStore((state) => state.loreDictionaryIds);
   const on = useSettingsStore((state) => state.loreDictionariesOn);
-  // 見ている辞書（画面の中だけ）
   const [viewing, setViewing] = useState<string | null>(null);
   const list = orderedDictionaries(dictionaries, enabledIds);
-  // 開いている辞書が一覧から消えたら、ダイアログも閉じる
   const viewed = viewing === null ? undefined : dictionaries[viewing];
 
   return (
     <section className="flex flex-col gap-2 rounded-md border p-2" aria-labelledby="dictionaries">
-      {/* カード全体で当てるかを切り替える。切っても 1 冊ずつのチェックは残す */}
       <label className="flex items-center gap-1.5 text-sm font-medium">
         <input
           type="checkbox"
@@ -75,7 +66,6 @@ export function DictionaryCard(): React.ReactElement {
             ))}
           </ul>
         )}
-        {/* 一覧の末尾に、新しく作る・ファイルを開く */}
         <div className="flex gap-2">
           <button
             type="button"
@@ -122,7 +112,6 @@ function DictionaryRow({
   onView,
 }: {
   readonly dictionary: Dictionary;
-  /** 全体で有効にしているか */
   readonly enabled: boolean;
   readonly onView: () => void;
 }): React.ReactElement {

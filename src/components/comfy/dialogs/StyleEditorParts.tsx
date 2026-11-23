@@ -13,11 +13,6 @@ import { t, type MessageKey } from '@/i18n';
 import { placeEntry } from '@/lib/insert-motion';
 import { useStylesStore } from '@/store/use-styles-store';
 
-// ─────────────────────────────
-// スタイルの編集の部品（取り直し・一覧・入力欄・下の帯）。状態は親が持つ
-// ─────────────────────────────
-
-/** 文面の種類ごとの見出しと写し取りの名前 */
 const TEXT_HEADINGS = {
   positive: { heading: 'styles.positiveText', copy: 'styles.copyPositive' },
   negative: { heading: 'styles.negativeText', copy: 'styles.copyNegative' },
@@ -27,18 +22,15 @@ const FIELD_CLASS = field({ size: 'sm', width: 'full' });
 
 const SELECTED = { true: 'bg-accent', false: '' };
 
-/** 一覧の先頭の「新しいスタイル」 */
 const newStyleItem = cva(
   'hover:bg-accent flex w-full items-center gap-1.5 rounded px-2 py-1 text-left text-xs',
   { variants: { selected: SELECTED } },
 );
 
-/** 一覧のスタイル 1 つ */
 const styleItem = cva('hover:bg-accent w-full truncate rounded px-2 py-1 text-left text-xs', {
   variants: { selected: SELECTED },
 });
 
-/** 文面 1 つぶんの写し取り付きの見出し（写し取りは**ラベルの外**。中に入れるとラベルが 2 つを指す） */
 function TextHeading({
   kind,
   text,
@@ -56,12 +48,10 @@ function TextHeading({
 
 interface RefreshStylesButtonProps {
   readonly status: ReturnType<typeof useStylesStore.getState>['status'];
-  /** 接続先が無い */
   readonly disabled: boolean;
   readonly onRefresh: () => void;
 }
 
-/** 接続先の表の読み直し（自動では読み直さない） */
 export function RefreshStylesButton({
   status,
   disabled,
@@ -83,14 +73,11 @@ export function RefreshStylesButton({
 
 interface StyleListProps {
   readonly styles: readonly Style[];
-  /** 選んでいるスタイルの名前。null は新しいスタイル */
   readonly selected: string | null;
-  /** 差し込み先の欄（ダブルクリックで肯定の文面を入れる） */
   readonly field: ReturnType<typeof useTextFieldWhile>;
   readonly onPick: (name: string | null) => void;
 }
 
-/** 選ぶ一覧。新規は絞り込みに拠らず先頭 */
 export function StyleList({ styles, selected, field, onPick }: StyleListProps): React.ReactElement {
   return (
     <nav
@@ -108,15 +95,12 @@ export function StyleList({ styles, selected, field, onPick }: StyleListProps): 
         {t('styles.newStyle')}
       </button>
       {styles.map((style) => (
-        // 掴んで欄へ落とすと肯定の文面が入る（ブラウザの文字のドラッグ）
         <div key={style.name} {...textDragProps(style.prompt)}>
           <button
             type="button"
             className={styleItem({ selected: style.name === selected })}
             title={t('styles.itemTitle', { name: style.name })}
             aria-pressed={style.name === selected}
-            // 押すと焦点はここへ移るが、差し込み先は開いてから最後に入った欄のまま
-            // （既定を止めると掴めなくなる）
             onClick={() => onPick(style.name)}
             onDoubleClick={(event) => {
               if (field === null) return;
@@ -136,7 +120,6 @@ interface StyleFormProps {
   readonly onPatch: (part: Partial<Style>) => void;
 }
 
-/** 直す欄（名前・肯定・否定） */
 export function StyleForm({ draft, onPatch }: StyleFormProps): React.ReactElement {
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto p-3">
@@ -174,7 +157,6 @@ export function StyleForm({ draft, onPatch }: StyleFormProps): React.ReactElemen
 }
 
 interface StyleFooterProps {
-  /** 書き込みの失敗。無ければ null */
   readonly message: string | null;
   readonly saving: boolean;
   readonly canDelete: boolean;
@@ -183,7 +165,6 @@ interface StyleFooterProps {
   readonly onSave: () => void;
 }
 
-/** 下端の帯（失敗の知らせ・削除・保存） */
 export function StyleFooter({
   message,
   saving,

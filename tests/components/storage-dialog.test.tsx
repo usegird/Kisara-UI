@@ -2,6 +2,7 @@
 import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { StaleBackupRow } from '@/components/llm/chat-list/StaleBackupRow';
 import { StorageDialogHost } from '@/components/llm/dialogs/StorageDialogHost';
 import { ComfyBackupField } from '@/components/llm/side-panel/ComfyBackupField';
 import { toastManager } from '@/components/ui/toast-manager';
@@ -25,15 +26,10 @@ import { LEAK_ALLOWANCE, LEAK_ROUNDS, leakWatch } from '../helpers/leak';
 vi.mock('@/lib/reload-page', () => ({ reloadPage: vi.fn() }));
 vi.mock('@/lib/download', () => ({ downloadText: vi.fn(), downloadBlob: vi.fn() }));
 
-// ─────────────────────────────
-// ストレージの管理。場所の選び方・階層の帯・印を付けてまとめて消す流れ・バックアップの列を確かめる。
-// ─────────────────────────────
-
 let embedding: FakeEmbeddingPort;
 let port: ReturnType<typeof comfyPort>;
 
 beforeEach(() => {
-  // ユーザーフォルダは既定で空にする（つないだテストで接続先へ取りに行かない）
   port = {
     ...comfyPort(),
     userFiles: {
@@ -59,11 +55,10 @@ afterEach(() => {
   installSystemPromptTable(null);
   useConnectionStore.setState({ status: 'disconnected' });
   useSettingsStore.setState({ dialogLayouts: {}, dialogPaneWidths: {}, dialogPanePins: {} });
-  useStorageDialogStore.setState({ isOpen: false, start: 'overview', staleNotice: false });
+  useStorageDialogStore.setState({ isOpen: false, start: 'overview', staleUrl: null });
   vi.useRealTimers();
 });
 
-/** 設定の欄と、ダイアログの出し先（画面全体で 1 つ） */
 function Field(): React.ReactElement {
   return (
     <>
@@ -79,21 +74,18 @@ async function openDialog(): Promise<HTMLElement> {
   return screen.findByRole('dialog');
 }
 
-/** 書き出しのファイル（1 行目に見出し、続けて 1 件 1 行。gzip で縮める） */
 async function exportedFile(category: string, items: Record<string, unknown>): Promise<Blob> {
   const header = JSON.stringify({ format: 'kisaraui-storage-export', version: 1, category });
   const lines = Object.entries(items).map(([key, value]) => JSON.stringify({ key, value }));
   return gzipLines([header, ...lines], 'application/gzip');
 }
 
-/** フォルダのアイコンで左の列を一時的に出し、場所を選ぶ（選ぶと閉じる） */
 async function choose(dialog: HTMLElement, name: string): Promise<void> {
   fireEvent.click(within(dialog).getByRole('button', { name: 'フォルダを出す' }));
   const nav = await within(dialog).findByRole('navigation', { name: '種類' });
   fireEvent.click(within(nav).getByRole('button', { name: new RegExp(`^${name}`) }));
 }
 
-/** 適用を押す時刻。押すたびに進め、前のテストの押下の見張りの間（PRESS_GUARD_MS）を外す */
 let pressedAt = Date.now();
 
 async function apply(dialog: HTMLElement): Promise<void> {
@@ -105,7 +97,6 @@ async function apply(dialog: HTMLElement): Promise<void> {
   });
 }
 
-/** 控えにシステムテンプレートを 2 件置き、つなぐ。消した控えの id を返す */
 function backupTemplates(): string[] {
   const removed: string[] = [];
   installComfyPort({
@@ -177,7 +168,6 @@ describe('左の列', () => {
     const dialog = await openDialog();
     expect(within(dialog).queryByRole('navigation', { name: '種類' })).toBeNull();
     fireEvent.click(within(dialog).getByRole('button', { name: 'フォルダを出す' }));
-    // 一時的に出した左の列も、境目で幅を変えられる
     expect(within(dialog).getByRole('separator', { name: /種類/ })).toBeTruthy();
     fireEvent.click(within(dialog).getByRole('button', { name: /ピン止めする/ }));
     expect(useSettingsStore.getState().dialogPanePins['llm-storage:directory']).toBe(true);
@@ -216,15 +206,12 @@ describe('削除と適用', () => {
     expect(within(list).getByText('ブラウザ')).toBeTruthy();
     expect(within(list).queryByText('バックアップ')).toBeNull();
     const summary = within(dialog).getByText('1 件 · 約 2.0 KB');
-    // 情報は列の見出し（一覧）より前
     expect(summary.compareDocumentPosition(list) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
-    // 帯には件数・全部戻すを出さず、右端の読み直すの左に全て削除を置く
     const band = within(dialog).getByRole('toolbar', { name: '種類の操作' });
     expect(within(band).queryByText(/件 · 約/)).toBeNull();
     expect(within(dialog).queryByRole('button', { name: '全部戻す' })).toBeNull();
     expect(band.lastElementChild?.getAttribute('aria-label')).toBe('読み直す');
     expect(band.lastElementChild?.previousElementSibling?.textContent).toBe('全て削除');
-    // 時刻と大きさは狭くしても隠さないので、情報アイコンは無い
     expect(within(list).queryByRole('button', { name: /の詳細$/ })).toBeNull();
   });
 
@@ -286,22 +273,18 @@ describe('削除と適用', () => {
       fireEvent.change(input!, { target: { files: [picked] } });
       await Promise.resolve();
     });
-    // localStorage でも、ファイルを開いている間はバックアップの列を出し、見出しの代わりにファイルの名前と外すアイコン
     const list = await within(dialog).findByRole('list', { name: '中身' });
     expect(within(list).getByText('local.json')).toBeTruthy();
     expect(within(list).getByRole('button', { name: 'ファイルを外す' })).toBeTruthy();
-    // 生データは、ファイルをもう一度流れで読んでその 1 件だけを出す
     fireEvent.click(within(list).getByRole('button', { name: '「設定」のファイルの生データ' }));
     expect(await screen.findByText(/"a": 2/)).toBeTruthy();
     fireEvent.click(within(list).getByRole('button', { name: '「設定」をバックアップから戻す' }));
-    // ブラウザにある 1 件へ戻すのは上書きなので、左の列に ＋ と − の両方を数える
     fireEvent.click(within(dialog).getByRole('button', { name: 'フォルダを出す' }));
     const nav = within(dialog).getByRole('navigation', { name: '種類' });
     const local = within(nav).getByRole('button', { name: /^localStorage/ });
     expect(local.textContent).toContain('+1');
     expect(local.textContent).toContain('−1');
     await apply(dialog);
-    // 戻すときにファイルを流れで読み直すので、書き換わるのを待つ
     await vi.waitFor(() => expect(localStorage.getItem(SETTINGS_KEY)).toBe('{"a":2}'));
     expect(reloadPage).toHaveBeenCalledTimes(1);
   });
@@ -313,7 +296,6 @@ describe('削除と適用', () => {
     await choose(dialog, 'localStorage');
     await within(dialog).findByRole('button', { name: 'ファイルを開く' });
     const input = dialog.querySelector<HTMLInputElement>('input[type="file"]');
-    // 33 MB の文字を入れた 1 件（実物の gzip の書き出しファイル）
     const huge = { a: 'x'.repeat(33 * 1024 * 1024) };
     const picked = new File([await exportedFile('local', { [SETTINGS_KEY]: huge })], 'big.json');
     await act(async () => {
@@ -400,7 +382,6 @@ describe('削除と適用', () => {
     await choose(dialog, '埋め込みモデル');
     fireEvent.click(await within(dialog).findByRole('button', { name: '削除 org/model' }));
     expect(embedding.removed).toEqual([]);
-    // もう一度押すと印を外す
     fireEvent.click(within(dialog).getByRole('button', { name: '削除を取り消す org/model' }));
     expect(within(dialog).getByRole('button', { name: '適用' })).toHaveProperty('disabled', true);
     fireEvent.click(within(dialog).getByRole('button', { name: '削除 org/model' }));
@@ -438,7 +419,6 @@ describe('バックアップの列', () => {
     const list = within(dialog).getByRole('list', { name: '中身' });
     expect(within(list).getByText('ブラウザ')).toBeTruthy();
     expect(within(list).getByText('バックアップ')).toBeTruthy();
-    // 件数の情報は「ブラウザ」と書かず、バックアップは括弧で添える
     expect(within(dialog).getByText(/^（バックアップ 2 件 · 約 /)).toBeTruthy();
   });
 
@@ -492,12 +472,10 @@ describe('バックアップの列', () => {
 });
 
 describe('ユーザーフォルダの物', () => {
-  /** 実行の記録に 1 つのファイルを置き、つなぐ。消したファイルを返す */
   function userFiles(): string[] {
     const removed: string[] = [];
     installComfyPort({
       ...port,
-      // 控えは空にする（作り物の接続先へ取りに行くと、名前の解決が詰まって後のテストが遅れる）
       library: { ...port.library, list: () => Promise.resolve([]) },
       userFiles: {
         list: (_baseUrl, kind) =>
@@ -523,7 +501,6 @@ describe('ユーザーフォルダの物', () => {
     const list = within(dialog).getByRole('list', { name: '中身' });
     expect(within(list).getByText('ComfyUI')).toBeTruthy();
     expect(within(list).queryByText('ブラウザ')).toBeNull();
-    // ブラウザの物ではないので、書き出しも開くアイコンも出さない
     expect(within(dialog).queryByRole('button', { name: 'エクスポート' })).toBeNull();
   });
 
@@ -545,6 +522,7 @@ describe('ユーザーフォルダの物', () => {
     ).toBeTruthy();
   });
 });
+
 describe('クリーンアップ', () => {
   it('元の無い古いバックアップを並べ、帯の「全て削除」で印を付けて適用でまとめて消す', async () => {
     const removed = backupTemplates();
@@ -590,15 +568,21 @@ describe('クリーンアップ', () => {
     expect(removed).toEqual(['system-prompts/t1']);
   });
 
-  it('古いバックアップの知らせの「確認する」で、Comfy バックアップの場所を開く', async () => {
+  it('古いバックアップがある間だけ「古いデータを整理」を出し、押すと Comfy バックアップの場所を開く', async () => {
     backupTemplates();
-    render(<Field />);
-    act(() => useStorageDialogStore.getState().notifyStale());
-    const notice = await screen.findByRole('alertdialog');
-    expect(
-      within(notice).getByText('古いバックアップデータが残っています。確認しますか？'),
-    ).toBeTruthy();
-    fireEvent.click(within(notice).getByRole('button', { name: '確認する' }));
+    connectComfy();
+    const onChosen = vi.fn();
+    render(
+      <>
+        <StaleBackupRow onChosen={onChosen} />
+        <Field />
+      </>,
+    );
+    expect(screen.queryByRole('button', { name: '古いデータを整理' })).toBeNull();
+    act(() => useStorageDialogStore.getState().markStale('http://comfy'));
+    expect(screen.queryByRole('alertdialog')).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: '古いデータを整理' }));
+    expect(onChosen).toHaveBeenCalled();
     const dialog = await screen.findByRole('dialog');
     const crumbs = within(dialog).getByRole('navigation', { name: '今の場所' });
     expect(crumbs.textContent).toBe('全体Comfy バックアップ');

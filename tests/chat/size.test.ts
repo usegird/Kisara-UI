@@ -13,10 +13,6 @@ import { MEGABYTE } from '@/lib/file-size';
 
 import { chat, chatMessage, chatTurns } from '../helpers/llm';
 
-// ─────────────────────────────
-// 会話の大きさの上限と、一度に描く発言の数
-// ─────────────────────────────
-
 describe('会話の大きさ', () => {
   it('保存と同じ見積もりで、添えた画像も数える', () => {
     const base = chat(chatTurns(4));

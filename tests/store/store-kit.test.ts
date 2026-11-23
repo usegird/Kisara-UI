@@ -8,10 +8,6 @@ import { createLibraryTable, restoreOutcomeOf } from '@/store/kit/library-table'
 import { captureTabScoped, registerTabScopedValue, restoreTabScoped } from '@/store/kit/tab-scoped';
 import { memoryTable } from '@/store/persist/chat-repo';
 
-// ─────────────────────────────
-// ストアが共有する作り手（一覧の表・接続先ごとの資源・接続のダイアログ・タブごとの値）と鍵の入口
-// ─────────────────────────────
-
 describe('restoreOutcomeOf', () => {
   it('一覧に無ければ足し、控えが新しければ置き換え、一覧が新しいか同じなら残す', () => {
     expect(restoreOutcomeOf(undefined, { updatedAt: 1 })).toBe('added');
@@ -120,7 +116,6 @@ describe('holdReleasable / heldLockNames', () => {
     expect(await holdReleasable('kit-test-lock')).toBeNull();
     expect((await heldLockNames())?.has('kit-test-lock')).toBe(true);
     release?.();
-    // 放した知らせは後の task で届く
     await new Promise((resolve) => setTimeout(resolve, 0));
     expect(await holdReleasable('kit-test-lock')).not.toBeNull();
   });

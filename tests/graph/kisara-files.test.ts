@@ -1,15 +1,15 @@
 import { describe, expect, it } from 'vitest';
 
-import { notesFilePath, styleFilePath } from '@/graph/kisara-files';
-
-// ─────────────────────────────
-// `kisara/` に書くファイルの経路。
-// ─────────────────────────────
+import { jsonEditsFilePath, notesFilePath, styleFilePath } from '@/graph/kisara-files';
 
 describe('メモの経路', () => {
   it('モデル名の区切りはフォルダとして残し、拡張子を残したまま .txt を足す', () => {
     expect(notesFilePath('loras', 'sub\\a.safetensors')).toBe('loras/sub/a.safetensors.txt');
     expect(notesFilePath('loras', 'a.pt')).not.toBe(notesFilePath('loras', 'a.safetensors'));
+  });
+
+  it('同名の JSON の差分はメモと同じ名前で、拡張子だけ .json', () => {
+    expect(jsonEditsFilePath('loras', 'sub\\a.safetensors')).toBe('loras/sub/a.safetensors.json');
   });
 
   it('要素ごとに退避するので、上へ戻る経路にならない', () => {

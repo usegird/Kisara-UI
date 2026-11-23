@@ -6,15 +6,10 @@ import type { LlmPort } from '@/port/llm-port';
 
 import { fakeLlmPort } from '../helpers/llm';
 
-// ─────────────────────────────
-// ゲートウェイの側。本体は信頼できない送り元として扱い、キーは入力の窓からだけ受ける。
-// ─────────────────────────────
-
 const APP = 'https://app.example';
 const GATEWAY = 'https://gateway.example';
 const BASE = 'https://openrouter.ai/api/v1';
 
-/** 知らせを手で起こせる iframe の窓と、作った窓口の控え */
 function setup(storage = new Map<string, string>()) {
   let listener: ((event: MessageEvent) => void) | null = null;
   const parent = {};
@@ -69,7 +64,6 @@ describe('キーを受ける', () => {
     gateway.putKey(APP, 'from-app');
     gateway.putKey(GATEWAY);
     expect(gateway.keyOf.current(BASE)).toBe('sk-1');
-    // 一覧を先に送ってから、キーが入ったことを知らせる（本体はキーのある先を知ってから確かめる）
     await vi.waitFor(() =>
       expect(gateway.received.slice(-2)).toEqual([
         { type: 'keys', urls: [BASE] },
@@ -119,7 +113,6 @@ describe('キーを外す', () => {
     await vi.waitFor(() => expect(gateway.received.at(-1)).toEqual({ type: 'keys', urls: [] }));
     expect(gateway.keyOf.current(BASE)).toBe('');
     expect(setup(gateway.storage).keyOf.current(BASE)).toBe('');
-    // 無い先を外せと言われても一覧は送り直さない
     expect(gateway.received.filter((message) => message.type === 'keys')).toHaveLength(3);
   });
 });
@@ -155,7 +148,6 @@ describe('要求を受ける', () => {
     const host = gateway.connect();
     host.postMessage({ type: 'request', id: 3, op: 'streamChat', baseUrl: BASE, request: {} });
     host.postMessage({ type: 'request', id: 4, op: 'fetch', baseUrl: BASE });
-    // 通り道は順に届くので、後に送った正しい要求の返事が来たら、前の 2 つは捨てられている
     host.postMessage({ type: 'request', id: 5, op: 'checkKey', baseUrl: BASE });
     const results = () => gateway.received.filter((message) => message.type === 'result');
     await vi.waitFor(() => expect(results()).toHaveLength(1));

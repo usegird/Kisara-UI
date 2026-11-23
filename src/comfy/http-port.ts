@@ -17,15 +17,29 @@ import {
   saveLibraryItem,
 } from '@/comfy/library-backup';
 import {
+  fetchManagerVersion,
+  fetchNodePackMappings,
+  installNodePack,
+  rebootComfy,
+} from '@/comfy/manager';
+import {
   fetchModelFiles,
+  fetchModelJson,
   fetchModelMetadata,
   fetchModelNotes,
   hasModelNotesRoute,
   modelPreviewSrc,
 } from '@/comfy/models';
 import { fetchNodeFrequency } from '@/comfy/node-frequency';
-import { fetchSavedNotes, listSavedNotes, saveNotes } from '@/comfy/notes';
+import {
+  fetchJsonEdits,
+  fetchSavedNotes,
+  listSavedNotes,
+  saveJsonEdits,
+  saveNotes,
+} from '@/comfy/notes';
 import { fetchNodeDefinition, fetchNodeDefinitions } from '@/comfy/object-info';
+import { parseOutputTexts } from '@/comfy/output-texts';
 import { interruptRun, PromptRejectedError, submitPrompt } from '@/comfy/prompt';
 import {
   deleteQueued,
@@ -54,7 +68,7 @@ import {
 } from '@/comfy/tags';
 import { fetchTemplate, listTemplates, templateThumbnailSrc } from '@/comfy/templates';
 import { listUserFiles, readUserFile, removeUserFile } from '@/comfy/user-files';
-import { fetchWildcards } from '@/comfy/wildcards';
+import { fetchWildcardEntries, fetchWildcards } from '@/comfy/wildcards';
 import {
   fetchSavedWorkflow,
   listSavedWorkflows,
@@ -66,11 +80,6 @@ import { connectComfySocket } from '@/comfy/ws';
 import type { ComfyPort } from '@/port/comfy-port';
 import type { RequestFailure } from '@/port/connection';
 
-// ─────────────────────────────
-// 通信の窓口の HTTP・WebSocket 実装。ComfyUI の公開 API を直接たたく。
-// 入口（`main.tsx`・デモの入口）が作って store の受け口に入れる。上の層はこれを直接読まない。
-// ─────────────────────────────
-
 function failureOf(error: unknown): RequestFailure | null {
   if (!(error instanceof ComfyRequestError)) return null;
   const { kind, reasonCode, params, url, message, status } = error;
@@ -78,7 +87,6 @@ function failureOf(error: unknown): RequestFailure | null {
   return status === null ? failure : { ...failure, status };
 }
 
-/** ComfyUI の窓口を、HTTP と WebSocket で実際に話す実装として作る */
 export function createHttpPort(): ComfyPort {
   return {
     connection: connectionPort(),
@@ -106,6 +114,8 @@ export function createHttpPort(): ComfyPort {
       fetchSavedStyles: (baseUrl, options) => fetchSavedStyles(baseUrl, options),
       saveStyle: (baseUrl, entry, options) => saveStyle(baseUrl, entry, options),
       fetchWildcards: (baseUrl, options) => fetchWildcards(baseUrl, options),
+      fetchWildcardEntries: (baseUrl, name, options) =>
+        fetchWildcardEntries(baseUrl, name, options),
     },
     tags: {
       fetchPysssss: (baseUrl, options) => fetchPysssssTags(baseUrl, options),
@@ -141,6 +151,12 @@ export function createHttpPort(): ComfyPort {
       read: (baseUrl, kind, path, options) => readUserFile(baseUrl, kind, path, options),
       remove: (baseUrl, kind, path, options) => removeUserFile(baseUrl, kind, path, options),
     },
+    manager: {
+      fetchVersion: (baseUrl, options) => fetchManagerVersion(baseUrl, options),
+      fetchMappings: (baseUrl, options) => fetchNodePackMappings(baseUrl, options),
+      install: (baseUrl, pack, options) => installNodePack(baseUrl, pack, options),
+      reboot: (baseUrl, options) => rebootComfy(baseUrl, options),
+    },
   };
 }
 
@@ -152,7 +168,6 @@ function connectionPort(): ComfyPort['connection'] {
     diagnose: async (error, baseUrl) => {
       const failure = failureOf(error) ?? { kind: 'unreachable' as const, url: baseUrl };
       const guess = diagnoseFailure(failure, currentPageContext());
-      // CORS か未起動かが残るときだけ、中身を読まない要求で届くかを確かめて分ける
       return guess.code === 'cors-or-down'
         ? refineWithReachability(guess, await probeReachability(baseUrl))
         : guess;
@@ -192,6 +207,7 @@ function queuePort(): ComfyPort['queue'] {
       viewUrl(baseUrl, { filename: file.filename, type: file.type, subfolder: file.subfolder }),
     entryNodesOf: (entry) => historyEntryNodes(entry),
     entryFailureOf: (entry) => parseRunFailure(entry),
+    entryTextsOf: (entry) => parseOutputTexts(entry),
     promptNodesOf: (nodes) => parsePromptNodes(nodes),
   };
 }
@@ -222,7 +238,12 @@ function modelsPort(): ComfyPort['models'] {
     fetchPysssssNotes: (baseUrl, folder, filename, options) =>
       fetchModelNotes(baseUrl, folder, filename, options),
     hasNotesRoute: (baseUrl, options) => hasModelNotesRoute(baseUrl, options),
+    fetchModelJson: (baseUrl, folder, filename, options) =>
+      fetchModelJson(baseUrl, folder, filename, options),
     saveNotes: (baseUrl, note, options) => saveNotes(baseUrl, note, options),
+    fetchJsonEdits: (baseUrl, folder, filename, options) =>
+      fetchJsonEdits(baseUrl, folder, filename, options),
+    saveJsonEdits: (baseUrl, file, options) => saveJsonEdits(baseUrl, file, options),
     previewSrc: (baseUrl, folder, file) => modelPreviewSrc(baseUrl, folder, file),
   };
 }

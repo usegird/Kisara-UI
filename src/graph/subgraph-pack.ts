@@ -14,37 +14,24 @@ import {
   type WorkflowNode,
 } from '@/graph/types';
 
-// ─────────────────────────────
-// グループ → subgraph の部品。定義とインスタンスを組み、外の線を引き直し、並びの位置を入れ替える。
-// ─────────────────────────────
-
-/** 本体の書き出しの形の版 */
 const SUBGRAPH_VERSION = 1;
-/** グループに名前が無いときの定義の名前（本体と同じ） */
 const DEFAULT_SUBGRAPH_NAME = 'New Subgraph';
 
-// 定義の入口・出口の仮想ノードの箱（中のノードの左右に置く）
 const IO_NODE_WIDTH = 120;
 const IO_NODE_HEIGHT = 100;
-/** 入口の左端を、中のノードの左端からどれだけ左へ置くか */
 const INPUT_NODE_OFFSET = 200;
-/** 出口の左端を、中のノードの右端からどれだけ右へ置くか */
 const OUTPUT_NODE_GAP = 80;
 
-// インスタンスの大きさ（見出し 1 段と、入出力の多い方の行の数）
 const INSTANCE_WIDTH = 240;
 const INSTANCE_BASE_HEIGHT = 46;
 const INSTANCE_SLOT_HEIGHT = 20;
 
-/** 外の線（インスタンスの入力へ入る線・出力から出る線）と、採番の続き */
 interface OuterLinks {
-  /** 入口ごとに 1 本（出どころの無い入口は null） */
   readonly incoming: (WorkflowLink | null)[];
   readonly outgoing: WorkflowLink[];
   readonly lastLink: LinkId;
 }
 
-/** 定義を組むのに要るもの */
 interface DefinitionParts {
   readonly id: string;
   readonly name: string;
@@ -55,14 +42,12 @@ interface DefinitionParts {
   readonly groups: unknown[];
 }
 
-/** 採番の今の値（外と全部の定義で共有） */
 interface Counters {
   readonly lastGroupId: number;
   readonly lastNode: NodeId;
   readonly lastLink: LinkId;
 }
 
-/** グループ（子のグループを含む）に入っているノード */
 export function groupMembers(
   workflow: Workflow,
   groupIndex: number,
@@ -77,7 +62,6 @@ export function groupMembers(
   );
 }
 
-/** 外の線: 出どころ → インスタンスの入力、インスタンスの出力 → 外の受け手 */
 export function outerLinksOf(
   inputs: readonly Port[],
   outputs: readonly Port[],
@@ -107,7 +91,6 @@ export function outerLinksOf(
   return { incoming, outgoing, lastLink };
 }
 
-/** 新しい定義。入口・出口の箱は中のノードの左右、縦は中のノードの真ん中に置く */
 export function createDefinition(
   parts: DefinitionParts,
   counters: Counters,
@@ -164,9 +147,6 @@ export function createDefinition(
   };
 }
 
-/**
- * 定義のインスタンス。`proxies` は後でアプリ入力を移すときに埋める（同じ配列を持たせる）
- */
 export function createInstance(
   instanceId: NodeId,
   definitionId: string,
@@ -202,10 +182,6 @@ export function createInstance(
   };
 }
 
-/**
- * 並びの位置: グループの箱の手前にインスタンスを入れてから、箱を抜いて詰める
- * （先に抜くと、親のグループが空になって消えたとき、入れる先が無くなる）
- */
 export function swapGroupForInstance(
   workflow: Workflow,
   {
@@ -236,7 +212,6 @@ export function swapGroupForInstance(
   return shiftRemove(opened, { kind: 'group', index: groupIndex }, layout);
 }
 
-/** 外に残す線か（消した線と、中のノードにつながる線を落とす） */
 export function keepsOuterLink(
   raw: WorkflowLink,
   removedIds: ReadonlySet<LinkId>,

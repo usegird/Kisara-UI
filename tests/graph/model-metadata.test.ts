@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest';
 
-import { summarizeModelMetadata, triggerWords } from '@/graph/model-metadata';
-
-// ─────────────────────────────
-// モデルの情報に出す safetensors の埋め込み情報の読み解き。
-// キーは揃っていない前提。読めないものは捨て、生の一覧は必ず残す。
-// ─────────────────────────────
+import {
+  hasModelJsonValue,
+  parseModelJsonEntries,
+  summarizeModelMetadata,
+  triggerWords,
+} from '@/graph/model-metadata';
 
 describe('学習で多かった語', () => {
   it('データセットをまたいで足し、多い順に出す', () => {
@@ -52,5 +52,35 @@ describe('要点の抜き出し', () => {
     const info = summarizeModelMetadata(new Map([['ss_datasets', 'x'.repeat(1000)]]));
 
     expect(info.entries[0]?.value).toHaveLength(401);
+  });
+});
+
+describe('Lora と同名の JSON（キーと値をそのまま）', () => {
+  it('キーをファイルの並びのまま、文字の値は変えずに出す（空も残す）', () => {
+    const entries = parseModelJsonEntries({ 'sd version': 'SDXL', notes: '', a: ' x\n' });
+
+    expect(entries?.map((entry) => entry.key)).toEqual(['sd version', 'notes', 'a']);
+    expect(entries?.map((entry) => entry.value)).toEqual(['SDXL', '', ' x\n']);
+  });
+
+  it('文字でない値は JSON の文字にする', () => {
+    const entries = parseModelJsonEntries({ weight: 0, tags: ['a'], none: null });
+
+    expect(entries?.map((entry) => entry.value)).toEqual(['0', '[\n  "a"\n]', 'null']);
+  });
+
+  it('物でなければ null', () => {
+    expect(parseModelJsonEntries([1])).toBeNull();
+    expect(parseModelJsonEntries('x')).toBeNull();
+  });
+});
+
+describe('JSON の値なし', () => {
+  it('前後の空白を除いて空・Unknown・0 は値なし、ほかは値あり', () => {
+    const valued = ['', '  ', 'Unknown', '0', 'SDXL', '0.8', 'unknown text'].map((value) =>
+      hasModelJsonValue({ key: 'k', value }),
+    );
+
+    expect(valued).toEqual([false, false, false, false, true, true, true]);
   });
 });

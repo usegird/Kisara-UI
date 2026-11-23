@@ -9,34 +9,21 @@ import {
 } from '@/llm/gateway-protocol';
 import type { ChatStreamEvent, LlmEndpoint, LlmKeyPort, LlmPort, LlmResult } from '@/port/llm-port';
 
-// ─────────────────────────────
-// 本体の側。ゲートウェイの iframe を置いてつなぎ、ゲートウェイがキーを持つ接続先への要求をゲートウェイへ回す。
-// ほかの接続先へは本体から直に送る。キーそのものは受け取らない。
-// ─────────────────────────────
-
-/** 入力の窓の大きさ（ベース URL とキーの 2 つの欄が収まる） */
 const ENTRY_FEATURES = 'popup,width=520,height=560';
 
-/** 本体の側を作るときに渡すもの */
 interface GatewayHostOptions {
   readonly gatewayOrigin: string;
-  /** キーの無い接続先へ直に送る窓口 */
   readonly direct: LlmPort;
-  /** iframe を置く文書 */
   readonly document: Document;
-  /** 入力の窓を開く（`window.open`） */
   readonly open: (url: string, target: string, features: string) => unknown;
-  /** 入力の窓に渡す画面の言語 */
   readonly locale: () => string;
 }
 
-/** 本体の側の窓口。LLM の窓口と、ゲートウェイの窓口 */
 export interface GatewayHost {
   readonly llm: LlmPort;
   readonly keys: LlmKeyPort;
 }
 
-/** 番号を付ける前の要求（要求の種類ごとに形を保つ） */
 type UnsentRequest =
   Extract<HostMessage, { type: 'request' }> extends infer M
     ? M extends unknown
@@ -44,24 +31,19 @@ type UnsentRequest =
       : never
     : never;
 
-/** ゲートウェイから聞いたキーのある先と、その知らせの購読者 */
 interface KeyBook {
   keyed: readonly string[];
   ready: boolean;
-  /** キーのある先が変わった・つながった */
   readonly changed: Set<() => void>;
-  /** 入力の窓からキーが入った */
   readonly keySet: Set<(baseUrl: string) => void>;
 }
 
-/** ゲートウェイからの返事を待っている 1 つの要求 */
 interface Pending {
   readonly resolve: (result: LlmResult<unknown>) => void;
   readonly onEvent?: ((event: ChatStreamEvent) => void) | undefined;
   readonly onRaw?: ((text: string) => void) | undefined;
 }
 
-/** ゲートウェイの iframe を置き、本体の側の窓口を作る */
 export function createGatewayHost(options: GatewayHostOptions): GatewayHost {
   const { gatewayOrigin, direct } = options;
   const book: KeyBook = { keyed: [], ready: false, changed: new Set(), keySet: new Set() };
@@ -74,7 +56,6 @@ export function createGatewayHost(options: GatewayHostOptions): GatewayHost {
     if (message === null) return;
     if (message.type === 'keys') {
       book.keyed = message.urls;
-      // ゲートウェイがキーの一覧を返したら、つながったとする（読み込めなかった iframe は返さない）
       book.ready = true;
       for (const listener of book.changed) listener();
       return;
@@ -110,7 +91,6 @@ export function createGatewayHost(options: GatewayHostOptions): GatewayHost {
     if (port === null) return Promise.resolve(fail('unreachable'));
     const id = nextId++;
     return new Promise((resolve) => {
-      // ゲートウェイは要求の種類ごとに決まった形の値を返す（本体と同じ LLM の窓口が作る）
       pending.set(id, { ...receiver, resolve: resolve as (result: LlmResult<unknown>) => void });
       port.postMessage({ ...message, id });
       signal?.addEventListener('abort', () => port.postMessage({ type: 'abort', id }), {
@@ -140,7 +120,6 @@ export function createGatewayHost(options: GatewayHostOptions): GatewayHost {
   return { llm, keys };
 }
 
-/** ゲートウェイの窓口。キーのある先を返し、入力の窓を開き、確かめた結果をゲートウェイへ返す */
 function createKeyPort(
   book: KeyBook,
   options: GatewayHostOptions,
@@ -155,7 +134,6 @@ function createKeyPort(
     openEntry: (baseUrl) => {
       if (!book.ready) return 'unready';
       const params = new URLSearchParams({ base: baseUrl.trim(), lang: options.locale() });
-      // 名前を付けない（同じ名前の窓は別のタブから開いても開いた元が替わらず、キーが元のタブへ渡る）
       const url = `${options.gatewayOrigin}${GATEWAY_ENTRY_PATH}#${params.toString()}`;
       return options.open(url, '_blank', ENTRY_FEATURES) === null ? 'blocked' : 'opened';
     },
@@ -168,7 +146,6 @@ function createKeyPort(
   };
 }
 
-/** 見えないゲートウェイの iframe。読み上げにも Tab にも出さない */
 function createFrame(document: Document, src: string): HTMLIFrameElement {
   const frame = document.createElement('iframe');
   frame.src = src;
@@ -178,7 +155,6 @@ function createFrame(document: Document, src: string): HTMLIFrameElement {
   return frame;
 }
 
-/** ゲートウェイの返事を、待っている要求へ渡す。結果が来たら待つのをやめる */
 function deliver(
   pending: Map<number, Pending>,
   message: Exclude<GatewayMessage, { type: 'keys' | 'keySet' }>,

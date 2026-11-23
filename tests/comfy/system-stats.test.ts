@@ -2,10 +2,6 @@ import { describe, expect, it } from 'vitest';
 
 import { parseSystemStats } from '@/comfy/schema';
 
-// ─────────────────────────────
-// `GET /system_stats` の決めた欄だけを読む。起動オプションは読まない
-// ─────────────────────────────
-
 describe('parseSystemStats', () => {
   it('版と機器を読み、起動オプションとメモリの空きは持たない', () => {
     const stats = parseSystemStats({

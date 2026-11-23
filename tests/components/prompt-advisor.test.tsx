@@ -21,11 +21,6 @@ import { useSettingsStore } from '@/store/use-settings-store';
 import { LEAK_ALLOWANCE, LEAK_ROUNDS, leakWatch } from '../helpers/leak';
 import { chat, profile, setDefaultLlm } from '../helpers/llm';
 
-// ─────────────────────────────
-// 構成の相談のカードと欄
-// ─────────────────────────────
-
-// 発言ごと・入力欄（Web 検索の切り替え）の描き直しを数える
 const renders = vi.hoisted(() => ({ messages: new Map<string, number>(), composer: 0 }));
 
 vi.mock('@/components/llm/advisor/PromptAdvisorMessage', async (importOriginal) => {
@@ -83,7 +78,6 @@ describe('構成の相談', () => {
     expect(started?.greeting).toBe(1);
     expect(screen.getByText(formatGreeting(1).split('\n')[0]!, { exact: false })).toBeTruthy();
 
-    // 初期メッセージに埋め込んだ付加情報は、三角で開くと文字のまま出す
     const context = screen.getByRole('button', { name: '送る付加情報' });
     expect(context.getAttribute('aria-expanded')).toBe('false');
     fireEvent.click(context);
@@ -93,14 +87,12 @@ describe('構成の相談', () => {
   it('送っていない相談は開き直し、送った相談があれば 2 枚目のカードで新しく始める', () => {
     render(<Screen />);
     fireEvent.click(startButton());
-    // 閉じると欄を外す（下の部品を覆ったまま残さない）
     fireEvent.click(screen.getByRole('button', { name: '閉じる' }));
     expect(panels()).toHaveLength(0);
     fireEvent.click(startButton());
     expect(panels()).toHaveLength(1);
     expect(screen.getAllByRole('button', { name: '構成の相談を終える' })).toHaveLength(1);
 
-    // 送った相談にする（送る中身は使わないので、やり取りを入れるだけ）
     act(() => {
       usePromptAdvisorStore.setState((state) => ({
         sessions: Object.fromEntries(
@@ -113,7 +105,6 @@ describe('構成の相談', () => {
     });
     fireEvent.click(startButton());
     expect(screen.getAllByRole('button', { name: '構成の相談を終える' })).toHaveLength(2);
-    // 置く欄は開いている 1 つ（新しい相談）だけ
     expect(panels()).toHaveLength(1);
     expect(within(panels()[0]!).queryByText('Asked')).toBeNull();
   });
@@ -230,6 +221,7 @@ describe('構成の相談', () => {
     fireEvent.click(screen.getByRole('button', { name: '元に戻す' }));
     expect(screen.getByRole('button', { name: '反映する' })).toBeTruthy();
   });
+
   it('ツールの呼び出しの案は本文の下のカードにし、受け取り中は書いている途中、読めなければ読めない旨を出す', () => {
     const id = usePromptAdvisorStore.getState().start('c1');
     const args = JSON.stringify({
@@ -278,6 +270,7 @@ describe('構成の相談', () => {
       .chats.c1?.prompt.items.find((item) => item.id === 'rules');
     expect(rules?.content).toBe('R');
   });
+
   it('案の無い最後の応答には「決まったことを入れる」を出し、押すと書き先に合わせた定型の発言を送る', () => {
     const id = usePromptAdvisorStore.getState().start('c1');
     const seed = (messages: AdvisorMessage[]): void => {
@@ -298,7 +291,6 @@ describe('構成の相談', () => {
     const target = advisorRecordTargetOf(greetingUse(0), null);
     expect(send).toHaveBeenCalledWith(id, t(`llm.advisor.record.${target}`));
     unmount();
-    // 案のある応答と、最後でない応答には出さない
     const args = JSON.stringify({ title: 'T', changes: [{ target: 'main', content: 'M' }] });
     seed([
       { id: 'a0', role: 'assistant', content: 'Decided.' },
@@ -314,6 +306,7 @@ describe('構成の相談', () => {
     send.mockRestore();
   });
 });
+
 describe('構成の相談の上限に近い知らせと要約の行', () => {
   const seed = (patch: Record<string, unknown>): void => {
     const id = usePromptAdvisorStore.getState().start('c1');
@@ -342,7 +335,6 @@ describe('構成の相談の上限に近い知らせと要約の行', () => {
   beforeEach(() => {
     useLlmProfilesStore.setState({ profiles: [profile()], checks: {}, learned: {} });
     setDefaultLlm();
-    // 文脈長 8000・max_tokens なし → 送れる上限 6000、8 割は 4800
     useLlmProfilesStore.getState().learnContext('p1', 'model-a', 8000);
   });
 
@@ -391,7 +383,6 @@ describe('構成の相談の上限に近い知らせと要約の行', () => {
     );
     expect(row?.open).toBe(false);
     expect(row?.textContent).toBe('要約SUMMARY');
-    // 縮めた発言も欄に残し、要約の行は残した発言（m2）の手前に置く
     const log = within(screen.getByRole('log', { name: '構成の相談' }));
     expect(log.getByText('text 0')).toBeTruthy();
     const next = log.getByText('text 2');

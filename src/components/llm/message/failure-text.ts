@@ -2,11 +2,6 @@ import { t, type MessageKey } from '@/i18n';
 import { pageOrigin } from '@/lib/host';
 import type { LlmFailure } from '@/port/llm-port';
 
-// ─────────────────────────────
-// 失敗の原因ごとの案内。次にやることが 1 つに決まる文にする。
-// ─────────────────────────────
-
-/** 差し込む値の無い案内 */
 const PLAIN_FAILURE_TEXT: Readonly<
   Record<Exclude<LlmFailure['kind'], 'cors' | 'auth' | 'rejected' | 'server'>, MessageKey>
 > = {
@@ -25,7 +20,6 @@ const PLAIN_FAILURE_TEXT: Readonly<
   'response-too-large': 'llm.failure.responseTooLarge',
 };
 
-/** LLM の失敗を、原因に応じた案内の文にする */
 export function formatLlmFailure(failure: LlmFailure): string {
   const status = String(failure.status ?? '');
   switch (failure.kind) {

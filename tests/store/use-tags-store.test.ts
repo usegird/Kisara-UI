@@ -6,13 +6,8 @@ import { createTagsStore, type TagChanges } from '@/store/use-tags-store';
 
 import { tagEntry } from '../helpers/tags';
 
-// ─────────────────────────────
-// タグ辞書のストア。読み終えた接続先にだけ書き、書いたら合わせた一覧も作り直す。
-// ─────────────────────────────
-
 const base = 'http://127.0.0.1:8188';
 
-/** `deleted` は pysssss の上書きで消したタグ */
 function setup(dictionaries: TagDictionary[] = [], deleted: string[] = []) {
   const overrides = deleted.map((tag) => ({ ...tagEntry(tag), kind: DELETED_KIND }));
   const deps = {

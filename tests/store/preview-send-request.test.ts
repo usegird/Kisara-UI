@@ -24,11 +24,6 @@ import {
   type FakeLlmPort,
 } from '../helpers/llm';
 
-// ─────────────────────────────
-// 送る生データを表示。送るときと同じ材料と組み立てで、入力欄の文も今回の
-// メッセージとして入れる。送った要求と同じ物になることを確かめる
-// ─────────────────────────────
-
 const LIBRARY: LoreLibrary = { dictionaries: {}, enabledIds: [], on: true };
 const TOOL = {
   type: 'function' as const,
@@ -63,7 +58,6 @@ afterEach(() => {
   useSettingsStore.setState({ llmSystemPrompt: '', llmParams: {} });
 });
 
-/** ロールプレイのプレイブックで、アウトラインの段（深さ 0）を 1 つ有効にした会話 */
 function playbookChat(): ReturnType<typeof chat> {
   const composition = sampleComposition();
   const items = composition.items.map((item) =>

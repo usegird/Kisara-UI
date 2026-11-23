@@ -1,16 +1,8 @@
 import { parseOutputFiles } from '@/comfy/schema';
+import { parseManagerQueueStatus } from '@/comfy/schema-manager';
 import { finiteNumber, isRecord, isUnknownArray, stringOr } from '@/lib/guards';
 import type { ComfyEvent, ProgressNode, ProgressNodeState } from '@/port/run';
 
-// ─────────────────────────────
-// WebSocket の通知の検証。`unknown` で受けて必要な形だけ確認し、`as` で型に押し込まない。
-// ─────────────────────────────
-
-/**
- * WebSocket の1メッセージを解釈する。
- * バイナリフレーム（プレビュー画像）は対象外で null を返す。
- * 実機での受信は未検証なので、想定外の型は捨てずに 'unknown' として通し、呼び出し側が握り潰さないようにする。
- */
 export function parseComfyEvent(raw: unknown): ComfyEvent | null {
   if (typeof raw !== 'string') return null;
 
@@ -28,7 +20,6 @@ export function parseComfyEvent(raw: unknown): ComfyEvent | null {
   return toComfyEvent(type, isRecord(parsed.data) ? parsed.data : {});
 }
 
-/** 種別ごとに、通知の中身（`data`）を型付きの通知にする。知らない種別は 'unknown' */
 function toComfyEvent(type: string, data: Record<string, unknown>): ComfyEvent {
   const promptId = stringOr(data.prompt_id, null);
 
@@ -43,7 +34,6 @@ function toComfyEvent(type: string, data: Record<string, unknown>): ComfyEvent {
       return cachedEvent(data, promptId);
 
     case 'executing':
-      // node が null なら実行完了を表す（正式な完了通知は execution_success）
       return {
         type: 'executing',
         promptId,
@@ -73,6 +63,13 @@ function toComfyEvent(type: string, data: Record<string, unknown>): ComfyEvent {
 
     case 'execution_error':
       return errorEvent(data, promptId);
+
+    case 'cm-queue-status': {
+      const status = parseManagerQueueStatus(data);
+      return status === null
+        ? { type: 'unknown', rawType: type }
+        : { type: 'manager_queue', ...status };
+    }
 
     default:
       return { type: 'unknown', rawType: type };

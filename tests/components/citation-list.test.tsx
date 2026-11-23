@@ -4,10 +4,6 @@ import { afterEach, describe, expect, it } from 'vitest';
 
 import { CitationList } from '@/components/llm/message/CitationList';
 
-// ─────────────────────────────
-// 出典の一覧。番号・タイトル・ドメイン。タイトルが無ければ URL。別のタブで開く
-// ─────────────────────────────
-
 afterEach(cleanup);
 
 describe('出典の一覧', () => {

@@ -13,15 +13,8 @@ import { caretRectOf, type CaretRect } from '@/lib/caret-rect';
 import { insertAtCaret, isQuietInput } from '@/lib/insert-at-caret';
 import { useTagsStore } from '@/store/use-tags-store';
 
-// ─────────────────────────────
-// 複数行の欄のタグ補完。打ちかけの語に当たるタグを出し、選んだら打鍵と同じ扱いで置き換える。
-// 欄の焦点は動かさず、候補の一覧は欄の印（aria-activedescendant）で選んでいる行を知らせる。
-// ─────────────────────────────
-
-/** 補完で出す候補の数 */
 const MAX_SUGGESTIONS = 20;
 
-/** 出している候補 */
 export interface TagSuggestions {
   readonly matches: readonly TagMatch[];
   readonly active: number;
@@ -29,7 +22,6 @@ export interface TagSuggestions {
   readonly word: string;
 }
 
-/** 欄に付ける手続きと印 */
 interface FieldBindings {
   readonly onInput: (event: React.FormEvent<HTMLTextAreaElement>) => void;
   readonly onSelect: (event: React.SyntheticEvent<HTMLTextAreaElement>) => void;
@@ -41,14 +33,11 @@ interface FieldBindings {
   readonly 'aria-activedescendant': string | undefined;
 }
 
-/** 補完の状態と、欄に付ける物 */
 export interface TagComplete {
   readonly suggestions: TagSuggestions | null;
   readonly listId: string;
-  /** 候補の行の id（読み上げの印に使う） */
   readonly optionId: (index: number) => string;
   readonly field: FieldBindings;
-  /** 欄の打鍵を先に見る。補完が受けたキーなら true（欄の既定の動きは止めてある） */
   readonly onKeyDown: (event: React.KeyboardEvent<HTMLTextAreaElement>) => boolean;
   readonly pick: (index: number) => void;
 }
@@ -59,16 +48,11 @@ interface OpenState {
   readonly forced: boolean;
 }
 
-/** キャレットの前の打ちかけの語。範囲を選んでいるときは無し */
 function tokenOf(field: HTMLTextAreaElement): TagToken | null {
   const caret = field.selectionStart;
   return caret === field.selectionEnd ? tagTokenAt(field.value, caret) : null;
 }
 
-/**
- * その語で出す候補。出さない語（短い・書式・重み・Esc で閉じた語）と、当たるタグが無いときは null。
- * キャレットの位置は持ち続けず、出すたびにその場で読む
- */
 function openAt(
   field: HTMLTextAreaElement,
   token: TagToken,
@@ -84,27 +68,22 @@ function openAt(
   return { token, forced, suggestions: { matches, active: 0, caret, word: token.word } };
 }
 
-/** Ctrl+Space（Mac は ⌃Space）。手で候補を出す */
 function isForceKey(event: React.KeyboardEvent): boolean {
   return event.ctrlKey && (event.key === ' ' || event.code === 'Space');
 }
 
-/** `enabled` の欄でタグを補完する。辞書が 1 件も無ければ何も出さない */
 export function useTagComplete(enabled: boolean): TagComplete {
   const merged = useTagsStore((state) => state.merged);
   const [open, setOpen] = useState<OpenState | null>(null);
   const listId = useId();
-  // 選んで差し込む先と、変換中か・Esc で閉じた語（語が変わるまで出さない）。どれも描画に使わない
   const fieldRef = useRef<HTMLTextAreaElement | null>(null);
   const composing = useRef(false);
   const dismissed = useRef<string | null>(null);
 
   const close = (): void => setOpen(null);
 
-  /** 今のキャレットで出し直す。出せなければ閉じる */
   const update = (field: HTMLTextAreaElement, forced: boolean): void => {
     fieldRef.current = field;
-    // 打った語ではない差し込み（Lora・落とした文字）の間は出さない
     const quiet = composing.current || isQuietInput(field);
     const token = enabled && !quiet ? tokenOf(field) : null;
     if (token !== null && dismissed.current !== token.word) dismissed.current = null;
@@ -119,7 +98,6 @@ export function useTagComplete(enabled: boolean): TagComplete {
     const { start, end } = open.token;
     const text = tagInsertText(match.tag.entry.tag, field.value.slice(end));
     field.setSelectionRange(start, end);
-    // 入れた語で出し直さない（直後が `,` のときはキャレットが語の末尾に残る）
     dismissed.current = text;
     close();
     insertAtCaret(field, text);
@@ -160,7 +138,6 @@ export function useTagComplete(enabled: boolean): TagComplete {
     pick,
     field: {
       onInput: (event) => update(event.currentTarget, false),
-      // キャレットを動かしたら出し直す（語の外へ出れば閉じる）
       onSelect: (event) => {
         if (open !== null) update(event.currentTarget, open.forced);
       },
@@ -181,7 +158,6 @@ export function useTagComplete(enabled: boolean): TagComplete {
   };
 }
 
-/** 開いているときのキーの扱い。受けたキーの種類を返し、受けなければ null */
 function keyAction(
   key: string,
   active: number,

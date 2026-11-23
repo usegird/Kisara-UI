@@ -13,8 +13,6 @@ import { useTaskLogStore } from '@/store/use-task-log-store';
 
 import { historyEntry, queueEntry, taskLogEntry, TEST_SESSION } from '../helpers/queue';
 
-// 画像の中身は取りに行かない（テストから ComfyUI に触れない）。取れなかった扱いで /view を指す。
-// キューからも外さない。呼ばれたかだけを見る
 const deleteQueued = vi.hoisted(() =>
   vi.fn((_baseUrl: string, _promptId: string) => Promise.resolve()),
 );
@@ -23,7 +21,6 @@ vi.mock('@/comfy/queue', async (importOriginal) => ({
   fetchOutputImage: () => Promise.reject(new Error('テストでは取らない')),
   deleteQueued,
 }));
-// 中断は送らない（テストから ComfyUI の状態を変えない）。呼ばれたかだけを見る
 const interruptRun = vi.hoisted(() =>
   vi.fn((_baseUrl: string, _promptId: string) => Promise.resolve()),
 );
@@ -31,11 +28,7 @@ vi.mock('@/comfy/prompt', async (importOriginal) => ({
   ...(await importOriginal<typeof import('@/comfy/prompt')>()),
   interruptRun,
 }));
-// ─────────────────────────────
-// キュー列。見出しは置かず、**取れなくなっても並びを消さない**。
-// ─────────────────────────────
 
-// 組み立てたキュー・履歴は、このタブから送ったものとする（ほかのタブの実行は出さない）
 beforeEach(() => {
   useTabsStore.setState({
     tabs: [{ id: 'w', kind: 'workflow', runSession: TEST_SESSION }],
@@ -125,7 +118,10 @@ describe('キュー列', () => {
       running: [queueEntry('run', 100)],
       history: Array.from({ length: 20 }, (_, index) => historyEntry(`h${String(index)}`, index)),
     });
-    useExecutionStore.getState().start('run', 10);
+    useExecutionStore.getState().start(
+      'run',
+      Array.from({ length: 10 }, (_, index) => String(index)),
+    );
     render(<QueuePanel />);
 
     resetStats();
@@ -138,8 +134,81 @@ describe('キュー列', () => {
     });
 
     expect(statCount('render:TaskItem'), '台帳に届いていない').toBeGreaterThan(0);
-    // 進捗 1 回につき実行中の 1 枚まで（全部描き直すと 5 × 21 枚になる）
     expect(statCount('render:TaskItem')).toBeLessThanOrEqual(5);
+  });
+
+  it('実行中は 2 行目に終わった数/全体を出し、バーは初回をノード数で均等割りする', () => {
+    useQueueStore.setState({ running: [queueEntry('run', 100)] });
+    useExecutionStore.getState().start('run', ['1', '2']);
+    const { container } = render(<QueuePanel />);
+    const apply = useExecutionStore.getState().applyEvent;
+    act(() => {
+      apply({ type: 'execution_start', promptId: 'run' });
+      apply({ type: 'executing', promptId: 'run', node: '1', displayNode: '1' });
+      apply({ type: 'progress', promptId: 'run', node: '1', value: 1, max: 2 });
+    });
+
+    expect(screen.getByText('0/2')).toBeDefined();
+    const bar = container.querySelector<HTMLElement>('.bg-slot-conditioning');
+    expect(bar?.style.transform).toBe('translateX(-75%)');
+    expect(bar?.style.width).toBe('');
+  });
+
+  describe('進みの帯の伸ばし方', () => {
+    const barWidth = 200;
+
+    function showBar(shownShift: number): { bar: HTMLElement; transitions: string[] } {
+      useQueueStore.setState({ running: [queueEntry('run', 100)] });
+      useExecutionStore.getState().start('run', ['1', '2']);
+      const { container } = render(<QueuePanel />);
+      act(() => {
+        const apply = useExecutionStore.getState().applyEvent;
+        apply({ type: 'execution_start', promptId: 'run' });
+        apply({ type: 'executing', promptId: 'run', node: '1', displayNode: '1' });
+        apply({ type: 'progress', promptId: 'run', node: '1', value: 1, max: 4 });
+      });
+      const bar = container.querySelector<HTMLElement>('.bg-slot-conditioning');
+      if (bar === null) throw new Error('帯が無い');
+
+      vi.spyOn(bar, 'offsetWidth', 'get').mockReturnValue(barWidth);
+      vi.spyOn(globalThis, 'getComputedStyle').mockReturnValue({
+        transform: `matrix(1, 0, 0, 1, ${String(shownShift)}, 0)`,
+      } as CSSStyleDeclaration);
+      const transitions: string[] = [];
+      Object.defineProperty(bar.style, 'transition', {
+        configurable: true,
+        get: () => '',
+        set: (value: string) => transitions.push(value),
+      });
+      return { bar, transitions };
+    }
+
+    function progress(value: number): void {
+      act(() => {
+        useExecutionStore
+          .getState()
+          .applyEvent({ type: 'progress', promptId: 'run', node: '1', value, max: 4 });
+      });
+    }
+
+    afterEach(() => {
+      vi.restoreAllMocks();
+    });
+
+    it('描いている位置から少し進むだけなら、伸ばして動かす', () => {
+      const { transitions } = showBar(-175);
+      progress(2);
+
+      expect(transitions).toEqual([]);
+    });
+
+    it('描くのが止まっていて大きく離れていたら、伸ばさずにその位置へ置く', () => {
+      const { bar, transitions } = showBar(-barWidth);
+      progress(3);
+
+      expect(transitions).toEqual(['none', '']);
+      expect(bar.style.transform).toBe('translateX(-62.5%)');
+    });
   });
 
   it('ほかのタブ・画面の実行はカードにせず、実行中と待機の数だけを添える', () => {
@@ -167,7 +236,6 @@ describe('キュー列', () => {
     fireEvent.click(screen.getByRole('button', { name: '次のセッションに切り替える' }));
 
     expect(useTabsStore.getState().tabs[0]?.runSession).not.toBe(TEST_SESSION);
-    // 前のセッションの実行もタスクの列に出し続ける
     expect(useTabsStore.getState().pastSessions).toContain(TEST_SESSION);
   });
 });

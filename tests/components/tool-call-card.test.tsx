@@ -22,7 +22,6 @@ import { useWorkflowToolsStore } from '@/store/use-workflow-tools-store';
 
 import { chat, toolCallMessage } from '../helpers/llm';
 
-// 実行（`POST /prompt`）は呼ばない。呼ばれたかだけを見る
 vi.mock('@/store/run/workflow-tool-run', () => ({
   approveToolCall: vi.fn(() => Promise.resolve()),
   declineToolCall: vi.fn(),
@@ -30,22 +29,16 @@ vi.mock('@/store/run/workflow-tool-run', () => ({
   generateToolCall: vi.fn(() => Promise.resolve(null)),
 }));
 
-// ─────────────────────────────
-// ワークフローの呼び出しのカード。承諾と却下は押したときだけで、時間では承諾しない
-// ─────────────────────────────
-
 function waiting(id: string): ToolCallRecord {
   return { id, name: 'make_image', arguments: '{"prompt":"cat"}', state: { kind: 'waiting' } };
 }
 
 const NONE = new Map();
 
-/** 完了して画像を 1 枚出した状態 */
 function image(filename: string): ToolCallState {
   return { kind: 'done', images: [{ filename, subfolder: '', type: 'output' }] };
 }
 
-/** 表示する実行を決めていない状態の行 */
 function renderList(
   calls: readonly ToolCallRecord[],
   props: {
@@ -237,7 +230,6 @@ describe('実行し直す', () => {
       />,
     );
     expect(screen.getByText(/^old\.png/)).toBeTruthy();
-    // 受け取ったら新しい実行に切り替える（留めた表示は実行の数が増えたら外れる）
     const done = { ...queued, state: image('new.png') };
     const pin = new Map([['call_1', { index: 0, count: 1 }]]);
     rerender(
@@ -395,7 +387,6 @@ describe('実行の切り替え', () => {
       />,
     );
     expect(screen.getByText('2/2')).toBeTruthy();
-    // 切り替えは画像の下
     const shownImage = screen.getByText(/^new\.png/);
     const step = screen.getByText('2/2');
     const after = shownImage.compareDocumentPosition(step) & Node.DOCUMENT_POSITION_FOLLOWING;
@@ -404,6 +395,7 @@ describe('実行の切り替え', () => {
     expect(onShow).toHaveBeenCalledWith('call_1', { index: 0, count: 2 });
   });
 });
+
 describe('本文を書かせる', () => {
   function renderMessage(content: string, last: boolean): void {
     const message = toolCallMessage('m1', [waiting('call_1')]);

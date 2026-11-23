@@ -14,10 +14,6 @@ import type { OwnLorebook } from '@/chat/lore';
 
 import { chat, chatMessage, loreEntry } from '../helpers/llm';
 
-// ─────────────────────────────
-// 会話から読む送る中身の出どころ（写しの欄・個別追加辞書・当てるロア・打ちかけ）
-// ─────────────────────────────
-
 const DICTIONARY: Dictionary = {
   id: 'd1',
   name: 'D',

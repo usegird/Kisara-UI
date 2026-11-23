@@ -9,24 +9,16 @@ import { omitKey } from '@/lib/own-key';
 import { abortStream, createChatStream } from '@/store/slices/chat-stream';
 import type { ChatState } from '@/store/use-chat-store';
 
-// ─────────────────────────────
-// 会話のストアの、送る・作り直す・受け直す・戻す・止める・クリアする操作。
-// 送らない注記（<comment>）は送るときに捨て、発言にも残さない。
-// ─────────────────────────────
-
-/** この slice が持つ操作 */
 type ChatSendActions = Pick<
   ChatState,
   'sendDirection' | 'send' | 'regenerate' | 'retry' | 'writeReply' | 'rollback' | 'stop' | 'clear'
 >;
 
-/** 送ったときに空にする打ちかけ */
 type SentDraftPatch = Pick<
   ChatState,
   'drafts' | 'draftImages' | 'draftDirections' | 'draftNotes' | 'loreDrafts'
 >;
 
-/** 送る・作り直す・戻す・止める操作を作る */
 export const createChatSendSlice: StateCreator<ChatState, [], [], ChatSendActions> = (set, get) => {
   const { change, start, sendable } = createChatStream(set, get);
   return {
@@ -44,7 +36,6 @@ export const createChatSendSlice: StateCreator<ChatState, [], [], ChatSendAction
     },
 
     send: (chatId) => {
-      // 指示の枠があれば、打ちかけと一緒に囲んでその操作として送る
       const direction = get().draftDirections[chatId];
       if (direction !== undefined) {
         get().sendDirection(chatId, [direction.text], direction.instruction);
@@ -62,8 +53,6 @@ export const createChatSendSlice: StateCreator<ChatState, [], [], ChatSendAction
     regenerate: (chatId) => {
       const chat = sendable(chatId);
       if (chat === null) return;
-      // 入力欄に文があれば、それを指示にして今の候補を作り直す。文は発言にしない
-      // 注記の枠は、入力欄が空でも作り直したら外す（添えた指示を使い終えたか、使わずに作り直したか）
       const draft = get().drafts[chatId] ?? '';
       const next = regenerate(chat, stripComments(draft));
       if (next !== null && draft.trim().length > 0) {
@@ -109,7 +98,6 @@ export const createChatSendSlice: StateCreator<ChatState, [], [], ChatSendAction
   };
 };
 
-/** 送ったときの打ちかけ（本文と見込みは空に、添えた画像・指示の枠・注記の枠は外す） */
 function sentDraftPatch(state: ChatState, chatId: string): SentDraftPatch {
   return {
     drafts: { ...state.drafts, [chatId]: '' },

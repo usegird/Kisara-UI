@@ -11,10 +11,6 @@ import {
 import { useLlmProfilesStore } from '@/store/use-llm-profiles-store';
 import { useSettingsStore } from '@/store/use-settings-store';
 
-// ─────────────────────────────
-// 診断ファイルの組み立て。入れてよい物だけで組む
-// ─────────────────────────────
-
 const INPUTS: DiagnosticsInputs = { comfySystem: null, storage: null };
 
 afterEach(() => {
@@ -64,7 +60,6 @@ describe('buildDiagnostics', () => {
     expect(parsed.comfy.url).toBe('http://192.168.10.20:8188');
     expect(parsed.llm.url).toBe('https://api.example.com/v1');
     expect(text).not.toContain('token=abc');
-    // ComfyUI の URL だけ外すと、ComfyUI の接続先は文面からも消え、LLM の URL は残る
     const comfyOff = formatDiagnostics(buildDiagnostics(INPUTS, new Set(['llmUrl'])));
     expect(comfyOff).not.toContain('192.168.10.20');
     expect(comfyOff).toContain('api.example.com');

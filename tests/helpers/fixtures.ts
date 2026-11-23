@@ -11,7 +11,6 @@ export const SAMPLE_FILES = [
   'video_ltx2_3_i2v.json',
 ] as const;
 
-/** 並べ方の確かめにだけ使う、グループ・線の輪・折りたたみを含む実ワークフロー */
 export const LAYOUT_SAMPLE_FILES = [
   'Illustrious_vPred_XL_comfyui_newbie (1).json',
   'Illustrious_vPred_XL_comfyui_newbie (2).json',
@@ -30,16 +29,10 @@ export function loadWorkflow(name: SampleFile): Workflow {
   return parseWorkflow(readJson(`../../workflow_sample/${name}`));
 }
 
-/**
- * `/object_info` の実レスポンス（20 MB を超える）はコミットできないため、
- * サンプルが使うクラスだけを抜き、COMBO の選択肢（＝ユーザーのモデルファイル名）を
- * 空にした射影前のサブセットを使う。
- */
 export function loadDefinitions(): NodeDefinitionMap {
   return buildNodeDefinitions(readJson('../fixtures/object-info.subset.json'));
 }
 
-/** ルートと全 subgraph の内部ノードを平らに並べる（検証用） */
 export function allNodes(workflow: Workflow): { node: WorkflowNode; where: string }[] {
   const result = workflow.nodes.map((node) => ({ node, where: 'root' }));
 

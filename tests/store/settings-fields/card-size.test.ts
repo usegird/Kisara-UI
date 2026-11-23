@@ -9,10 +9,6 @@ import {
   parseCardHeight,
 } from '@/store/settings-fields/card-size';
 
-// ─────────────────────────────
-// カードの大小。刻みで増減し、端で止まる。
-// ─────────────────────────────
-
 describe('保存値の読み直し', () => {
   it('数値でなければ既定に落とす', () => {
     expect(normalizeCardHeight(undefined)).toBe(CARD_HEIGHT_DEFAULT);
@@ -34,7 +30,6 @@ describe('列の幅', () => {
 });
 
 describe('parseCardHeight', () => {
-  // 空・打鍵の途中・範囲外は値にしない（0 や NaN を設定へ流さない）
   it('整数で範囲に入ったときだけ値にする', () => {
     expect(parseCardHeight('300')).toBe(300);
     expect(parseCardHeight(' 120 ')).toBe(120);

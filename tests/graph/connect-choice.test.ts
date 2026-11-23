@@ -4,11 +4,6 @@ import { autoSlot, needsChoice, slotChoices } from '@/graph/connect-choice';
 
 import { loadDefinitions } from '../helpers/fixtures';
 
-// ─────────────────────────────
-// 繋ぎ先の選び方。**迷いが無いときだけ自動で繋ぐ**。
-// 合う口が無いときも、2 つ以上あるときも、利用者に尋ねる。
-// ─────────────────────────────
-
 const definitions = loadDefinitions();
 const definition = (name: string) => {
   const found = definitions.get(name);
@@ -18,7 +13,6 @@ const definition = (name: string) => {
 
 describe('繋ぎ先の候補', () => {
   it('入力は widget を除いた並び（ノードのソケットと同じ位置）', () => {
-    // model / positive / negative。cfg は widget なので入らない
     const choices = slotChoices(definition('CFGGuider'), 'CONDITIONING', 'input');
 
     expect(choices.map((choice) => choice.name)).toEqual(['model', 'positive', 'negative']);

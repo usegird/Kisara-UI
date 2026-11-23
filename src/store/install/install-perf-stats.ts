@@ -30,12 +30,6 @@ import { useTaskLogStore } from '@/store/use-task-log-store';
 import { useViewerStore } from '@/store/use-viewer-store';
 import { useWildcardsStore } from '@/store/use-wildcards-store';
 
-// ─────────────────────────────
-// 回数の台帳の取り付け（ストアの変化と長いフレームを数え、コンソールの `kisaraStats` で読む）。
-// **開発と計測用ビルドでだけ**入口から読み込む（通常の本番ビルドには入らない）。
-// ─────────────────────────────
-
-/** 台帳の名前 → ストア。名前は `use-***-store` の *** */
 const STORES: Readonly<Record<string, StoreApi<unknown>>> = {
   'app-values': useAppValuesStore,
   connection: useConnectionStore,
@@ -60,23 +54,19 @@ const STORES: Readonly<Record<string, StoreApi<unknown>>> = {
   wildcards: useWildcardsStore,
 };
 
-/** コンソールの `kisaraStats` で呼べる手続き */
 interface PerfStatsConsole {
   readonly reset: () => void;
   readonly snapshot: typeof statsSnapshot;
   readonly table: () => void;
-  /** 今の JS ヒープの量。計測用ビルドでなければ null */
   readonly heap: () => HeapUsage | null;
 }
 
-/** 回数だけの表（開発サーバの時間は StrictMode・HMR が乗り使えないので出さない） */
 function countsOnly(): Record<string, number> {
   return Object.fromEntries(
     Object.entries(statsSnapshot()).map(([name, stat]) => [name, stat.count]),
   );
 }
 
-/** `profiling` は計測用ビルドか。違えば表に時間を出さない */
 export function installPerfStats(profiling: boolean): void {
   for (const [name, store] of Object.entries(STORES)) {
     store.subscribe(() => recordStat(`store:${name}`));

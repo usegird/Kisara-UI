@@ -9,11 +9,6 @@ import { useTermsStore } from '@/store/use-terms-store';
 
 import { fakeLlmPort, profile } from '../helpers/llm';
 
-// ─────────────────────────────
-// 外部クラウド接続の注意への合意。初めてつなぐ前に確かめ、同意したら日時を残してつなぐ。
-// やめたらつながない。つないだ後は注意を出さない
-// ─────────────────────────────
-
 const OPENROUTER = 'https://openrouter.ai/api/v1';
 
 beforeEach(() => {

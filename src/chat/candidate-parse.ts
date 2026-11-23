@@ -20,10 +20,6 @@ import type {
   ToolBilling,
 } from '@/port/llm-port';
 
-// ─────────────────────────────
-// 候補とその記録（終わり方・呼び出し・使用量・費用・引用）と要約の読み戻し。
-// ─────────────────────────────
-
 const FAILURE_KINDS: readonly LlmFailureKind[] = [
   'stopped',
   'consent',
@@ -51,7 +47,6 @@ function parseOverflow(raw: unknown): { overflow: ContextOverflow } | Record<str
   return { overflow: { context, prompt: finiteNumber(raw.prompt) } };
 }
 
-/** 候補の終わり方を読む。読めない形は終わったもの（理由なし）とし、失敗の種類が分からなければ応答の不正にする */
 function parseEnd(raw: unknown): CandidateEnd {
   if (!isRecord(raw)) return { kind: 'done', reason: null };
   if (raw.kind === 'streaming') return { kind: 'streaming' };
@@ -88,7 +83,6 @@ function parseFileRef(raw: unknown): { filename: string; subfolder: string; type
   return [{ filename: raw.filename, subfolder: stringOr(raw.subfolder), type: stringOr(raw.type) }];
 }
 
-/** 呼び出しの状態。読めない形は失敗として残す（呼び出しそのものは消さない） */
 function parseCallState(raw: unknown): ToolCallState {
   if (!isRecord(raw)) return { kind: 'failed', message: '' };
   switch (raw.kind) {
@@ -154,7 +148,6 @@ function parseUsage(raw: unknown): TokenUsage | null {
   };
 }
 
-/** 応答の記録。物でなければ null */
 function parseResponseRecord(raw: unknown): ResponseRecord | null {
   if (!isRecord(raw)) return null;
   const usage = parseUsage(raw.usage);
@@ -167,7 +160,6 @@ function parseResponseRecord(raw: unknown): ResponseRecord | null {
   };
 }
 
-/** 呼び出しを作らせた応答の記録。物でなければ null */
 function parseGeneration(raw: unknown): ToolCallGeneration | null {
   const record = parseResponseRecord(raw);
   return record === null || !isRecord(raw)
@@ -175,9 +167,6 @@ function parseGeneration(raw: unknown): ToolCallGeneration | null {
     : { reasoning: stringOr(raw.reasoning), ...record };
 }
 
-/**
- * 使用状況。数でない項目は落とし、1 つも無ければ null
- */
 function parseBilling(raw: unknown): ToolBilling | null {
   if (!isRecord(raw)) return null;
   const searches = finiteNumber(raw.searches);
@@ -195,7 +184,6 @@ function parseBilling(raw: unknown): ToolBilling | null {
   };
 }
 
-/** 受け取りの記録。数でない項目は落とし、1 つも無ければ null */
 function parseTiming(raw: unknown): ResponseTiming | null {
   if (!isRecord(raw)) return null;
   const firstMs = finiteNumber(raw.firstMs);
@@ -214,7 +202,6 @@ function parseCitation(raw: unknown): Citation[] {
   return [{ url: raw.url, title: stringOr(raw.title) }];
 }
 
-/** 候補を 1 つ読む。物でなければ null。読めない項目は落とす */
 export function parseCandidate(raw: unknown): Candidate | null {
   if (!isRecord(raw)) return null;
   const usage = parseUsage(raw.usage);
@@ -241,9 +228,6 @@ export function parseCandidate(raw: unknown): Candidate | null {
   };
 }
 
-/**
- * 指示で作り直した候補の土台と指示。読めなければ持たない
- */
 function parseRevision(raw: unknown): { revision: CandidateRevision } | Record<string, never> {
   if (!isRecord(raw) || typeof raw.instruction !== 'string') return {};
   const base = finiteNumber(raw.base);
@@ -251,16 +235,10 @@ function parseRevision(raw: unknown): { revision: CandidateRevision } | Record<s
   return { revision: { base: Math.trunc(base), instruction: raw.instruction } };
 }
 
-/**
- * 添えた画像として読めるもの（画像のデータ URL だけ）
- */
 function isImageDataUrl(value: unknown): value is string {
   return typeof value === 'string' && value.startsWith('data:image/');
 }
 
-/**
- * 会話履歴の要約を読む。読めなければ持たない
- */
 export function parseSummary(raw: unknown): { summary: ChatSummary } | Record<string, never> {
   if (!isRecord(raw) || typeof raw.content !== 'string' || typeof raw.upTo !== 'string') return {};
   const response = parseResponseRecord(raw.response);

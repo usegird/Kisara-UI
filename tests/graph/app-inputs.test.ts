@@ -32,11 +32,6 @@ import type { Workflow } from '@/graph/types';
 
 import { nodeRow, nodeView } from '../helpers/views';
 
-// ─────────────────────────────
-// App Mode（アプリ入力）の保持先は ComfyUI 本体と同じ `extra.linearData`。
-// **自分が触らない要素（3要素目の config・outputs・他の extra）は必ず残す**。
-// ─────────────────────────────
-
 function workflow(extra?: unknown): Workflow {
   return {
     nodes: [{ id: 3, type: 'KSampler', pos: [0, 0] }],
@@ -125,9 +120,6 @@ describe('アプリ入力の切り替え', () => {
   });
 });
 
-/**
- * 独自の持ち物（`extra.kisara`）を読む
- */
 function own(next: Workflow): unknown {
   return (next.extra as Record<string, unknown>).kisara;
 }
@@ -166,7 +158,6 @@ describe('アプリ入力の幅', () => {
   });
 
   it('全幅に戻すと指定ごと消える', () => {
-    // 幅を触っていないワークフローに独自の持ち物を残さない
     expect(own(setAppInputSpan(wf, 3, 'seed', 12))).toBeUndefined();
   });
 
@@ -190,6 +181,7 @@ describe('アプリ入力の幅', () => {
     expect(appInputSpans(rebuilt).get('3:seed')).toBe(6);
   });
 });
+
 describe('入れた値の保存', () => {
   const wf = workflow({ linearData: { inputs: [[3, 'seed']], outputs: [] } });
 
@@ -277,7 +269,6 @@ describe('アプリ入力の高さ', () => {
 });
 
 describe('アプリ入力を足す位置', () => {
-  // 通し番号は処理順（線が無ければ位置の順）。1 → 2 → 3
   const ordered = (inputs: unknown[]): Workflow => ({
     nodes: [
       { id: 1, type: 'A', pos: [0, 0] },
@@ -397,7 +388,6 @@ describe('実行時のアプリ入力の差し込み', () => {
 
     expect(next['3']?.inputs).toEqual({ seed: 42, steps: 8 });
     expect(next['9']).toEqual(prompt['9']);
-    // 元の prompt は書き換えない
     expect(prompt['3']?.inputs.seed).toBe(1);
   });
 
@@ -475,10 +465,6 @@ describe('subgraph の昇格 widget', () => {
   });
 });
 
-// ─────────────────────────────
-// 並び順。**`linearData.inputs` の配列順がそのまま並び順**（独自キーは足さない）。
-// ─────────────────────────────
-
 describe('アプリ入力の並び順', () => {
   const wf = workflow({
     ds: { scale: 1 },
@@ -512,7 +498,6 @@ describe('アプリ入力の並び順', () => {
       { nodeId: 3, widgetName: 'seed' },
       { nodeId: 3, widgetName: 'steps' },
     ]);
-    // 3要素目の設定・outputs・他の extra は落とさない
     const data = (moved.extra as { linearData: { inputs: unknown[][]; outputs: unknown[] } })
       .linearData;
     expect(data.inputs.find((entry) => entry[1] === 'seed')?.[2]).toEqual({ width: 200 });
@@ -521,14 +506,10 @@ describe('アプリ入力の並び順', () => {
   });
 
   it('別の枠に重ねても中へは入れず、下へ動かせば枠の後ろ、上へ動かせば前に置く', () => {
-    // 並び: 9 / 3 3 3 / 5（枠は 9・3・5 の 3 つ）
     const ids = [9, 3, 3, 3, 5];
 
-    // 9 を 3 の枠の真ん中に重ねた → 3 の枠の後ろ（抜いたあとの並びで 3 番目）
     expect(appInputDrop(ids, 0, 2)).toEqual({ index: 3, scope: 'group', side: 'after' });
-    // 5 を 3 の枠の真ん中に重ねた → 3 の枠の前
     expect(appInputDrop(ids, 4, 2)).toEqual({ index: 1, scope: 'group', side: 'before' });
-    // 同じ枠の中は項目の間へ
     expect(appInputDrop(ids, 1, 3)).toEqual({ index: 3, scope: 'row', side: 'after' });
   });
 
@@ -565,10 +546,6 @@ describe('アプリ入力の並び順', () => {
   });
 });
 
-// ─────────────────────────────
-// 表示グループ。**並び順に従い、同じカードが連続する区間**を1つの枠にする。
-// ─────────────────────────────
-
 function row(widgetName: string): NodeRow {
   return nodeRow({ name: widgetName, label: widgetName, widgetName, appInput: true });
 }
@@ -603,7 +580,6 @@ describe('アプリ入力のグループ', () => {
     expect(groups.map((group) => group.key)).toEqual(['1:0', '2:0', '1:1']);
   });
 
-  // 鍵が変わると枠ごと作り直され、キーボードで並べ替えた項目から焦点が消える
   it('枠の中で並べ替えても鍵は変わらない', () => {
     const keyOf = (order: { nodeId: number; widgetName: string }[]): string | undefined =>
       appInputGroups(views, order)[0]?.key;
@@ -617,6 +593,7 @@ describe('アプリ入力のグループ', () => {
     expect(appInputGroups(views, [{ nodeId: 9, widgetName: 'a' }])).toEqual([]);
   });
 });
+
 describe('掴んでいる間の枠の並び', () => {
   const views = [view(1, 1, ['a', 'b']), view(2, 2, ['c', 'd'])];
   const ref = (nodeId: number, widgetName: string): { nodeId: number; widgetName: string } => ({
@@ -632,7 +609,6 @@ describe('掴んでいる間の枠の並び', () => {
       [1, ['b', 'a']],
       [2, ['c', 'd']],
     ]);
-    // 下へ動かして別の枠に重ねたら、その枠の後ろ（元の枠は分かれずに残りが残る）
     expect(shape(droppedGroups(groups, ref(1, 'a'), ref(2, 'c')))).toEqual([
       [1, ['b']],
       [2, ['c', 'd']],

@@ -13,20 +13,12 @@ import {
 } from '@/store/kit/library-table';
 import type { ChatTable } from '@/store/persist/chat-repo';
 
-// ─────────────────────────────
-// システムプロンプトのテンプレートの一覧。置き場は端末の大きい保存領域の
-// テンプレートの表に 1 件ずつ。画面の中にも全部を持つ。
-// 書けなくても画面の中では使える
-// ─────────────────────────────
-
 const templateTable = createLibraryTable('system-prompt');
 
-/** テストから置き場を差し替える */
 export function installSystemPromptTable(next: ChatTable | null): void {
   templateTable.install(next);
 }
 
-/** 表の 1 件か控えの 1 件を読む。形が合わなければ null */
 export function parseTemplate(raw: unknown): SystemPromptTemplate | null {
   if (!isRecord(raw) || typeof raw.id !== 'string' || typeof raw.name !== 'string') return null;
   const at = (value: unknown): number => (typeof value === 'number' ? value : 0);
@@ -40,10 +32,6 @@ export function parseTemplate(raw: unknown): SystemPromptTemplate | null {
   };
 }
 
-/**
- * 端末に書く。`expected` はこのタブが持っていた版の時刻で、置き場の 1 件がほかのタブで変わって
- * いないかを照合してから書く（新しく足す・控えから戻すときは null で照合しない）
- */
 function write(template: SystemPromptTemplate, expected: number | null): void {
   templateTable.write({
     id: template.id,
@@ -57,17 +45,10 @@ function write(template: SystemPromptTemplate, expected: number | null): void {
 interface SystemPromptsState {
   readonly templates: Readonly<Record<string, SystemPromptTemplate>>;
   readonly load: () => Promise<void>;
-  /** 新しいテンプレートとして保存する（別名保存） */
   readonly add: (name: string, content: string, params?: GenerationParams) => SystemPromptTemplate;
-  /** テンプレートの本文と生成の設定を書き換える（上書き保存） */
   readonly update: (id: string, content: string, params: GenerationParams) => void;
-  /** テンプレートの名前を変える */
   readonly rename: (id: string, name: string) => void;
   readonly remove: (id: string) => void;
-  /**
-   * 控えから戻す。同じ id があれば、最後に変えた時刻（版）の新しい方を残す。
-   * 足したら 'added'、置き換えたら 'updated'、一覧のものを残したら null
-   */
   readonly restore: (template: SystemPromptTemplate) => RestoreOutcome;
 }
 

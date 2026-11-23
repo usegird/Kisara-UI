@@ -8,18 +8,12 @@ import {
 } from '@/chat/prompt-advisor';
 import { isRecord, isUnknownArray, stringOr } from '@/lib/guards';
 
-// ─────────────────────────────
-// 構成の相談の応答から案を読む。応答は外から来るので、形を確かめてから使う。
-// ─────────────────────────────
-
-/** 本文を描く単位。文・読めた案・読めない案・書いている途中の案 */
 type AdvisorSegment =
   | { readonly kind: 'text'; readonly text: string }
   | { readonly kind: 'proposal'; readonly proposal: AdvisorProposal }
   | { readonly kind: 'invalid'; readonly raw: string }
   | { readonly kind: 'pending' };
 
-/** 本文を文と案に分ける。閉じていない案は書いている途中として出す */
 export function splitAdvisorText(content: string): AdvisorSegment[] {
   const segments: AdvisorSegment[] = [];
   const pushText = (value: string): void => {
@@ -45,10 +39,6 @@ export function splitAdvisorText(content: string): AdvisorSegment[] {
   return segments;
 }
 
-/**
- * 案の JSON を読む。形が違えば null。読めない変える所は落とし、1 件も無ければ null。
- * 呼び出しを文字で書いた形（`名前({...})`）は、括弧の中を読む
- */
 export function parseProposal(raw: string): AdvisorProposal | null {
   let value: unknown;
   try {
@@ -96,7 +86,6 @@ function parseChange(raw: unknown): AdvisorChange | null {
   }
 }
 
-/** 個別追加辞書の項目。キーワードが無く常に入れるのでもない項目は当たらないので読まない */
 function parseDictionaryChange(
   raw: Record<string, unknown>,
   content: string,
@@ -117,13 +106,11 @@ function parseDictionaryChange(
   };
 }
 
-/** 文字で書いた呼び出し（`名前( … )`）なら括弧の中を、ほかはそのまま返す */
 function unwrapCall(raw: string): string {
   const call = /^\s*[A-Za-z_][\w]*\s*\(([\s\S]*)\)\s*;?\s*$/u.exec(raw);
   return call?.[1] ?? raw;
 }
 
-/** 送った名前で書かれた id を読む */
 function idOf(value: unknown): string | null {
   const id = stringOr(value, null);
   return id === null ? null : internalId(id);

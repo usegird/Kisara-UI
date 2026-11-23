@@ -19,10 +19,6 @@ import {
 
 import { acceptTerms } from '../helpers/connection';
 
-// ─────────────────────────────
-// 利用規約への同意と、同意するまでつながないこと
-// ─────────────────────────────
-
 const ORIGINAL = {
   probe: useConnectionStore.getState().probe,
   load: useDefinitionsStore.getState().load,

@@ -3,12 +3,6 @@ import { describe, expect, it } from 'vitest';
 import { valueTooltip } from '@/components/comfy/flow/value-tooltip';
 import type { ValuePart } from '@/graph/widgets';
 
-// ─────────────────────────────
-// 値のホバー説明。変数ボックスとカードのチップで**同じ書式**にする。
-//   1行目: 「通し番号 生成元 / 出力名」
-//   2行目以降: 値を1行ずつ（省略しない）。数値・真偽にはパラメータ名が付く
-// ─────────────────────────────
-
 function part(text: string, label = text, bypassed = false): ValuePart {
   return { text, label, bypassed };
 }

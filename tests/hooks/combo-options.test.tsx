@@ -9,11 +9,6 @@ import { useSettingsStore } from '@/store/use-settings-store';
 
 import { nodeRow, nodeView } from '../helpers/views';
 
-// ─────────────────────────────
-// 選択肢は**行が出た時点**で取る。
-// 押してから取ると、1 回目の操作が読み込みに消えて選択の欄が開かない。
-// ─────────────────────────────
-
 afterEach(() => {
   cleanup();
   useSettingsStore.setState({ baseUrl: '' });
@@ -46,7 +41,6 @@ describe('選択肢の取り寄せ', () => {
     const rows = [
       comboRow(),
       comboRow({ target: { kind: 'node', nodeId: 2, classType: 'CheckpointLoaderSimple' } }),
-      // 取得済みと、書き込み先が無い行は対象にしない
       comboRow({ options: ['a.safetensors'] }),
       comboRow({ target: null }),
     ];

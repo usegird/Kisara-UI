@@ -7,18 +7,16 @@ import {
   isModelFolderOptions,
   modelDirectories,
   modelFileIndex,
+  modelNameOf,
   normalizeModelName,
   normalizeModelSort,
   sortModelItems,
   usesFetchedParts,
+  usesJsonKeys,
   usesLearnText,
 } from '@/graph/model-files';
 
 import { modelFile } from '../helpers/model-files';
-
-// ─────────────────────────────
-// モデル一覧の加工。区切り文字は接続先で揺れる前提。突き合わせは正規化してから行う。
-// ─────────────────────────────
 
 const files = [
   modelFile('style\\a.safetensors'),
@@ -146,33 +144,114 @@ describe('並び替えの条件の読み直し', () => {
   });
 });
 
-describe('Lora の写し取り', () => {
-  it('既定の書式は名前（拡張子なし・ディレクトリあり）と学習で多かった語', () => {
-    expect(formatLoraCopy('', 'style/foo.v2.safetensors', ['a', 'b'])).toBe(
-      '<lora:style/foo.v2:1> a, b',
+describe('Lora プロンプト書式', () => {
+  it('[name] は情報の name と同じ。区切りを / に揃え、拡張子を除く', () => {
+    expect(formatLoraCopy('<lora:[name]:1>', 'style\\foo.v2.safetensors')).toBe(
+      '<lora:style/foo.v2:1>',
+    );
+    expect(modelNameOf('style\\foo.v2.safetensors')).toBe('style/foo.v2');
+  });
+
+  it('既定の書式は名前・推奨の強さ（無ければ 1）・activation text（無ければ学習で多かった語）・改行', () => {
+    expect(formatLoraCopy('', 'style/foo.v2.safetensors', { learned: ['a', 'b'] })).toBe(
+      '<lora:style/foo.v2:1> a, b\n',
+    );
+    const json = new Map([
+      ['preferred weight', '0.7'],
+      ['activation text', 'kisara'],
+    ]);
+    expect(formatLoraCopy('', 'foo.safetensors', { learned: ['a'], json })).toBe(
+      '<lora:foo:0.7> kisara\n',
+    );
+  });
+
+  it('既定の書式で語が空なら、空白を詰めて末尾の改行は残す', () => {
+    expect(formatLoraCopy('', 'foo.safetensors')).toBe('<lora:foo:1>\n');
+  });
+
+  it('\\n の 2 字は改行にする（書式の途中でも）', () => {
+    expect(formatLoraCopy('<lora:[name]:1>\\n[txt]\\n', 'a', { memo: 'x' })).toBe(
+      '<lora:a:1>\nx\n',
     );
   });
 
   it('学習で多かった語が無ければ、置き換えの前後の空白を詰める', () => {
-    expect(formatLoraCopy('[learntext] <lora:[loraname]:0.8>', 'bar', [])).toBe('<lora:bar:0.8>');
+    expect(formatLoraCopy('[ss_tag_frequency] <lora:[name]:0.8>', 'bar')).toBe('<lora:bar:0.8>');
   });
 
-  it('[memo] はメモの前後の空白を落として入れ、無ければ詰める', () => {
-    expect(formatLoraCopy('<lora:[loraname]:1> [memo]', 'a.safetensors', [], ' x\ny\n')).toBe(
+  it('[txt] は同名の .txt の前後の空白を落として入れ、無ければ詰める', () => {
+    const memo = ' x\ny\n';
+    expect(formatLoraCopy('<lora:[name]:1> [txt]', 'a.safetensors', { memo })).toBe(
       '<lora:a:1> x\ny',
     );
-    expect(formatLoraCopy('[memo] <lora:[loraname]:1>', 'a.safetensors', [], '')).toBe(
+    expect(formatLoraCopy('[txt] <lora:[name]:1>', 'a.safetensors', { memo: '' })).toBe(
       '<lora:a:1>',
     );
   });
 
-  it('[memo] を含む書式だけ、接続先から取りに行く', () => {
-    expect(usesFetchedParts('<lora:[loraname]:1> [memo]')).toBe(true);
-    expect(usesFetchedParts('<lora:[loraname]:1>')).toBe(false);
+  it('ほかの [キー] は同名の JSON のその値を前後の空白を落として入れ、無いキーは置き換えない', () => {
+    const json = new Map([['activation text', ' kisara ']]);
+    const format = '<lora:[name]:1> [activation text] [sd version]';
+
+    expect(formatLoraCopy(format, 'a.safetensors', { json })).toBe(
+      '<lora:a:1> kisara [sd version]',
+    );
+    expect(formatLoraCopy('[style] <lora:[name]:1>', 'a')).toBe('[style] <lora:a:1>');
+  });
+
+  it('キーがあって値なし（空・Unknown・0）なら空にし、前後の空白を詰める', () => {
+    const json = new Map([
+      ['notes', ''],
+      ['sd version', 'Unknown'],
+      ['strength', '0'],
+    ]);
+    const format = '[notes] <lora:[name]:[strength]> [sd version]';
+
+    expect(formatLoraCopy(format, 'a', { json })).toBe('<lora:a:>');
+  });
+});
+
+describe('Lora の写し取り（| の候補）', () => {
+  const format = '<lora:[name]:[preferred weight|1]>';
+
+  it('値なし・キーが無ければ次の候補へ移り、最後の名前でない候補はその文字のまま入れる', () => {
+    expect(formatLoraCopy(format, 'a')).toBe('<lora:a:1>');
+    expect(formatLoraCopy(format, 'a', { json: new Map([['preferred weight', '0']]) })).toBe(
+      '<lora:a:1>',
+    );
+    expect(formatLoraCopy(format, 'a', { json: new Map([['preferred weight', '-0.5']]) })).toBe(
+      '<lora:a:-0.5>',
+    );
+  });
+
+  it('どの候補も空なら空にする（最後が名前なら文字のまま入れない）', () => {
+    expect(formatLoraCopy('[activation text|ss_tag_frequency] <lora:[name]:1>', 'a')).toBe(
+      '<lora:a:1>',
+    );
+  });
+
+  it('候補の中の名前も、取りに行くものの判定に入れる', () => {
+    expect(usesLearnText('[activation text|ss_tag_frequency]')).toBe(true);
+    expect(usesJsonKeys('[txt|ss_tag_frequency]')).toBe(false);
+    expect(usesJsonKeys('[preferred weight|1]')).toBe(true);
+  });
+});
+
+describe('Lora の写し取り（取りに行くもの）', () => {
+  it('決まった名前と同じキーは JSON から引かない', () => {
+    const json = new Map([['txt', 'from json']]);
+
+    expect(formatLoraCopy('[txt]', 'a', { memo: 'note', json })).toBe('note');
+    expect(usesJsonKeys('<lora:[name]:1> [ss_tag_frequency] [txt]')).toBe(false);
+  });
+
+  it('[txt] を含む書式だけ、接続先から取りに行く', () => {
+    expect(usesFetchedParts('<lora:[name]:1> [txt]')).toBe(true);
+    expect(usesFetchedParts('<lora:[name]:1>')).toBe(false);
   });
 
   it('語を使わない書式なら metadata は要らない', () => {
-    expect(usesLearnText('<lora:[loraname]:1>')).toBe(false);
+    expect(usesLearnText('<lora:[name]:1>')).toBe(false);
     expect(usesLearnText('')).toBe(true);
   });
 });

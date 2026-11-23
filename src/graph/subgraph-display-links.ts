@@ -12,23 +12,17 @@ import {
   type WorkflowNode,
 } from '@/graph/types';
 
-// ─────────────────────────────
-// 開いた subgraph の境界をまたぐ線を、表示用のワークフローの線へ解く。
-// ─────────────────────────────
-
 interface End {
   readonly id: NodeId;
   readonly slot: number;
 }
 
-/** 開いた subgraph の階層と、その中の線 */
 export interface OpenLevel {
   readonly definition: SubgraphDefinition;
   readonly level: Workflow;
   readonly links: readonly ResolvedLink[];
 }
 
-/** 線の行き先を透かす（入口・出口と、開いたインスタンスを通り抜ける） */
 function resolver(
   workflow: Workflow,
   levels: ReadonlyMap<NodeId, OpenLevel>,
@@ -38,7 +32,6 @@ function resolver(
 } {
   const rootById = new Map(workflow.nodes.map((node) => [node.id, node]));
   const rootLinks = linkIndex(workflow.links);
-  // 入口と出口を行き来して輪になる形でも止まるように、深さを区切る
   const LIMIT = 16;
 
   const outerSource = (instanceId: NodeId, inputName: string, depth = 0): End | null => {
@@ -62,7 +55,6 @@ function resolver(
     if (link.originId !== SUBGRAPH_IO_NODE_ID.input) {
       return { id: link.originId, slot: link.originSlot };
     }
-    // 入口から出口へ素通しの線
     const name = open.definition.inputs?.[link.originSlot]?.name;
     return name === undefined ? null : outerSource(instanceId, name, depth + 1);
   };
@@ -70,15 +62,10 @@ function resolver(
   return { outerSource, innerOrigin };
 }
 
-/** 透かした線を作る（id と受け手はそのまま、出どころだけ差し替える） */
 function rerouted(link: ResolvedLink, origin: End): WorkflowLink {
   return [link.id, origin.id, origin.slot, link.targetId, link.targetSlot, link.type];
 }
 
-/**
- * 表示の線。外の線は、開いたインスタンスへ入るものを落とし、開いたインスタンスから出るものを
- * 中の出どころから張り直す。中の線は、出口へのものを落とし、入口からのものを外の出どころから張る
- */
 export function displayLinks(
   workflow: Workflow,
   levels: ReadonlyMap<NodeId, OpenLevel>,
@@ -112,7 +99,6 @@ export function displayLinks(
   return result;
 }
 
-/** 入出力の口の線を、表示の線に合わせる。変わらなければ同じノードを返す */
 export function withDisplayLinks(
   node: WorkflowNode,
   links: ReadonlyMap<LinkId, ResolvedLink>,

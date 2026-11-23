@@ -20,24 +20,17 @@ import {
 import type { NodeRect } from '@/graph/node-box';
 import type { NodeId } from '@/graph/types';
 
-// ─────────────────────────────
-// ノードやグループのまとまりを、変更箇所だけの置き直しで入れる・抜く。
-// ─────────────────────────────
-
-/** 入れるもの 1 つ。ノード 1 つか、グループの箱（メンバーの間隔を保って動かす） */
 export interface Unit {
   readonly ids: readonly NodeId[];
   readonly group: number | null;
 }
 
-/** 入れる先。`beside` の前か後ろ。null なら階層の末尾 */
 export interface Spot {
   readonly container: Container;
   readonly beside: NodeId | { readonly group: number } | null;
   readonly side: 'before' | 'after';
 }
 
-/** まとまり全体の箱。箱の無いまとまりは null */
 export function unitRect(work: Work, unit: Unit): NodeRect | null {
   const rects = unit.ids.flatMap((id) => nodeRect(work, id) ?? []);
   if (rects.length === 0) return null;
@@ -45,7 +38,6 @@ export function unitRect(work: Work, unit: Unit): NodeRect | null {
   return groupFrame(work, unit.group, new Set()) ?? frameAround(rects);
 }
 
-/** 入れるものの所属を `container` に書く（ノードは所属、グループの箱は親） */
 function assignContainer(work: Work, units: readonly Unit[], container: Container): void {
   for (const unit of units) {
     if (unit.group === null) {
@@ -58,18 +50,12 @@ function assignContainer(work: Work, units: readonly Unit[], container: Containe
   }
 }
 
-/** 入れる先の隣（`beside`）に当たるものか */
 function isBeside(item: Item, beside: Spot['beside']): boolean {
   if (beside === null) return false;
   if (typeof beside === 'number') return item.group === null && containsItem(item, beside);
   return item.group === beside.group;
 }
 
-/**
- * `units` を `spot` へ入れる。入れるものの所属は `spot.container` に書く。
- * 入れるものは今の位置から抜いた扱いで数える（呼ぶ側で、元の場所は先に詰めておく）。
- * 読み戻すと「上 → 入れたもの → 下」になる
- */
 export function insertUnits(work: Work, units: readonly Unit[], spot: Spot): void {
   const adding = new Set(units.flatMap((unit) => unit.ids));
   assignContainer(work, units, spot.container);
@@ -86,7 +72,6 @@ export function insertUnits(work: Work, units: readonly Unit[], spot: Spot): voi
   let column: Item[] | null = null;
   let lower: Item[] = [];
   if (at < 0) {
-    // 末尾。いちばん右の箱の右に、最後の列の上端に揃えて置く
     const last = columns.at(-1);
     x = last
       ? Math.max(...items.map((item) => item.rect.right)) + work.layout.gap
@@ -103,7 +88,6 @@ export function insertUnits(work: Work, units: readonly Unit[], spot: Spot): voi
     top = anchor ? anchor.rect.top : 0;
   }
 
-  // 入れるものを 1 つずつ別の列に置く（上端を揃える）
   let right = x;
   let lastLeft = x;
   for (const unit of units) {
@@ -131,11 +115,9 @@ export function insertUnits(work: Work, units: readonly Unit[], spot: Spot): voi
     shiftColumns(work, columns.slice(at + 1), dx);
   }
 
-  // 箱の中に入れたなら、箱の伸びを外へ順に伝える
   propagateUp(work, spot.container, before);
 }
 
-/** 空の階層に入れるときの左端（グループなら枠の内側） */
 function startOf(work: Work, frame: NodeRect | null): number {
   return frame ? frame.left + GROUP_PADDING : work.layout.startX;
 }
@@ -144,10 +126,6 @@ function topOf(frame: NodeRect | null): number {
   return frame ? frame.top + GROUP_PADDING + GROUP_TITLE_HEIGHT : 0;
 }
 
-/**
- * `unit` を今の場所から抜いたものとして詰める。位置は書き換えない（抜くものは
- * 呼ぶ側で消すか、別の場所へ入れる）。列にほかのものが残れば動かさない
- */
 export function removeUnit(work: Work, unit: Unit): void {
   const first = unit.ids[0];
   if (first === undefined) return;
@@ -163,21 +141,17 @@ export function removeUnit(work: Work, unit: Unit): void {
   );
   const column = columns[at];
   if (column && column.every((item) => item.ids.every((id) => removing.has(id)))) {
-    // 列が空になる。後ろに読む列を、空いた列の左端まで詰める
     const rest = columns.filter((_, index) => index !== at);
     const behind = columns.slice(at + 1);
     const want = behind.length > 0 ? Math.min(...behind.map(columnLeft)) - columnLeft(column) : 0;
     closeColumns(work, { columns: rest, behind }, want, null);
   } else if (column) {
-    // 列が残る。抜けたものが列の左端なら、残りを元の左端へ寄せる（ゆとりの分以内）。
-    // 左端が右へずれると、すぐ後ろの列が同じ列として読まれ、並びが入れ替わる
     const remaining = column.filter((item) => !item.ids.some((id) => removing.has(id)));
     const dx = columnLeft(column) - columnLeft(remaining);
     if (dx < 0) translate(work, idsOf(remaining), dx, 0);
   }
 
   if (container === null || !before.get(container)) return;
-  // 箱から抜けた。残りで枠が縮めば外へ順に詰める。空になれば箱ごと抜けた扱い
   const detach = (): void => {
     if (unit.group === null) for (const id of unit.ids) work.membership.delete(id);
     else work.parents.delete(unit.group);
@@ -191,7 +165,6 @@ export function removeUnit(work: Work, unit: Unit): void {
     propagateUp(work, container, before);
     return;
   }
-  // 箱ごと空いた: 1 つ外の列から箱を抜いて詰める（その外も同じく）
   attach();
   removeUnit(work, { ids: unit.ids, group: container });
   detach();

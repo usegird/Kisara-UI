@@ -10,11 +10,6 @@ import { buildVariableBoxes } from '@/graph/variables';
 
 import { loadDefinitions } from '../helpers/fixtures';
 
-// ─────────────────────────────
-// 信頼できない入力。**1 つの壊れた入力で全体を止めない**。
-// ComfyUI やカスタムノードが思いがけない形で持つ値を、どの経路でも受け流せること。
-// ─────────────────────────────
-
 const definitions = loadDefinitions();
 const SHOW_ALL = { showControlNodes: true, showUnlinkedNodes: true };
 
@@ -22,7 +17,6 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-/** 口や値の形が崩れたノードと、まともなノードを混ぜたもの */
 function malformed(): Workflow {
   return parseWorkflow({
     nodes: [
@@ -32,7 +26,6 @@ function malformed(): Workflow {
         pos: [0, 0],
         outputs: [{ name: 'IMAGE', type: 'IMAGE', links: [7] }],
       },
-      // 口が配列でない・項目が崩れている・値の並びが数値・位置が無い
       {
         id: 2,
         type: 'Broken',
@@ -82,7 +75,6 @@ describe('崩れた Workflow JSON', () => {
   it('組み立ての途中で投げるノードは「壊れた」印を付けて残し、ほかは組み立てる', () => {
     vi.spyOn(console, 'error').mockImplementation(() => {});
     const workflow = malformed();
-    // 読むだけで投げる値（想定外の形の代わり）
     const trap = { ...workflow.nodes[2] } as Record<string, unknown>;
     Object.defineProperty(trap, 'inputs', {
       get: () => {

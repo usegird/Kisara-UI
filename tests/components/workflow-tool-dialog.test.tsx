@@ -8,10 +8,6 @@ import type { Workflow } from '@/graph/types';
 import { definition, definitionMap, widget } from '../helpers/definitions';
 import { bareNode } from '../helpers/workflow';
 
-// ─────────────────────────────
-// LLM からの呼び出し設定。直しかけがあるまま閉じるときは確かめる。
-// ─────────────────────────────
-
 const definitions = definitionMap(definition('Prompt', [widget('text', 'STRING')]));
 
 const workflow: Workflow = {

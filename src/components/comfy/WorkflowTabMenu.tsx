@@ -5,21 +5,26 @@ import { t } from '@/i18n';
 import { guardPress } from '@/lib/press-guard';
 import { useGraphStore } from '@/store/use-graph-store';
 import { useSettingsStore } from '@/store/use-settings-store';
+import { useTabsStore } from '@/store/use-tabs-store';
 
-// ─────────────────────────────
-// ワークフローのタブの右クリックメニューに差し込む保存の項目。「閉じる」はタブ種別に依存しないので
-// 外枠が足す。アクティブなタブのメニューにだけ出るので、どれもアクティブなタブに効く。
-// ─────────────────────────────
-
-/** 保存の項目の props */
 export interface WorkflowTabMenuProps {
-  /** 保存・エクスポートの手続き */
   readonly io: WorkflowIo;
-  /** 接続中か。つないでいなければ保存は押せない */
   readonly connected: boolean;
 }
 
-/** 上書き保存・名前を付けて保存・エクスポートの項目を並べる */
+export function DuplicateTabMenuItem(): React.ReactElement {
+  const hasWorkflow = useGraphStore((state) => state.workflow !== null);
+  const onDuplicateClick = (): void => {
+    const { activeId, duplicateTab } = useTabsStore.getState();
+    duplicateTab(activeId);
+  };
+  return (
+    <ContextMenuItem disabled={!hasWorkflow} onClick={onDuplicateClick}>
+      {t('comfy.tabMenu.duplicate')}
+    </ContextMenuItem>
+  );
+}
+
 export function WorkflowTabMenu({ io, connected }: WorkflowTabMenuProps): React.ReactElement {
   const hasWorkflow = useGraphStore((state) => state.workflow !== null);
   const canSave = hasWorkflow && connected && io.saveState.kind !== 'saving';
@@ -49,10 +54,6 @@ export function WorkflowTabMenu({ io, connected }: WorkflowTabMenuProps): React.
   );
 }
 
-/**
- * 上書き保存できない理由。押せるなら null（保存先がまだ無いときも押せて、名前を付けて保存になる）。
- * 押せるのは、KisaraUI が作ったファイルを今の接続先で開いたときだけ
- */
 function useOverwriteBlock(): string | null {
   const baseUrl = useSettingsStore((state) => state.baseUrl);
   return useGraphStore((state) => {

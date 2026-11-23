@@ -4,21 +4,15 @@ import { describe, expect, it } from 'vitest';
 import { collisionDetection, homesOf, pointerInView } from '@/components/comfy/flow/flow-dnd';
 import { scopedId } from '@/graph/subgraph-level';
 
-// ─────────────────────────────
-// 当たり判定の振り分け。カードの並べ替えは**カードどうしだけ**で決める。
-// ─────────────────────────────
-
 function box(top: number, height: number): ClientRect {
   return { top, left: 0, right: 100, bottom: top + height, width: 100, height };
 }
 
-/** 並べ替えの受け口に入っているもの（dnd-kit の sortable が data に載せる形） */
 function sortableData(containerId: string): { sortable: { containerId: string } } {
   return { sortable: { containerId } };
 }
 
 function container(id: string | number, sortable?: string): DroppableContainer {
-  // 判定に使うのは id と data だけ。残りは dnd-kit の内部で使う
   const current = sortable === undefined ? undefined : sortableData(sortable);
   return { id, key: String(id), data: { current }, disabled: false } as never;
 }
@@ -29,7 +23,6 @@ describe('当たり判定', () => {
   it('カードの並べ替えでは、中のパラメータ行が近くてもカードを選ぶ', () => {
     const rects = new Map<string | number, ClientRect>([
       [2, box(200, 300)],
-      // カード 2 の中のパラメータ行。掴んだカードの中心にいちばん近い
       ['in:2:0', box(100, 20)],
     ]);
     const args = {
@@ -46,7 +39,6 @@ describe('当たり判定', () => {
   it('枠の外を指しているあいだは、枠の中のカードを外のカードの候補にしない', () => {
     const rects = new Map<string | number, ClientRect>([
       ['group:1', box(200, 400)],
-      // 枠の中のカード。掴んだカードにいちばん近い
       [5, box(100, 40)],
     ]);
     const args = {
@@ -64,7 +56,6 @@ describe('当たり判定', () => {
     const innerA = scopedId(68, 26);
     const innerB = scopedId(68, 44);
     const rects = new Map<string | number, ClientRect>([
-      // 外のカードとグループの枠。指している所にある
       [9, box(100, 40)],
       ['group:1', box(600, 100)],
       [innerB, box(300, 40)],
@@ -100,7 +91,6 @@ describe('当たり判定', () => {
 
     expect(at(50)).toEqual([4]);
     expect(at(120)).toEqual([5]);
-    // 隙間では縦に一番近いもの
     expect(at(104)).toEqual([4]);
   });
 
@@ -119,8 +109,8 @@ describe('当たり判定', () => {
 
     expect(collisionDetection(args).map((collision) => collision.id)).toEqual([7]);
   });
+
   describe('枠の出入り', () => {
-    // 枠は 200〜600（上 22px はタブの帯）。中にカード 5（230〜330）と 6（340〜440）
     const rects = new Map<string | number, ClientRect>([
       [1, box(0, 100)],
       ['group:1', box(200, 400)],
@@ -147,7 +137,6 @@ describe('当たり判定', () => {
 
     it('外のカードで枠の中を指すと、指しているメンバーを選ぶ（グループに入る）', () => {
       expect(ids(drag(1, 'cards', 380))).toEqual([6]);
-      // メンバーの間の隙間なら、縦に一番近いメンバー
       expect(ids(drag(1, 'cards', 335))).toEqual([5]);
     });
 
@@ -166,8 +155,6 @@ describe('当たり判定', () => {
     });
 
     it('列の横の外を指すあいだは、置き直して受け口が変わっても同じものを選ぶ', () => {
-      // メンバー 5 を掴み、列の右の外（x = 300）で枠の高さを指す。置き直すと 5 は外の受け口に
-      // 描かれる。今の受け口で選ぶと、外に置けば自分、中に戻せば枠を選んで行き来が止まらない
       const homes = homesOf(containers);
       const outside = (live: readonly DroppableContainer[]): unknown[] =>
         collisionDetection(
@@ -202,14 +189,12 @@ describe('並べ替えの指の位置', () => {
   it('列の上のヘッダを指していたら、列の見えている上端を指しているとみなす', () => {
     const view = { top: 80, bottom: 700 };
 
-    // 列の上（ヘッダ）・下の外は端へ寄せる。列の中はそのまま
     expect(pointerInView({ x: 10, y: 20 }, view)).toEqual({ x: 10, y: 80 });
     expect(pointerInView({ x: 10, y: 900 }, view)).toEqual({ x: 10, y: 700 });
     expect(pointerInView({ x: 10, y: 300 }, view)).toEqual({ x: 10, y: 300 });
   });
 
   it('列の上端を指していれば、ヘッダの裏に隠れたカードではなく見えている先頭のカードを選ぶ', () => {
-    // 1 は送って列の上（ヘッダの裏）に隠れている。2 が見えている先頭
     const rects = new Map<string | number, ClientRect>([
       [1, box(-200, 260)],
       [2, box(80, 200)],
@@ -229,12 +214,7 @@ describe('並べ替えの指の位置', () => {
   });
 });
 
-// ─────────────────────────────
-// 入れ子の枠。重なる枠は内側を選び、掴んだグループは自分の中に入らない。
-// ─────────────────────────────
-
 describe('入れ子の枠の当たり判定', () => {
-  // 外の列: カード 1・外側の枠 outer（中に inner の枠とカード 4）。inner の中にカード 2
   const rects = new Map<string | number, ClientRect>([
     [1, box(0, 80)],
     ['group:outer', box(100, 400)],
@@ -272,7 +252,6 @@ describe('入れ子の枠の当たり判定', () => {
   });
 
   it('掴んだグループは自分の枠とその中の枠には入らない', () => {
-    // outer を掴んで inner の中を指しても、外の列のもの（outer 自身）に当たる
     expect(hit(args('group:outer', 'cards', 250))).toBe('group:outer');
   });
 });

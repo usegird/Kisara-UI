@@ -6,11 +6,6 @@ import { formatMegabytes, isTooLarge, MEGABYTE, wholeMegabytes } from '@/lib/fil
 import { readAttachedImage } from '@/lib/image-attach';
 import { importDictionaryFile } from '@/store/use-dictionaries-store';
 
-// ─────────────────────────────
-// 取り込むファイルの大きさの上限。丸ごと読む前に見て、大きすぎれば読まずに断る
-// ─────────────────────────────
-
-/** 中身は小さいまま、大きさだけを上限の外にしたファイル */
 function sizedFile(name: string, type: string, size: number): File {
   const file = new File(['{}'], name, { type });
   Object.defineProperty(file, 'size', { value: size });

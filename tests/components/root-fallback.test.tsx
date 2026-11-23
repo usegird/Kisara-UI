@@ -5,10 +5,6 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { RootFallback } from '@/components/app/RootFallback';
 import { downloadText } from '@/lib/download';
 
-// ─────────────────────────────
-// アプリ全体の受け止め画面。診断ファイルは全文を出してから保存する
-// ─────────────────────────────
-
 vi.mock('@/lib/download', () => ({ downloadText: vi.fn() }));
 
 afterEach(cleanup);

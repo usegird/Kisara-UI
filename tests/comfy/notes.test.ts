@@ -1,13 +1,37 @@
 import { describe, expect, it, vi } from 'vitest';
 
 import type { FetchLike } from '@/comfy/client';
-import { fetchSavedNotes, listSavedNotes, saveNotes } from '@/comfy/notes';
-
-// ─────────────────────────────
-// `kisara/notes/` のメモ。書くのは `/userdata` だけで、上書きを必ず指定する。
-// ─────────────────────────────
+import {
+  fetchJsonEdits,
+  fetchSavedNotes,
+  listSavedNotes,
+  saveJsonEdits,
+  saveNotes,
+} from '@/comfy/notes';
 
 const base = 'http://127.0.0.1:8188';
+
+describe('同名の JSON の差分の読み書き', () => {
+  it('kisara/notes へ上書きの指定つきで、差分を JSON で書く', async () => {
+    const fetchImpl = vi.fn<FetchLike>().mockResolvedValue(new Response('', { status: 200 }));
+    const edits = new Map<string, string | number>([['preferred weight', -0.5]]);
+
+    await saveJsonEdits(base, { folder: 'loras', filename: 'a.safetensors', edits }, { fetchImpl });
+
+    const [url, init] = fetchImpl.mock.calls[0] ?? [];
+    expect(url).toBe(`${base}/userdata/kisara%2Fnotes%2Floras%2Fa.safetensors.json?overwrite=true`);
+    const body = typeof init?.body === 'string' ? init.body : '';
+    expect(JSON.parse(body)).toEqual({ 'preferred weight': -0.5 });
+  });
+
+  it('無い（404）・形が合わないときは空として読む', async () => {
+    const missing = vi.fn<FetchLike>().mockResolvedValue(new Response('', { status: 404 }));
+    const broken = vi.fn<FetchLike>().mockResolvedValue(new Response('[1]', { status: 200 }));
+
+    expect((await fetchJsonEdits(base, 'loras', 'a', { fetchImpl: missing })).size).toBe(0);
+    expect((await fetchJsonEdits(base, 'loras', 'a', { fetchImpl: broken })).size).toBe(0);
+  });
+});
 
 describe('メモの読み書き', () => {
   it('kisara/notes へ上書きの指定つきで、本文を生のまま書く', async () => {

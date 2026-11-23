@@ -8,25 +8,14 @@ import { sortableStyle } from '@/components/ui/sortable-style';
 import { slideKey } from '@/hooks/ui/use-reorder-slide';
 import { t } from '@/i18n';
 
-// ─────────────────────────────
-// プロンプトのタブの「プレイブック」の行。構成の項目ではないので掴めず、落とし先にもしない。
-// ─────────────────────────────
-
-/**
- * プレイブックの行の鍵（構成の項目ではない）
- */
 export const PLAYBOOK_KEY = PLAYBOOK_ID;
 
-/** プレイブックの行に出すもの */
 export interface PlaybookPromptRow {
-  /** プレイブックの名前と今のフェーズ */
   readonly summary: string;
-  /** 送るフェーズの文（置き換えの後） */
   readonly text: string;
   readonly tokens: number | undefined;
 }
 
-/** プレイブックの名前と今のフェーズの行。開くと送るフェーズの文を読むだけで出す */
 export function PlaybookPromptCard({
   row,
   open,
@@ -36,12 +25,10 @@ export function PlaybookPromptCard({
   readonly row: PlaybookPromptRow;
   readonly open: boolean;
   readonly onToggle: () => void;
-  /** 動かせない行の地のつなぎ方 */
   readonly join: BandJoin;
 }): React.ReactElement {
   const { setNodeRef, transform, transition } = useSortable({
     id: PLAYBOOK_KEY,
-    // 掴めない。指せないことは slotCollision で決める（落とし先のまま置いて、行の大きさを測らせる）
     disabled: { draggable: true, droppable: false },
   });
   return (

@@ -5,10 +5,6 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { useOpenRunWorkflow } from '@/hooks/run/use-open-run-workflow';
 import type { HistoryRun } from '@/queue/run-history-view';
 
-// ─────────────────────────────
-// 記録の実行を、出力の画像に埋まった Workflow JSON から開く
-// ─────────────────────────────
-
 const fetchWorkflowFromImage = vi.hoisted(() => vi.fn());
 const openWorkflow = vi.hoisted(() => vi.fn());
 

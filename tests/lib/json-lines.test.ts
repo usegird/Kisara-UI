@@ -2,10 +2,6 @@ import { describe, expect, it } from 'vitest';
 
 import { gzipLines, LineTooLongError, readLines } from '@/lib/json-lines';
 
-// ─────────────────────────────
-// 1 行 1 件の JSON を gzip で縮めて書き、流れのまま読む
-// ─────────────────────────────
-
 async function collect(blob: Blob, maxChars = 1000): Promise<string[]> {
   const lines: string[] = [];
   for await (const line of readLines(blob, maxChars)) lines.push(line);

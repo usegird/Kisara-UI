@@ -15,10 +15,6 @@ import { cloudAgreed, useTermsStore } from '@/store/use-terms-store';
 
 import { fakeKeyPort, fakeLlmPort, profile } from '../helpers/llm';
 
-// ─────────────────────────────
-// 接続の欄は API キーを受けず、ゲートウェイの入力の窓を開く。打った値は送るまで接続の設定に書かない
-// ─────────────────────────────
-
 const OPENROUTER = 'https://openrouter.ai/api/v1';
 
 let openEntry: ReturnType<typeof vi.fn<LlmKeyPort['openEntry']>>;
@@ -36,7 +32,7 @@ beforeEach(() => {
 afterEach(cleanup);
 
 const urlField = () => screen.getByRole<HTMLInputElement>('combobox', { name: 'ベース URL' });
-const enterButton = () => screen.getByRole('button', { name: 'API キーをセット' });
+const enterButton = () => screen.getByRole('button', { name: 'API キーを設定' });
 const stored = (id: string) => useLlmProfilesStore.getState().profiles.find((p) => p.id === id);
 
 describe('API キーの入れ方', () => {
@@ -94,7 +90,6 @@ describe('API キーの入れ方', () => {
     act(() => useLlmKeysStore.setState({ keyed: [OPENROUTER] }));
     expect(screen.getByText('設定済')).toBeTruthy();
 
-    // そのキーで同じ接続先の設定がつながったら、検証済みと出す
     const ok = { kind: 'ok', models: [], contexts: {}, details: {}, serverContext: null } as const;
     act(() => useLlmProfilesStore.setState({ checks: { cloud: ok } }));
     expect(screen.getByText('API キー検証済み')).toBeTruthy();
@@ -111,6 +106,35 @@ describe('API キーの入れ方', () => {
     act(() => useLlmKeysStore.setState({ keyed: [OPENROUTER] }));
     fireEvent.click(screen.getByRole('button', { name: 'API キーを消す' }));
     expect(forgetKey).toHaveBeenCalledWith(OPENROUTER);
+  });
+
+  it('未接続で窓を開き、その URL にキーが入ったらつなぐ（つながっていれば、つなぎ直さない）', () => {
+    const listeners = new Set<(url: string) => void>();
+    const keyPort = fakeKeyPort({
+      openEntry,
+      onKeySet: (listener) => {
+        listeners.add(listener);
+        return () => listeners.delete(listener);
+      },
+    });
+    installLlmKeyPort(keyPort);
+    const keySet = (url: string) => act(() => [...listeners].forEach((listener) => listener(url)));
+    const onProfile = vi.fn();
+    render(<LlmEndpointField profileId="p1" onProfile={onProfile} />);
+    fireEvent.change(urlField(), { target: { value: OPENROUTER } });
+
+    keySet(OPENROUTER);
+    expect(onProfile).not.toHaveBeenCalled();
+
+    fireEvent.click(enterButton());
+    act(() => useLlmKeysStore.setState({ keyed: [OPENROUTER] }));
+    keySet(OPENROUTER);
+    expect(onProfile).toHaveBeenCalledWith('cloud');
+    expect(stored('cloud')?.keyRequired).toBe(true);
+
+    onProfile.mockClear();
+    keySet(OPENROUTER);
+    expect(onProfile).not.toHaveBeenCalled();
   });
 
   it('送ったら同じ URL の設定を選び、キーを入れたかを書く', () => {

@@ -9,16 +9,6 @@ import {
 } from '@/graph/types';
 import { nextNodeId } from '@/graph/workflow-ids';
 
-// ─────────────────────────────
-// ノードの複製。複製どうしの線を付け直す（線の追加は links.ts の 1 本を通す）。
-// ─────────────────────────────
-
-/**
- * ノードを写す（クローン）。新しい id で**同じ内容**を足す。置き場所はここでは決めない
- * （呼び出し側で並びに入れる）。まとめて写すときは**写したものどうしの線はクローンどうしで張り直し**、
- * それ以外の入力は元と同じ相手から引く。出力の先へは繋がない。
- * 返す id は渡した順（見つからない元は飛ばす）。1 つも無ければ null
- */
 export function cloneNodes(
   workflow: Workflow,
   nodeIds: readonly NodeId[],
@@ -28,7 +18,6 @@ export function cloneNodes(
 
   const first = nextNodeId(workflow);
   const cloneOf = new Map(originals.map((original, at) => [original.id, first + at]));
-  // 元のノードの形を保ったまま写す（知らないキーも落とさない）。線は引き直すので一旦外す
   const clones = originals.map((original): WorkflowNode => {
     const copy = structuredClone(original);
     return {

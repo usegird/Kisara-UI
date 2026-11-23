@@ -7,12 +7,6 @@ import { t } from '@/i18n';
 import { cn } from '@/lib/utils';
 import { pushInOffsets, pushOutOffsets, type CellOffset, type Slide } from '@/queue/viewer-slides';
 
-// ─────────────────────────────
-// ビューワーの画像の層。行×列の枠に画像を並べ、入れ替わり（送り・追従の押しのけ）の動きを当てる。
-// 状態と送り・追従の手順は `ViewerSurface` が持ち、ここは描くだけ
-// ─────────────────────────────
-
-/** 入れ替わりの層ごとの動き。送りはページごと滑らせる */
 const layer = cva('absolute inset-0 grid gap-1 p-1', {
   variants: {
     motion: {
@@ -25,14 +19,12 @@ const layer = cva('absolute inset-0 grid gap-1 p-1', {
   },
 });
 
-/** 追従の押しのけの、枠ごとの動き。残る画像は出ていく側では描かない */
 const pushCell = cva('', {
   variants: {
     push: { none: '', in: 'kisara-push-in', out: 'kisara-push-out', stay: 'invisible' },
   },
 });
 
-/** 画像 1 枚の枠。実サイズのときは掴んで送れるようにする */
 const slideFrame = cva('flex min-h-0 min-w-0', {
   variants: {
     actualSize: {
@@ -47,7 +39,6 @@ const slideImage = cva('', {
   },
 });
 
-/** 左右の端に重ねる送りの矢印。帯と同じく、画像を指している間か焦点がある間だけ見せる */
 const sideArrow = cva(
   'bg-background/60 text-foreground absolute top-1/2 z-10 -translate-y-1/2 rounded-full p-1.5 ' +
     'opacity-0 backdrop-blur-sm transition-opacity hover:bg-background/90 ' +
@@ -55,12 +46,10 @@ const sideArrow = cva(
   { variants: { side: { left: 'left-2', right: 'right-2' } } },
 );
 
-/** 入れ替わりの動き。送りはページごと滑らせ、追従は枠ごとに押しのける */
 export type Motion =
   | { readonly kind: 'slide'; readonly from: 'left' | 'right'; readonly seq: number }
   | { readonly kind: 'push'; readonly shift: number; readonly seq: number };
 
-/** 出ていく側。入れ替えのあいだだけ重ねて残す */
 export type Leaving =
   | {
       readonly kind: 'slide';
@@ -75,7 +64,6 @@ export type Leaving =
       readonly seq: number;
     };
 
-/** 枠を押したときの動き（1 枚を大きく見る・並びに戻る） */
 export interface CellPick {
   readonly label: string;
   readonly run: () => void;
@@ -85,7 +73,6 @@ interface SlideStageProps {
   readonly shown: readonly Slide[];
   readonly leaving: Leaving | null;
   readonly motion: Motion;
-  /** 押さえた並びを出していない（押しのけの動きを当ててよい） */
   readonly pushing: boolean;
   readonly perPage: number;
   readonly rows: number;
@@ -95,7 +82,6 @@ interface SlideStageProps {
   readonly pick: (slide: Slide) => CellPick | undefined;
 }
 
-/** 画像の層。出ていく側（入れ替えのあいだだけ）と、入ってくる側を重ねる */
 export function SlideStage({
   shown,
   leaving,
@@ -115,7 +101,6 @@ export function SlideStage({
 
   return (
     <div className="relative h-full">
-      {/* 出ていく側。入れ替えのあいだだけ重ねる */}
       {leaving === null ? null : (
         <div
           key={`out:${String(leaving.seq)}`}
@@ -126,7 +111,6 @@ export function SlideStage({
           style={grid}
         >
           {leaving.slides.map((slide, index) => {
-            // 押しのけでは、あふれて出ていく画像だけを動かす（残る画像は入る側が描く）
             const offset =
               leaving.kind === 'push'
                 ? (pushOutOffsets(leaving.shift, perPage)[index] ?? null)
@@ -156,7 +140,6 @@ export function SlideStage({
         style={grid}
       >
         {shown.map((slide, index) => {
-          // 押しのけでは、枠ごとに前の枠（新しい画像は左の外）から入る
           const offset =
             motion.kind === 'push' && pushing
               ? pushInOffsets(motion.shift, perPage, cols)[index]
@@ -192,14 +175,11 @@ function Cell({
   readonly actualSize: boolean;
   readonly className?: string | undefined;
   readonly style?: React.CSSProperties | undefined;
-  /** 押したときの動き（1 枚を大きく見る・並びに戻る）。無ければ押せない */
   readonly onPick?: CellPick | undefined;
 }): React.ReactElement {
   const src = useOutputSrc(baseUrl, slide.file, { until: slide.until });
-  // 実サイズで枠からはみ出したときは、掴んで動かして送る
   const { handlers, wasDragged } = useDragScroll(actualSize);
   const onCellClick = (): void => {
-    // 動かして離したときは押したことにしない
     if (!wasDragged()) onPick?.run();
   };
   const onCellKeyDown = (event: React.KeyboardEvent): void => {
@@ -222,7 +202,6 @@ function Cell({
       onKeyDown={onCellKeyDown}
     >
       {src === false ? (
-        // 接続先が無いと答えた画像は取りに行かず、名前だけ出す
         <p className="text-muted-foreground text-sm">
           {t('queue.viewer.imageMissing', { name: slide.file.filename })}
         </p>
@@ -230,11 +209,8 @@ function Cell({
         <img
           src={src ?? undefined}
           alt={slide.file.filename}
-          // 先読みで復号済みなので、他の描画と同じ拍で出す（差し替えで白く抜けない）
           decoding="sync"
-          // 掴んで送るとき、画像そのものを持ち出さない
           draggable={false}
-          // 実サイズでも中央に置く。`m-auto` なら枠より大きいときに左上が欠けない（送って見る）
           className={slideImage({ actualSize })}
         />
       )}
@@ -242,10 +218,6 @@ function Cell({
   );
 }
 
-/**
- * 送りの矢印。左右の端の縦の中ほどに重ね、帯と同じく指している間だけ出す。
- * **送る先が無い向きは出さない**
- */
 export function SideArrows({
   canNewer,
   canOlder,
@@ -283,13 +255,11 @@ export function SideArrows({
   );
 }
 
-/** 枠ごとのずれを CSS に渡す（`kisara-push-in` / `kisara-push-out` が読む） */
 function offsetStyle(offset: CellOffset): React.CSSProperties {
   const vars: Record<`--${string}`, number> = { '--kx': offset.x, '--ky': offset.y };
   return vars;
 }
 
-/** 押しのけで出ていく側の画像の動き。押しのけでなければ動かさず、残る画像は隠す */
 function pushOf(offset: unknown): 'none' | 'stay' | 'out' {
   if (offset === undefined) return 'none';
   return offset === null ? 'stay' : 'out';

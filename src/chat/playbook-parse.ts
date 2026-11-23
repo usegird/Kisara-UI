@@ -13,11 +13,6 @@ import {
 import { ADVISOR_USES } from '@/chat/prompt-advisor';
 import { isRecord, isUnknownArray, stringOr } from '@/lib/guards';
 
-// ─────────────────────────────
-// プレイブックの読み戻し（置き場・書き出したファイル・ComfyUI の控え）。外から来た形なので
-// 確かめてから使う。前の形は読まない。
-// ─────────────────────────────
-
 const USES: readonly ResponseUse[] = ['send'];
 const KINDS: readonly PhaseKind[] = ['decide', 'proceed', 'close'];
 
@@ -28,7 +23,6 @@ function parseSend(
 ): PlaybookSendAction | null {
   const instruction = stringOr(raw.instruction, null);
   if (instruction === null) return null;
-  // 入力欄に入れる操作は使い道を持たない
   if (raw.revise === true) return { kind: 'send', id, name, instruction, revise: true };
   const use = USES.find((item) => item === raw.use);
   const sendTo = stringOr(raw.sendTo, null);
@@ -42,7 +36,6 @@ function parseSend(
   };
 }
 
-/** 操作。読めない種類は読み捨てる */
 function parseAction(raw: unknown): PlaybookAction | null {
   if (!isRecord(raw)) return null;
   const id = stringOr(raw.id, null);
@@ -81,14 +74,12 @@ function parsePhase(raw: unknown): PlaybookPhase | null {
     id,
     name,
     kind,
-    // 読めなければ種類で決める
     outline: OUTLINE_VIEWS.find((item) => item === raw.outline) ?? defaultOutlineView(kind),
     goal: stringOr(raw.goal),
     actions: actionsOf(raw.actions),
   };
 }
 
-/** プレイブックの持ち物。読めなければ null（自分のプレイブックの一覧からも使う） */
 export function parsePlaybook(raw: unknown): Playbook | null {
   if (!isRecord(raw)) return null;
   const id = stringOr(raw.id, null);
@@ -120,9 +111,6 @@ export function parsePlaybook(raw: unknown): Playbook | null {
   };
 }
 
-/**
- * 会話のプレイブック（どれかと今のフェーズ）を読む。読めなければ持たない
- */
 export function parseChatPlaybook(
   raw: unknown,
 ): { readonly playbook: ChatPlaybookRef } | Record<string, never> {
@@ -138,7 +126,6 @@ export function parseChatPlaybook(
   };
 }
 
-/** 発言が持つ操作の指示。読めなければ持たない */
 export function parseInstruction(
   raw: unknown,
 ): { readonly instruction: PlaybookInstruction } | Record<string, never> {

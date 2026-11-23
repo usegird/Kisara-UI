@@ -3,10 +3,6 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { openPopup } from '@/lib/popup';
 
-// ─────────────────────────────
-// 別ウィンドウの用意（lib/popup）。jsdom は窓を開けないので、空の文書を持つ窓の代役で確かめる。
-// ─────────────────────────────
-
 afterEach(() => {
   vi.unstubAllGlobals();
   document.documentElement.className = '';

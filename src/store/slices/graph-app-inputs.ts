@@ -12,11 +12,6 @@ import { withWorkflowTool } from '@/graph/workflow-tool';
 import { createGraphKit } from '@/store/slices/graph-kit';
 import type { GraphState } from '@/store/use-graph-store';
 
-// ─────────────────────────────
-// グラフのストアの、アプリ入力（`extra.linearData`）と LLM からの呼び出し設定の操作。
-// ─────────────────────────────
-
-/** この slice が持つ操作 */
 type GraphAppInputActions = Pick<
   GraphState,
   | 'toggleAppInput'
@@ -27,7 +22,6 @@ type GraphAppInputActions = Pick<
   | 'removeAppInputs'
 >;
 
-/** アプリ入力と LLM からの呼び出し設定の操作を作る */
 export const createGraphAppInputSlice: StateCreator<GraphState, [], [], GraphAppInputActions> = (
   rawSet,
   get,
@@ -38,7 +32,6 @@ export const createGraphAppInputSlice: StateCreator<GraphState, [], [], GraphApp
       const workflow = get().workflow;
       if (!workflow) return;
 
-      // 中のノードはアプリ入力にしない（本体の持ち方を確かめていない）
       if (levelOfId(nodeId) !== null) return;
       set({ workflow: toggleAppInput(workflow, nodeId, widgetName), dirty: true });
     },
@@ -60,7 +53,6 @@ export const createGraphAppInputSlice: StateCreator<GraphState, [], [], GraphApp
       const workflow = get().workflow;
       if (!workflow) return;
 
-      // 変わらなければ触らない（同じ幅への連打で dirty を立てない）
       const next = setAppInputSpan(workflow, nodeId, widgetName, span);
       if (next !== workflow) set({ workflow: next, dirty: true });
     },

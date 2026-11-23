@@ -13,10 +13,6 @@ import {
 } from '@/store/diagnostics/diagnostics-file';
 import { discardSession } from '@/store/persist/session';
 
-/**
- * ダイアログを開かずに書き出す中身（画面の部品が描けないため）。
- * 区分を選べないので接続先 URL は入れず、通信もしない（ComfyUI の版は読まない）。保存する前に全文を出す
- */
 async function fallbackDiagnostics(): Promise<string> {
   const inputs = await readDiagnosticsInputs({ comfySystem: false });
   return formatDiagnostics(buildDiagnostics(inputs, FALLBACK_SECTIONS));
@@ -25,23 +21,12 @@ async function fallbackDiagnostics(): Promise<string> {
 const FALLBACK_BUTTON =
   'border-input hover:bg-muted inline-flex items-center gap-1.5 rounded border px-3 py-1';
 
-// ─────────────────────────────
-// アプリ全体が描けなかったときの最後の画面。
-// 開いていたタブの控えが壊れていると、読み込み直しても同じところで止まるので、
-// **控えを捨てて始め直す**手を出す。
-// ─────────────────────────────
-
-/** 最後の画面の props */
 export interface RootFallbackProps {
-  /** 描けなかった原因 */
   readonly error: Error;
-  /** もう一度描いてみる */
   readonly onRetry: () => void;
 }
 
-/** 描けなかったことと、やり直す・読み込み直す・控えを捨てる・診断を書き出す手を出す */
 export function RootFallback({ error, onRetry }: RootFallbackProps): React.ReactElement {
-  // 書き出す前に見せる全文（出していなければ null）
   const [preview, setPreview] = useState<string | null>(null);
   return (
     <div role="alert" className="bg-background text-foreground flex h-full items-center p-6">
@@ -75,8 +60,6 @@ export function RootFallback({ error, onRetry }: RootFallbackProps): React.React
             className="border-destructive/50 text-destructive hover:bg-destructive/10 inline-flex
               items-center gap-1.5 rounded border px-3 py-1"
             onClick={() => {
-              // 消し終えてから読み込み直す（途中で読み込み直すと、消えずに戻る）。
-              // 会話は消さない。並びから外れるだけ
               void discardSession().finally(reloadPage);
             }}
           >

@@ -17,10 +17,6 @@ import {
   type FakeLlmPort,
 } from '../helpers/llm';
 
-// ─────────────────────────────
-// 会話のストア。作り物の窓口で受け取り、止める・失敗・間引きを確かめる。
-// ─────────────────────────────
-
 let port: FakeLlmPort;
 
 beforeEach(() => {
@@ -39,7 +35,6 @@ afterEach(() => {
 
 const current = () => useChatStore.getState().chats.c1;
 
-/** 間引いた書き込みを流す（描かれる間隔を待つ代わり） */
 async function nextFrame(): Promise<void> {
   await new Promise((resolve) => requestAnimationFrame(() => resolve(null)));
 }
@@ -54,7 +49,6 @@ describe('送って受け取る', () => {
 
     port.emit({ kind: 'delta', content: 'He', reasoning: '' });
     port.emit({ kind: 'delta', content: 'y', reasoning: '' });
-    // まだ足していない（描かれる間隔で 1 回だけ足す）
     expect(current()?.messages.at(-1)?.candidates[0]?.content).toBe('');
     await nextFrame();
     expect(current()?.messages.at(-1)?.candidates[0]?.content).toBe('Hey');
@@ -99,7 +93,6 @@ describe('送って受け取る', () => {
     store.send('c1');
     expect(port.requests).toHaveLength(1);
 
-    // モデルは全体で持つ。空なら（接続の設定の既定も無ければ）どの会話も送らない
     useSettingsStore.setState({ llmModel: '' });
     useChatStore.getState().put('c2', chat([]));
     store.setDraft('c2', 'x');
@@ -116,6 +109,7 @@ describe('送って受け取る', () => {
     expect(current()?.messages.at(-1)?.candidates).toHaveLength(2);
     expect(port.requests[0]?.messages).toEqual([{ role: 'user', content: 'hi' }]);
   });
+
   it('送らない注記（<comment>）は、送った発言にも作り直しの指示にも残さない', () => {
     const store = useChatStore.getState();
     store.setDraft('c1', 'hello\n<comment>note</comment>');
@@ -129,6 +123,7 @@ describe('送って受け取る', () => {
     expect(current()?.messages.at(-1)?.candidates[1]?.revision?.instruction).toBe('Shorter.');
     expect(useChatStore.getState().drafts.c1).toBe('');
   });
+
   it('注記の枠は、指示の枠を外したときと、入力欄が空でも作り直したときに外す', () => {
     const store = useChatStore.getState();
     store.fillDirection('c1', ['Go on.'], directionOf(null));
@@ -201,6 +196,7 @@ describe('容量の不足', () => {
     expect(useChatStore.getState().drafts.c1).toBe('q');
   });
 });
+
 describe('添えた画像', () => {
   const png = 'data:image/png;base64,iVBORw0KGgo=';
 

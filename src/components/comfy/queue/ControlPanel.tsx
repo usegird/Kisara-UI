@@ -1,5 +1,13 @@
 import { Menu } from '@base-ui/react/menu';
-import { ChevronDown, CircleAlert, Loader2, Repeat, SendHorizontal, Unplug } from 'lucide-react';
+import {
+  ChevronDown,
+  CircleAlert,
+  Loader2,
+  Repeat,
+  SendHorizontal,
+  Square,
+  Unplug,
+} from 'lucide-react';
 import { useRef } from 'react';
 
 import { useStartRepeatRun } from '@/hooks/run/use-repeat-run';
@@ -15,35 +23,26 @@ import { useRepeatStore } from '@/store/use-repeat-store';
 import { useSidePanelStore } from '@/store/use-side-panel-store';
 import { useTabsStore } from '@/store/use-tabs-store';
 
-// ─────────────────────────────
-// コントロールパネルの中身（実行と繰り返しの操作）。置き場所を動かす仕組みは外側（`FloatingControl`）が持つ。
-// ─────────────────────────────
+const MENU_ITEM_CLASS = `data-highlighted:bg-accent data-highlighted:text-accent-foreground flex
+  cursor-default items-center gap-1.5 rounded px-2 py-1 outline-none select-none
+  data-disabled:opacity-50`;
 
-/** コントロールパネルの受け取り物 */
 export interface ControlPanelProps {
   readonly connected: boolean;
-  /** 置き場所を動かす取っ手。左端に置く */
   readonly handle?: React.ReactNode;
 }
 
-/** 実行を押せない理由。押せるなら null */
 function blockedReason(hasWorkflow: boolean, connected: boolean, busy: boolean): string | null {
   if (!hasWorkflow) return t('run.control.blocked.noWorkflow');
   if (!connected) return t('run.control.blocked.notConnected');
   return busy ? t('run.control.blocked.sending') : null;
 }
 
-/**
- * 実行のボタンと ▼ の一覧（繰り返し）、失敗があればエラーのタブへ飛ぶアイコンを 1 行に並べる。
- * `POST /prompt` は GPU を消費するので、押されたときだけ呼ぶ。
- * 繰り返しの 2 回目からの送りは右の列の `useRepeatRunDriver` が持つ。
- */
 export function ControlPanel({ connected, handle }: ControlPanelProps): React.ReactElement {
   const { run, busy } = useRunWorkflow();
   const hasWorkflow = useGraphStore((state) => state.workflow !== null);
 
   const status = useExecutionStore((state) => state.status);
-  // 失敗があるときだけ、接続のアイコンの右にアイコンを出してエラーのタブへ飛べるようにする
   const errors = useRunReport().errors;
   const showReport = useSidePanelStore((state) => state.setTab);
 
@@ -51,15 +50,11 @@ export function ControlPanel({ connected, handle }: ControlPanelProps): React.Re
 
   const startRepeat = useStartRepeatRun();
   const activeTabId = useTabsStore((state) => state.activeId);
-  // 繰り返しはタブごとに 1 つ。最中のタブでは選べない（別のタブなら足せる）
   const repeating = useRepeatStore((state) => state.jobs.some((job) => job.tabId === activeTabId));
-  // ▼ の一覧は実行のボタン（仕切りを含む枠）の左端に揃える
+  const stopRepeat = useRepeatStore((state) => state.stop);
   const runGroup = useRef<HTMLDivElement>(null);
 
-  // 押せないときは**理由を明示**する（黙って無効にしない）。
-  // **実行中でもキューに足せる**ので、実行中は無効にしない
   const blocked = blockedReason(hasWorkflow, connected, busy);
-  // つないでいなければ「接続」にし、ワークフローが無くても押せる（押すと接続のポップアップ）
   const runBlocked = connected ? blocked : null;
   const label = runLabelOf(connected, running);
 
@@ -67,7 +62,6 @@ export function ControlPanel({ connected, handle }: ControlPanelProps): React.Re
     <div className="bg-card flex items-center gap-1.5 rounded-md border p-1.5 text-2xs shadow-lg">
       {handle}
 
-      {/* 実行のボタンの右端を仕切りで分け、▼ から繰り返し実行を選ぶ。地の色は塗らない */}
       <div
         ref={runGroup}
         className="flex items-stretch rounded-md has-[button:disabled]:opacity-50"
@@ -82,7 +76,6 @@ export function ControlPanel({ connected, handle }: ControlPanelProps): React.Re
               ? (blocked ?? (running ? t('run.control.enqueueHint') : t('run.control.runHint')))
               : t('comfy.bar.openConnectTitle')
           }
-          // 表示が「実行」のままでも、押した時点でつながっていなければ送らずに接続のポップアップを出す
           onClick={guardPress('run', () => {
             if (useConnectionStore.getState().status === 'connected') void run();
             else useComfyConnectDialogStore.getState().open();
@@ -95,7 +88,6 @@ export function ControlPanel({ connected, handle }: ControlPanelProps): React.Re
           ) : (
             <Unplug className="text-destructive size-3.5" aria-hidden />
           )}
-          {/* 幅は長い方（キュー）に揃え、切り替わっても枠が伸び縮みしないようにする */}
           <span className="grid">
             <span className="invisible col-start-1 row-start-1" aria-hidden>
               {t('run.control.queue')}
@@ -118,7 +110,6 @@ export function ControlPanel({ connected, handle }: ControlPanelProps): React.Re
             <Menu.Positioner
               className="z-50 outline-none"
               anchor={runGroup}
-              // 下に空きがあれば下、無ければ上へ（入り切らない側は自動で反対へ回る）
               side="bottom"
               align="start"
               sideOffset={4}
@@ -127,17 +118,25 @@ export function ControlPanel({ connected, handle }: ControlPanelProps): React.Re
                 className="bg-popover text-popover-foreground min-w-40 rounded-md border p-1
                   text-2xs shadow-md outline-none"
               >
-                <Menu.Item
-                  className="data-highlighted:bg-accent data-highlighted:text-accent-foreground
-                    flex cursor-default items-center gap-1.5 rounded px-2 py-1 outline-none
-                    select-none data-disabled:opacity-50"
-                  disabled={repeating}
-                  title={repeating ? t('run.control.repeatActive') : t('run.control.repeatHint')}
-                  onClick={guardPress('run-repeat', () => void startRepeat(activeTabId))}
-                >
-                  <Repeat className="size-3.5" aria-hidden />
-                  {t('run.control.repeat')}
-                </Menu.Item>
+                {repeating ? (
+                  <Menu.Item
+                    className={MENU_ITEM_CLASS}
+                    title={t('queue.repeat.stopHint')}
+                    onClick={() => stopRepeat(activeTabId)}
+                  >
+                    <Square className="size-3.5" aria-hidden />
+                    {t('run.control.repeatStop')}
+                  </Menu.Item>
+                ) : (
+                  <Menu.Item
+                    className={MENU_ITEM_CLASS}
+                    title={t('run.control.repeatHint')}
+                    onClick={guardPress('run-repeat', () => startRepeat(activeTabId))}
+                  >
+                    <Repeat className="size-3.5" aria-hidden />
+                    {t('run.control.repeat')}
+                  </Menu.Item>
+                )}
               </Menu.Popup>
             </Menu.Positioner>
           </Menu.Portal>
@@ -160,7 +159,6 @@ export function ControlPanel({ connected, handle }: ControlPanelProps): React.Re
   );
 }
 
-/** 実行のボタンの文字。つないでいなければ「接続」、実行中なら「キューに足す」 */
 function runLabelOf(connected: boolean, running: boolean): string {
   if (!connected) return t('comfy.connection.connect');
   return running ? t('run.control.queue') : t('run.control.run');

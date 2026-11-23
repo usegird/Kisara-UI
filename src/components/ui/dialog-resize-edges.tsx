@@ -4,12 +4,6 @@ import type { DragHandlers } from '@/hooks/ui/use-drag-from';
 import { t } from '@/i18n';
 import { RESIZE_EDGES, type ResizeEdge } from '@/lib/dialog-rect';
 
-// ─────────────────────────────
-// 動かせるダイアログの、大きさを変える掴み（上下左右の辺と四隅）。
-// 枠の内側の縁に細い帯を重ねる。どこを掴んだかは `data-edge` で手続きへ渡す
-// （掴みの手続きは `useDialogPlacement` の `resize`）。
-// ─────────────────────────────
-
 const edgeHandle = cva('absolute z-10', {
   variants: {
     edge: {
@@ -25,13 +19,10 @@ const edgeHandle = cva('absolute z-10', {
   },
 });
 
-/** 大きさを変える掴みの props */
 export interface DialogResizeEdgesProps {
-  /** 掴みの手続き（`useDialogPlacement` の `resize`） */
   readonly handlers: DragHandlers;
 }
 
-/** 辺と四隅の掴みを枠の内側の縁に重ねる */
 export function DialogResizeEdges({ handlers }: DialogResizeEdgesProps): React.ReactElement {
   return (
     <>

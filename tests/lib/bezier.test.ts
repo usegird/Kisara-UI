@@ -30,7 +30,6 @@ describe('直結の弧', () => {
   });
 
   it('制御点は始点・終点と同じ高さに置く（縦に膨らませない）', () => {
-    // M x y C c1x c1y, c2x c2y, x y
     const [, y, , c1y, , c2y] = numbersIn(arcPath({ x: 10, y: 5 }, { x: 20, y: 90 }));
 
     expect(y).toBe(5);

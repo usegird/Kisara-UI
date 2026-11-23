@@ -17,11 +17,6 @@ import { useWildcardsStore } from '@/store/use-wildcards-store';
 import { acceptTerms } from '../helpers/connection';
 import { modelFile, modelFolder } from '../helpers/model-files';
 
-// ─────────────────────────────
-// つながっている所からの接続し直し。いったん未接続にし、
-// 接続ごとに取る一覧を未取得に戻して、初めての接続と同じ手続きを通す。
-// ─────────────────────────────
-
 const BASE = 'http://127.0.0.1:8188';
 const ORIGINAL = {
   probe: useConnectionStore.getState().probe,
@@ -88,7 +83,6 @@ describe('接続し直し', () => {
     const probe = vi.fn(() => Promise.resolve(false));
     useSettingsStore.setState({ baseUrl: BASE });
     useConnectionStore.setState({ status: 'connected', socketStatus: 'open', probe });
-    // 接続先が変わった瞬間の接続の状態。つながったままだと通知の張り直しが不正な URL で投げる
     const seen: string[] = [];
     const stop = useSettingsStore.subscribe((state, prev) => {
       if (state.baseUrl !== prev.baseUrl) seen.push(useConnectionStore.getState().status);

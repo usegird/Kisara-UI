@@ -24,18 +24,12 @@ import { isRecord } from '@/lib/guards';
 
 import { node } from '../helpers/workflow';
 
-// ─────────────────────────────
-// グループ。所属は位置で決まり、並べ直しのたびに枠を求め直す。
-// ─────────────────────────────
-
-/** 線の無いノードを 1..n 並べ、このアプリの置き方にしたもの */
 function arranged(count: number): Workflow {
   const nodes = Array.from({ length: count }, (_, at) => node(at + 1, 'X', { pos: [at * 400, 0] }));
   const workflow: Workflow = { nodes, links: [] };
   return applyOrder(workflow, orderedNodeIds(workflow));
 }
 
-/** グループの添字ごとの顔ぶれ（並び順） */
 function members(workflow: Workflow): number[][] {
   const membership = groupMembership(workflow);
   return workflowGroups(workflow).map((_, index) =>
@@ -100,6 +94,7 @@ describe('グループ化', () => {
     expect(grouped.state).toEqual({ lastGroupId: 10 });
     expect(grouped.definitions?.subgraphs?.[0]?.state).toEqual({ lastGroupId: 10 });
   });
+
   it('中を全部選んだグループは、子のグループとして枠ごと入る', () => {
     const first = groupNodes(arranged(3), [2]);
     const second = groupNodes(first, [1, 2]);
@@ -216,7 +211,6 @@ describe('並べ替え', () => {
 describe('足す・消す', () => {
   const grouped = groupNodes(arranged(4), [2, 3]);
 
-  /** 位置の決まっていないノードを足したもの（足したばかりは原点にいる） */
   const withNew = (workflow: Workflow): Workflow => ({
     ...workflow,
     nodes: [...workflow.nodes, node(9, 'X', { pos: [0, 0] })],

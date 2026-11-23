@@ -1,14 +1,7 @@
-# 近似判定の部品（@huggingface/transformers。ADR-0040）が連れてくる。ブラウザでは使わない
-# Node 用の実行部品と protobufjs の組み立ては走らせない
 allowBuilds:
   onnxruntime-node: false
   protobufjs: false
-# 供給網の硬化（2026-10-01 裁可。react-doctor の require-pnpm-hardening）。
-# 公開から 7 日経っていない版は入れない（公開直後に取り下げられる悪意ある版を避ける）。
 minimumReleaseAge: 10080
-# 署名・出所の印が前より弱まった版は入れない。
-# semver@6.3.1（間接依存）は印の無い古い版のまま lockfile にあり、入れ替えると依存の木が
-# 広く変わるので、この 1 件だけ除く
 trustPolicy: no-downgrade
 trustPolicyExclude:
   - semver@6.3.1

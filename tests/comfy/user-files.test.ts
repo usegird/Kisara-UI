@@ -3,11 +3,6 @@ import { describe, expect, it, vi } from 'vitest';
 import type { FetchLike } from '@/comfy/client';
 import { listUserFiles, readUserFile, removeUserFile } from '@/comfy/user-files';
 
-// ─────────────────────────────
-// ストレージの管理で見る・消す、ユーザーフォルダの KisaraUI の物。
-// 実行の記録・モデルのメモ・スタイル・タグ辞書のフォルダの中だけを読み・消す。
-// ─────────────────────────────
-
 const base = 'http://127.0.0.1:8188';
 
 function respond(body: string, status = 200) {

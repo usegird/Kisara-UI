@@ -11,10 +11,6 @@ import { useChatStore } from '@/store/use-chat-store';
 import { useReceivedStore, type ReceivedBody } from '@/store/use-received-store';
 import { responseKey } from '@/store/use-response-stats-store';
 
-// ─────────────────────────────
-// `assistant` の発言の受け取った中身のアイコンと、サーバーから受け取った本文をそのまま出すダイアログ。
-// ─────────────────────────────
-
 const CHOICE_CLASS = cn(dialogControl({ kind: 'choice' }), 'min-w-0 py-1');
 
 interface ReceivedEntry {
@@ -22,7 +18,6 @@ interface ReceivedEntry {
   readonly label: string;
 }
 
-/** 発言の候補の数と選んでいる候補 */
 function useCandidates(
   chatId: string,
   messageId: string,
@@ -35,7 +30,6 @@ function useCandidates(
   );
 }
 
-/** `assistant` の発言のアイコン。このページで受け取っていなければ出さない */
 export function MessageReceivedButton({
   chatId,
   messageId,
@@ -82,17 +76,14 @@ export function MessageReceivedButton({
       </button>
       <DialogFrame
         id="llm-received"
-        // 長い本文を中で送るので、高さの決まった大きさにする
         size="lg"
         movable
         modal={false}
-        // 会話のタブには嵌める列が無いので、いつも自由移動で出す
         embeddable={false}
         open={open}
         onOpenChange={setOpen}
         title={t('llm.received.title')}
       >
-        {/* 開くたびに既定の 1 件から始めたいので、中身は開いている間だけ置く */}
         {open ? (
           <ReceivedBodyView entries={entries} initial={bodies[selected]?.id ?? null} />
         ) : null}

@@ -4,11 +4,6 @@ import { useDefinitionsStore } from '@/store/use-definitions-store';
 import { useGraphStore } from '@/store/use-graph-store';
 import { useSettingsStore } from '@/store/use-settings-store';
 
-// ─────────────────────────────
-// カードの行の編集（値の書き戻し・高さ・選択肢の取り寄せ）。書き込み先は `row.target` が持つ。
-// ─────────────────────────────
-
-/** 行の値の書き戻し・複数行の高さ・選択肢の取り寄せの手続きを返す */
 export function useRowEditing(): {
   readonly commitValue: (row: NodeRow, value: unknown) => void;
   readonly resizeText: (row: NodeRow, height: number) => void;

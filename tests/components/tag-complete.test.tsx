@@ -10,11 +10,6 @@ import { useTagsStore } from '@/store/use-tags-store';
 
 import { tagEntry } from '../helpers/tags';
 
-// ─────────────────────────────
-// 複数行の欄のタグ補完。打ちかけの語で候補を出し、キーで選んで打鍵と同じ扱いで入れる。
-// ─────────────────────────────
-
-/** 選んだ行を見える範囲へ入れる呼び出し（jsdom には無い） */
 const scrollIntoView = vi.fn<(this: Element) => void>();
 
 beforeEach(() => {
@@ -28,7 +23,6 @@ afterEach(() => {
   useTagsStore.setState({ merged: [] });
 });
 
-/** 補完を付けた欄（カードの欄と同じ付け方） */
 function Field({ enabled = true }: { readonly enabled?: boolean }) {
   const complete = useTagComplete(enabled);
   return (
@@ -73,7 +67,6 @@ describe('タグ補完', () => {
     expect(field().value).toBe('hair');
     expect(screen.queryByRole('listbox')).toBeNull();
 
-    // 同じ文字でも打てば出す
     insertAtCaret(field(), ', hair');
     expect(screen.queryByRole('listbox')).not.toBeNull();
   });
@@ -100,7 +93,6 @@ describe('タグ補完', () => {
   it('↓ で選んだ行を一覧の見える範囲へ入れる', () => {
     render(<Field />);
     type(field(), 'hair');
-    // React の onSelect は次のキーで選択の変化を拾うので、先に拾わせてから矢印を押す
     fireEvent.keyUp(field());
     scrollIntoView.mockClear();
 

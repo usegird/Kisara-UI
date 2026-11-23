@@ -10,11 +10,6 @@ import {
 } from '@/components/llm/message/ToolCallStatus';
 import { useExecutionStore } from '@/store/use-execution-store';
 
-// ─────────────────────────────
-// ワークフローの呼び出しの状態の文（画像を生成中の進捗）と、「ワークフローを実行」で作らせている行・
-// 作らせられなかった行
-// ─────────────────────────────
-
 afterEach(cleanup);
 
 beforeEach(() => {

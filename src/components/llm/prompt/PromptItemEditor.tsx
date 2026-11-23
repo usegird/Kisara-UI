@@ -10,23 +10,16 @@ import { editCharacter } from '@/store/chat/preset-import';
 import { useChatStore } from '@/store/use-chat-store';
 import { useSettingsStore } from '@/store/use-settings-store';
 
-// ─────────────────────────────
-// プロンプトの項目を開いたときの中身。カードの中でそのまま直し、打つたびに構成に効く。
-// ─────────────────────────────
-
 function edit(chatId: string, itemId: string, patch: PromptItemPatch): void {
   useChatStore.getState().updatePrompt(chatId, (prompt) => updatePromptItem(prompt, itemId, patch));
 }
 
-/** 開いた項目の中身の props */
 export interface PromptItemEditorProps {
   readonly chatId: string;
   readonly item: PromptItem;
-  /** 一覧に出している補足（印の中身・カードの欄・ロアブック） */
   readonly summary: ItemSummary;
 }
 
-/** 項目の印に応じた中身（履歴・メッセージ・利用者の情報・追加辞書・カードの欄・本文の欄）を出す */
 export function PromptItemEditor({
   chatId,
   item,
@@ -44,7 +37,6 @@ export function PromptItemEditor({
       ) : item.marker === 'additionalInfo' ? (
         <LoreList lore={summary.lore} />
       ) : card !== null ? (
-        // プリセットの欄は会話の写しだけを直す（プリセットは変えない）
         <ContentField
           value={card.value}
           onChange={(value) => editCharacter(chatId, { [card.field]: value })}
@@ -66,7 +58,6 @@ export function PromptItemEditor({
   );
 }
 
-/** 履歴の中に差し込む項目の深さ（末尾から何件目の後ろか。0 は最後の発言の後） */
 function DepthField({
   chatId,
   item,
@@ -98,9 +89,6 @@ function DepthField({
   );
 }
 
-/**
- * システムプロンプト（全体の設定）の本文の欄
- */
 export function SystemPromptEditor({ content }: { readonly content: string }): React.ReactElement {
   return (
     <ContentField
@@ -110,13 +98,8 @@ export function SystemPromptEditor({ content }: { readonly content: string }): R
   );
 }
 
-/**
- * プレフィルの空の欄に薄く出す例。空の欄で Tab を押すとそのまま入る（接続先の欄と同じ）。会話の
- * プリセットなどで変えない（どの会話でも同じ例）
- */
 const PREFILL_EXAMPLE = '<response>';
 
-/** プレフィルを開いたときの中身 */
 export function PrefillEditor({
   chatId,
   content,
@@ -146,17 +129,14 @@ export function PrefillEditor({
   );
 }
 
-/** 本文の欄の props */
 export interface ContentFieldProps {
   readonly value: string;
   readonly onChange: (value: string) => void;
   readonly placeholder?: string | undefined;
   readonly onKeyDown?: ((event: React.KeyboardEvent<HTMLTextAreaElement>) => void) | undefined;
-  /** 欄の名前（読み上げ用）。無ければ「本文」 */
   readonly label?: string | undefined;
 }
 
-/** 本文の欄。見積もったトークン数は見出しの行に出すので、ここには出さない */
 export function ContentField({
   value,
   onChange,
@@ -177,10 +157,6 @@ export function ContentField({
   );
 }
 
-/**
- * 利用者の情報（この会話だけ）。説明はこの項目に入る。名前（`{{user}}`）はカードの欄の変数で直す。
- * 説明を空から書き始めたら、項目も有効にする（書いたのに送られないことが無いように）
- */
 function PersonaFields({
   chatId,
   item,
@@ -203,7 +179,6 @@ function PersonaFields({
   return <ContentField value={description} onChange={(next) => set({ description: next })} />;
 }
 
-/** 行を指したときに出す、項目の中身（辞書名・トリガーワードか追加条件・追加内容。省かない） */
 function entryTip(dictionary: string, entry: LoreEntry): string {
   const lines = [t('llm.prompt.lore.tip.dictionary', { value: dictionary })];
   if (entry.keys.length > 0) {
@@ -218,16 +193,11 @@ function entryTip(dictionary: string, entry: LoreEntry): string {
   return lines.join('\n');
 }
 
-/**
- * 追加辞書の 1 行。`辞書名: 本文 (role)`。辞書名は半角 10 文字まで、本文は 1 行に収まらない分を省く。
- * 当て方で見た目を変えない。指すと中身を省かずに出す
- */
 function LoreRow({
   row,
   trailing,
 }: {
   readonly row: AdditionalInfoRow;
-  /** 「履歴 N 件」の行の右端に置くもの（要約する） */
   readonly trailing?: React.ReactNode;
 }): React.ReactElement {
   if (row.kind === 'history') {
@@ -255,7 +225,6 @@ function LoreRow({
   );
 }
 
-/** 追加辞書の一覧（追加辞書の印に入る項目）。読むだけ */
 function LoreList({ lore }: { readonly lore: ItemSummary['lore'] }): React.ReactElement {
   if (!lore.some((row) => row.kind === 'entry')) {
     return (
@@ -276,10 +245,6 @@ function LoreList({ lore }: { readonly lore: ItemSummary['lore'] }): React.React
   );
 }
 
-/**
- * 会話履歴の中身。「履歴 N 件」の行と、その上下に追加辞書から差し込む項目を送る順に並べる
- * （トークン数は見出しの行に出す。要約はこの上のセッション要約の行に出す）
- */
 function HistoryRows({
   chatId,
   rows,
@@ -308,7 +273,6 @@ function HistoryRows({
   );
 }
 
-/** メッセージの中身。会話の入力欄に打ちかけている本文を、欄の枠を付けずに文字のまま写す */
 function CurrentInputView({ chatId }: { readonly chatId: string }): React.ReactElement {
   const draft = useChatStore((state) => state.drafts[chatId] ?? '');
   return (

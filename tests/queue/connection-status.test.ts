@@ -2,11 +2,6 @@ import { describe, expect, it } from 'vitest';
 
 import { connectionStatusView, retryCount, retryNotice } from '@/queue/connection-status';
 
-// ─────────────────────────────
-// 接続ステータスの見せ方。
-// **HTTP は通っているが進捗（WS）が来ない**状態を「接続済み」で塗り潰さないこと。
-// ─────────────────────────────
-
 describe('接続ステータス', () => {
   it('未接続・接続中・失敗をそれぞれ区別する', () => {
     expect(connectionStatusView('disconnected', 'closed')).toEqual({
@@ -55,7 +50,6 @@ describe('接続ステータス', () => {
     expect(retryNotice('reconnecting', 4)).toBe('応答なしリトライ (4/10)');
     expect(retryNotice('reconnecting', 10)).toBe('応答なしリトライ (10/10)');
     expect(retryNotice('open', 5)).toBeNull();
-    // タスクのカードには回数だけ
     expect(retryCount('reconnecting', 4)).toBe('リトライ (4/10)');
     expect(retryCount('reconnecting', 3)).toBeNull();
 

@@ -9,10 +9,6 @@ import { useViewerStore } from '@/store/use-viewer-store';
 
 import { chat, chatMessage, toolCallMessage } from '../helpers/llm';
 
-// ─────────────────────────────
-// 会話の画像で開いた画像のビューワー。開いている間に画像が増えたら並びを取り直す
-// ─────────────────────────────
-
 afterEach(() => {
   cleanup();
   useViewerStore.getState().close();

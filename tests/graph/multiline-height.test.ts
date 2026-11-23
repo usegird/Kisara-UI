@@ -9,11 +9,6 @@ import {
 import { definition, socket, widget } from '../helpers/definitions';
 import { node } from '../helpers/workflow';
 
-// ─────────────────────────────
-// 複数行の入力の高さは、本体と同じく**ノードの `size`** に持つ。
-// 換算は近似なので、値そのものではなく**往復で変わらないこと**と向きを確かめる。
-// ─────────────────────────────
-
 const textNode = definition('Text', [
   socket('clip', 'CLIP'),
   widget('text', 'STRING', { multiline: true }),
@@ -58,7 +53,6 @@ describe('複数行の入力の高さ', () => {
       widget('b', 'STRING', { multiline: true }),
     ]);
     const free = node(1, 'Two', { inputs: [], size: [320, 300] });
-    // a を線で受ける（widget 付きの入力に線が来ている）
     const linked = node(1, 'Two', {
       inputs: [{ name: 'a', type: 'STRING', widget: { name: 'a' }, link: 5 }],
       size: [320, 300],

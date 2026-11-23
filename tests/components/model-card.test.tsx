@@ -7,11 +7,6 @@ import { buildModelItems, modelFileIndex } from '@/graph/model-files';
 
 import { modelFile } from '../helpers/model-files';
 
-// ─────────────────────────────
-// モデルのカード。画像は同時に 4 枚まで読み、残りは順番を待つ
-// （取り込み・情報の要求に接続を空けておく）。
-// ─────────────────────────────
-
 afterEach(cleanup);
 
 const NAMES = ['a', 'b', 'c', 'd', 'e', 'f'].map((name) => `${name}.safetensors`);
@@ -37,7 +32,6 @@ function cards(): void {
   );
 }
 
-/** 画像の要素を置いたカード（読み始めたもの） */
 function loading(): string[] {
   return NAMES.filter((name) => screen.getByTitle(name).querySelector('img') !== null);
 }

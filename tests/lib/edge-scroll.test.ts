@@ -2,10 +2,6 @@ import { describe, expect, it } from 'vitest';
 
 import { EDGE_SCROLL_MAX, edgeScrollStep } from '@/lib/edge-scroll';
 
-// ─────────────────────────────
-// 掴んだまま列の端へ寄せたときの送り量。端に近いほど速く、端を越えたら最も速い。
-// ─────────────────────────────
-
 const rect = { top: 100, bottom: 500 };
 
 describe('端での送り', () => {

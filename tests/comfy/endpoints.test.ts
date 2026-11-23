@@ -17,7 +17,6 @@ describe('エンドポイント URL', () => {
   it('プロトコル省略・末尾スラッシュ・余分なパスを正規化する', () => {
     expect(normalizeBaseUrl('127.0.0.1:8188')).toBe('http://127.0.0.1:8188');
     expect(normalizeBaseUrl('http://127.0.0.1:8188/')).toBe('http://127.0.0.1:8188');
-    // パス接頭辞は残す（リバースプロキシ配下の配置に対応するため）
     expect(normalizeBaseUrl('  https://comfy.example/comfy/  ')).toBe(
       'https://comfy.example/comfy',
     );
@@ -31,6 +30,7 @@ describe('エンドポイント URL', () => {
     expect(() => normalizeBaseUrl('ftp://example.com')).toThrow(InvalidBaseUrlError);
     expect(() => normalizeBaseUrl('http://')).toThrow(InvalidBaseUrlError);
   });
+
   it('弾いた理由は符号で持ち、文言の表を読まない', () => {
     const reasonOf = (baseUrl: string): unknown => {
       try {
@@ -74,7 +74,6 @@ describe('エンドポイント URL', () => {
     expect(websocketUrl('https://comfy.example', 'cid')).toBe(
       'wss://comfy.example/ws?clientId=cid',
     );
-    // パス接頭辞のある配置（リバースプロキシ・開発時のプロキシ）でも /ws を足すだけにする
     expect(websocketUrl('http://localhost:5173/comfy', 'cid')).toBe(
       'ws://localhost:5173/comfy/ws?clientId=cid',
     );

@@ -14,17 +14,8 @@ import { parsePreset, usePresetsStore } from '@/store/use-presets-store';
 import { useSettingsStore } from '@/store/use-settings-store';
 import { parseTemplate, useSystemPromptsStore } from '@/store/use-system-prompts-store';
 
-// ─────────────────────────────
-// プリセット・システムプロンプトのテンプレート・追加辞書・自分のプレイブック・アバターの控えを
-// ComfyUI に 1 件ずつ書き、利用者が押したときに戻す。
-// ─────────────────────────────
-
-/** 変えてから控えを書くまでの間（ms）。打鍵のたびに書かない */
 const BACKUP_DELAY_MS = 2000;
 
-/**
- * 控えの 1 件の本文（画像は別のファイル）。個別追加辞書は並びで持つ
- */
 function presetBody(preset: Preset): string {
   const { id, name, fields, lorebooks, createdAt, updatedAt } = preset;
   return JSON.stringify({ v: 7, id, name, fields, lorebooks, createdAt, updatedAt });
@@ -34,15 +25,11 @@ function templateBody(template: SystemPromptTemplate): string {
   return JSON.stringify({ v: 1, ...template });
 }
 
-/**
- * アバターの控えの本文（画像は別のファイル。画像の種類はここに持つ）
- */
 function avatarBody(avatar: Avatar): string {
   const { id, name, hash, createdAt } = avatar;
   return JSON.stringify({ v: 1, id, name, hash, type: avatar.image.type, createdAt });
 }
 
-/** アバターの控えの本文（画像を除く）。形が違えば null */
 export function parseAvatarBackup(
   raw: unknown,
 ): (Omit<Avatar, 'image'> & { readonly type: string }) | null {
@@ -67,21 +54,16 @@ interface Item {
   readonly image: Blob | null;
 }
 
-/** 1 つの種別の一覧の見張り方と、一覧の 1 件を控えの 1 件にする手続き */
 interface LibrarySource {
-  /** 読み終えた後の変化を追う。止めるための関数を返す */
   readonly watch: (onChanged: (item: Item) => void, onRemoved: (id: string) => void) => () => void;
-  /** 一覧にある 1 件の控え。無ければ null */
   readonly current: (id: string) => Item | null;
 }
 
-/** 一覧を持つストア（購読と今の状態） */
 interface LibraryStore<S> {
   readonly subscribe: (listener: (state: S, prev: S) => void) => () => void;
   readonly getState: () => S;
 }
 
-/** 控えの見張りを始める順 */
 const LIBRARY_KINDS: readonly LibraryKind[] = [
   'presets',
   'dictionaries',
@@ -90,7 +72,6 @@ const LIBRARY_KINDS: readonly LibraryKind[] = [
   'playbooks',
 ];
 
-/** 種別ごとの一覧の置き場と、控えの本文・画像 */
 const SOURCES: Readonly<Record<LibraryKind, LibrarySource>> = {
   presets: sourceOf('presets', usePresetsStore, {
     listOf: (state) => state.presets,
@@ -102,7 +83,6 @@ const SOURCES: Readonly<Record<LibraryKind, LibrarySource>> = {
     isLoaded: (state) => state.loaded,
     partsOf: (dictionary) => ({ body: dictionaryBody(dictionary), image: null }),
   }),
-  // テンプレートは読み終えた印を持たないので、初めから追う
   'system-prompts': sourceOf('system-prompts', useSystemPromptsStore, {
     listOf: (state) => state.templates,
     isLoaded: () => true,
@@ -120,16 +100,12 @@ const SOURCES: Readonly<Record<LibraryKind, LibrarySource>> = {
   }),
 };
 
-/** ストアの一覧の読み方 */
 interface SourceShape<S, T> {
   readonly listOf: (state: S) => Readonly<Record<string, T>>;
-  /** 読み終えたか（読み終える前の変化を控えに書かない） */
   readonly isLoaded: (state: S) => boolean;
-  /** 控えの本文と画像 */
   readonly partsOf: (item: T) => Pick<Item, 'body' | 'image'>;
 }
 
-/** ストアの一覧から、1 つの種別の見張り方を作る */
 function sourceOf<S, T extends { readonly id: string }>(
   kind: LibraryKind,
   store: LibraryStore<S>,
@@ -149,17 +125,14 @@ function sourceOf<S, T extends { readonly id: string }>(
   };
 }
 
-/** 控えを書く先（控えを書く設定で、ComfyUI につないでいるとき）。無ければ null */
 function backupComfyUrl(): string | null {
   return useSettingsStore.getState().chatComfyBackup ? connectedComfyUrl() : null;
 }
 
 const keyOf = (kind: LibraryKind, id: string): string => `${kind}/${id}`;
 
-/** 書くのを待っている 1 件（間を置いている・つないでいなかった・書けなかった） */
 const pending = new Map<string, Item>();
 const timers = new Map<string, ReturnType<typeof setTimeout>>();
-/** 控えから戻している間（戻した 1 件を控えに書き戻さない） */
 let restoring = false;
 
 async function writeItem(item: Item): Promise<void> {
@@ -170,7 +143,6 @@ async function writeItem(item: Item): Promise<void> {
     await comfyPort().library.save(baseUrl, item);
     if (pending.get(key) === item) pending.delete(key);
   } catch {
-    // 残して、つなぎ直したときに書く
   }
 }
 
@@ -189,7 +161,6 @@ function scheduleItem(item: Item): void {
   );
 }
 
-/** 書くのを待っている 1 件をやめる */
 function dropPending(kind: LibraryKind, id: string): void {
   const key = keyOf(kind, id);
   pending.delete(key);
@@ -197,7 +168,6 @@ function dropPending(kind: LibraryKind, id: string): void {
   timers.delete(key);
 }
 
-/** 2 つの一覧の違いを、書く・消えたに分ける */
 function diff<T>(
   next: Readonly<Record<string, T>>,
   prev: Readonly<Record<string, T>>,
@@ -212,7 +182,6 @@ function diff<T>(
   }
 }
 
-/** 書けなかった控えを書く（つないだ・設定を入れた） */
 function retryPending(): void {
   if (backupComfyUrl() === null) return;
   for (const item of [...pending.values()]) {
@@ -220,7 +189,6 @@ function retryPending(): void {
   }
 }
 
-/** 一覧の変化を追いかけて控えを書く。読み込み（load）の後に呼ぶ。止めるための関数を返す */
 export function startLibraryBackup(): () => void {
   const unsubscribeKinds = LIBRARY_KINDS.map((kind) =>
     SOURCES[kind].watch(
@@ -247,15 +215,10 @@ export function startLibraryBackup(): () => void {
   };
 }
 
-/** 端末の一覧にある 1 件を、控えの 1 件にする。無ければ null */
 function currentItem(kind: LibraryKind, id: string): Item | null {
   return SOURCES[kind].current(id);
 }
 
-/**
- * 端末の 1 件の控えを今すぐ書く（ストレージの管理でバックアップ取得を押したとき）。
- * 控えを書く設定に関わらず、つないでいる先へ書く。書けたら true
- */
 export async function backupLibraryItem(kind: LibraryKind, id: string): Promise<boolean> {
   const baseUrl = connectedComfyUrl();
   const item = currentItem(kind, id);
@@ -269,30 +232,17 @@ export async function backupLibraryItem(kind: LibraryKind, id: string): Promise<
   return true;
 }
 
-/** 控えを戻した結果の数 */
 export interface RestoreResult {
-  /** 端末に無かったので足した数 */
   readonly added: number;
-  /** 控えの方が新しかったので置き換えた数 */
   readonly updated: number;
-  /** 読めなかった */
   readonly failed: boolean;
-  /**
-   * 上限の大きさを超えたので戻さなかった数。無ければ持たない
-   */
   readonly tooLarge?: number;
 }
 
-/** 戻さなかった数があるときだけ結果に付ける */
 export function withTooLarge(count: number): Pick<RestoreResult, 'tooLarge'> {
   return count > 0 ? { tooLarge: count } : {};
 }
 
-/**
- * ComfyUI の控えから、プリセット・テンプレート・追加辞書・自分のプレイブックのどれかを戻す（設定のタブで押したとき）。
- * `only` を渡すとその id の 1 件だけを戻す（ストレージの管理）。
- * id で突き合わせ、端末に無ければ足し、両方にあれば最後に変えた時刻（版）の新しい方を残す
- */
 export async function restoreLibrary(kind: LibraryKind, only?: string): Promise<RestoreResult> {
   const baseUrl = connectedComfyUrl();
   if (baseUrl === null) return { added: 0, updated: 0, failed: true };
@@ -304,9 +254,7 @@ export async function restoreLibrary(kind: LibraryKind, only?: string): Promise<
   restoring = true;
   try {
     for (const raw of await port.list(baseUrl, kind)) {
-      // 1 件だけ戻すときは、ほかの id を読み飛ばす
       if (only !== undefined && (!isRecord(raw) || raw.id !== only)) continue;
-      // 大きすぎる 1 件は戻さない（取り込むときと同じ上限）
       const step = overRestoreLimit('other', approxBytes(raw))
         ? 'too-large'
         : await restoreRaw(raw, { baseUrl, port });
@@ -322,20 +270,13 @@ export async function restoreLibrary(kind: LibraryKind, only?: string): Promise<
   return { added, updated, failed: false, ...withTooLarge(tooLarge) };
 }
 
-// ─────────────────────────────
-// 控えの 1 件を戻す手続き（種別ごと）
-// ─────────────────────────────
-
-/** 1 件を戻した結果。上限を超えて戻さなかったときは 'too-large' */
 type RestoreStep = RestoreOutcome | 'too-large';
 
-/** 戻すときに画像を読む先 */
 interface RestoreContext {
   readonly baseUrl: string;
   readonly port: LibraryBackupPort;
 }
 
-/** 種別ごとの、控えの 1 件を読んで一覧に戻す手続き。形が合わなければ null */
 const RESTORERS: Readonly<
   Record<LibraryKind, (raw: unknown, context: RestoreContext) => Promise<RestoreStep>>
 > = {
@@ -359,7 +300,6 @@ const RESTORERS: Readonly<
   presets: restorePreset,
 };
 
-/** アバターを戻す。画像は別のファイルから読む。同じ画像があれば足さない */
 async function restoreAvatar(
   raw: unknown,
   { baseUrl, port }: RestoreContext,
@@ -373,17 +313,14 @@ async function restoreAvatar(
   return (await useAvatarsStore.getState().restore(avatar)) ? 'added' : null;
 }
 
-/** プリセットを戻す。控えの画像はアバターの表へ入れ、中身が同じなら今ある 1 件を指す */
 async function restorePreset(
   raw: unknown,
   { baseUrl, port }: RestoreContext,
 ): Promise<RestoreStep> {
   const preset = parsePreset(raw);
   if (preset === null) return null;
-  // 一覧の方が新しければ、画像を読みに行かない
   if (restoreOutcomeOf(usePresetsStore.getState().presets[preset.id], preset) === null) return null;
   const image = await port.fetchImage(baseUrl, 'presets', preset.id).catch(() => null);
-  // 大きすぎる画像はアバターに足さず、プリセットだけ戻す
   const imageId =
     image === null || overRestoreLimit('avatar', image.size)
       ? null

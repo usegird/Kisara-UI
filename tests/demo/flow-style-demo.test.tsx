@@ -9,10 +9,6 @@ import { NARROW_SCREEN_QUERY } from '@/hooks/ui/use-narrow-screen';
 
 import { stubMediaQuery, stubMissingDom } from '../helpers/dom';
 
-// ─────────────────────────────
-// デモの見出しの帯。説明の一行と操作のボタンは帯に並べ、狭い画面ではメニューに畳む
-// ─────────────────────────────
-
 beforeAll(() => {
   stubMissingDom();
 });

@@ -8,10 +8,6 @@ import {
 import { outputPath, outputRefOf } from '@/graph/run-record';
 import type { RunHistoryFile } from '@/port/run-history';
 
-// ─────────────────────────────
-// 実行の記録の形の検証と、`/history` から材料を読む
-// ─────────────────────────────
-
 const FILE: RunHistoryFile = {
   workflows: {
     k1: {
@@ -47,7 +43,6 @@ describe('serializeRunHistoryFile / parseRunHistoryFile', () => {
   });
 
   it('版や形が違えば null', () => {
-    // Workflow JSON を持つ v4 の形は読まない
     expect(parseRunHistoryFile({ v: 4, workflows: {}, prompts: {}, runs: [] })).toBeNull();
     expect(parseRunHistoryFile({ v: 5, workflows: {}, prompts: {} })).toBeNull();
     expect(parseRunHistoryFile('x')).toBeNull();

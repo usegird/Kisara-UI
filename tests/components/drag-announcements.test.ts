@@ -4,8 +4,6 @@ import { afterAll, describe, expect, it } from 'vitest';
 import { dragAccessibility } from '@/components/ui/drag-announcements';
 import { initLocale } from '@/i18n';
 
-// 読み上げの文言は画面の言語で、識別子ではなく名前を読む
-
 function active(id: string, data: Data): Active {
   return { id, data: { current: data }, rect: { current: { initial: null, translated: null } } };
 }

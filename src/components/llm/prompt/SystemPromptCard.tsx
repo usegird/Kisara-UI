@@ -11,21 +11,13 @@ import { t } from '@/i18n';
 import { useSettingsStore } from '@/store/use-settings-store';
 import { useSystemPromptsStore } from '@/store/use-system-prompts-store';
 
-// ─────────────────────────────
-// KisaraUI のシステムプロンプトの、プロンプトのタブの読むだけの行と、パラメタのタブの先頭の直す欄。
-// 全体の設定の 1 つで、どの会話にも効く。
-// ─────────────────────────────
-
-/** プロンプトのタブのシステムプロンプトの行の props */
 export interface SystemPromptCardProps {
   readonly tokens: number | undefined;
   readonly open: boolean;
   readonly onToggle: () => void;
-  /** すぐ下の Comfy Workflow の行と地をつなげる（間に項目を入れられない） */
   readonly joinDown?: boolean | undefined;
 }
 
-/** プロンプトのタブの読むだけの 1 行。開くと本文を文字のまま出す */
 export function SystemPromptCard({
   tokens,
   open,
@@ -39,7 +31,6 @@ export function SystemPromptCard({
     <div className={cardRow({ enabled: !empty, dragging: false, locked: true, joinDown })}>
       <CardHeader
         label={t('llm.prompt.system')}
-        // 縮めているときだけ、選んでいるテンプレートの名前を右に出す
         position={open ? null : (selected?.name ?? null)}
         tokens={empty ? undefined : tokens}
         summary={content.trim().split('\n')[0] ?? ''}
@@ -54,14 +45,12 @@ export function SystemPromptCard({
   );
 }
 
-/** パラメタのタブの先頭に置く、テンプレートの 1 行とシステムプロンプトの本文の欄 */
 export function SystemPromptSettings(): React.ReactElement {
   const content = useSettingsStore((state) => state.llmSystemPrompt);
   const selected = useSettingsStore((state) => state.llmSystemTemplate);
   return (
     <div className="flex flex-col gap-1 pt-1 pl-1">
       <TemplateBar
-        // 選んでいるテンプレートが替わったら、名前の欄を作り直す
         key={selected?.id ?? ''}
         content={content}
         selectedId={selected?.id ?? null}
@@ -72,7 +61,6 @@ export function SystemPromptSettings(): React.ReactElement {
   );
 }
 
-/** テンプレートを選ぶ・保存する・別名で保存する・消す 1 行 */
 function TemplateBar({
   content,
   selectedId,
@@ -82,7 +70,6 @@ function TemplateBar({
 }): React.ReactElement {
   const templates = useSystemPromptsStore((state) => state.templates);
   const current = selectedId === null ? undefined : templates[selectedId];
-  // 打ちかけの名前はこの欄だけが持つ（選んでいるテンプレートが替わったら作り直す。呼び出し側の key）
   const [name, setName] = useState(current?.name ?? '');
   const [confirming, setConfirming] = useState(false);
   const list = Object.values(templates).sort((a, b) => a.name.localeCompare(b.name));
@@ -94,14 +81,12 @@ function TemplateBar({
   const choose = (picked: string): void => {
     const template = list.find((item) => item.name === picked);
     if (template === undefined) return;
-    // 本文も生成の設定も全体に写す（どの会話にも効く）
     settings().setLlmSystemPrompt(template.content);
     settings().setLlmSystemTemplate({ id: template.id, name: template.name });
     settings().setLlmParams(template.params);
   };
   const select = (template: { readonly id: string; readonly name: string }): void =>
     settings().setLlmSystemTemplate({ id: template.id, name: template.name });
-  // 生成の設定は全体のもの。押したときに読む（欄を描き直すたびに購読しない）
   const params = () => settings().llmParams;
   const save = (): void => {
     if (trimmed.length === 0) return;
@@ -176,7 +161,6 @@ function TemplateBar({
           setConfirming(false);
           if (current === undefined) return;
           store().remove(current.id);
-          // 本文は残し、テンプレートとのつながりだけ外す
           settings().setLlmSystemTemplate(null);
           setName('');
         }}

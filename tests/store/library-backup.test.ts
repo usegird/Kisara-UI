@@ -20,11 +20,6 @@ import { installSystemPromptTable, useSystemPromptsStore } from '@/store/use-sys
 import { connectComfy } from '../helpers/connection';
 import { chatPlaybook, loreEntry } from '../helpers/llm';
 
-// ─────────────────────────────
-// プリセットとテンプレートの控え。ユーザーフォルダは作り物にする。
-// ─────────────────────────────
-
-/** ユーザーフォルダの代わり。`<種類>/<id>` から本文と画像へ */
 function fakeLibrary(files: Map<string, { body: string; image: Blob | null }>): LibraryBackupPort {
   const key = (kind: LibraryKind, id: string): string => `${kind}/${id}`;
   return {
@@ -113,7 +108,6 @@ describe('控えを書く', () => {
     expect(files.size).toBe(0);
     useConnectionStore.setState({ status: 'connected' });
     await vi.advanceTimersByTimeAsync(0);
-    // 設定を入れる前に足した 1 件はまとめて書かない
     expect(
       [...files.values()].map((file) => (JSON.parse(file.body) as { name: string }).name),
     ).toEqual(['later']);
@@ -157,9 +151,7 @@ describe('控えから戻す', () => {
       'mine',
     ]);
     expect(templates.abc?.name).toBe('restored');
-    // プリセットは別のボタン
     expect(usePresetsStore.getState().presets.p1).toBeUndefined();
-    // 戻した 1 件を控えに書き戻さない
     await vi.advanceTimersByTimeAsync(2000);
     expect(saves).not.toHaveBeenCalled();
   });
@@ -182,7 +174,6 @@ describe('控えから戻す', () => {
     const body = JSON.stringify({ v: 7, id: 'p1', name: 'P', fields, lorebooks: [], updatedAt: 1 });
     files.set('presets/p1', { body, image: new Blob(['x']) });
     expect(await restoreLibrary('presets')).toEqual({ added: 1, updated: 0, failed: false });
-    // 画像はアバターの表へ移し、プリセットは id で指す
     const imageId = usePresetsStore.getState().presets.p1?.imageId;
     expect(avatarImageOf(imageId)).not.toBeNull();
   });
@@ -195,14 +186,12 @@ describe('プリセットの上書きと別名保存', () => {
     const book = { id: 'b1', name: 'Book', entries: [loreEntry({ content: 'Lore.' })] };
     const preset = usePresetsStore.getState().add('Rei', fields, 'a1', []);
     await vi.advanceTimersByTimeAsync(5);
-    // 会話で切った印はプリセットに書かない
     const refs = { imageId: 'a2', lorebooks: [{ ...book, off: true as const }] };
     usePresetsStore.getState().update(preset.id, 'Rei 2', fields, refs);
     const renamed = usePresetsStore.getState().presets[preset.id];
     expect(renamed).toMatchObject({ name: 'Rei 2', imageId: 'a2', lorebooks: [book] });
     expect(renamed?.lorebooks[0]).not.toHaveProperty('off');
     expect(renamed?.updatedAt).toBeGreaterThan(preset.updatedAt);
-    // 控えには辞書の並びの中身を書く（版 7）
     await vi.advanceTimersByTimeAsync(2000);
     const body = JSON.parse(files.get(`presets/${preset.id}`)?.body ?? '{}') as object;
     expect(body).toMatchObject({ v: 7, lorebooks: [book] });
@@ -212,6 +201,7 @@ describe('プリセットの上書きと別名保存', () => {
     expect(copy).toMatchObject({ name: 'Copy', imageId: 'a2', lorebooks: [book] });
   });
 });
+
 describe('追加辞書とロアブックの控え', () => {
   it('辞書を書き、一覧から消しても控えは残す', async () => {
     connectComfy({ chatComfyBackup: true });
@@ -272,7 +262,6 @@ describe('追加辞書とロアブックの控え', () => {
       body: JSON.stringify({ id: 'r1', playbook: chatPlaybook().playbook, updatedAt: 5 }),
       image: null,
     });
-    // 消した 1 件も控えに残っているので、一緒に戻る
     expect(await restoreLibrary('playbooks')).toEqual({ added: 2, updated: 0, failed: false });
     expect(usePlaybooksStore.getState().playbooks.r1?.playbook).toMatchObject({
       id: 'r1',
@@ -280,6 +269,7 @@ describe('追加辞書とロアブックの控え', () => {
     });
   });
 });
+
 describe('アバターの控え', () => {
   beforeEach(() => {
     installAvatarTable(memoryTable());

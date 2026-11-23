@@ -5,12 +5,7 @@ import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 
 import { useDragPan } from '@/hooks/ui/use-drag-pan';
 
-// ─────────────────────────────
-// 何も無い所を掴んで送る。横は全体、縦は掴んだ列だけ。中身の上と指では掴まない。
-// ─────────────────────────────
-
 beforeAll(() => {
-  // jsdom はポインタの捕捉を持たない
   HTMLElement.prototype.setPointerCapture = () => undefined;
   HTMLElement.prototype.hasPointerCapture = () => false;
 });
@@ -74,7 +69,6 @@ describe('何も無い所を掴んで送る', () => {
     expect(flow.scrollLeft).toBe(50);
     expect(outside).not.toHaveBeenCalled();
 
-    // やめた後は動かしても送らない
     fireEvent.pointerMove(right, { clientX: 40, clientY: 60, pointerType: 'mouse' });
     expect(flow.scrollLeft).toBe(50);
     document.body.removeEventListener('keydown', outside);

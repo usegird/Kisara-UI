@@ -12,10 +12,6 @@ import { advisorContextText, advisorGreeting, advisorMessages } from '@/chat/pro
 
 import { chat, chatMessage, contentText, sampleComposition } from '../helpers/llm';
 
-// ─────────────────────────────
-// 構成の相談の案の読み方と当て方
-// ─────────────────────────────
-
 const fence = (body: string): string => '```kisara-prompt\n' + body + '\n```';
 
 const proposal = (changes: readonly unknown[]): string =>
@@ -57,7 +53,6 @@ describe('案の読み方', () => {
     ]);
   });
 
-  // ツールを呼ばずに、呼び出しを文字でコードブロックに書くモデルがある
   it('コードブロックに文字で書いた呼び出し（名前({...})）は、括弧の中を案として読む', () => {
     const body = JSON.stringify({ title: 'T', changes: [{ target: 'main', content: 'S' }] });
     const text = fence(`propose_prompt_changes(${body})`);
@@ -138,6 +133,7 @@ describe('案の当て方', () => {
     expect(appended[0]?.entries).toHaveLength(2);
     expect(appended[0]?.off).toBeUndefined();
   });
+
   it('足す先は LLM が書いた名前の辞書。無い名前なら、その名前で 1 冊足す', () => {
     const entry = (dictionary: string) =>
       ({
@@ -159,6 +155,7 @@ describe('案の当て方', () => {
     expect(added.map((book) => book.name)).toEqual(['Card', 'Places', 'Items']);
     expect(added[2]?.entries).toHaveLength(1);
   });
+
   it('段を書かせる辞書の項目は、作業の用途でも切って足す', () => {
     const step = {
       target: 'dictionaryEntry',
@@ -175,9 +172,9 @@ describe('案の当て方', () => {
     const { next } = applyProposal(target(), proposal, { ...options, outline: 'Outline' });
     expect(next.lorebooks?.[0]?.name).toBe('Outline');
     expect(next.lorebooks?.[0]?.entries[0]?.enabled).toBe(false);
-    // 段は常時・深さ 0・system で足す
     expect(next.lorebooks?.[0]?.entries[0]?.depth).toEqual({ depth: 0, role: 'system' });
   });
+
   it('プレイブックから開いた相談は、現在の状況の欄を当てない', () => {
     const situation = {
       target: 'character',
@@ -215,7 +212,6 @@ describe('案の当て方', () => {
     expect(next.prompt.prefill).toEqual({ content: '{{char}}:', enabled: true });
     const markers = next.prompt.items.filter((item) => item.marker !== null);
     expect(markers.find((item) => item.marker === 'charDescription')?.enabled).toBe(true);
-    // 中身の無い欄の印も有効で足す（空なので送らない）
     expect(markers.find((item) => item.marker === 'charPersonality')?.enabled).toBe(true);
   });
 });
@@ -244,10 +240,8 @@ describe('相談で送る messages', () => {
     expect(sent[0]?.content).toBe('SYS');
     const first = sent[1] === undefined ? '' : contentText(sent[1]);
     expect(first.startsWith('Hello\n\n```kisara-context\n')).toBe(true);
-    // 案の書き方はツールで示し、コードブロックの書き方は指示に書かない
     expect(first).toContain('propose_prompt_changes');
     expect(first).not.toContain('kisara-prompt');
-    // 空の欄は渡さない。会話のログは渡さない
     expect(first.split('Current composition (JSON):')[1]).not.toContain('"prefill"');
     expect(first).not.toContain('"hi"');
   });
@@ -261,11 +255,13 @@ describe('相談で送る messages', () => {
       expect(roleplay).toContain(word);
     }
   });
+
   it('段を書かせるときは、段の終わりの状態を次の段の始まりにつながる形で書かせる', () => {
     const guide = { use: 'story' as const, visible: '', guide: '', outline: '##playbook' };
     const text = advisorContextText(chat([]), 'story', guide);
     expect(text).toContain('leads into the beginning of the next step');
   });
+
   it('段は段の辞書にだけ書かせ、構成の項目と、段でない項目をその辞書に書くことを断る', () => {
     const guide = { use: 'story' as const, visible: '', guide: '', outline: '##playbook' };
     const text = advisorContextText(chat([]), 'story', guide);
@@ -276,13 +272,11 @@ describe('相談で送る messages', () => {
     expect(text).toContain('put other\nentries (premise, setting');
   });
 
-  // 文字だけで段を書く応答が多かった（反映できない）
   it('段は案のブロックで書かせ、文字だけの段・変更は反映できないと伝える', () => {
     const guide = { use: 'story' as const, visible: '', guide: '', outline: '##playbook' };
     const text = advisorContextText(chat([]), 'story', guide);
     expect(text).toContain('An outline written only as text is not applied');
     expect(text).toContain('Changes described only in text are not applied');
-    // ##playbook を構成の項目と取り違えないよう、段の変更の形を示す
     expect(text).toContain('"##playbook" is a dictionary, not a prompt item');
     expect(text).toContain('{"target": "dictionaryEntry", "dictionary": "##playbook"');
   });
@@ -403,6 +397,7 @@ describe('送る名前', () => {
     ]);
   });
 });
+
 describe('予約の辞書', () => {
   const entry = (dictionary: string) =>
     ({
@@ -427,6 +422,7 @@ describe('予約の辞書', () => {
     expect(next.lorebooks?.[0]?.name).toBe('##playbook');
     expect(next.lorebooks?.[0]?.entries[0]).toMatchObject({ keys: ['【One】'], constant: true });
   });
+
   it('予約の辞書の名前（## で始まる）を構成の項目の名前にした案は足さない', () => {
     const proposal = {
       title: '',

@@ -16,10 +16,6 @@ import type { QueueTask } from '@/queue/queue-tasks';
 import type { NodeLabeler } from '@/queue/task-failure';
 import type { SubmitFailure } from '@/queue/task-log';
 
-// ─────────────────────────────
-// キューの詳細の見出しと実行の結果の行
-// ─────────────────────────────
-
 interface TaskDetailHeaderProps {
   readonly task: QueueTask | null;
   readonly workflowName: string | null;
@@ -31,7 +27,6 @@ interface TaskDetailHeaderProps {
   readonly onClose: () => void;
 }
 
-/** 見出しの帯はダイアログと共通（出し方の切り替えと掴みは枠が足す） */
 export function TaskDetailHeader({
   task,
   workflowName,
@@ -82,7 +77,6 @@ export function TaskDetailHeader({
         </span>
       }
       actions={
-        // 追従は押すたびに入り切りする（ビューワーと同じアイコン。入っている間は押された見た目）
         <button
           type="button"
           className={cn(DIALOG_ICON_CLASS, DIALOG_TOGGLE_ON_CLASS)}
@@ -102,14 +96,12 @@ export function TaskDetailHeader({
 interface RunOutcomeProps {
   readonly rejection: SubmitFailure | null;
   readonly failure: RunFailure | null;
-  /** タスクに添えられた文（失敗の記録が無いときに出す） */
   readonly message: string | null;
   readonly nodes: React.ComponentProps<typeof TaskFailure>['nodes'];
   readonly timings: readonly NodeTiming[];
   readonly label: NodeLabeler;
 }
 
-/** 失敗の内容。断られた理由 → 履歴に残った失敗 → タスクに添えられた文の順に 1 つ */
 export function RunOutcome({
   rejection,
   failure,

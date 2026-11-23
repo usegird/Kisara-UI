@@ -11,10 +11,6 @@ import type { SideColumnKit } from '@/components/ui/side-column-kit';
 import { t, type MessageKey } from '@/i18n';
 import { useChatSidePanelStore, type ChatSidePanelTab } from '@/store/use-chat-side-panel-store';
 
-// ─────────────────────────────
-// 会話のタブの右の列。枠は ComfyUI のタブと共通（`ui/side-column`）で、中身のタブを渡す。
-// ─────────────────────────────
-
 const PANELS: readonly { readonly value: ChatSidePanelTab; readonly label: MessageKey }[] = [
   { value: 'prompt', label: 'llm.side.prompt' },
   { value: 'generation', label: 'llm.side.generation' },
@@ -56,12 +52,10 @@ function PanelContent({
   );
 }
 
-/** 会話のタブの右の列の props */
 export interface ChatSidePanelProps {
   readonly chatId: string;
 }
 
-/** 会話のタブの右の列。拡張のほかのタブはアクティブな会話のものを出す */
 export function ChatSidePanel({ chatId }: ChatSidePanelProps): React.ReactElement {
   const tab = useChatSidePanelStore((state) => state.tab);
   const setTab = useChatSidePanelStore((state) => state.setTab);
@@ -70,12 +64,9 @@ export function ChatSidePanel({ chatId }: ChatSidePanelProps): React.ReactElemen
 
   const kit: SideColumnKit = {
     label: t('llm.side.label'),
-    // 会話では下に置く切り替えを持たない（右に固定）
     dockable: false,
     bottomEdge: 'input',
-    // 幅は ComfyUI の右の列と別に持つ
     widthKey: 'chatSide',
-    // 画像ビューワーはこの列に重ねる（上端はタブの並びから）
     attachPanel,
     attachTabs,
     sections: PANELS.map((panel) => ({ value: panel.value, label: t(panel.label) })),

@@ -16,29 +16,17 @@ import { useConnectionStore } from '@/store/use-connection-store';
 import { queueIds, useQueueStore } from '@/store/use-queue-store';
 import { useSettingsStore } from '@/store/use-settings-store';
 
-// ─────────────────────────────
-// 会話から呼んだワークフローの完了の見張りと拾い直し。完了は実行の通知で知り、見張りはこの画面を
-// 開いている間だけ持つ（残さない）。投入し直さない。
-// ─────────────────────────────
-
 interface Watched {
   readonly chatId: string;
   readonly messageId: string;
   readonly callId: string;
-  /** 結果として渡す画像を出すノード。空ならすべて */
   readonly outputs: readonly string[];
   readonly files: OutputFileRef[];
-  /**
-   * 通知を逃したかもしれない（読み込み直す前に投入した・接続が切れた）。通知では決めず、キューから
-   * 外れたら履歴で決める
-   */
   recovered?: true;
 }
 
-/** 実行の id → 待っている呼び出し */
 export const watching = new Map<string, Watched>();
 
-/** 待っている呼び出しの状態を変える。会話を閉じていれば何もしない（完了待ちのまま残る） */
 function settle(promptId: string, update: (watched: Watched) => void): void {
   const watched = watching.get(promptId);
   if (watched === undefined) return;
@@ -48,23 +36,18 @@ function settle(promptId: string, update: (watched: Watched) => void): void {
   update(watched);
 }
 
-/**
- * 選んだ出力ノードが出した画像だけを集める
- */
 function collectOutput(promptId: string, event: Extract<ComfyEvent, { type: 'executed' }>): void {
   const watched = watching.get(promptId);
   if (watched === undefined || event.node === null) return;
   if (passesOutput(watched.outputs, event.node)) watched.files.push(...event.files);
 }
 
-/**
- * 実行の通知を見る（use-comfy-socket から）
- */
 export function observeToolRun(event: ComfyEvent): void {
-  if (event.type === 'unknown' || event.type === 'status') return;
+  if (event.type === 'unknown' || event.type === 'status' || event.type === 'manager_queue') {
+    return;
+  }
   const promptId = event.promptId;
   if (promptId === null || !watching.has(promptId)) return;
-  // 拾い直している実行は、途中の通知が欠けているので履歴で決める
   if (watching.get(promptId)?.recovered === true) return;
   const setState = useChatStore.getState().setToolCall;
   switch (event.type) {
@@ -72,7 +55,6 @@ export function observeToolRun(event: ComfyEvent): void {
       collectOutput(promptId, event);
       return;
     case 'executing':
-      // node が null なら完了（正式な通知は execution_success。互換のため両方受ける）
       if (event.node !== null) return;
       break;
     case 'execution_success':
@@ -104,18 +86,8 @@ export function observeToolRun(event: ComfyEvent): void {
   );
 }
 
-// ─────────────────────────────
-// 拾い直し。完了を待つ呼び出しのうち、この画面が通知を見張って
-// いないものを、ComfyUI のキューと履歴に照らす。投入し直さない
-// ─────────────────────────────
-
-/** 履歴を読んでいる実行の id（重ねて読まない） */
 const resolving = new Set<string>();
 
-/**
- * 履歴の 1 件で呼び出しの結果を決める。読めなければ今の状態のまま（次に取り直したときに読む）。
- * 履歴にも無ければ不明にする（不明のものは不明のまま。前へしか進めない）
- */
 async function resolveFromHistory(
   baseUrl: string,
   chatId: string,
@@ -152,10 +124,6 @@ async function resolveFromHistory(
   }
 }
 
-/**
- * 読んである会話の、完了を待つ呼び出しを照らす。接続していてキューを一度でも取れているときだけ。
- * キューにあれば外れるまで待ち、無ければ履歴を読む。この画面が見張っている実行は通知に任せる
- */
 function reconcileQueuedCalls(): void {
   if (useConnectionStore.getState().status !== 'connected') return;
   const queue = useQueueStore.getState();
@@ -188,9 +156,6 @@ function reconcileQueuedCalls(): void {
   }
 }
 
-/**
- * 通知とストアの見張りを始める。呼び出しの受け手を渡した後に 1 回だけ呼ぶ
- */
 export function startToolRunWatch(): void {
   listenComfyEvents(observeToolRun);
   useQueueStore.subscribe((state, previous) => {
@@ -203,7 +168,6 @@ export function startToolRunWatch(): void {
     reconcileQueuedCalls();
   });
   useConnectionStore.subscribe((state, previous) => {
-    // 切れている間の通知は届かないので、見張っている実行はすべて拾い直しに回す
     if (previous.status === 'connected' && state.status !== 'connected') {
       for (const watched of watching.values()) watched.recovered = true;
     }
@@ -212,13 +176,8 @@ export function startToolRunWatch(): void {
   reconcileQueuedCalls();
 }
 
-/** 会話の顔ぶれ（会話を読んだ・閉じたときだけ照らし直す。発言の受け取りごとには照らさない） */
 let chatIds = '';
 
-/**
- * 不明の呼び出しを、履歴で 1 回だけ決め直す。**接続したときだけ**呼ぶ（取り直しのたびに読むと、
- * 不明が溜まるほど問い合わせが増える）
- */
 function recheckUnknownCalls(): void {
   const baseUrl = useSettingsStore.getState().baseUrl;
   if (baseUrl.length === 0) return;

@@ -52,44 +52,24 @@ import { useConnectionStore } from '@/store/use-connection-store';
 import { useSettingsStore } from '@/store/use-settings-store';
 import type { StorageDialogStart } from '@/store/use-storage-dialog-store';
 
-// ─────────────────────────────
-// ストレージの管理のダイアログ。読んだ結果と印は開いている間だけ持つ。会話のタブから開くので、
-// いつも自由移動で出す。
-// ─────────────────────────────
-
 const DIALOG_ID = 'llm-storage';
 const PANE_KEY = `${DIALOG_ID}:left`;
 const PIN_KEY = `${DIALOG_ID}:directory`;
-/**
- * 左の列を広げられる上限。いちばん長い名前（システムテンプレート）に大きさ「999 KB」を並べた長さ
- * （名前 119px・大きさ 37px と字下げ・余白）。既定の幅も同じにする
- */
 const LEFT_MAX = 194;
 const LEFT_WIDTH = LEFT_MAX;
-/** 左の列を縮められる下限（左右の列の部品と同じ）。ダイアログを狭めると、ここまで先に縮む */
 const LEFT_MIN = 140;
-/**
- * 境目の線とダイアログの枠の幅
- */
 const FRAME_EXTRA = 4;
-/** ダイアログの最小。左の列を下限まで縮めて、右の列を横に送らずに済む幅 */
 const STORAGE_DIALOG_MIN = {
   width: LEFT_MIN + RIGHT_MIN + FRAME_EXTRA,
   height: DIALOG_MIN.height,
 };
 
-/** ストレージの管理のダイアログの props */
 export interface StorageDialogProps {
   readonly open: boolean;
-  /** 開いたときに出す場所（古いバックアップの知らせからは Comfy バックアップ） */
   readonly start?: StorageDialogStart;
   readonly onOpenChange: (open: boolean) => void;
 }
 
-/**
- * 左の列で場所（全体・見出し・種類）を選び、右に中身を出すダイアログ。削除は印を付けるだけで、
- * 「適用」でまとめて消す
- */
 export function StorageDialog({
   open,
   start = 'overview',
@@ -98,18 +78,15 @@ export function StorageDialog({
   return (
     <DialogFrame
       id={DIALOG_ID}
-      // 左右の列を並べ、右の一覧を中で送るので、高さの決まった大きさにする
       size="lg"
       minSize={STORAGE_DIALOG_MIN}
       movable
       modal={false}
-      // 会話のタブには嵌める列が無いので、いつも自由移動で出す
       embeddable={false}
       open={open}
       onOpenChange={onOpenChange}
       title={t('llm.storage.title')}
     >
-      {/* 開くたびに全体・読み直した中身・印の無い状態から始めたいので、中身は開いている間だけ置く */}
       {open ? <StorageBody start={start === 'comfyBackup' ? COMFY_BACKUP : OVERVIEW} /> : null}
     </DialogFrame>
   );
@@ -137,13 +114,10 @@ function StorageBody({ start }: { readonly start: string }): React.ReactElement 
   const [marks, setMarks] = useState<Marks>(new Map());
   const [reloadNeeded, setReloadNeeded] = useState(false);
   const [busy, setBusy] = useState(false);
-  // 30 日より前かを決める時刻。開いている間は動かさない（描くたびに対象が入れ替わらないように）
   const [openedAt] = useState(Date.now);
-  // 開いたエクスポートのファイル（種類ごと）。中身はダイアログを閉じると捨てる
   const [files, setFiles] = useState<ReadonlyMap<string, OpenedFile>>(new Map());
   const refresh = (): void => setRevision((value) => value + 1);
 
-  // 保存領域は外のもの。開いたときと読み直すときに読む
   useEffect(() => {
     let alive = true;
     void readStorageUsage().then((found) => {
@@ -154,14 +128,12 @@ function StorageBody({ start }: { readonly start: string }): React.ReactElement 
     };
   }, [revision]);
 
-  // 控えは接続先のもの。つないでいる間に、開いたときと読み直すときに読む
   useEffect(() => {
     if (!connected) return undefined;
     let alive = true;
     void readRemoteLists(BACKUP_KINDS, listBackups).then((found) => {
       if (alive) setBackups(found);
     });
-    // ユーザーフォルダの物も同じ時機に読む
     void readRemoteLists(USER_FILE_KINDS, listUserFileItems).then((found) => {
       if (alive) setUserFiles(found);
     });
@@ -186,7 +158,6 @@ function StorageBody({ start }: { readonly start: string }): React.ReactElement 
     setMarks((current) => withoutReferenceMarks(current, entryId));
   };
 
-  /** エクスポートのファイルを開き、その種類のバックアップの列に替える */
   const openFile = async (target: Entry, picked: File): Promise<void> => {
     const file = await openStorageFile(target, picked);
     if (file === null) return;
@@ -203,10 +174,6 @@ function StorageBody({ start }: { readonly start: string }): React.ReactElement 
     dropReferenceMarks(entryId);
   };
 
-  /**
-   * 印を付けた物をまとめて行う。戻すを先に行い（戻した数を 1 回知らせる）、続けて消す。
-   * localStorage を消したら・sessionStorage に戻したら、終えてから読み込み直す
-   */
   const apply = async (): Promise<void> => {
     setBusy(true);
     const outcome = await applyMarks(
@@ -216,7 +183,6 @@ function StorageBody({ start }: { readonly start: string }): React.ReactElement 
     setBusy(false);
     setMarks(new Map());
     toastApplied(outcome);
-    // localStorage・sessionStorage は画面の中の値がすぐ書き戻すので読み込み直す
     if (outcome.local) {
       reloadPage();
       return;
@@ -225,12 +191,10 @@ function StorageBody({ start }: { readonly start: string }): React.ReactElement 
     refresh();
   };
 
-  /** 控えの無い 1 件のバックアップをその場で取る。取れたら一覧を読み直す */
   const take = async (target: Entry, key: string): Promise<void> => {
     if (await takeEntryBackup(target, key)) refresh();
   };
 
-  // 一時的に出した左の列は、その外（切り替えのアイコンを除く）を押すか Esc で閉じる
   const onKeyDownCapture = (event: React.KeyboardEvent): void => {
     if (!closesOnKey(event.key)) return;
     hide();
@@ -244,7 +208,6 @@ function StorageBody({ start }: { readonly start: string }): React.ReactElement 
   const onPaneResize = (next: number): void =>
     setPaneWidth(PANE_KEY, clampPane(next, LEFT_MIN, LEFT_MAX));
 
-  /** 右の列の中身。読んでいる間はその旨、種類なら 1 件ずつ、ほかは合計の表 */
   const content = (): React.ReactElement => {
     if (usage === null) {
       return <p className="text-muted-foreground p-1">{t('llm.storage.loading')}</p>;
@@ -290,7 +253,6 @@ function StorageBody({ start }: { readonly start: string }): React.ReactElement 
     );
   };
 
-  /** 帯の種類ごとのボタン。種類はエクスポート・全て削除、Comfy バックアップはクリーンアップの全て削除 */
   const header = (): React.ReactNode => {
     if (entry !== undefined) {
       return <EntryHeader entry={entry} marks={marks} busy={busy} onToggleAll={toggle} />;
@@ -308,7 +270,6 @@ function StorageBody({ start }: { readonly start: string }): React.ReactElement 
       onPointerDown={onPointerDown}
     >
       <StorageBand
-        // ピン止めした左の列と同じく、下限まで先に縮む
         leadStyle={
           pinned ? { flexBasis: leftWidth + 1, flexShrink: 1, minWidth: LEFT_MIN + 1 } : undefined
         }
@@ -337,7 +298,6 @@ function StorageBody({ start }: { readonly start: string }): React.ReactElement 
           </SidePane>
         ) : null}
 
-        {/* 一時的に出した左の列はこの中（帯の下）に重ねる。帯の切り替えを覆わない */}
         <div className="relative flex flex-1 flex-col" style={{ minWidth: RIGHT_MIN }}>
           {reloadNeeded ? <ReloadNotice /> : null}
           <div className="min-h-0 flex-1 overflow-y-auto p-2">{content()}</div>

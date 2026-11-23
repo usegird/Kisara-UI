@@ -34,7 +34,6 @@ describe('回数の台帳', () => {
 
     const snapshot = statsSnapshot();
     expect(Object.keys(snapshot)).toEqual(['mount:a', 'store:b']);
-    // 写しの中身を書き換える（読み取り専用の型を外して試す）
     const entry = snapshot['mount:a'] as { count: number };
     entry.count = 99;
     expect(statCount('mount:a')).toBe(1);
@@ -86,12 +85,10 @@ describe('表の並び', () => {
     const parents = new Map([['Field', 'Panel']]);
     const snapshot = { 'render:Field': stat, 'render:Loose': stat };
 
-    // 根は名前の順（Loose が、回数の無い Panel より先）
     expect(shape(statRows(snapshot, parents))).toEqual(['0 render:Loose', '1 render:Field']);
   });
 });
 
-// 画面が裏に隠れている間のフレームは、何もしていなくても長く届く
 describe('長いフレームの処理時間', () => {
   it('描画待ちだけのフレームは処理 0 とみなす', () => {
     const idle = { startTime: 1000, duration: 734, renderStart: 1733, scripts: [] };

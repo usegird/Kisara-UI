@@ -4,35 +4,20 @@ import { DIALOG_ICON_CLASS } from '@/components/ui/dialog-header';
 import { t } from '@/i18n';
 import { cn } from '@/lib/utils';
 
-// ─────────────────────────────
-// ダイアログの操作の帯に置く決定のボタンと、その並びの右端の閉じる ×。
-// 層をまたいで使うので基盤の置き場に置く。
-// ─────────────────────────────
-
 const DECIDE_BUTTON_CLASS = `bg-primary text-primary-foreground flex shrink-0 items-center gap-1
   rounded-md px-2 py-0.5 disabled:opacity-40`;
 
-/** 決定のボタンの props */
 export interface DecideButtonProps {
-  /** 読み上げの名前（何を決定するか） */
   readonly label: string;
-  /** 指したときの説明。押せないときは理由を渡す */
   readonly title: string;
   readonly disabled: boolean;
-  /** 押した手続き。差し込みはボタンの位置から札を飛ばすので押した知らせを受け取れる */
   readonly onClick: (event: React.MouseEvent<HTMLButtonElement>) => void;
-  /** ボタンの文字。既定は「決定」 */
   readonly caption?: string | undefined;
-  /**
-   * `insert` は外の欄へ差し込む、`set` はパラメータへ書いて閉じる、`apply` は印を付けた操作を
-   * まとめて行う（ストレージの管理の適用）
-   */
   readonly icon?: 'insert' | 'set' | 'apply' | undefined;
 }
 
 const DECIDE_ICONS = { insert: ArrowLeftToLine, set: ArrowDownToLine, apply: Check } as const;
 
-/** 決定のボタン。アイコンは行き先で変える */
 export function DecideButton({
   label,
   title,
@@ -50,7 +35,6 @@ export function DecideButton({
       aria-label={label}
       title={title}
       disabled={disabled}
-      // 押しても焦点を奪わない（差し込み先の欄のキャレットを外さない）
       onMouseDown={(event) => event.preventDefault()}
       onClick={onClick}
     >
@@ -60,7 +44,6 @@ export function DecideButton({
   );
 }
 
-/** 決定の並びの右端に置く閉じる ×。見出しの帯の × と同じ働きで、大きさも揃える */
 export function PaneCloseButton({
   label,
   onClick,

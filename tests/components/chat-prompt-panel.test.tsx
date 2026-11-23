@@ -12,13 +12,7 @@ import { useSettingsStore } from '@/store/use-settings-store';
 import { LEAK_ALLOWANCE, LEAK_ROUNDS, leakWatch } from '../helpers/leak';
 import { chat, chatMessage } from '../helpers/llm';
 
-// ─────────────────────────────
-// 受け取り中に、プロンプトの列の項目を語ごとに描き直さない。
-// 列が使うのは受け取り中の候補より前の発言だけなので、本文が届いても項目の一覧は描き直さない
-// ─────────────────────────────
-
 const listRenders = vi.hoisted(() => ({ count: 0 }));
-// カードの欄（CardFieldsSection の挨拶の欄）の描き直し
 const cardRenders = vi.hoisted(() => ({ count: 0 }));
 
 vi.mock('@/components/llm/message/StepSwitch', async (importOriginal) => {
@@ -78,7 +72,6 @@ describe('ChatPromptPanel の受け取り中の描き直し', () => {
       screen.getByRole('button', { name: /^送信メッセージ/u }).textContent;
     const empty = total();
     act(() => useChatStore.getState().setDraft('c1', 'a'));
-    // 空から打ち始めたときは、メッセージの行の見積もりを出すので一覧を 1 回描き直す
     const before = listRenders.count;
     for (let index = 0; index < 10; index += 1) {
       act(() => useChatStore.getState().setDraft('c1', 'a'.repeat(index + 2).concat(' word')));
@@ -107,7 +100,6 @@ describe('ChatPromptPanel の受け取り中の描き直し', () => {
 describe('ChatPromptPanel の開いている項目', () => {
   it('プリセットのリンクでは開かず、カードを読み込んだときだけ中身のある有効な項目を開いて出す', () => {
     const base = chat([chatMessage('u1', 'user', ['hi'])]);
-    // 本文のある項目を 1 つ。ほかの文面の項目は本文が空なので開かない
     const items = base.prompt.items.map((item, at) =>
       at === 0 ? { ...item, content: 'X' } : item,
     );
@@ -115,13 +107,12 @@ describe('ChatPromptPanel の開いている項目', () => {
     const { container } = render(<ChatPromptPanel chatId="c1" />);
     expect(container.querySelectorAll('button[aria-expanded="true"]').length).toBe(0);
     act(() => useChatSidePanelStore.getState().requestExpand('c1'));
-    // 本文のある項目と、追加辞書の印・会話履歴・メッセージ
     const filled = items.filter((item) => item.marker !== null || item.content !== '').length;
     expect(filled).toBe(4);
     expect(container.querySelectorAll('[aria-expanded="true"]').length).toBe(filled);
-    // 開いたら頼みを外す（タブを出し直しても、もう一度は開かない）
     expect(useChatSidePanelStore.getState().expand).toBeNull();
   });
+
   it('開く行を添えた頼み（相談の案を反映したとき）は、すべて閉じてその行だけを開く', () => {
     const base = chat([chatMessage('u1', 'user', ['hi'])]);
     const items = base.prompt.items.map((item, at) =>
@@ -143,7 +134,6 @@ describe('ChatPromptPanel の送る中身を見る', () => {
     setChat(chat([chatMessage('u1', 'user', ['hello there'])]));
     render(<ChatPromptPanel chatId="c1" />);
     const button = screen.getByRole('button', { name: '送る生データを表示' });
-    // 合計の行より前に置く
     const total = screen.getByText(/^合計 約/u);
     expect(button.compareDocumentPosition(total) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
 
@@ -151,6 +141,7 @@ describe('ChatPromptPanel の送る中身を見る', () => {
     const dialog = screen.getByRole('dialog', { name: '送る中身' });
     expect(within(dialog).getByText(/hello there/u)).toBeTruthy();
   });
+
   it('まとめる設定を変えると、生データの system のまとまりも変わる', () => {
     useSettingsStore.setState({ squashSystemMessages: false, llmSystemPrompt: 'SYS' });
     setChat(chat([chatMessage('u1', 'user', ['hi'])]));
@@ -160,7 +151,6 @@ describe('ChatPromptPanel の送る中身を見る', () => {
     }));
     render(<ChatPromptPanel chatId="c1" />);
     fireEvent.click(screen.getByRole('button', { name: '送る生データを表示' }));
-    // 送る要求の本文。`messages` を見る
     const sent = (): unknown[] =>
       (
         JSON.parse(screen.getByRole('dialog').querySelector('pre')?.textContent ?? '{}') as {
@@ -206,7 +196,6 @@ describe('ChatPromptPanel のすべて開く・すべて閉じる', () => {
     const opened = () => container.querySelectorAll('[aria-expanded="true"]').length;
     expect(screen.getByRole('heading', { name: 'プロンプト構成' })).toBeTruthy();
     fireEvent.click(screen.getByRole('button', { name: 'すべて開く' }));
-    // プリセットの名前の一覧（コンボボックス）は項目ではないので数えない
     const closed = [...container.querySelectorAll('[aria-expanded="false"]')]
       .map((element) => element.getAttribute('aria-label') ?? element.textContent ?? '')
       .filter((label) => !label.startsWith('プリセットの名前'));

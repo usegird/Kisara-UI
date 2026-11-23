@@ -4,10 +4,6 @@ import { afterEach, describe, expect, it } from 'vitest';
 
 import { ReceivingIndicator } from '@/components/llm/message/ReceivingIndicator';
 
-// ─────────────────────────────
-// 受け取り中の印。経過時間に、ツールを動かしている間と届いた出典の数を添える
-// ─────────────────────────────
-
 afterEach(cleanup);
 
 describe('受け取り中の印', () => {

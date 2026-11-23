@@ -10,11 +10,6 @@ import { clamp } from '@/lib/clamp';
 import { finiteNumber, isRecord, isUnknownArray, stringOr } from '@/lib/guards';
 import type { GenerationParams } from '@/port/llm-port';
 
-// ─────────────────────────────
-// 会話の中身の読み戻し。ブラウザの置き場の形を読む。API キーは持たない。
-// 候補の読み戻しは candidate-parse.ts、書き出しの形は conversation-file.ts が持つ。
-// ─────────────────────────────
-
 function parseMessage(raw: unknown): ChatMessage | null {
   if (!isRecord(raw) || typeof raw.id !== 'string') return null;
   if (raw.role !== 'user' && raw.role !== 'assistant') return null;
@@ -41,7 +36,6 @@ const NUMBER_PARAMS = [
   'seed',
 ] as const;
 
-/** 生成の設定を読む。数でない値と、知らない項目は落とす */
 export function parseParams(raw: unknown): GenerationParams {
   if (!isRecord(raw)) return {};
   const numbers: Record<string, number> = {};
@@ -55,7 +49,6 @@ export function parseParams(raw: unknown): GenerationParams {
   return pickGenerationParams({ ...numbers, ...(stop === null ? {} : { stop }) });
 }
 
-/** 会話の中身を読む。読めなければ null。受け取り中のまま残った候補は止めたものにする */
 export function parseChat(raw: unknown): Chat | null {
   if (!isRecord(raw)) return null;
   const messages = isUnknownArray(raw.messages)
@@ -77,10 +70,6 @@ export function parseChat(raw: unknown): Chat | null {
   return settleInterrupted(chat);
 }
 
-/**
- * 置き場に残した会話を読む。発言か候補を 1 つでも読めなければ null（壊れている。黙って落とすと、次に
- * 書くときに欠けた形で上書きするため）
- */
 export function parseIntactChat(raw: unknown): Chat | null {
   if (!isRecord(raw) || !isUnknownArray(raw.messages)) return null;
   const intact = raw.messages.every((item) => {
@@ -95,9 +84,6 @@ export function parseIntactChat(raw: unknown): Chat | null {
   return intact ? parseChat(raw) : null;
 }
 
-/**
- * 会話が写した個別追加辞書の並びとアバターの id を読む。無ければ持たない
- */
 export function refsOf(
   raw: Readonly<Record<string, unknown>> | null | undefined,
 ): Pick<Chat, 'lorebooks' | 'imageId'> {

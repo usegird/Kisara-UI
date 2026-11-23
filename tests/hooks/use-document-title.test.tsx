@@ -9,10 +9,6 @@ import { useTabsStore } from '@/store/use-tabs-store';
 
 import { chat, chatMessage } from '../helpers/llm';
 
-// ─────────────────────────────
-// ブラウザのタブの題名。付けた名前だけを出し、名前の無い会話は種類だけにする。
-// ─────────────────────────────
-
 afterEach(() => {
   cleanup();
   window.history.replaceState(null, '', '/');
@@ -42,26 +38,5 @@ describe('ブラウザのタブの題名', () => {
     });
     renderTitle();
     expect(document.title).toBe('会話 - KisaraUI');
-  });
-
-  it('はじめの画面を重ねている間は「KisaraUI」だけにし、閉じると戻す', () => {
-    act(() => {
-      useTabsStore.getState().addTab();
-      useGraphStore.getState().setName('anima');
-    });
-    renderTitle();
-    expect(document.title).toBe('anima - KisaraUI');
-
-    act(() => {
-      window.location.hash = 'welcome';
-      window.dispatchEvent(new HashChangeEvent('hashchange'));
-    });
-    expect(document.title).toBe('KisaraUI');
-
-    act(() => {
-      window.history.replaceState(null, '', '/');
-      window.dispatchEvent(new HashChangeEvent('hashchange'));
-    });
-    expect(document.title).toBe('anima - KisaraUI');
   });
 });

@@ -5,10 +5,6 @@ import { memoryTable, type ChatTable } from '@/store/persist/chat-repo';
 import { installAvatarTable, useAvatarsStore } from '@/store/use-avatars-store';
 import { installPresetTable, usePresetsStore } from '@/store/use-presets-store';
 
-// ─────────────────────────────
-// アバターの画像の表。中身が同じ画像は足さない・消してもプリセットのリンクは変えない
-// ─────────────────────────────
-
 let avatars: ChatTable;
 let presets: ChatTable;
 

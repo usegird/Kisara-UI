@@ -6,7 +6,6 @@ import { FULL_REFRESH_GAP_MS, useComfySocket } from '@/hooks/comfy/use-comfy-soc
 import type { SocketStatus } from '@/port/connection';
 import { useQueueStore } from '@/store/use-queue-store';
 
-// 口は張らない。状態の知らせだけを手で流す
 const statuses = vi.hoisted(() => ({ notify: (_status: SocketStatus): void => {} }));
 vi.mock('@/comfy/ws', async (importOriginal) => ({
   ...(await importOriginal<typeof import('@/comfy/ws')>()),
@@ -15,10 +14,6 @@ vi.mock('@/comfy/ws', async (importOriginal) => ({
     return { status: () => 'open', suspect: () => {}, close: () => {} };
   },
 }));
-
-// ─────────────────────────────
-// 通知の口を張り直したら、キューを全件取り直す
-// ─────────────────────────────
 
 const ORIGINAL_REFRESH = useQueueStore.getState().refresh;
 
@@ -38,7 +33,6 @@ describe('通知の口', () => {
       statuses.notify('open');
       expect(refresh).not.toHaveBeenCalled();
 
-      // 張ってすぐの張り直しでは全件を取らない（落ちては上がる相手に全件を取り続けない）
       statuses.notify('reconnecting');
       statuses.notify('open');
       expect(refresh).toHaveBeenLastCalledWith('http://comfy.test', false);

@@ -5,11 +5,6 @@ import { userdataFileUrl, userdataListUrl } from '@/comfy/endpoints';
 import { parseSavedWorkflows, saveWorkflow, WorkflowNotOwnedError } from '@/comfy/workflows';
 import { saveTarget, workflowDisplayName, workflowFileName } from '@/graph/workflow-name';
 
-// ─────────────────────────────
-// ComfyUI に保存されたワークフローの読み取り。
-// 一覧の応答は `[{path, size, modified, created}]`。文字列配列の形も受ける。
-// ─────────────────────────────
-
 describe('保存済みワークフローの一覧', () => {
   it('新しいものから並べる', () => {
     const list = parseSavedWorkflows([
@@ -68,20 +63,12 @@ describe('userdata の URL', () => {
   });
 });
 
-/**
- * 接続先が経路から名前を取り出す手順。1 回ほどき、`%` が残ればもう一度ほどく
- */
 function serverPath(url: string): string {
   const once = decodeURIComponent(url.slice(url.indexOf('/userdata/') + '/userdata/'.length));
-  // Python の unquote と同じく、16 進 2 桁が続かない % はそのまま残す
   return once.includes('%')
     ? once.replace(/(%[0-9A-Fa-f]{2})+/g, (match) => decodeURIComponent(match))
     : once;
 }
-
-// ─────────────────────────────
-// 保存。本文は生のまま送り、同名は 409 で弾かれる。
-// ─────────────────────────────
 
 describe('ワークフロー名', () => {
   it('表示名は拡張子とフォルダを落とす', () => {
@@ -96,7 +83,6 @@ describe('ワークフロー名', () => {
 
   it('パスや禁止文字は潰す（別フォルダに書かせない）', () => {
     expect(workflowFileName('a/b:c*?.json')).toBe('a_b_c__.json');
-    // % は使える文字なので残す（送るときの符号化は URL の組み立てが持つ）
     expect(workflowFileName('50%20a')).toBe('50%20a.json');
     expect(workflowFileName('   ')).toBe('workflow.json');
   });
@@ -199,7 +185,6 @@ describe('ComfyUI への保存', () => {
   });
 });
 
-/** 読むと `existing` を返し、書くと `postStatus` を返す接続先 */
 function serverWith(existing: Response, postStatus = 200) {
   return vi.fn<FetchLike>((_url, init) =>
     Promise.resolve(

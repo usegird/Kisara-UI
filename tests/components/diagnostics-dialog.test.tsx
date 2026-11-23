@@ -9,11 +9,6 @@ import { useSettingsStore } from '@/store/use-settings-store';
 
 import { LEAK_ALLOWANCE, LEAK_ROUNDS, leakWatch } from '../helpers/leak';
 
-// ─────────────────────────────
-// 診断ファイルを書き出すダイアログ。書き出す前に全文を見せ、
-// 選べる区分は選んだときだけ中身に入る
-// ─────────────────────────────
-
 afterEach(() => {
   cleanup();
   clearTrace();

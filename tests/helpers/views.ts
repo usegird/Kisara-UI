@@ -1,10 +1,5 @@
 import type { NodeRow, NodeView } from '@/graph/rows';
 
-// ─────────────────────────────
-// 表示用の行とカード（`NodeRow` / `NodeView`）の組み立て。既定は編集できる widget 行を 1 つ持つノードで、
-// 検証で見たい項目だけ `overrides` で差し替える。`src/` の型そのままなので、項目が増えたら**ここだけ**直す。
-// ─────────────────────────────
-
 export function nodeRow(overrides: Partial<NodeRow> = {}): NodeRow {
   return {
     name: 'value',

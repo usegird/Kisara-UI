@@ -1,45 +1,93 @@
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Pencil } from 'lucide-react';
+import { useState } from 'react';
 
 import { Section } from '@/components/comfy/queue/task-detail-sections';
 import { DIALOG_ICON_CLASS } from '@/components/ui/dialog';
 import { t } from '@/i18n';
 import { EMPTY_MARK, formatDateTimeSeconds } from '@/i18n/format';
+import { entryKeyOf } from '@/lib/text-entry';
 import { cn } from '@/lib/utils';
 import type { OutputFileRef } from '@/port/files';
 import { imagesOf } from '@/queue/outputs';
 import { promptNumbers, type HistoryCard, type RunSeed } from '@/queue/run-history-view';
 
-// ─────────────────────────────
-// 履歴の詳細の部品（実行の要約・移動のボタン・シード・実行の一覧）
-// ─────────────────────────────
-
-/** 実行の一覧で、↑ ↓ 1 回に動かす向き */
 const RUN_KEY_STEP: Readonly<Partial<Record<string, number>>> = { ArrowUp: -1, ArrowDown: 1 };
 
-/** 見出しの欄の名前。段の見出し（`Section`）と同じ見た目 */
 const SUMMARY_LABEL = 'text-muted-foreground text-2xs font-semibold';
 
-/** 出力の置き場の中の道筋 */
+function SessionNameField({
+  session,
+  name,
+  onRename,
+}: {
+  readonly session: string;
+  readonly name: string;
+  readonly onRename: (name: string) => void;
+}): React.ReactElement {
+  const [editing, setEditing] = useState(false);
+
+  if (editing) {
+    return (
+      <input
+        type="text"
+        autoFocus
+        className="border-input bg-background h-6 min-w-0 flex-1 rounded-md border px-2 text-xs
+          focus-visible:outline-2"
+        aria-label={t('history.detail.renameInput')}
+        defaultValue={name}
+        onBlur={(event) => {
+          setEditing(false);
+          onRename(event.currentTarget.value);
+        }}
+        onKeyDown={(event) => {
+          const key = entryKeyOf(event);
+          if (key === null) return;
+          event.stopPropagation();
+          if (key === 'cancel') event.currentTarget.value = name;
+          event.currentTarget.blur();
+        }}
+      />
+    );
+  }
+  return (
+    <>
+      <span className="min-w-0 truncate" title={session}>
+        {session}
+      </span>
+      <button
+        type="button"
+        className="text-muted-foreground hover:text-foreground hover:bg-muted shrink-0 rounded-md
+          p-0.5 focus-visible:outline-2"
+        aria-label={t('history.detail.rename')}
+        title={t('history.detail.rename')}
+        onClick={() => setEditing(true)}
+      >
+        <Pencil className="size-3" aria-hidden />
+      </button>
+    </>
+  );
+}
+
 function outputPath(file: OutputFileRef): string {
   return file.subfolder.length > 0 ? `${file.subfolder}/${file.filename}` : file.filename;
 }
 
-/**
- * 先頭の欄。名前と値を左右の列に並べる。セッションは 1 行、タイプは出力ごとに 1 行
- * （置き場の種別 temp / output とファイル名）
- */
 export function RunSummary({
   session,
+  name,
+  onRename,
   files,
 }: {
   readonly session: string;
+  readonly name: string;
+  readonly onRename: (name: string) => void;
   readonly files: readonly OutputFileRef[];
 }): React.ReactElement {
   return (
     <dl className="grid min-w-0 grid-cols-[auto_minmax(0,1fr)] items-baseline gap-x-3 gap-y-0.5">
       <dt className={SUMMARY_LABEL}>{t('history.detail.sessionLabel')}</dt>
-      <dd className="truncate" title={session}>
-        {session}
+      <dd className="flex min-w-0 items-center gap-1">
+        <SessionNameField session={session} name={name} onRename={onRename} />
       </dd>
       <dt className={SUMMARY_LABEL}>{t('history.detail.typeLabel')}</dt>
       <dd className="flex min-w-0 flex-col">
@@ -62,7 +110,6 @@ export function RunSummary({
   );
 }
 
-/** 履歴の詳細の新しい方・古い方へ移るボタン */
 export function MoveButtons({
   hasNewer,
   hasOlder,
@@ -96,12 +143,8 @@ export function MoveButtons({
   );
 }
 
-/** 短縮する欄（幅が足りなければ末尾を省く。折り返さない） */
 const SEED_PART = 'min-w-0 truncate';
 
-/**
- * シードの欄。1 行にシード 1 つ
- */
 export function SeedsSection({
   seeds,
 }: {
@@ -112,7 +155,6 @@ export function SeedsSection({
       {seeds.length === 0 ? (
         <p className="text-muted-foreground">{EMPTY_MARK}</p>
       ) : (
-        // ノード番号・入力名・値は列にして行をまたいで揃える。ノード名から後は最後の列に詰める
         <ul className="grid grid-cols-[auto_auto_auto_minmax(0,1fr)] gap-x-1.5 gap-y-0.5">
           {seeds.map((seed) => (
             <li
@@ -122,7 +164,6 @@ export function SeedsSection({
               <span className="text-muted-foreground tabular-nums">
                 {t('history.detail.seedNode', { id: seed.nodeId })}
               </span>
-              {/* 揃える列は省かない（省くと最後の列に幅を取られて潰れる） */}
               <span className="text-muted-foreground">{seed.input}</span>
               <span className="tabular-nums">{String(seed.value)}</span>
               <span className="flex min-w-0 items-baseline gap-1.5">
@@ -145,7 +186,6 @@ export function SeedsSection({
   );
 }
 
-/** 実行ごとの一覧（新しい順）。押すとその実行を選ぶ */
 export function RunList({
   card,
   selected,
@@ -155,16 +195,13 @@ export function RunList({
   readonly card: HistoryCard;
   readonly selected: number;
   readonly onSelect: (index: number) => void;
-  /** 並びの要素（開いたときのフォーカスと ↑ ↓ の移動に使う） */
   readonly list: React.RefObject<HTMLUListElement | null>;
 }): React.ReactElement {
   const numbers = promptNumbers(card);
-  /** ↑ ↓ で隣の実行を選び、その行へ移る（端では止まる） */
   const moveSelection = (event: React.KeyboardEvent, index: number): void => {
     const step = RUN_KEY_STEP[event.key] ?? 0;
     if (step === 0) return;
     event.preventDefault();
-    // 詳細全体の ← → などに渡さない
     event.stopPropagation();
     const next = Math.min(Math.max(index + step, 0), card.runs.length - 1);
     if (next === index) return;

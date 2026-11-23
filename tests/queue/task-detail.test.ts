@@ -18,11 +18,6 @@ import {
 
 import { definition, definitionMap, widget } from '../helpers/definitions';
 
-// ─────────────────────────────
-// タスクの詳細ダイアログの中身。
-// **ノード名で決め打ちしない**：モデルは拡張子、プロンプトは定義の multiline で判定する。
-// ─────────────────────────────
-
 const definitions = definitionMap(
   definition('Loader', [widget('ckpt_name', 'COMBO')]),
   definition('Encode', [widget('text', 'STRING', { multiline: true })]),
@@ -79,7 +74,6 @@ describe('実行内容の要約', () => {
 });
 
 describe('ポジ／ネガの分類', () => {
-  /** 2=ポジ, 3=ネガ を KSampler 相当の positive / negative 入力につなぐ */
   const sampler = parsePromptNodes({
     '1': { class_type: 'Loader', inputs: { ckpt_name: 'a.safetensors' } },
     '2': { class_type: 'Encode', inputs: { text: 'good', clip: ['1', 1] } },
@@ -253,11 +247,6 @@ describe('設定と所要時間のまとめ', () => {
   });
 });
 
-// ─────────────────────────────
-// 失敗したとき。形は本体 `execution.py` の読解に合わせる。
-// ─────────────────────────────
-
-/** 1→2→4、3→4。4 で止まる。1 はキャッシュ、2・3 は動いた（順は集合なので崩しておく） */
 const failedNodes = parsePromptNodes({
   '1': { class_type: 'Loader', inputs: {} },
   '2': { class_type: 'Encode', inputs: { clip: ['1', 0] } },
@@ -323,7 +312,6 @@ describe('そこまでの処理', () => {
     expect(trace.orderedBy).toBe('dependency');
     expect(trace.steps.map((step) => step.nodeId)).toEqual(['2', '3']);
     expect(trace.cached.map((step) => step.nodeId)).toEqual(['1']);
-    // 5 だけが動かなかった
     expect(trace.notRun).toBe(1);
   });
 

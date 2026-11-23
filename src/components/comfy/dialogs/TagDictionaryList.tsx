@@ -9,10 +9,6 @@ import { isDefaultDictionary } from '@/graph/tag-dictionary';
 import { t } from '@/i18n';
 import { isComposingKey } from '@/lib/text-entry';
 
-// ─────────────────────────────
-// タグ辞書の画面の左の列（辞書の一覧と、最下部の辞書の追加）。直しかけは親が持ち、名前の打ちかけだけをここに持つ。
-// ─────────────────────────────
-
 const ITEM_ICON = `text-muted-foreground hover:text-foreground hover:bg-muted shrink-0 rounded p-1
   opacity-0 group-hover/item:opacity-100 focus:opacity-100 disabled:opacity-0`;
 const ADD_BUTTON = `text-muted-foreground hover:text-foreground hover:bg-muted flex w-full
@@ -27,7 +23,6 @@ const itemName = cva('flex min-w-0 flex-1 items-center gap-1 truncate', {
   variants: { removed: { true: 'text-muted-foreground line-through', false: '' } },
 });
 
-/** 見ている一覧。辞書は名前で指す */
 export type TagView =
   | { readonly kind: 'all' }
   | { readonly kind: 'dictionary'; readonly name: string }
@@ -36,18 +31,13 @@ export type TagView =
 interface DictionaryListProps {
   readonly view: TagView;
   readonly totals: { readonly all: number; readonly pysssss: number | null };
-  /** 既定の辞書（ファイルが無くても空で入れておく）を先に、ほかは名前の順、足した辞書は最後 */
   readonly dictionaries: readonly DictionaryDraft[];
-  /** 書ける（読み終えた）か。書けなければ消す・足すを押せない */
   readonly canWrite: boolean;
   readonly onSelect: (view: TagView) => void;
-  /** 辞書に消す印を付ける・外す */
   readonly onToggle: (name: string) => void;
-  /** 辞書を足す。足せなければ理由を返す */
   readonly onAdd: (name: string) => string | null;
 }
 
-/** 辞書の一覧。すべて・既定の辞書・ほかのタグ辞書・pysssss（読むだけ。無ければ出さない）・追加の順 */
 export function DictionaryList({
   view,
   totals,
@@ -108,7 +98,6 @@ export function DictionaryList({
   );
 }
 
-/** 行に重ねたときに出す、辞書の削除（消す印があれば戻す）。ファイルの無い既定の辞書には出さない */
 function DictionaryToggle({
   dictionary,
   canWrite,
@@ -135,7 +124,6 @@ function DictionaryToggle({
   );
 }
 
-/** 一覧の最下部の追加。押すと名前の欄を出し、Enter で足す・Esc でやめる */
 function AddDictionary({
   canWrite,
   onAdd,

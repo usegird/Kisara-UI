@@ -8,11 +8,6 @@ import { normalizingSetterOf, setterOf } from '@/store/settings-fields/settings-
 import { normalizeViewerGrid } from '@/store/settings-fields/viewer-grid';
 import type { SettingsState } from '@/store/use-settings-store';
 
-// ─────────────────────────────
-// 設定のストアの、ワークフローの画面の見え方（表示の切り替え・配色・モデル選択・実行の記録・ビューワー・列の幅と倍率）の操作。
-// ─────────────────────────────
-
-/** この slice が持つ操作 */
 type SettingsViewActions = Pick<
   SettingsState,
   | 'setShowControlNodes'
@@ -35,7 +30,6 @@ type SettingsViewActions = Pick<
   | 'resetNarrowZoom'
 >;
 
-/** ワークフローの画面の見え方（表示の切り替え・配色・モデル選択・実行の記録・ビューワー・列の幅と倍率）の操作を作る */
 export const createSettingsViewSlice: StateCreator<
   SettingsState,
   [['zustand/persist', unknown]],

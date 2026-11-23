@@ -5,11 +5,6 @@ import { MENU_ITEM_CLASS } from '@/components/ui/menu-item';
 import { t } from '@/i18n';
 import { cn } from '@/lib/utils';
 
-// ─────────────────────────────
-// プレイブックの一覧の行の右端のメニュー。開く先は use-playbook-manage が持つ。
-// ─────────────────────────────
-
-/** 行のメニュー。「写して作る」はどれも、「直す」「消す」は自分のものだけに出す */
 export function PlaybookRowMenu({
   name,
   own,

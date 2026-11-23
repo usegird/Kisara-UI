@@ -20,19 +20,10 @@ import { cn } from '@/lib/utils';
 import { duplicateChat, renameChat } from '@/store/chat/chat-library';
 import { exportChat } from '@/store/chat/chat-transfer';
 
-// ─────────────────────────────
-// 会話の一覧の 1 行。名前・置き場の印・別のタブで開く・行のメニューと、名前を変える欄。
-// ─────────────────────────────
-
-/** 行の右端に、指したとき・焦点が当たったときだけ出すアイコン */
 const ROW_ICON = `text-muted-foreground hover:text-foreground hover:bg-background absolute top-1/2
   flex size-6 -translate-y-1/2 items-center justify-center rounded opacity-0
   group-focus-within/chat:opacity-100 group-hover/chat:opacity-100`;
 
-/**
- * 「別のタブで開く」のアイコン。今の会話の行では押せなくし、指しても淡く出す（同じ会話は 1 つのタブでしか
- * 開けず、押しても何も変わらないため）
- */
 const openTabIcon = cva(
   `text-muted-foreground absolute top-1/2 right-7 flex size-6 -translate-y-1/2 items-center
     justify-center rounded opacity-0`,
@@ -47,7 +38,6 @@ const openTabIcon = cva(
   },
 );
 
-/** 会話の一覧の 1 行。名前を変えている間は欄に替える */
 export function ChatRow({
   item,
   active,
@@ -59,7 +49,6 @@ export function ChatRow({
   readonly item: ListedChat;
   readonly active: boolean;
   readonly onOpen: () => void;
-  /** 別のタブで開く */
   readonly onOpenTab: () => void;
   readonly onClear: () => void;
   readonly onDelete: () => void;
@@ -98,7 +87,6 @@ export function ChatRow({
             />
           }
         >
-          {/* 置き場の印は名前のすぐ後ろに続ける */}
           <span className="min-w-0 truncate">{chatNameOf(item)}</span>
           <PlaceMark place={item.place} />
         </ContextMenuTrigger>
@@ -116,11 +104,8 @@ export function ChatRow({
         </ContextMenuContent>
       </ContextMenuRoot>
 
-      {/* 指したとき・焦点が当たったときだけ、行の右端に「別のタブで開く」とメニューを出す。
-          今の会話の行では「別のタブで開く」を押せない */}
       <button
         type="button"
-        // メニューのアイコンのすぐ左に並べる
         className={openTabIcon({ disabled: active })}
         disabled={active}
         aria-label={t('llm.sidebar.openTabOf', { name: chatNameOf(item) })}
@@ -169,9 +154,6 @@ export function ChatRow({
   );
 }
 
-/**
- * 行の置き場の印。ブラウザだけなら出さない（控えあり・控えだけ）
- */
 function PlaceMark({ place }: { readonly place: ChatPlace }): React.ReactElement | null {
   if (place.kind === 'browser') return null;
   const label = t(place.kind === 'both' ? 'llm.place.both' : 'llm.place.backupOnly');
@@ -183,7 +165,6 @@ function PlaceMark({ place }: { readonly place: ChatPlace }): React.ReactElement
   );
 }
 
-/** 行の名前を変える欄。Enter で確定、Esc・外へ出ると戻す */
 function RenameField({
   initial,
   onEnd,

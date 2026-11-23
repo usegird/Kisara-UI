@@ -19,10 +19,6 @@ import { useTabsStore } from '@/store/use-tabs-store';
 import { llm, loreEntry, profile } from '../helpers/llm';
 import { png, textChunk } from '../helpers/png';
 
-// ─────────────────────────────
-// キャラクターカードを開く。プリセットの一覧に足し、新しい会話で開く。
-// ─────────────────────────────
-
 function cardFile(name: string, data: Record<string, unknown>): File {
   const json = JSON.stringify({
     spec: 'chara_card_v2',
@@ -33,7 +29,6 @@ function cardFile(name: string, data: Record<string, unknown>): File {
   return new File([png(textChunk('chara', encoded))], `${name}.png`, { type: 'image/png' });
 }
 
-/** 次に 1 件送るときの `messages`（送るときと同じく、今回のメッセージと受け取る側を足して組む） */
 function sentMessages(chat: Chat): readonly ChatRequestMessage[] {
   return buildChatRequest(
     appendTurn(chat, { text: 'Q', userId: 'uq', assistantId: 'aq' }),
@@ -48,7 +43,6 @@ beforeEach(() => {
   usePresetsStore.setState({ presets: {}, loaded: true });
   useDictionariesStore.setState({ dictionaries: {}, loaded: true });
   useLlmProfilesStore.setState({ profiles: [profile({ defaultModel: 'm' })] });
-  // 接続の設定とモデルは全体で持つ（モデルが空なら接続の設定の既定）
   useSettingsStore.setState({ llmProfileId: 'p1', llmModel: '' });
   useChatStore.setState({ chats: {}, places: {}, saveStates: {}, pending: {}, drafts: {} });
   useTabsStore.setState({ tabs: [{ id: 'tab-1', kind: 'workflow' }], activeId: 'tab-1' });
@@ -70,7 +64,6 @@ describe('カードを開く', () => {
       'Hi User',
       'Hey',
     ]);
-    // カードにある欄だけで組み、KisaraUI の初めの構成の項目は使わない。空の欄も有効で置く
     const ids = chat?.prompt.items.map((item) => item.id) ?? [];
     expect(ids).toContain('charDescription');
     expect(ids).not.toContain('tone');
@@ -170,6 +163,7 @@ describe('プリセットを作る・上書きする・消す', () => {
     expect(usePresetsStore.getState().presets[preset.id]).toBeUndefined();
   });
 });
+
 describe('プリセットを写す', () => {
   const lorebook = [{ id: 'b1', name: 'Book', entries: [loreEntry({ content: 'Lore.' })] }];
 

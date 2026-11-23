@@ -7,21 +7,14 @@ import { CopyButton } from '@/components/ui/copy-button';
 import { t } from '@/i18n';
 import { isWebUrl } from '@/lib/web-url';
 
-// ─────────────────────────────
-// 会話の本文の Markdown。LLM の出力は信用しないデータとして描く。
-// ─────────────────────────────
-
-// 生の HTML は描かない（react-markdown は既定で文字のまま出すので、HTML を通すプラグインを足さない）
 const PLUGINS = [remarkGfm, remarkBreaks];
 
-/** 文中のコードだけに地の色を付ける（コードブロックの中の `code` は `pre` の地のまま） */
 const BLOCK_CLASS = `min-w-0 [&_:not(pre)>code]:bg-muted [&_:not(pre)>code]:rounded
   [&_:not(pre)>code]:px-1 [&_:not(pre)>code]:font-mono [&_:not(pre)>code]:text-[0.85em]`;
 
 type HastElement = NonNullable<ExtraProps['node']>;
 type HastNode = HastElement | HastElement['children'][number];
 
-/** 節の中の文字をつなげる（コードブロックの写し取り用） */
 function nodeText(node: HastNode): string {
   if (node.type === 'text') return node.value;
   if (node.type === 'element') return node.children.map((child) => nodeText(child)).join('');
@@ -42,7 +35,6 @@ const COMPONENTS: Components = {
     ) : (
       <span>{children}</span>
     ),
-  // `img` を作らない（描いた時点で外へ送られるため）。代わりの文と URL をリンクにする
   img: ({ src, alt }) => {
     const label = alt !== undefined && alt.length > 0 ? alt : (src ?? '');
     return isWebUrl(src) ? (
@@ -102,21 +94,15 @@ const COMPONENTS: Components = {
   hr: () => <hr className="border-border my-3" />,
 };
 
-/** 会話の本文の Markdown の props */
 export interface MarkdownTextProps {
   readonly text: string;
 }
 
-/**
- * 本文を塊ごとに描く。受け取り中に増えるのは最後の塊だけなので、確定した塊は描き直されない
- * （受け取り物が同じ塊は、React Compiler が前の描画を返す）
- */
 export function MarkdownText({ text }: MarkdownTextProps): React.ReactElement {
   const blocks = splitMarkdownBlocks(text);
   return (
     <div className="flex flex-col gap-2">
       {blocks.map((block, index) => (
-        // 塊は本文の頭からの位置で決まる（並べ替えない）。位置を鍵にして、確定した塊を作り直さない
         <MarkdownBlock key={index} text={block} />
       ))}
     </div>

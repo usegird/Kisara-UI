@@ -13,11 +13,6 @@ import {
 } from '@/chat/types';
 import { finiteNumber, isRecord, isUnknownArray } from '@/lib/guards';
 
-// ─────────────────────────────
-// プロンプトの構成の読み戻し（ブラウザの置き場・書き出しの `kisara.prompt`）。
-// ─────────────────────────────
-
-/** 深さの差し込みで順番が書かれていないときの順番（SillyTavern の既定） */
 const DEFAULT_DEPTH_ORDER = 100;
 
 const ROLES: readonly PromptRole[] = ['system', 'user', 'assistant'];
@@ -59,7 +54,6 @@ function parseItem(raw: unknown): PromptItem | null {
   return canUseDepth(item) ? item : { ...item, position: { kind: 'relative' } };
 }
 
-/** 構成を読む。読めなければ null。同じ id の 2 つ目からは外す */
 export function parseComposition(raw: unknown): PromptComposition | null {
   if (!isRecord(raw) || !isUnknownArray(raw.items)) return null;
   const seen = new Set<string>();
@@ -85,10 +79,6 @@ export function parseComposition(raw: unknown): PromptComposition | null {
   });
 }
 
-/**
- * 追加辞書の印をちょうど 1 つにする。2 つ目からは外す。無ければ
- * 会話の履歴の手前、それも無ければ最後に足す
- */
 function withAdditionalInfo(items: readonly PromptItem[]): PromptItem[] {
   const first = items.findIndex(isAnchorItem);
   const anchor: PromptItem = {
@@ -113,15 +103,11 @@ function withAdditionalInfo(items: readonly PromptItem[]): PromptItem[] {
   return rest;
 }
 
-/**
- * ロアの前置き・後置きを置く。どちらも空なら持たない（既定は書かない）
- */
 function withLoreFraming(composition: PromptComposition, framing: LoreFraming): PromptComposition {
   const empty = framing.prefix.length === 0 && framing.suffix.length === 0;
   return { ...composition, loreFraming: empty ? undefined : framing };
 }
 
-/** 利用者の情報を読む。読めなければ null */
 export function parsePersona(raw: unknown): Persona | null {
   if (!isRecord(raw)) return null;
   const name = typeof raw.name === 'string' ? raw.name : '';
@@ -130,18 +116,15 @@ export function parsePersona(raw: unknown): Persona | null {
   return isEmptyPersona(persona) ? null : persona;
 }
 
-/** 利用者の情報が何も持たないか（名前も説明も無い。持たない会話は null で持つ） */
 export function isEmptyPersona(persona: Persona): boolean {
   return persona.name.length === 0 && persona.description.length === 0;
 }
 
-/** 保存済みの 1 件へのリンクを読む。読めなければ null */
 export function parseUnitLink(raw: unknown): UnitLink | null {
   if (!isRecord(raw) || typeof raw.id !== 'string' || raw.id.length === 0) return null;
   return { id: raw.id, name: typeof raw.name === 'string' ? raw.name : '' };
 }
 
-/** 会話の構成を読む。構成が無ければ初めの構成 */
 export function compositionOf(raw: Record<string, unknown>): PromptComposition {
   return parseComposition(raw.prompt) ?? defaultComposition();
 }

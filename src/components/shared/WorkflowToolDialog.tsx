@@ -29,39 +29,20 @@ import type { NodeDefinitionMap, Workflow } from '@/graph/types';
 import { outputNodes, readWorkflowTool, type WorkflowTool } from '@/graph/workflow-tool';
 import { t } from '@/i18n';
 
-// ─────────────────────────────
-// LLM からの呼び出し設定。ワークフローの `extra.kisara.tool` を見せる・直す。両方の種別の層から
-// 開くので種別の層の外に置き、データと書き込みは呼び出し側が渡す。打ちかけの値はダイアログの中だけで持つ。
-// ─────────────────────────────
-
-/** 呼び出し設定のダイアログの props */
 export interface WorkflowToolDialogProps {
   readonly open: boolean;
   readonly onClose: () => void;
   readonly workflow: Workflow;
   readonly definitions: NodeDefinitionMap;
-  /** タブのワークフローの名前（機能名の欄の placeholder） */
   readonly workflowName: string;
   readonly place: WorkflowToolPlace;
-  /** 渡せば直せる。無ければ読み取り専用 */
   readonly onSave?: ((tool: WorkflowTool | null) => void) | undefined;
-  /** 埋め込みを持つか（既定は持つ）。嵌める列の無い会話のタブから開くときは false */
   readonly embeddable?: boolean | undefined;
-  /**
-   * 外から閉じる確認を求められたか（直しかけがあるまま、開いたアイコンを押し直した）。
-   * 直しかけが無いときは、呼び出し側がそのまま閉じる（`onDirtyChange` で知る）
-   */
   readonly closeRequested?: boolean | undefined;
-  /** 確かめて閉じるのをやめた（`closeRequested` を下ろす） */
   readonly onCloseCanceled?: (() => void) | undefined;
-  /** 直しかけがあるかが変わった */
   readonly onDirtyChange?: ((dirty: boolean) => void) | undefined;
 }
 
-/**
- * 呼び出し設定のダイアログ。無効（ミュート・バイパス）か線の無いノードの欄は出さないが、既に設定して
- * あれば保存しても残す（送らないだけ）。直しかけがあるまま閉じるときは確かめ、保存・リセットでは確かめない
- */
 export function WorkflowToolDialog({
   open,
   onClose,
@@ -75,7 +56,6 @@ export function WorkflowToolDialog({
   onCloseCanceled,
   onDirtyChange,
 }: WorkflowToolDialogProps): React.ReactElement {
-  // 直しかけがあるか（中身が知らせる）と、閉じる前の確認を出しているか
   const [dirty, setDirty] = useState(false);
   const [confirmingClose, setConfirmingClose] = useState(false);
   const close = (): void => {
@@ -91,7 +71,6 @@ export function WorkflowToolDialog({
     setConfirmingClose(false);
     onCloseCanceled?.();
   };
-  // 直しかけがあれば、閉じる前に確かめる
   const onFrameOpenChange = (next: boolean): void => {
     if (next) return;
     if (dirty) setConfirmingClose(true);
@@ -100,8 +79,6 @@ export function WorkflowToolDialog({
   return (
     <DialogFrame
       id="workflow-tool"
-      // 差し込みのアイコンの画面と同じく、列の上に埋め込んで出す。
-      // 埋め込む先の無い会話のタブでは自由移動で出る
       defaultMode="embedded"
       movable
       embeddable={embeddable}
@@ -110,7 +87,6 @@ export function WorkflowToolDialog({
       size="md"
       title={t('comfy.tool.title')}
     >
-      {/* 開くたびにワークフローの今の定義から始めるので、中身は開いている間だけ置く */}
       {open ? (
         <ToolForm
           workflow={workflow}
@@ -134,10 +110,6 @@ export function WorkflowToolDialog({
   );
 }
 
-/**
- * 本体。段と段の間はほかのダイアログ（gap-3）の 1.5 倍。入り切らなければ本体だけを送る。
- * 読み取り専用では、欄の値と選んだ出力ノードの名前を薄い色で出す
- */
 const toolForm = cva('flex min-h-0 flex-1 flex-col gap-4.5 overflow-auto p-4 pt-3', {
   variants: {
     readOnly: {
@@ -164,14 +136,12 @@ function ToolForm({
   readonly workflowName: string;
   readonly place: WorkflowToolPlace;
   readonly onSave: ((tool: WorkflowTool | null) => void) | undefined;
-  /** 直しかけがあるかを知らせる（打つたびに。閉じる前の確認に使う） */
   readonly onDirty: (dirty: boolean) => void;
   readonly onDone: () => void;
 }): React.ReactElement {
   const existing = readWorkflowTool(workflow);
   const [draft, setDraftState] = useState(() => draftOf(existing));
   const readOnly = onSave === undefined;
-  // 読み取り専用では、引数名を設定していない欄を出さない
   const rows = paramRows(workflow, definitions);
   const shownRows = readOnly
     ? rows.filter((row) => (draft.params[keyOf(row.nodeId, row.input)]?.name ?? '') !== '')
@@ -180,9 +150,7 @@ function ToolForm({
   const hidden = hiddenParams(workflow, existing);
   const tool = toolOf(draft, rows, hidden);
   const problem = problemOf(tool, hidden);
-  // 名前を打つ前から理由を出さない（保存は押せないまま）
   const shownProblem = readOnly || draft.name.trim().length === 0 ? null : problem;
-  // 直しかけは、書く定義が開いたときの定義と変わったか（読み取り専用では打てない）
   const setDraft = (next: Draft): void => {
     setDraftState(next);
     const before = toolOf(draftOf(existing), rows, hidden);
@@ -229,7 +197,6 @@ function ToolForm({
           onChange={(event) => setDraft({ ...draft, description: event.target.value })}
         />
       </label>
-      {/* どのタブ・どのファイルの設定かは、説明の次に出す */}
       <PlaceInfo place={place} />
       <OutputChoice
         nodes={outputNodes(workflow, definitions)}
@@ -239,7 +206,6 @@ function ToolForm({
         onChange={(outputs) => setDraft({ ...draft, outputs })}
       />
       <fieldset className="flex flex-col gap-3">
-        {/* 見出しの下も引数どうしの間（gap-3）と同じだけ空ける */}
         <legend className="mb-3 text-sm">{t('comfy.tool.params')}</legend>
         {shownRows.length === 0 ? (
           <p className={EMPTY_NOTICE_CLASS}>

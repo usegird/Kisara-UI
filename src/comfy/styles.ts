@@ -13,14 +13,8 @@ import {
   type StyleTable,
 } from '@/graph/styles';
 
-// ─────────────────────────────
-// スタイルの読み書き。`styles.csv` は読むだけで、書くのは `kisara/styles/` の 1 件ずつ（合わせるのはストア）。
-// ─────────────────────────────
-
-/** ユーザーフォルダ直下の、読むだけのスタイルの表 */
 const STYLES_FILE = 'styles.csv';
 
-/** `styles.csv`。無ければ空の表を返す（置いていないだけで、失敗ではない） */
 export async function fetchStyleTable(
   baseUrl: string,
   options: RequestOptions = {},
@@ -33,7 +27,6 @@ export async function fetchStyleTable(
   }
 }
 
-/** 1 件を読む。無い・形が違う（JSON でないものも）なら null（無いものとして扱う） */
 async function fetchSavedStyle(
   baseUrl: string,
   path: string,
@@ -48,7 +41,6 @@ async function fetchSavedStyle(
   }
 }
 
-/** `kisara/styles/` の全件。経路の名前順に返す */
 export async function fetchSavedStyles(
   baseUrl: string,
   options: RequestOptions = {},
@@ -60,7 +52,6 @@ export async function fetchSavedStyles(
   return entries.filter((entry) => entry !== null);
 }
 
-/** 1 件（または消した印）を書く。同じ名前のファイルは上書きする（ファイルは消さず、消した印で上書きする） */
 export async function saveStyle(
   baseUrl: string,
   entry: SavedStyle,

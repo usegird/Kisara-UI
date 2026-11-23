@@ -16,12 +16,6 @@ import type { LlmFailure } from '@/port/llm-port';
 import type { ToolCallAttempt } from '@/store/use-chat-store';
 import { useExecutionStore } from '@/store/use-execution-store';
 
-// ─────────────────────────────
-// ワークフローの呼び出しの状態の文（画像を生成中の進捗を含む）と、「ワークフローを実行」で作らせている間・
-// 作らせられなかったときの行。作らせている行は、会話の応答が返した呼び出しを受け取る間と同じ形にする。
-// ─────────────────────────────
-
-/** 作らせている行・作らせられなかった行（メッセージの部品が画面を開いている間だけ持つ。残さない） */
 export type GenerateRow =
   | { readonly kind: 'generating'; readonly name: string }
   | {
@@ -31,10 +25,6 @@ export type GenerateRow =
       readonly attempt?: ToolCallAttempt | undefined;
     };
 
-/**
- * 状態の行の見出しの文（「状態 : Comfy Workflow - 機能名」）。完了を待つ間は、ComfyUI が今その実行を
- * 進めていて進捗が届いていれば、ステップ数を足す（この部品だけが進捗を購読する）
- */
 export function ToolCallStateText({
   state,
   name,
@@ -54,10 +44,6 @@ export function ToolCallStateText({
   return <>{t('llm.tool.summary', { state: text, name: name || '…' })}</>;
 }
 
-/**
- * 「ワークフローを実行」で作らせている間の行（回る印）と、作らせられなかった行。失敗の行は開くと
- * 理由・作らせた応答の情報・LLM が書いた本文を出す
- */
 export function ToolCallGenerateRow({
   chatId,
   row,
@@ -88,7 +74,6 @@ export function ToolCallGenerateRow({
             <Workflow className="size-3.5 shrink-0" aria-hidden />
             {t('llm.tool.summary', { state, name: row.name })}
           </button>
-          {/* 作らせている間は、受け取り中の呼び出しと同じく回る印を出す */}
           {failed ? null : (
             <span className={rerunButton({ busy: true })} aria-hidden>
               <RotateCw className={rerunIcon({ busy: true })} />
@@ -101,7 +86,6 @@ export function ToolCallGenerateRow({
   );
 }
 
-/** 作らせられなかった行の中身。理由、LLM が応えていれば作らせた応答の情報と本文 */
 function FailedDetails({
   chatId,
   row,

@@ -5,11 +5,6 @@ import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { t } from '@/i18n';
 import { useGraphStore } from '@/store/use-graph-store';
 
-// ─────────────────────────────
-// 処理の順（上流が先）に並べ直すアイコン。押して確かめたときだけ並べ直す。
-// ─────────────────────────────
-
-/** 処理の順に並べ直すアイコンと、原点から置き直すかを選べる確かめのダイアログ */
 export function SortByProcessingButton(): React.ReactElement {
   const sort = useGraphStore((state) => state.sortByProcessing);
   const [confirming, setConfirming] = useState(false);
@@ -31,7 +26,6 @@ export function SortByProcessingButton(): React.ReactElement {
         <ArrowDownWideNarrow className="size-4" aria-hidden />
       </button>
 
-      {/* 並べた順が一度に入れ替わるので、押し間違いで崩さないよう確かめる */}
       <ConfirmDialog
         open={confirming}
         title={t('flow.sort.confirmTitle')}

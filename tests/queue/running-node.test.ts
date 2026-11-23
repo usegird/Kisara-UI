@@ -5,11 +5,6 @@ import { nodeProgress, runningNodeLabel } from '@/queue/running-node';
 
 import { nodeView } from '../helpers/views';
 
-// ─────────────────────────────
-// 実行中ノードの表示。WebSocket が返すのは**平坦化後の id**（subgraph 内は `12:34`）なので、
-// カードに戻して「通番 + コメント/ノード名」にする。
-// ─────────────────────────────
-
 function view(id: number, index: number | null, displayName: string, comment = ''): NodeView {
   return nodeView({ id, index: index === null ? null : String(index), displayName, comment });
 }

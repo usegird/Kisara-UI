@@ -7,11 +7,6 @@ import { normalizePromptAdvisorWidth } from '@/store/settings-fields/prompt-advi
 import { normalizingSetterOf, setterOf } from '@/store/settings-fields/settings-table';
 import type { SettingsState } from '@/store/use-settings-store';
 
-// ─────────────────────────────
-// 設定のストアの、ダイアログ・枠・右の列・会話の列の置き場所と大きさの操作。
-// ─────────────────────────────
-
-/** この slice が持つ操作 */
 type SettingsPanelsActions = Pick<
   SettingsState,
   | 'setDialogMode'
@@ -30,7 +25,6 @@ type SettingsPanelsActions = Pick<
   | 'resizeChatCard'
 >;
 
-/** ダイアログ・枠・右の列・会話の列の置き場所と大きさの操作を作る */
 export const createSettingsPanelsSlice: StateCreator<
   SettingsState,
   [['zustand/persist', unknown]],
@@ -52,7 +46,6 @@ export const createSettingsPanelsSlice: StateCreator<
     })),
   setDialogPaneDock: (key, dock) =>
     set((state) => ({ dialogPaneDocks: { ...state.dialogPaneDocks, [key]: dock } })),
-  // やめたことも残す（切り替えていない列の既定と分ける）
   setDialogPanePin: (key, pinned) =>
     set((state) => ({ dialogPanePins: { ...state.dialogPanePins, [key]: pinned } })),
   setSidePanelDock: setterOf(set, 'sidePanelDock'),

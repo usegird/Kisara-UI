@@ -21,24 +21,15 @@ import { t } from '@/i18n';
 import { formatBytes } from '@/lib/text';
 import { totalOf, type StorageItem } from '@/store/persist/storage-usage';
 
-// ─────────────────────────────
-// ストレージの管理の Comfy バックアップ。接続先のバックアップの合計と種類ごとの表、その下のクリーンアップ。
-// 印はダイアログが持ち、ここは描いて押したことを返すだけ。
-// ─────────────────────────────
-
-/** クリーンアップの 1 件の名前。削除の印を付けたら取り消し線 */
 const staleName = cva('min-w-0 flex-1 truncate', { variants: { marked: MARKED } });
 
-/** クリーンアップの 1 件の時刻・大きさ。削除の印を付けたら取り消し線 */
 const staleFact = cva('text-muted-foreground whitespace-nowrap tabular-nums', {
   variants: { marked: MARKED },
 });
 
-/** Comfy バックアップの props */
 export interface BackupOverviewProps {
   readonly entries: readonly Entry[];
   readonly connected: boolean;
-  /** クリーンアップの対象。読んでいる・つないでいなければ null */
   readonly stale: readonly StaleBackup[] | null;
   readonly marks: Marks;
   readonly busy: boolean;
@@ -46,10 +37,6 @@ export interface BackupOverviewProps {
   readonly onToggle: (mark: Mark) => void;
 }
 
-/**
- * Comfy バックアップ。接続先のバックアップの合計と、バックアップする種類ごとの件数と大きさ。
- * 名前を押すとその種類へ移る（1 件ずつはそこで戻す・消す）
- */
 export function BackupOverview({
   entries,
   connected,
@@ -69,7 +56,6 @@ export function BackupOverview({
       {connected ? null : (
         <p className="text-muted-foreground">{t('llm.storage.backup.notConnected')}</p>
       )}
-      {/* 読めなかった種類は合計に入れず、その行を — にする */}
       {backed.some((entry) => entry.backups === 'failed') ? (
         <p className="text-muted-foreground">{t('llm.storage.backup.failed')}</p>
       ) : null}
@@ -110,10 +96,6 @@ export function BackupOverview({
   );
 }
 
-/**
- * Comfy バックアップを選んでいるときの帯の「全て削除」。クリーンアップの対象すべてに削除の印を付ける
- * （全部に付いていれば外す）。消すのは「適用」
- */
 export function CleanupHeader({
   stale,
   marks,
@@ -141,7 +123,6 @@ export function CleanupHeader({
   );
 }
 
-/** Comfy バックアップの表の下のクリーンアップ。説明と、対象の 1 件ずつ */
 function Cleanup({
   stale,
   marks,
@@ -178,7 +159,6 @@ function Cleanup({
   );
 }
 
-/** クリーンアップの 1 件。種類・名前・時刻・大きさと削除アイコン */
 function StaleRow({
   target,
   marks,
@@ -219,7 +199,6 @@ function StaleRow({
   );
 }
 
-/** Comfy バックアップの合計の文。つないでいない・読んでいるはその旨 */
 function formatBackupTotal(connected: boolean, all: readonly StorageItem[] | null): string {
   if (!connected) return t('llm.storage.notConnected');
   return all === null ? t('llm.storage.loading') : figures(all);

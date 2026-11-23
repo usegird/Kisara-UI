@@ -4,16 +4,9 @@ import { lanes, laneSuccessors } from '@/graph/lane';
 import { DEFAULT_ORDER_LAYOUT, rectOf, type OrderLayout } from '@/graph/node-box';
 import type { NodeId, Workflow, WorkflowNode } from '@/graph/types';
 
-// ─────────────────────────────
-// 位置から並びを読み戻す。置く側は `layout-place.ts`。
-// ─────────────────────────────
-
-/** 同じ列とみなす左端の差（px）。ComfyUI で少し動かしても並びが変わらないよう、ゆとりを持たせる */
 export const COLUMN_TOLERANCE = 20;
 
-/** 読み戻す 1 つ（グループの外のノード、またはグループの箱） */
 interface ReadItem {
-  /** 中の並び（ノードなら自分だけ） */
   readonly ids: readonly NodeId[];
   readonly left: number;
   readonly top: number;
@@ -24,7 +17,6 @@ function nodeItem(node: WorkflowNode, layout: OrderLayout): ReadItem {
   return { ids: [node.id], left: rect.left, top: rect.top };
 }
 
-/** 左端の順に列へ分け、列の中は上からの順で並べる */
 function readItems(items: readonly ReadItem[]): NodeId[] {
   const byLeft = [...items].sort(
     (a, b) => a.left - b.left || a.top - b.top || (a.ids[0] ?? 0) - (b.ids[0] ?? 0),
@@ -43,22 +35,16 @@ function readItems(items: readonly ReadItem[]): NodeId[] {
   );
 }
 
-/**
- * 現在の pos から表示順を導く。ComfyUI 本家も左から右へ流れるので、X 軸の順にすると
- * 素のエディタで開いたときに読みやすい。
- */
 export function orderedNodeIds(
   workflow: Workflow,
   layout: OrderLayout = DEFAULT_ORDER_LAYOUT,
 ): NodeId[] {
-  // 表示用のワークフローは、作ったときに求めた並びを使う（位置の座標が混ざっている）
   const fixed = fixedLayoutOf(workflow);
   if (fixed) return [...fixed.order];
 
   const membership = groupMembership(workflow, layout);
   const parents = groupParents(workflow);
 
-  // 階層ごとに読む。子のグループは 1 つの箱として、中のノードの左端と上端で読む
   const level = (nodes: readonly WorkflowNode[], container: number | null): ReadItem => {
     const children = new Map<number, WorkflowNode[]>();
     const items: ReadItem[] = [];
@@ -77,10 +63,6 @@ export function orderedNodeIds(
   return liftLanes([...level(workflow.nodes, null).ids], workflow, membership, layout);
 }
 
-/**
- * 本流の下に回り込んだ支流を、X 軸の順で読んだあと入る先の直前へ移す。同じ段とみなす上端の差は
- * `COLUMN_TOLERANCE` 以内
- */
 function liftLanes(
   order: readonly NodeId[],
   workflow: Workflow,

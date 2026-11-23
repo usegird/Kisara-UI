@@ -11,14 +11,9 @@ import { useDefinitionsStore } from '@/store/use-definitions-store';
 import { useExecutionStore } from '@/store/use-execution-store';
 import { useGraphStore } from '@/store/use-graph-store';
 
-// ─────────────────────────────
-// デモの模擬実行の枠。待ち → 実行中 → 終わりを切り替えて描く。**通信はしない**。
-// ─────────────────────────────
-
 type Phase = 'idle' | 'running' | 'done';
 
 interface RunResult {
-  /** 実行の形のノード id */
   readonly nodeId: string;
   readonly name: string;
   readonly src: string;
@@ -29,10 +24,6 @@ const BUTTON =
   'bg-primary text-primary-foreground hover:bg-primary/90';
 const ICON_BUTTON = 'text-muted-foreground hover:bg-muted rounded p-1';
 
-/**
- * 待ちはボタンの大きさ、実行中と終わりは画像が入る幅。
- * 狭い画面は右下の拡大・縮小のボタンに掛からない幅に留める
- */
 const pane = cva(
   'bg-popover text-popover-foreground absolute bottom-4 left-4 z-30 flex max-w-[calc(100%-2rem)] ' +
     'max-md:max-w-[calc(100%-5rem)] flex-col gap-2 rounded-lg border p-2 shadow-lg',
@@ -45,7 +36,6 @@ const thumb = cva('size-12 shrink-0 overflow-hidden rounded border-2', {
   },
 });
 
-/** 実行の形のノードの見出し（カードのコメントか、ノードの名前） */
 function nodeName(
   nodeId: string,
   workflow: Workflow | null,
@@ -58,7 +48,6 @@ function nodeName(
   return title !== '' ? title : (definitions.get(node.type)?.displayName ?? node.type);
 }
 
-/** 模擬実行の枠。押すと見本の画像を時間をかけて出し、実行中の見た目を本体と同じ仕組みで出す */
 export function SimulatedRunPane(): React.ReactElement {
   const workflow = useGraphStore((state) => state.workflow);
   const definitions = useDefinitionsStore((state) => state.definitions);
@@ -73,7 +62,6 @@ export function SimulatedRunPane(): React.ReactElement {
   const runs = useRef(0);
   const cancel = useRef<(() => void) | null>(null);
 
-  // 枠を外す（ワークフローを開き直す）ときは実行を止め、状況を初めに戻す
   useEffect(
     () => () => {
       cancel.current?.();
@@ -118,7 +106,6 @@ export function SimulatedRunPane(): React.ReactElement {
     setPhase('idle');
   };
 
-  // 大きく出すのは選んだ画像、無ければ最後に出た画像
   const shown = results.find((result) => result.nodeId === selected) ?? results.at(-1);
 
   return (
@@ -178,7 +165,6 @@ export function SimulatedRunPane(): React.ReactElement {
               alt={shown.name}
               className="aspect-square w-full rounded object-cover"
             />
-            {/* 説明の一行は実行中だけなので、結果にも模擬だと示す */}
             <span
               title={t('demo.run.note')}
               className="absolute top-1.5 left-1.5 rounded bg-black/60 px-1.5 py-0.5 text-3xs

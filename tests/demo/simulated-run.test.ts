@@ -4,11 +4,6 @@ import { planRun, runSimulation } from '@/demo/simulated-run';
 import type { ApiPrompt } from '@/graph/to-api-prompt';
 import { useExecutionStore } from '@/store/use-execution-store';
 
-// ─────────────────────────────
-// デモの模擬実行。処理の順に並べ、通知と同じ形の事象を時間をかけて流す。通信はしない
-// ─────────────────────────────
-
-/** 3 → 1 → 2 の順に指す小さな実行の形（2 が出力、1 は手数 3） */
 const PROMPT: ApiPrompt = {
   '2': { class_type: 'Out', inputs: { images: ['1', 0] } },
   '1': { class_type: 'Sampler', inputs: { model: ['3', 0], steps: 3 } },
@@ -55,7 +50,6 @@ describe('runSimulation', () => {
     });
     expect(useExecutionStore.getState().status).toBe('running');
 
-    // 1 つ目（3）のすぐ後に 2 つ目（1）が始まり、手数を 1 つずつ進める
     vi.advanceTimersByTime(130);
     expect(useExecutionStore.getState().runningNode).toBe('1');
     expect(useExecutionStore.getState().nodeStates['1']).toBe('running');

@@ -13,16 +13,10 @@ import type { SavedWorkflow } from '@/port/workflows';
 import { useConnectionStore } from '@/store/use-connection-store';
 import { useSettingsStore } from '@/store/use-settings-store';
 
-// ─────────────────────────────
-// ComfyUI のタブのワークフローの一覧。ヘッダーのハンバーガーメニューで本体の左端から引き出す
-// （会話の左の列の引き出しと同じ形）。
-// ─────────────────────────────
-
 const ROW = `flex w-full min-w-0 items-center gap-1.5 rounded px-2 py-1 text-left text-sm
   hover:bg-background/60 disabled:cursor-not-allowed disabled:opacity-40
   disabled:hover:bg-transparent`;
 
-/** 行の右端に、指したとき・焦点が当たったときだけ出すアイコン（会話の一覧と同じ） */
 const ROW_ICON = `text-muted-foreground hover:text-foreground hover:bg-background absolute top-1/2
   right-1 flex size-6 -translate-y-1/2 items-center justify-center rounded opacity-0
   group-focus-within/workflow:opacity-100 group-hover/workflow:opacity-100`;
@@ -34,25 +28,16 @@ const PERIOD_LABEL: Readonly<Record<ListPeriod, MessageKey>> = {
   older: 'llm.library.older',
 };
 
-/** ワークフローの一覧の引き出しの props */
 export interface WorkflowListDrawerProps {
-  /** 一覧を取る接続先 */
   readonly baseUrl: string;
-  /** 出し続けるか（ワークフローを開いていないタブ）。外を押す・Esc では引っ込めない */
   readonly pinned: boolean;
-  /** 引っ込める */
   readonly onClose: () => void;
-  /** 空のワークフローで開く */
   readonly onOpenEmpty: () => void;
-  /** ファイルから開く */
   readonly onOpenFile: () => void;
-  /** 同梱のテンプレートから開く */
   readonly onOpenTemplate: () => void;
-  /** `here` なら今のタブの中身を替え、そうでなければ別のタブで開く */
   readonly onOpenSaved: (workflow: SavedWorkflow, here: boolean) => void;
 }
 
-/** ワークフローの一覧の引き出しを描く。出している間だけ置く（開くたびに一覧を取り直す） */
 export function WorkflowListDrawer({
   baseUrl,
   pinned,
@@ -64,7 +49,6 @@ export function WorkflowListDrawer({
 }: WorkflowListDrawerProps): React.ReactElement {
   const connected = useConnectionStore((state) => state.status === 'connected');
   const { items, error } = useSavedWorkflows(connected, baseUrl);
-  // 幅は会話の左の列と同じ値（端末に残す）
   const width = useSettingsStore((state) => state.chatSidebarWidth);
   const resize = useSettingsStore((state) => state.resizeChatSidebar);
   const [now] = useState(() => Date.now());
@@ -74,12 +58,10 @@ export function WorkflowListDrawer({
     onClose();
     open();
   };
-  /** 保存したワークフローを開く（here: このタブで開く。偽なら新しいタブ） */
   const onSavedClick = (item: SavedWorkflow, here: boolean): (() => void) =>
     guardPress('workflow-open-server', () => choose(() => onOpenSaved(item, here)));
   const groups = groupByPeriod(items ?? [], (item) => item.modified, now);
 
-  // 外を押す・Esc で引っ込める（外の出来事の購読）。ハンバーガーメニューは自分で開け閉めする
   useEffect(() => {
     if (pinned) return undefined;
     const onPointer = (event: PointerEvent): void => {
@@ -102,7 +84,6 @@ export function WorkflowListDrawer({
     <nav
       ref={root}
       aria-label={t('comfy.list.label')}
-      // 会話の左の列の引き出しと同じ置き方。右端の境目で幅を変える
       className="animate-in slide-in-from-left bg-background animation-duration-150 absolute inset-y-0
         left-0 z-30 flex flex-row pt-column-top pb-column-bottom pl-column-gutter shadow-lg
         motion-reduce:animate-none"

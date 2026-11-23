@@ -12,28 +12,17 @@ import { DEFAULT_ORDER_LAYOUT, type OrderLayout } from '@/graph/node-box';
 import { dropGroups, emptied, spotAt } from '@/graph/order';
 import type { NodeId, Workflow } from '@/graph/types';
 
-// ─────────────────────────────
-// ノードとグループを動かす操作。新しい並びと所属を決め、変わったものだけを動かす。
-// ─────────────────────────────
-
-/** 並べ替えで掴んだもの・重ねた先。グループは `groups[]` の添字で指す */
 export type SortTarget =
   | { readonly kind: 'node'; readonly id: NodeId }
   | { readonly kind: 'group'; readonly index: number };
 
-/** 落とした先のどちら側に入れるか。省くと動かした向きで決める（上から来たら後ろ） */
 export type DropSide = 'before' | 'after';
 
-/** 並べ替えで落とした先 */
 export interface SortDrop {
   readonly over: SortTarget;
   readonly side?: DropSide | undefined;
 }
 
-/**
- * 並べ替え。落とした先の相手と同じ階層に入る（相手の前か後ろは `side`）。
- * 動かすのは移動元と移動先だけ。動かせない・同じ場所なら同じものを返す。
- */
 export function moveTarget(
   workflow: Workflow,
   active: SortTarget,
@@ -42,7 +31,6 @@ export function moveTarget(
 ): Workflow {
   const membership = groupMembership(workflow, layout);
   const parents = groupParents(workflow);
-  /** 相手の階層（ノードはその所属、グループはその親。外は null） */
   const into =
     over.kind === 'node' ? (membership.get(over.id) ?? null) : (parents.get(over.index) ?? null);
   const move: Move = {
@@ -57,18 +45,15 @@ export function moveTarget(
   return moveGroup(move, active.index, over, side);
 }
 
-/** 並べ替えの間の持ち物 */
 interface Move {
   readonly workflow: Workflow;
   readonly layout: OrderLayout;
   readonly membership: Membership;
   readonly parents: GroupParents;
   readonly order: readonly NodeId[];
-  /** 相手の階層（入る先） */
   readonly into: number | null;
 }
 
-/** 塊。ノードは 1 つ、グループは中のノード全部（子のグループの中も） */
 function blockOf(move: Move, target: SortTarget): NodeId[] {
   return target.kind === 'group'
     ? groupNodeIds(move.order, target.index, move.membership, move.parents)
@@ -83,7 +68,6 @@ function moveNode(
 ): Workflow {
   const { workflow, membership, parents, order, into } = move;
   const from = membership.get(activeId) ?? null;
-  // 前後の指定が無ければ、同じ所属のノードどうし（グループの中・どちらも外）は添字で並べ替える
   let target: NodeId[];
   let direction = side;
   if (over.kind === 'node' && from === into && side === undefined) {
@@ -93,8 +77,6 @@ function moveNode(
     target = [over.id];
     direction = at < to ? 'after' : 'before';
   } else {
-    // 相手の前か後ろへ入れ、相手の所属に移る（グループへ入る・抜ける・同じ所属なら並べ替え）
-    // 自分のグループそのものへ落としたときは、残りのメンバーの前後へ出る
     target = over.kind === 'node' ? [over.id] : blockOf(move, over).filter((id) => id !== activeId);
   }
   const spot = placedWith(order, [activeId], target, direction);
@@ -119,7 +101,6 @@ function moveGroup(
   side: DropSide | undefined,
 ): Workflow {
   const { workflow, membership, parents, order, into } = move;
-  // 自分の中（子孫）へは入れない
   if (into !== null && groupSubtree(activeIndex, parents).has(into)) return workflow;
   const target = over.kind === 'node' ? [over.id] : blockOf(move, over);
   const where = placedWith(
@@ -143,10 +124,6 @@ function moveGroup(
   return dropGroups(moved, membership, nextParents, gone).workflow;
 }
 
-/**
- * `moving` を抜いた並びで `target` の前か後ろの位置。`side` が無ければ動かす向きで決める
- * （上から来たら後ろ）。動かせなければ null。並びが変わらなければ `unchanged`
- */
 function placedWith(
   order: readonly NodeId[],
   moving: readonly NodeId[],
@@ -164,10 +141,6 @@ function placedWith(
   return { rest, at, unchanged: sequence.every((id, index) => order[index] === id) };
 }
 
-/**
- * 並べ替え。添字は表示順（`orderedNodeIds`）を指す。
- * 範囲外・同じ位置なら同じものを返す
- */
 export function moveInX(
   workflow: Workflow,
   from: number,

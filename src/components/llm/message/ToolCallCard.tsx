@@ -38,16 +38,6 @@ import { useConnectionStore } from '@/store/use-connection-store';
 import { useSettingsStore } from '@/store/use-settings-store';
 import { activeWorkflowTools, useWorkflowToolsStore } from '@/store/use-workflow-tools-store';
 
-// ─────────────────────────────
-// ワークフローの呼び出しの表示。表示している実行と直した引数は、メッセージの部品が画面を開いている間だけ
-// 持つ（保存しない）。
-// ─────────────────────────────
-
-// ─────────────────────────────
-// 状態の行
-// ─────────────────────────────
-
-/** 呼び出しの状態の行の並びの props */
 export interface ToolCallListProps {
   readonly chatId: string;
   readonly messageId: string;
@@ -55,14 +45,9 @@ export interface ToolCallListProps {
   readonly shown: ShownRuns;
   readonly edits: ArgumentEdits;
   readonly onEdit: (callId: string, name: string, value: string) => void;
-  /** 実行し直したあと（今の表示を留め、直した値を捨てる） */
   readonly onRerun: (callId: string, shown: ShownRun) => void;
 }
 
-/**
- * 呼び出し 1 件ごとの状態の行（機能名のすぐ右に実行し直す）。行の中に作らせた応答の情報・思考・理由・
- * 引数（直せる）を畳み、確認を待つ間は「承諾」「却下」を出す
- */
 export function ToolCallList({
   chatId,
   messageId,
@@ -112,11 +97,9 @@ function ToolCallCard({
   readonly run: ToolCallRun;
   readonly edits: ReadonlyMap<string, string>;
   readonly onEdit: (name: string, value: string) => void;
-  /** 実行し直すときの引数の本文 */
   readonly toRun: () => string;
   readonly onRerun: () => void;
 }): React.ReactElement {
-  // 開いているか（この行だけの表示。保存しない）
   const [open, setOpen] = useState(false);
   const { state } = run;
   const failed = state.kind === 'invalid' || state.kind === 'failed';
@@ -130,7 +113,6 @@ function ToolCallCard({
       aria-label={t('llm.tool.card', { name: call.name })}
     >
       <div>
-        {/* 開閉の三角・状態・機能名、そのすぐ右に実行し直す（開閉のボタンの中にボタンを入れない） */}
         <div className="flex items-center gap-1">
           <button
             type="button"
@@ -168,10 +150,6 @@ function ToolCallCard({
   );
 }
 
-/**
- * 実行し直す。承諾を待つ呼び出しは承諾し、ほかは表示している実行の引数（直した値を重ねる）で
- * 実行を 1 件足す。受け取り中・実行中はアイコンを回して実行中を表し、押せない。接続していなければ押せない
- */
 function RerunButton({
   chatId,
   messageId,
@@ -206,9 +184,6 @@ function RerunButton({
   );
 }
 
-/**
- * 承諾・却下。時間で自動に承諾することはしない（確認を省くかは設定と承諾の関門が決める）
- */
 function Confirm({
   chatId,
   messageId,
@@ -243,27 +218,15 @@ function Confirm({
   );
 }
 
-// ─────────────────────────────
-// ワークフローを実行（メッセージの操作のアイコンの行）
-// ─────────────────────────────
-
-/** 「ワークフローを実行」のメニューの props */
 export interface WorkflowRunMenuProps {
   readonly chatId: string;
   readonly messageId: string;
   readonly className: string;
-  /** 送れないとき（受け取り中・接続の設定が無い）と、作らせている間は押せない */
   readonly disabled: boolean;
-  /** 選んだワークフローの呼び出しを作らせ始めた */
   readonly onStart: (name: string) => void;
-  /** 作らせ終えた（失敗なら理由と、LLM が応えていればその記録） */
   readonly onEnd: (failure: GenerateFailure | null) => void;
 }
 
-/**
- * 呼べるワークフローを選ばせ、選んだものの呼び出しを LLM に作らせて実行する（押したことを承諾と
- * みなす、人が押す入口）。呼べるワークフローが無い・接続していなければ押せない
- */
 export function WorkflowRunMenu({
   chatId,
   messageId,

@@ -5,12 +5,6 @@ import { scaleHexColor, toHexColor } from '@/lib/color';
 import { isRecord } from '@/lib/guards';
 import { setOwn } from '@/lib/own-key';
 
-// ─────────────────────────────
-// フロー上のカードに出していないノード設定（大きさ・ピン留め・実行モード・色など）の読み書き。
-// すべて ComfyUI 本家が持っている標準キーで、独自キーは足さない。
-// ─────────────────────────────
-
-/** カードに出している（＝設定ダイアログでは扱わない）キー */
 const SHOWN_IN_CARD = new Set([
   'id',
   'type',
@@ -25,38 +19,26 @@ const SHOWN_IN_CARD = new Set([
   'title',
 ]);
 
-/** 詳細設定で入れ外しする `flags` の印 */
 const EDITABLE_FLAGS: readonly NodeFlag[] = ['pinned'];
 
-/** size を持たないノードに幅だけ指定されたときの既定の幅と高さ */
 const FALLBACK_WIDTH = 240;
 const FALLBACK_HEIGHT = 100;
 
-/** 3 分の 2 の分母 */
 const THIRDS = 3;
 
-/**
- * カスタムの色の見出しの帯の明るさ（本体の色に対する倍率）。本体の 9 色の組はおおむね
- * 見出しが本体の 2/3（`#533` → `#322`）。本体には自由な色選びが無いので、この割合はこちらの決め事
- */
 const CUSTOM_HEADER_RATIO = 2 / THIRDS;
 
-/** 設定ダイアログに出すノードの設定。カードに出さない残りのキーは読み取り専用でそのまま見せる */
 interface NodeSettings {
   readonly id: NodeId;
   readonly classType: string;
-  /** 位置（`pos`）。取れなければ null */
   readonly x: number | null;
   readonly y: number | null;
-  /** size を持たないノードは ComfyUI 側が自動計算するので null */
   readonly width: number | null;
   readonly height: number | null;
   readonly mode: number;
   readonly color: string | null;
   readonly bgcolor: string | null;
-  /** ピン留め（`flags.pinned`） */
   readonly pinned: boolean;
-  /** カードに出していない残りのキー（読み取り専用） */
   readonly extra: Readonly<Record<string, unknown>>;
 }
 
@@ -81,7 +63,6 @@ function stringOrNull(value: unknown): string | null {
   return typeof value === 'string' && value.length > 0 ? value : null;
 }
 
-/** ノードから設定ダイアログに出す設定を読む */
 export function readNodeSettings(node: WorkflowNode): NodeSettings {
   const [width, height] = sizeOf(node);
   const [x, y] = posOf(node);
@@ -108,16 +89,13 @@ export function readNodeSettings(node: WorkflowNode): NodeSettings {
   };
 }
 
-/** 編集できる印を除いた残りの `flags`。残りが無ければ undefined（読み取り専用の欄に出さない） */
 function otherFlags(value: unknown): unknown {
   if (!isRecord(value)) return value;
   const rest = Object.entries(value).filter(([key]) => !EDITABLE_FLAGS.includes(key as NodeFlag));
   return rest.length === 0 ? undefined : Object.fromEntries(rest);
 }
 
-/** 設定の書き換え。渡した項目だけを変える */
 export interface NodeSettingsPatch {
-  /** 位置。片方だけ渡せばもう片方は今のまま（`pos` は落とさない） */
   readonly x?: number;
   readonly y?: number;
   readonly width?: number | null;
@@ -128,10 +106,8 @@ export interface NodeSettingsPatch {
   readonly pinned?: boolean;
 }
 
-/** size を持たないノードに幅だけ指定されたときの既定値 */
 export const FALLBACK_SIZE: [number, number] = [FALLBACK_WIDTH, FALLBACK_HEIGHT];
 
-/** 設定の書き換えを当てた新しいノード。色を null か空にするとキーごと消す */
 export function writeNodeSettings(node: WorkflowNode, patch: NodeSettingsPatch): WorkflowNode {
   const next: WorkflowNode = { ...node };
 
@@ -152,7 +128,6 @@ export function writeNodeSettings(node: WorkflowNode, patch: NodeSettingsPatch):
   return patch.pinned === undefined ? next : withFlag(next, 'pinned', patch.pinned);
 }
 
-/** 色を書く。null か空ならキーごと消す */
 function writeColors(next: WorkflowNode, patch: NodeSettingsPatch): void {
   for (const key of ['color', 'bgcolor'] as const) {
     const value = patch[key];
@@ -163,10 +138,8 @@ function writeColors(next: WorkflowNode, patch: NodeSettingsPatch): void {
   }
 }
 
-/** 書き換えた後の `size`。幅も高さも未設定に戻すなら null（キーごと消す） */
 function patchedSize(node: WorkflowNode, patch: NodeSettingsPatch): [number, number] | null {
   const [currentWidth, currentHeight] = sizeOf(node);
-  // null は「未設定に戻す」の意味なので ?? では拾わない
   const width = patch.width === undefined ? currentWidth : patch.width;
   const height = patch.height === undefined ? currentHeight : patch.height;
 
@@ -174,16 +147,8 @@ function patchedSize(node: WorkflowNode, patch: NodeSettingsPatch): [number, num
   return [width ?? FALLBACK_SIZE[0], height ?? FALLBACK_SIZE[1]];
 }
 
-/**
- * グループの既定の色。本体は `color` の無いグループを淡青（色の組の `pale_blue`）で描くので、
- * 無いときはこれで塗る。ワークフローには書かない
- */
 export const DEFAULT_GROUP_COLOR = '#3f789e';
 
-/**
- * ノードの色の選択肢。見出しの帯（`color`）と本体（`bgcolor`）の組。
- * `groupcolor` は同じ色をグループの枠に使うときの値（本体の組と同じ）
- */
 interface NodeColorOption {
   readonly key: string;
   readonly label: string;
@@ -192,7 +157,6 @@ interface NodeColorOption {
   readonly groupcolor: string;
 }
 
-/** 色の選択肢を作る。名前は読んだときに引く（読み込んだ時点では言語が決まっていない） */
 function colorOption(
   key: string,
   labelKey: MessageKey,
@@ -209,9 +173,6 @@ function colorOption(
   };
 }
 
-/**
- * ComfyUI 本体がノードの色として出すものと同じ値。本体と同じく組で塗る
- */
 export const NODE_COLOR_OPTIONS: readonly NodeColorOption[] = [
   colorOption('red', 'graph.color.red', ['#322', '#533', '#A88']),
   colorOption('brown', 'graph.color.brown', ['#332922', '#593930', '#b06634']),
@@ -224,9 +185,6 @@ export const NODE_COLOR_OPTIONS: readonly NodeColorOption[] = [
   colorOption('black', 'graph.color.black', ['#222', '#000', '#444']),
 ];
 
-/**
- * 選んだ色（本体に塗る色）から組を作る。読めない色は null
- */
 export function customColorPair(
   bgcolor: string,
 ): { readonly color: string; readonly bgcolor: string } | null {
@@ -235,7 +193,6 @@ export function customColorPair(
   return body && header ? { color: header, bgcolor: body } : null;
 }
 
-/** 今の色がどの組か。組に無ければ `'custom'`、色が無ければ null */
 export function nodeColorChoice(color: string | null, bgcolor: string | null): string | null {
   if (color === null && bgcolor === null) return null;
   const found = NODE_COLOR_OPTIONS.find(

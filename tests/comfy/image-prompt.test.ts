@@ -5,11 +5,6 @@ import { fetchPromptFromImage } from '@/comfy/queue';
 
 import { png, pngWithPrompt } from '../helpers/png';
 
-// ─────────────────────────────
-// 生成画像に埋まっている API Prompt（PNG の `tEXt(prompt)`）。
-// ComfyUI の履歴はメモリ上にあり再起動で消えるので、消えたときの拠り所にする。
-// ─────────────────────────────
-
 const file = { filename: 'a.png', subfolder: '', type: 'output' };
 
 describe('画像からの API Prompt 読み取り', () => {

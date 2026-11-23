@@ -33,15 +33,10 @@ import { useTabsStore } from '@/store/use-tabs-store';
 import { connectComfy } from '../helpers/connection';
 import { chat, chatMessage } from '../helpers/llm';
 
-// ─────────────────────────────
-// 残した会話の出し入れと ComfyUI の控え。ComfyUI のユーザーフォルダは作り物にする。
-// ─────────────────────────────
-
 const BROWSER = { kind: 'browser' } as const;
 const COMFY = { kind: 'comfy', baseUrl: 'http://comfy' } as const;
 const BOTH = { kind: 'both', baseUrl: 'http://comfy' } as const;
 
-/** ユーザーフォルダの代わり。ファイルの名前から中身へ */
 function fakeChats(files: Map<string, string>): ChatsPort {
   return {
     listMetas: () =>
@@ -139,7 +134,6 @@ describe('新しい会話', () => {
 });
 
 describe('ComfyUI の控え', () => {
-  /** 開いた会話を変えて、書き込みを済ませる */
   async function edit(id: string, name: string): Promise<void> {
     useChatStore.getState().update(id, { name });
     await flushChat(id);
@@ -150,7 +144,6 @@ describe('ComfyUI の控え', () => {
     connectComfy({ chatComfyBackup: true });
     await saveChatTo('b1', saved, BROWSER);
     await openChat('b1', BROWSER);
-    // 設定を入れただけでは書かない（次に保存したときに書く）
     expect(files.has('b1.json')).toBe(false);
     await edit('b1', 'edited');
     expect((await loadChatFrom('b1', COMFY))?.name).toBe('edited');
@@ -188,6 +181,7 @@ describe('ComfyUI の控え', () => {
     expect(await loadChatFrom('b4', BROWSER)).not.toBeNull();
     expect(useChatStore.getState().places.b4).toEqual(BOTH);
   });
+
   it('消すとブラウザから消し、控えはつないでいても残す', async () => {
     connectComfy({ chatComfyBackup: true });
     await saveChatTo('b5', saved, BOTH);

@@ -16,10 +16,6 @@ import { defaultComposition, type PromptComposition } from '@/chat/types';
 
 import { cardView, chat, chatMessage, sampleComposition } from '../helpers/llm';
 
-// ─────────────────────────────
-// 構成の操作・読み戻しとトークン数の見積もり。
-// ─────────────────────────────
-
 describe('構成の操作', () => {
   it('会話の履歴とメッセージは消せず、深さにも置けない', () => {
     const base = sampleComposition();
@@ -68,7 +64,6 @@ describe('読み戻し', () => {
         { id: 'h', marker: 'chatHistory', content: 'z', position: { kind: 'depth', depth: 2 } },
       ],
     });
-    // 追加辞書の印が無い構成には、会話の履歴の手前に足す
     expect(read?.items.map((item) => item.id)).toEqual(['a', 'additionalInfo', 'h']);
     expect(read?.items[2]).toMatchObject({ content: '', position: { kind: 'relative' } });
   });
@@ -133,7 +128,6 @@ describe('トークン数の見積もり', () => {
     );
     expect(plain.lastActual).toBeNull();
     expect(scaled.lastActual).toBe(1000);
-    // 比は 3 で止まる
     expect(scaled.history).toBeLessThanOrEqual((plain.history + 8) * 3);
     expect(scaled.history).toBeGreaterThan(plain.history);
   });
@@ -287,7 +281,6 @@ describe('項目を入れられる所', () => {
 
   it('会話履歴の帯やメッセージの手前を指しても、メッセージのすぐ下に入れる', () => {
     const moved = moveToSlot(sampleComposition(), 'tone', 'chatHistory', 'currentInput');
-    // 前の行が帯の中なら、帯の中ではなくメッセージの下
     const ids = moved?.items.map((item) => item.id) ?? [];
     expect(ids[ids.indexOf('currentInput') + 1]).toBe('tone');
   });

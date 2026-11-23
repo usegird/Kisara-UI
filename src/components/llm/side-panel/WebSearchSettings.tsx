@@ -14,12 +14,7 @@ import { t, type MessageKey } from '@/i18n';
 import { entryKeyOf } from '@/lib/text-entry';
 import { useSettingsStore } from '@/store/use-settings-store';
 
-// ─────────────────────────────
-// パラメタのタブの末尾の Web 検索の欄。
-// ─────────────────────────────
-
 const SELECT = field({ size: 'xs', width: 'control' });
-/** 中の欄（名前の列と箱の列）。見出しより薄い色にし、箱は左端を揃える */
 const ROWS =
   'text-muted-foreground grid grid-cols-[max-content_max-content] items-center gap-x-2 gap-y-1 px-1';
 const NUMBER = field({ size: 'sm' });
@@ -32,12 +27,10 @@ const ENGINE_LABEL: Readonly<Record<string, MessageKey>> = {
   perplexity: 'llm.settings.enginePerplexity',
 };
 
-/** エンジンの名前（無効・自動・OpenRouter も含む） */
 function engineName(engine: string): string {
   return t(ENGINE_LABEL[engine] ?? 'llm.settings.engineAuto');
 }
 
-/** 検索の選択肢の名前。モードがあれば「エンジン - モード」（モードは API の名前のまま） */
 function searchOptionName(option: SearchEngine): string {
   const { engine, mode } = searchEngineParts(option);
   if (engine === null) return engineName(option);
@@ -60,7 +53,6 @@ function EngineSelect({
   readonly onChange: (value: string) => void;
 }): React.ReactElement {
   const id = useId();
-  // 名前と箱を ROWS の 2 つの列に並べる（箱の左端を揃える）
   return (
     <>
       <label htmlFor={id}>{label}</label>
@@ -80,7 +72,6 @@ function EngineSelect({
   );
 }
 
-/** 数の欄。打ちかけはこの欄だけで持ち、決めたら設定に書く（範囲に収めた値に揃え直す） */
 function LimitField({
   label,
   saved,
@@ -127,7 +118,6 @@ function LimitField({
   );
 }
 
-/** 使用ツール（検索のエンジンとモードの組）と、手数の上限・取得の本文の上限の欄 */
 export function WebSearchSettings(): React.ReactElement {
   const hintId = useId();
   const search = useSettingsStore((state) => state.webSearchEngine);
@@ -137,7 +127,6 @@ export function WebSearchSettings(): React.ReactElement {
   return (
     <div className="flex flex-col gap-1" aria-describedby={hintId}>
       <span className={SETTING_HEADING_CLASS}>{t('llm.settings.webSearch')}</span>
-      {/* 見出しのすぐ下に、使える接続先の説明 */}
       <p id={hintId} className="text-muted-foreground px-1">
         {t('llm.settings.webSearchHint')}
       </p>

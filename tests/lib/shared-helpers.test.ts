@@ -9,10 +9,6 @@ import { newShortId } from '@/lib/id';
 import { compositeKey, omitKey } from '@/lib/own-key';
 import { parseHttpBaseUrl } from '@/lib/web-url';
 
-// ─────────────────────────────
-// 写しを 1 か所にまとめた小さな道具（文字列の読み戻し・鍵・ファイル名・接続先の URL・数の書式）
-// ─────────────────────────────
-
 describe('stringOr / stringArray / isString', () => {
   it('文字列でなければ既定（渡さなければ空）を返す', () => {
     expect(stringOr('a')).toBe('a');

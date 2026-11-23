@@ -7,10 +7,6 @@ import {
   URL_HISTORY_LIMIT,
 } from '@/lib/url-history';
 
-// ─────────────────────────────
-// 接続先の履歴の並びと件数。
-// ─────────────────────────────
-
 describe('接続先の履歴', () => {
   it('先頭に足し、同じものは先頭へ寄せる', () => {
     expect(pushUrlHistory(['a', 'b'], 'b')).toEqual(['b', 'a']);

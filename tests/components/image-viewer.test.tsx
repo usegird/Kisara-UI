@@ -13,33 +13,21 @@ import { useViewerStore } from '@/store/use-viewer-store';
 
 import { outputFile, queueTask } from '../helpers/queue';
 
-// 画像の中身は取りに行かない（テストから ComfyUI に触れない）。取れなかった扱いで /view を指す
 vi.mock('@/comfy/queue', async (importOriginal) => ({
   ...(await importOriginal<typeof import('@/comfy/queue')>()),
   fetchOutputImage: () => Promise.reject(new Error('テストでは取らない')),
 }));
-// ─────────────────────────────
-// 別ウィンドウのビューワー。**開いた先へポータルで描く**ので、
-// 描き込み先だけ差し替えれば、窓を開かずに中身を確かめられる。
-// ─────────────────────────────
 
 afterEach(() => {
   cleanup();
-  // 行×列は端末に残るので、テストごとに既定へ戻す
   useSettingsStore.getState().setViewerGrid({ rows: 1, cols: 1 });
 });
 
-/** 5 枚（新しいタスクが先、タスクの中では後に出たものが先） */
 const TASKS = [
   queueTask('a', [outputFile('a1.png'), outputFile('a2.png')], { number: 2 }),
   queueTask('b', [outputFile('b1.png'), outputFile('b2.png'), outputFile('b3.png')], { number: 1 }),
 ];
 
-/**
- * 窓の代わりに、テスト用の要素へ描き込ませる。
- * **`close()` は空にする**（本物の window を渡すと、後始末で jsdom ごと閉じてしまう）。
- * キーの購読は本物へ通すので、`fireEvent.keyDown(window)` がそのまま届く。
- */
 function fakePopup(mount: HTMLElement): Popup {
   const view = {
     addEventListener: globalThis.window.addEventListener.bind(globalThis.window),
@@ -47,11 +35,9 @@ function fakePopup(mount: HTMLElement): Popup {
     close: () => undefined,
     closed: false,
   };
-  // Window の一部だけを真似た代役。全部を実装する必要はない
   return { window: view as unknown as Window, mount };
 }
 
-/** 窓へ描き、中身（開いたときに読む）が出るまで待つ */
 async function show(overrides: Partial<React.ComponentProps<typeof ImageViewer>> = {}) {
   const mount = document.createElement('div');
   document.body.append(mount);
@@ -73,7 +59,6 @@ async function show(overrides: Partial<React.ComponentProps<typeof ImageViewer>>
   return { mount, onChange, onClose, view };
 }
 
-/** 左右の端の送りの矢印（見出しの帯の `<` `>` とは別）。出ていなければ null */
 function sideArrow(mount: HTMLElement, label: string): HTMLElement | null {
   const found = within(mount).queryAllByLabelText(label);
   return found.find((element) => element.closest('[data-dialog-header]') === null) ?? null;
@@ -87,9 +72,7 @@ describe('見た目', () => {
     expect(bar).not.toBeNull();
     expect(bar?.className).toContain('inset-x-0');
     expect(bar?.className).toContain('top-0');
-    // 指すまでは透明。帯のために面積を取らない
     expect(bar?.className).toContain('opacity-0');
-    // 画像を指している間は出す
     expect(bar?.className).toContain('group-hover/viewer:opacity-100');
   });
 
@@ -117,20 +100,16 @@ describe('見た目', () => {
     );
 
     const header = view.getByLabelText('実サイズで見る').closest('[data-dialog-header]');
-    // 並びはタスクの詳細に揃える: 送りの < > と、番号と画像の名前の見出し
     expect(within(header as HTMLElement).getByLabelText('新しい方へ')).toBeDefined();
     expect(within(header as HTMLElement).getByRole('heading')).toBeDefined();
-    // 枚数は送りの右（見出しより前）
     const older = within(header as HTMLElement).getByLabelText('古い方へ');
     expect(older.nextElementSibling?.textContent).toMatch(/\d+ \/ \d+/u);
-    // 画像に重ねず、沈めもしない
     expect(header?.className).not.toContain('absolute');
     expect(header?.className).not.toContain('opacity-0');
     expect(view.container.querySelector('div.absolute.inset-x-0')).toBeNull();
   });
 
   it('送りの矢印は左右の端の縦の中ほどに置く', async () => {
-    // 両向きに送れる位置（先頭でも末尾でもない）で見る
     const { mount } = await show({ current: buildSlides(TASKS)[1]?.key ?? null });
 
     const back = sideArrow(mount, '新しい方へ')!;
@@ -156,7 +135,6 @@ describe('見た目', () => {
 
   it('行と列は数字を出さず、上下の三角で 1 から上限までの間で増減する', async () => {
     const { mount } = await show();
-    // 1 のときは減らせない。今の値は読み上げの名前で伝える
     expect(within(mount).getByLabelText('行を減らす')).toHaveProperty('disabled', true);
     expect(within(mount).getByRole('group', { name: '行 1' })).toBeDefined();
     expect(mount.querySelector('input[type="number"]')).toBeNull();
@@ -170,7 +148,6 @@ describe('見た目', () => {
     fireEvent.click(within(mount).getByRole('button', { name: /a1\.png を大きく見る/u }));
     expect(onChange).toHaveBeenCalledWith(buildSlides(TASKS)[1]?.key);
     expect(mount.querySelectorAll('img')).toHaveLength(1);
-    // 行と列の設定は変えない
     expect(useSettingsStore.getState().viewerGrid).toEqual({ rows: 1, cols: 2 });
 
     fireEvent.click(within(mount).getByRole('button', { name: '並びに戻す' }));
@@ -255,11 +232,9 @@ describe('送り', () => {
 });
 
 describe('送りのモーション', () => {
-  /** 入ってくる側（重なっている出ていく側の下に置かれる） */
   const grid = (mount: HTMLElement): string =>
     [...mount.querySelectorAll('div.grid')].at(-1)?.className ?? '';
 
-  /** 出ていく側。入れ替えのあいだだけ出る */
   const leaving = (mount: HTMLElement): string =>
     [...mount.querySelectorAll('div.grid')].at(0)?.className ?? '';
 
@@ -282,7 +257,6 @@ describe('送りのモーション', () => {
     const { mount } = await show();
     fireEvent.click(sideArrow(mount, '古い方へ')!);
 
-    // 右から入るなら、出ていく側は左へ抜ける
     await waitFor(() => expect(leaving(mount)).toContain('kisara-slide-out-left'));
     expect(mount.querySelectorAll('div.grid')).toHaveLength(2);
   });
@@ -325,7 +299,6 @@ describe('キーボード', () => {
 });
 
 describe('新しい画像の追いかけ', () => {
-  /** 画像が 1 枚増えた状態で描き直す */
   function grow(
     view: ReturnType<typeof render>,
     mount: HTMLElement,
@@ -352,7 +325,6 @@ describe('新しい画像の追いかけ', () => {
     const before = mount.querySelector('img')?.getAttribute('alt');
 
     const grown = grow(view, mount, onChange);
-    // 並びに入った直後は、まだ新しい画像を出さない（一度出てから動き出さない）
     expect(mount.querySelector('img')?.getAttribute('alt')).toBe(before);
 
     await waitFor(() => expect(onChange).toHaveBeenCalledWith(buildSlides(grown)[0]?.key));
@@ -396,14 +368,12 @@ describe('新しい画像の追いかけ', () => {
       );
     };
 
-    // 1 回目は追いかけ終える（錨が先頭に置かれる）
     const once = [queueTask('c', [outputFile('c1.png')]), ...TASKS];
     draw(once, buildSlides(TASKS)[0]?.key ?? null);
     const head = buildSlides(once)[0]?.key ?? null;
     await waitFor(() => expect(onChange).toHaveBeenLastCalledWith(head));
     draw(once, head);
 
-    // 2 回続けて出る。1 回目の読み込みが終わる前に 2 回目が来る
     const twice = [queueTask('d', [outputFile('d1.png')]), ...once];
     draw(twice, head);
     const thrice = [queueTask('e', [outputFile('e1.png')]), ...twice];
@@ -419,7 +389,6 @@ describe('新しい画像の追いかけ', () => {
 
     grow(view, mount, onChange);
 
-    // 送りの処理は読み込みを挟むので、待ってから「呼ばれていない」ことを見る
     await new Promise((resolve) => setTimeout(resolve, 20));
     expect(onChange).not.toHaveBeenCalled();
   });
@@ -430,7 +399,6 @@ describe('新しい画像の追いかけ', () => {
 
     fireEvent.click(within(mount).getByLabelText('新しい画像に追従する'));
 
-    // 決めておかないと、新しい画像が先頭に来たときにそちらへ移ってしまう
     expect(onChange).toHaveBeenCalledWith(buildSlides(TASKS)[0]?.key);
   });
 });

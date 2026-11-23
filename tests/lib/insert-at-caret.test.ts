@@ -1,12 +1,7 @@
 // @vitest-environment jsdom
 import { describe, expect, it, vi } from 'vitest';
 
-import { insertAtCaret, isTextField, replaceFieldText } from '@/lib/insert-at-caret';
-
-// ─────────────────────────────
-// スタイルの取り込みで使う、キャレット位置への差し込み。
-// **`input` を発火する**ことが肝（発火しないと React 側の値が次の描画で戻る）。
-// ─────────────────────────────
+import { insertAtCaret, insertEntry, isTextField, replaceFieldText } from '@/lib/insert-at-caret';
 
 function textarea(value: string, start: number, end = start): HTMLTextAreaElement {
   const element = document.createElement('textarea');
@@ -57,7 +52,6 @@ describe('取り消し履歴', () => {
   it('人が打ったのと同じ編集として入れる（Ctrl+Z で戻せる道）', () => {
     const element = textarea('ab', 1);
     const insertText = vi.fn((command: string, _ui: boolean, value?: string) => {
-      // 本物と同じく、選択位置へ入れたことにする
       element.value = `${element.value.slice(0, 1)}${value ?? ''}${element.value.slice(1)}`;
       return command === 'insertText';
     });
@@ -65,7 +59,6 @@ describe('取り消し履歴', () => {
 
     expect(insertAtCaret(element, 'X')).toBe(true);
     expect(insertText).toHaveBeenCalledWith('insertText', false, 'X');
-    // 二重に入れない（素の setter の道へ落ちていない）
     expect(element.value).toBe('aXb');
 
     Reflect.deleteProperty(document, 'execCommand');
@@ -130,5 +123,23 @@ describe('差し込み先の判別', () => {
     expect(isTextField(checkbox)).toBe(false);
     expect(isTextField(document.createElement('button'))).toBe(false);
     expect(isTextField(null)).toBe(false);
+  });
+});
+
+describe('差し込みの画面からの 1 件', () => {
+  it('改行を足さずにそのまま入れ、キャレットを後ろに置く', () => {
+    const element = textarea('ab', 1);
+
+    expect(insertEntry(element, '__w__')?.text).toBe('__w__');
+    expect(element.value).toBe('a__w__b');
+    expect(element.selectionStart).toBe(6);
+  });
+
+  it('改行で終わる文字（Lora の既定の書式）も、そのまま入れてキャレットを後ろに置く', () => {
+    const element = textarea('ab', 1);
+
+    expect(insertEntry(element, 'X\n')?.text).toBe('X\n');
+    expect(element.value).toBe('aX\nb');
+    expect(element.selectionStart).toBe(3);
   });
 });

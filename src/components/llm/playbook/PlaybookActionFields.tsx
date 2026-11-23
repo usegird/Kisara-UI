@@ -3,22 +3,16 @@ import { withActionKind } from '@/chat/playbook-draft';
 import { FIELD_XS } from '@/components/ui/field';
 import { t } from '@/i18n';
 
-// ─────────────────────────────
-// プレイブックを作るダイアログの、操作 1 件の欄。
-// ─────────────────────────────
-
 const LABEL = 'text-muted-foreground flex flex-col gap-1 text-xs';
 
 const KINDS: readonly PlaybookAction['kind'][] = ['send', 'consult', 'next'];
 const USES: readonly (ResponseUse | 'none')[] = ['none', 'send'];
 
-/** 送るの操作の、使い道を除いた項目 */
 function sendBase(action: PlaybookSendAction): PlaybookSendAction {
   const { kind, id, name, instruction } = action;
   return { kind, id, name, instruction };
 }
 
-/** 操作の名前・種類と、種類ごとの項目（送るなら指示と使い道、相談なら初めの文と勘所）の欄 */
 export function PlaybookActionFields({
   draft,
   action,
@@ -27,7 +21,6 @@ export function PlaybookActionFields({
 }: {
   readonly draft: Playbook;
   readonly action: PlaybookAction;
-  /** 送るの操作だけにする（常設の操作） */
   readonly sendOnly: boolean;
   readonly onChange: (next: PlaybookAction) => void;
 }): React.ReactElement {
@@ -73,7 +66,6 @@ export function PlaybookActionFields({
               onChange={(event) => onChange({ ...action, instruction: event.target.value })}
             />
           </label>
-          {/* 入力欄に入れる操作は使い道を持たない */}
           <label className="flex items-center gap-1.5 text-xs">
             <input
               type="checkbox"
@@ -113,7 +105,6 @@ export function PlaybookActionFields({
                     className={FIELD_XS}
                     value={action.sendTo ?? ''}
                     onChange={(event) => {
-                      // 空は続けるの指示で送る
                       const sendTo = event.target.value;
                       const rest = { ...sendBase(action), use: 'send' as const };
                       onChange(sendTo.length === 0 ? rest : { ...rest, sendTo });

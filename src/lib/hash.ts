@@ -1,12 +1,6 @@
 import { isRecord } from '@/lib/guards';
 import { setOwn } from '@/lib/own-key';
 
-// ─────────────────────────────
-// 文字列のハッシュ（cyrb53。53 ビットを 16 進 14 文字で返す）。
-// 暗号用ではない。中身が同じかを見分ける鍵にだけ使う。
-// ─────────────────────────────
-
-// cyrb53 の種・掛ける数・ずらす幅（アルゴリズムが決める値）
 const SEED_HIGH = 0xdeadbeef;
 const SEED_LOW = 0x41c6ce57;
 const MIX_HIGH = 2654435761;
@@ -15,15 +9,11 @@ const AVALANCHE_FIRST = 2246822507;
 const AVALANCHE_SECOND = 3266489909;
 const SHIFT_FIRST = 16;
 const SHIFT_SECOND = 13;
-/** 2 の 32 乗（上位の 21 ビットを 32 ビット上へ送る） */
 const UINT32_RANGE = 4294967296;
-/** 上位の 21 ビットを残す印（21 + 32 = 53 ビット） */
 const HIGH_21_BITS = 2097151;
 const HEX_RADIX = 16;
-/** 53 ビットを 16 進で書いた桁数 */
 const HASH_HEX_DIGITS = 14;
 
-/** 文字列の 53 ビットのハッシュを 16 進 14 文字で返す。同期で求めたいので `crypto.subtle` は使わない */
 export function hash53(text: string): string {
   let h1 = SEED_HIGH;
   let h2 = SEED_LOW;
@@ -41,7 +31,6 @@ export function hash53(text: string): string {
   return value.toString(HEX_RADIX).padStart(HASH_HEX_DIGITS, '0');
 }
 
-/** キーを並べ替えた JSON。キーの順が違うだけのものを同じ文字列にする */
 export function stableStringify(value: unknown): string {
   return JSON.stringify(sortKeys(value));
 }

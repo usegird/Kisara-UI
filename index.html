@@ -1,12 +1,378 @@
 <!doctype html>
-<html lang="ja">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>KisaraUI</title>
+    <meta name="description" data-t-content="app.welcome.about" content="" />
+    <link rel="stylesheet" href="/src/welcome/welcome.css" />
+    <script type="module" src="/src/welcome/main.ts"></script>
   </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
+  <body class="welcome-body">
+    <img src="/src/welcome/welcome-background.svg" alt="" class="welcome-background" />
+    <div class="welcome-band">
+      <img src="/src/welcome/kisara-logo.svg" alt="" class="h-32 w-auto shrink-0 sm:h-48" />
+      <div class="flex h-16 items-end sm:h-24 sm:pb-0.5">
+        <h1
+          class="text-logo-bottom text-3xl font-light sm:text-4xl"
+          data-t="app.welcome.title"
+        ></h1>
+      </div>
+    </div>
+    <main class="welcome-main">
+      <section aria-labelledby="welcome-about" class="flex flex-col gap-2">
+        <h2
+          id="welcome-about"
+          class="text-base font-semibold"
+          data-t="app.welcome.aboutHeading"
+        ></h2>
+        <p class="pl-4" data-t="app.welcome.about"></p>
+      </section>
+      <section aria-labelledby="welcome-uses" class="flex flex-col gap-2">
+        <h2 id="welcome-uses" class="text-base font-semibold" data-t="app.welcome.usesHeading"></h2>
+        <dl class="flex flex-col gap-2">
+          <div>
+            <dt class="mt-[3px] font-medium" data-t="app.welcome.useChatName"></dt>
+            <dd class="text-muted-foreground pl-4" data-t="app.welcome.useChat"></dd>
+          </div>
+          <div>
+            <dt class="mt-[3px] font-medium" data-t="app.welcome.useImageName"></dt>
+            <dd class="text-muted-foreground pl-4" data-t="app.welcome.useImage"></dd>
+          </div>
+        </dl>
+      </section>
+      <section aria-labelledby="welcome-features" class="flex flex-col gap-2">
+        <h2
+          id="welcome-features"
+          class="text-base font-semibold"
+          data-t="app.welcome.featuresHeading"
+        ></h2>
+        <dl class="flex flex-col gap-2">
+          <div>
+            <dt class="mt-[3px] font-medium" data-t="app.welcome.featureBrowserName"></dt>
+            <dd class="text-muted-foreground pl-4" data-t="app.welcome.featureBrowser"></dd>
+          </div>
+          <div>
+            <dt class="mt-[3px] font-medium" data-t="app.welcome.featurePrivacyName"></dt>
+            <dd class="text-muted-foreground pl-4">
+              <span data-t="app.welcome.featurePrivacy"></span>
+              <span class="block text-xs" data-t="app.welcome.systemLink"
+                ><template data-part="link"
+                  ><button
+                    type="button"
+                    class="agreement-link"
+                    data-open="welcome-system"
+                    data-t="app.welcome.system"
+                  ></button></template
+              ></span>
+            </dd>
+          </div>
+          <div>
+            <dt class="mt-[3px] font-medium" data-t="app.welcome.featureCraftName"></dt>
+            <dd class="text-muted-foreground pl-4" data-t="app.welcome.featureCraft"></dd>
+          </div>
+        </dl>
+      </section>
+      <section class="welcome-consent" data-t-aria-label="app.landing.consentHeading">
+        <div class="flex flex-col gap-2 text-xs">
+          <p hidden data-revised data-t="terms.revisedSummary" data-params="date:termsDate"></p>
+          <p data-t="terms.landingSummary">
+            <template data-part="terms"
+              ><button
+                type="button"
+                class="agreement-link"
+                data-open="terms-view"
+                data-t="terms.title"
+              ></button></template
+            ><template data-part="privacy"
+              ><button
+                type="button"
+                class="agreement-link"
+                data-open="privacy-view"
+                data-t="privacy.title"
+              ></button
+            ></template>
+          </p>
+          <div class="flex items-center gap-2 has-disabled:opacity-50">
+            <input type="checkbox" id="notice-check" data-t-aria-label="terms.noticeCheckLabel" />
+            <span data-t="terms.noticeCheck"
+              ><template data-part="notice"
+                ><button
+                  type="button"
+                  class="agreement-link"
+                  data-open="usage-notice-view"
+                  data-t="terms.noticeTitle"
+                ></button></template
+            ></span>
+          </div>
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <label class="flex items-center gap-2 has-disabled:opacity-50">
+              <input type="checkbox" id="consent-check" />
+              <span data-t="terms.consent"></span>
+            </label>
+            <button
+              type="button"
+              id="start"
+              class="welcome-primary"
+              disabled
+              data-t="terms.accept"
+            ></button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <dialog
+      id="welcome-system"
+      class="welcome-dialog theme-light"
+      aria-labelledby="welcome-system-title"
+    >
+      <div class="welcome-dialog-header">
+        <h2
+          id="welcome-system-title"
+          class="min-w-0 truncate text-sm font-semibold"
+          data-t="app.welcome.system"
+        ></h2>
+        <button
+          type="button"
+          class="welcome-dialog-close"
+          data-close
+          data-t-aria-label="common.close"
+        >
+          <i data-icon="x" class="size-4"></i>
+        </button>
+      </div>
+      <div class="bg-figure-bg min-h-0 flex-1 overflow-y-auto text-sm">
+        <figure class="route-figure">
+          <svg aria-hidden="true" class="absolute size-0">
+            <filter id="route-figure-sketch">
+              <feTurbulence
+                type="fractalNoise"
+                baseFrequency="0.04"
+                numOctaves="2"
+                seed="7"
+                result="n"
+              />
+              <feDisplacementMap
+                in="SourceGraphic"
+                in2="n"
+                scale="3"
+                xChannelSelector="R"
+                yChannelSelector="G"
+              />
+            </filter>
+          </svg>
+          <ul class="flex gap-3 border-x-2 border-transparent px-3 sm:gap-4">
+            <li class="flex min-w-0 flex-1 flex-col gap-1">
+              <div class="route-box flex-1">
+                <span aria-hidden="true" class="sketch-line"></span>
+                <i data-icon="server" class="route-mark text-figure-host-ink"></i>
+                <div class="min-w-0 self-center">
+                  <p
+                    class="font-medium [overflow-wrap:anywhere]"
+                    data-t="app.landing.hostName"
+                    data-params="url:pageUrl"
+                  ></p>
+                  <p class="text-figure-muted text-xs" data-t="app.landing.hostDetail"></p>
+                </div>
+              </div>
+              <div class="route-connector">
+                <i data-icon="arrow-down" class="text-figure-arrow size-4 shrink-0"></i>
+                <span data-t="app.landing.hostVia"></span>
+              </div>
+            </li>
+            <li class="flex min-w-0 flex-1 flex-col gap-1">
+              <div class="route-box flex-1">
+                <span aria-hidden="true" class="sketch-line"></span>
+                <i data-icon="cloud" class="route-mark text-figure-cloud-ink"></i>
+                <div class="min-w-0 self-center">
+                  <p
+                    class="font-medium [overflow-wrap:anywhere]"
+                    data-t="llm.landing.cloudName"
+                  ></p>
+                  <p class="text-figure-muted text-xs" data-t="llm.landing.cloudDetail"></p>
+                </div>
+              </div>
+              <div class="route-connector">
+                <i data-icon="arrow-up-down" class="text-figure-arrow size-4 shrink-0"></i>
+                <span data-t="llm.landing.cloudVia"></span>
+              </div>
+            </li>
+          </ul>
+          <div role="group" aria-labelledby="route-device" class="route-device">
+            <span aria-hidden="true" class="sketch-line sketch-line-device"></span>
+            <p id="route-device" class="flex items-center gap-1.5 text-xs font-semibold">
+              <i data-icon="laptop" class="size-4"></i>
+              <span data-t="app.landing.localDevice"></span>
+            </p>
+            <div class="route-box route-box-browser">
+              <span aria-hidden="true" class="sketch-line"></span>
+              <i data-icon="app-window" class="route-mark text-figure-ink"></i>
+              <div class="min-w-0 self-center">
+                <p
+                  class="font-medium [overflow-wrap:anywhere]"
+                  data-t="app.landing.browserName"
+                ></p>
+                <p class="text-figure-muted text-xs" data-t="app.landing.browserDetail"></p>
+              </div>
+            </div>
+            <ul class="flex gap-3 sm:gap-4">
+              <li class="flex min-w-0 flex-1 flex-col gap-1">
+                <div class="route-connector">
+                  <i data-icon="arrow-up-down" class="text-figure-arrow size-4 shrink-0"></i>
+                  <span data-t="llm.landing.localVia"></span>
+                </div>
+                <div class="route-box">
+                  <span aria-hidden="true" class="sketch-line"></span>
+                  <i data-icon="bot" class="route-mark text-figure-local-ink"></i>
+                  <div class="min-w-0 self-center">
+                    <p
+                      class="font-medium [overflow-wrap:anywhere]"
+                      data-t="llm.landing.localName"
+                    ></p>
+                  </div>
+                </div>
+              </li>
+              <li class="flex min-w-0 flex-1 flex-col gap-1">
+                <div class="route-connector">
+                  <i data-icon="arrow-up-down" class="text-figure-arrow size-4 shrink-0"></i>
+                  <span data-t="comfy.landing.routeVia"></span>
+                </div>
+                <div class="route-box">
+                  <span aria-hidden="true" class="sketch-line"></span>
+                  <i data-icon="workflow" class="route-mark text-figure-local-ink"></i>
+                  <div class="min-w-0 self-center">
+                    <p
+                      class="font-medium [overflow-wrap:anywhere]"
+                      data-t="comfy.landing.routeName"
+                    ></p>
+                  </div>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </figure>
+      </div>
+    </dialog>
+
+    <dialog
+      id="terms-view"
+      class="welcome-dialog welcome-dialog-wide"
+      aria-labelledby="terms-view-title"
+    >
+      <div class="welcome-dialog-header">
+        <h2
+          id="terms-view-title"
+          class="min-w-0 truncate text-sm font-semibold"
+          data-t="terms.title"
+        ></h2>
+        <button
+          type="button"
+          class="welcome-dialog-close"
+          data-close
+          data-t-aria-label="common.close"
+        >
+          <i data-icon="x" class="size-4"></i>
+        </button>
+      </div>
+      <div
+        tabindex="0"
+        role="region"
+        aria-labelledby="terms-view-title"
+        class="welcome-dialog-body"
+      >
+        <div class="document-text">
+          <div class="contents" data-legal="terms"></div>
+          <p
+            class="mt-2"
+            data-t="terms.version"
+            data-params="revision:termsRevision,date:termsDate"
+          ></p>
+        </div>
+      </div>
+    </dialog>
+
+    <dialog
+      id="privacy-view"
+      class="welcome-dialog welcome-dialog-wide"
+      aria-labelledby="privacy-view-title"
+    >
+      <div class="welcome-dialog-header">
+        <h2
+          id="privacy-view-title"
+          class="min-w-0 truncate text-sm font-semibold"
+          data-t="privacy.title"
+        ></h2>
+        <button
+          type="button"
+          class="welcome-dialog-close"
+          data-close
+          data-t-aria-label="common.close"
+        >
+          <i data-icon="x" class="size-4"></i>
+        </button>
+      </div>
+      <div
+        tabindex="0"
+        role="region"
+        aria-labelledby="privacy-view-title"
+        class="welcome-dialog-body"
+      >
+        <div class="document-text">
+          <div class="contents" data-legal="privacy"></div>
+          <p class="mt-2" data-t="privacy.version" data-params="date:privacyDate"></p>
+        </div>
+      </div>
+    </dialog>
+
+    <dialog id="usage-notice-view" class="welcome-dialog" aria-labelledby="usage-notice-view-title">
+      <div class="welcome-dialog-header">
+        <h2
+          id="usage-notice-view-title"
+          class="min-w-0 truncate text-sm font-semibold"
+          data-t="terms.noticeTitle"
+        ></h2>
+        <button
+          type="button"
+          class="welcome-dialog-close"
+          data-close
+          data-t-aria-label="common.close"
+        >
+          <i data-icon="x" class="size-4"></i>
+        </button>
+      </div>
+      <div
+        tabindex="0"
+        role="region"
+        aria-labelledby="usage-notice-view-title"
+        class="welcome-dialog-body"
+      >
+        <div class="document-text">
+          <div class="contents" data-lines="terms.noticeIntro" data-line-class="indent-[1em]"></div>
+          <p class="mt-2 font-medium" data-t="terms.conditionsHeading"></p>
+          <ul class="list-disc pl-5">
+            <li data-t="terms.condition3"></li>
+            <li data-t="terms.notice1"></li>
+            <li data-t="terms.condition2"></li>
+            <li data-t="terms.noticeAi2"></li>
+            <li data-t="terms.condition4"></li>
+          </ul>
+          <p class="mt-2 font-medium" data-t="terms.noticeAiHeading"></p>
+          <ul class="list-disc pl-5">
+            <li data-t="terms.noticeAi1"></li>
+            <li data-t="terms.noticeAi3"></li>
+            <li data-t="terms.noticeAi4"></li>
+          </ul>
+        </div>
+        <div class="mt-4 flex justify-end">
+          <button
+            type="button"
+            id="notice-confirm"
+            class="welcome-primary"
+            data-t="terms.noticeConfirm"
+          ></button>
+        </div>
+      </div>
+    </dialog>
   </body>
 </html>

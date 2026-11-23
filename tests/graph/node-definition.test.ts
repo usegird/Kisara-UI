@@ -10,7 +10,6 @@ import { loadDefinitions } from '../helpers/fixtures';
 
 describe('/object_info の射影', () => {
   it('display_name が null のときはクラス名にフォールバックする', () => {
-    // RandomNoise は display_name が null
     expect(loadDefinitions().get('RandomNoise')?.displayName).toBe('RandomNoise');
   });
 
@@ -85,6 +84,7 @@ describe('/object_info の射影', () => {
     expect(buildNodeDefinitions([]).size).toBe(0);
   });
 });
+
 describe('小分けの射影', () => {
   it('200 クラスずつ分けて合間に待ち、1 回で射影したときと同じ定義を作る', async () => {
     const raw = Object.fromEntries(

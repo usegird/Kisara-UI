@@ -4,19 +4,12 @@ import { splitRun, type SplitRun } from '@/graph/run-record';
 
 import { definition, definitionMap, widget } from '../helpers/definitions';
 
-// ─────────────────────────────
-// 実行の記録のシードとプロンプトの拾い方
-// ─────────────────────────────
-
-/** 実行の形に入るよう、どれも出力ノードにする（出力から辿れないノードは刈られる） */
 const OUTPUT = { outputNode: true };
 
 const DEFINITIONS = definitionMap(
-  // 名前の決まり（INT の seed）で制御が付く
   definition('Sampler', [widget('seed', 'INT'), widget('steps', 'INT')], OUTPUT),
   definition('Text', [widget('text', 'STRING', { multiline: true })], OUTPUT),
   definition('Title', [widget('title', 'STRING')], OUTPUT),
-  // 宣言で制御が付く
   definition('Noise', [widget('amount', 'INT', { control_after_generate: true })], OUTPUT),
 );
 
@@ -60,7 +53,6 @@ describe('splitRun', () => {
     expect(result.prompts).toEqual(['a dog']);
     expect(result.seedSlots).toEqual([['3', 'seed']]);
     expect(result.promptSlots).toEqual([['6', 'text']]);
-    // 置き場の無いノード（7）は持たない
     expect(result.nodes).toEqual({ '3': ['Sampler'], '6': ['Text'] });
   });
 

@@ -4,6 +4,7 @@ import { Fragment } from 'react';
 import { CopyButton } from '@/components/ui/copy-button';
 import { t, type MessageKey } from '@/i18n';
 import { EMPTY_MARK, formatDuration } from '@/i18n/format';
+import type { OutputText } from '@/port/files';
 import {
   MODEL_KINDS,
   ROLE_LABEL,
@@ -14,11 +15,6 @@ import {
 } from '@/queue/task-detail';
 import { type NodeLabeler } from '@/queue/task-failure';
 
-// ─────────────────────────────
-// 実行内容の段（モデル・プロンプト・設定）。タスクの詳細・履歴の詳細・画像のタブが同じ見た目で使う。
-// ─────────────────────────────
-
-/** プロンプトの役（肯定・否定）の札 */
 const roleBadge = cva('shrink-0 rounded px-1 text-3xs', {
   variants: {
     role: {
@@ -27,12 +23,10 @@ const roleBadge = cva('shrink-0 rounded px-1 text-3xs', {
     },
   },
 });
-/** ノード 1 つの値の並び。順番の付いた行は番号の幅だけ下げる */
 const nodeValues = cva('flex flex-wrap gap-x-3', {
   variants: { ordered: { true: 'pl-7', false: '' } },
 });
 
-/** 見出しの付いた段 1 つ */
 export function Section({
   title,
   children,
@@ -48,18 +42,12 @@ export function Section({
   );
 }
 
-/**
- * プロンプトの出どころ。**実行した内容そのもの**から示す（開いているカードとは限らない）。
- * ノードは投げた時点のカードの表記で示す（控えが無ければ id とクラス名）
- */
 function promptLabel(prompt: TaskPrompt, label: NodeLabeler): string {
   return `${label(prompt.nodeId, prompt.classType)} / ${prompt.inputName}`;
 }
 
-/** 空の段の印 */
 const EMPTY_SECTION = <p className="text-muted-foreground">{EMPTY_MARK}</p>;
 
-/** 使ったモデルを区分に分けずに並べる段 */
 export function ModelsSection({
   models,
 }: {
@@ -82,22 +70,17 @@ export function ModelsSection({
   );
 }
 
-/** 区分の見出し */
 const KIND_LABEL: Readonly<Record<ModelKind, MessageKey>> = {
   model: 'history.detail.kindModel',
   lora: 'history.detail.kindLora',
   other: 'history.detail.kindOther',
 };
 
-/**
- * モデルを区分（モデル・LoRA・その他）ごとの段で出す。無い区分は出さない
- */
 export function ModelGroupsSection({
   models,
   compact = false,
 }: {
   readonly models: ModelGroups | null;
-  /** 区分の間を空けない（履歴の詳細で使う） */
   readonly compact?: boolean | undefined;
 }): React.ReactElement {
   const kinds = MODEL_KINDS.filter((kind) => (models?.[kind].length ?? 0) > 0);
@@ -122,20 +105,16 @@ export function ModelGroupsSection({
   );
 }
 
-/** 区分を間を空けずに積む（親の段の間隔を区分どうしには入れない） */
 function CompactKinds({ children }: { readonly children: React.ReactNode }): React.ReactElement {
   return <div className="flex min-w-0 flex-col">{children}</div>;
 }
 
-/** プロンプトの段の受け取り物 */
 export interface PromptsSectionProps {
   readonly prompts: readonly TaskPrompt[];
   readonly label: NodeLabeler;
-  /** ノードの表記の横に、文章を写し取るアイコンを置く（履歴の詳細で使う） */
   readonly copyable?: boolean | undefined;
 }
 
-/** 実行したプロンプトを、出どころのノードと正負の印を添えて並べる段 */
 export function PromptsSection({
   prompts,
   label,
@@ -177,15 +156,50 @@ export function PromptsSection({
   );
 }
 
-/** 設定の段の受け取り物 */
+export interface OutputTextsSectionProps {
+  readonly outputs: readonly { readonly text: OutputText; readonly classType: string | null }[];
+  readonly label: NodeLabeler;
+}
+
+export function OutputTextsSection({
+  outputs,
+  label,
+}: OutputTextsSectionProps): React.ReactElement | null {
+  if (outputs.length === 0) return null;
+  return (
+    <Section title={t('queue.detail.section.outputTexts')}>
+      <ul className="flex flex-col gap-2">
+        {outputs.map(({ text, classType }) => {
+          const joined = text.texts.join('\n');
+          return (
+            <li key={text.nodeId}>
+              <span className="flex items-baseline gap-1.5">
+                <span className="text-muted-foreground min-w-0 truncate">
+                  {label(text.nodeId, classType)}
+                </span>
+                <CopyButton
+                  iconOnly
+                  frameless
+                  className="self-center"
+                  text={joined}
+                  label={t('queue.detail.copyOutputText')}
+                />
+              </span>
+              <p className="mt-0.5 break-all whitespace-pre-wrap">{joined}</p>
+            </li>
+          );
+        })}
+      </ul>
+    </Section>
+  );
+}
+
 export interface SettingsSectionProps {
   readonly rows: readonly TaskNodeRow[];
-  /** ノードの時刻がある（この画面が見ていた実行） */
   readonly timed: boolean;
   readonly label: NodeLabeler;
 }
 
-/** 設定と所要時間の表（時刻があるものは実行順に並ぶ） */
 export function SettingsSection({ rows, timed, label }: SettingsSectionProps): React.ReactElement {
   return (
     <Section

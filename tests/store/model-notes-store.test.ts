@@ -4,11 +4,6 @@ import { fetchModelNotes, hasModelNotesRoute } from '@/comfy/models';
 import { fetchSavedNotes, listSavedNotes, saveNotes } from '@/comfy/notes';
 import { useModelNotesStore } from '@/store/use-model-notes-store';
 
-// ─────────────────────────────
-// メモの読み先。`kisara/` の一覧と拡張の有無は接続ごとに 1 回。
-// `kisara/` にあればそれを、無ければ pysssss の `.txt` を読む。書くのは `kisara/` だけ。
-// ─────────────────────────────
-
 vi.mock('@/comfy/models', () => ({ hasModelNotesRoute: vi.fn(), fetchModelNotes: vi.fn() }));
 vi.mock('@/comfy/notes', () => ({
   listSavedNotes: vi.fn(),

@@ -15,13 +15,8 @@ import { SidePane } from '@/components/ui/side-pane';
 import { t } from '@/i18n';
 import { guardPress } from '@/lib/press-guard';
 
-// ─────────────────────────────
-// タグ辞書の画面の中身。作りはワイルドカードの画面に揃え、左で選んだ辞書を右の表で直して確定で書く。
-// ─────────────────────────────
-
 type Panel = ReturnType<typeof useTagPanel>;
 
-/** タグ辞書を見て直す画面。捨てることになる操作の前には確かめる */
 export function TagPanel(): React.ReactElement {
   const panel = useTagPanel();
   const { store, draft } = panel;
@@ -53,7 +48,6 @@ export function TagPanel(): React.ReactElement {
       />
 
       <div className="flex min-h-0 flex-1">
-        {/* 左: 確定と辞書の一覧 */}
         <SidePane
           paneKey="tag-panel:left"
           label={t('tags.dictionaries')}
@@ -86,7 +80,6 @@ export function TagPanel(): React.ReactElement {
           />
         </SidePane>
 
-        {/* 右: 帯に絞り込み、その下にタグの表 */}
         <div className="flex min-w-0 flex-1 flex-col">
           <DialogToolbar label={t('tags.filterToolbar')}>
             <SearchField
@@ -119,7 +112,6 @@ export function TagPanel(): React.ReactElement {
   );
 }
 
-/** 見ている一覧の表と、上限を超えた分の知らせ */
 function TagTableArea({ panel }: { readonly panel: Panel }): React.ReactElement {
   const { editable, readOnly, pysssss, draft, sort, changeSort } = panel;
   const table = editable ?? readOnly ?? pysssss;
@@ -155,7 +147,6 @@ function TagTableArea({ panel }: { readonly panel: Panel }): React.ReactElement 
   );
 }
 
-/** 見出しに出す、見ている一覧の名前 */
 function viewLabel(view: TagView): string {
   if (view.kind === 'dictionary') return view.name;
   return t(view.kind === 'pysssss' ? 'tags.pysssss' : 'tags.all');

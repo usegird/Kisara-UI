@@ -12,12 +12,6 @@ import {
   type Style,
 } from '@/graph/styles';
 
-// ─────────────────────────────
-// スタイル。`styles.csv` は実物と同じ形（BOM・CRLF・欄の中の改行）で読み、
-// **知らない列を落とさない**。`kisara/` の 1 件と名前で合わせる。
-// ─────────────────────────────
-
-/** 実物の `styles.csv` から写した形（BOM 付き・CRLF・欄の中に改行と引用符） */
 const SAMPLE =
   '﻿name,prompt,negative_prompt\r\n' +
   'anima,"masterpiece, best quality,\n<lora:anima:0.9>,\n",\r\n' +
@@ -129,7 +123,6 @@ describe('書き入れ', () => {
     expect(upsertStyle(table, null, style({ name: '  ' })).error).toBe('empty-name');
     expect(upsertStyle(table, null, style({ name: 'anima' })).error).toBe('duplicate-name');
     expect(upsertStyle(table, null, style({ name: 'ANIMA' })).error).toBe('duplicate-name');
-    // 自分自身の名前は重なりにしない（大文字小文字だけの変更も）
     expect(upsertStyle(table, 'anima', style({ name: 'Anima' })).error).toBeNull();
   });
 

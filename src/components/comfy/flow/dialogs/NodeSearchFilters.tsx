@@ -9,16 +9,11 @@ import { guardPress } from '@/lib/press-guard';
 import { useDefinitionsStore } from '@/store/use-definitions-store';
 import { useSettingsStore } from '@/store/use-settings-store';
 
-// ─────────────────────────────
-// ノードの検索の絞り込みの欄（モードのタブ・型の選択・定義の取り直し）
-// ─────────────────────────────
-
 const modeTab = cva(
   'rounded px-3 py-0.5 text-xs font-medium disabled:cursor-not-allowed disabled:opacity-40',
   {
     variants: {
       selected: {
-        // 見出しの帯（muted）の上で選んでいるものが分かるよう、濃く塗る
         true: 'bg-primary/60 text-primary-foreground',
         false: 'text-muted-foreground hover:bg-background',
       },
@@ -26,7 +21,6 @@ const modeTab = cva(
   },
 );
 
-/** 何にでも繋がる口（`*`）を型の一致に含めるか。追加と参照で共用 */
 export function AnyTypeCheckbox({
   checked,
   onChange,
@@ -50,14 +44,10 @@ const SELECT_CLASS = 'border-input min-w-0 flex-1 rounded border bg-transparent 
 
 interface ModeTabsProps {
   readonly mode: PopupMode;
-  /** ノード参照を選べるか（繋ぐ起点があるか） */
   readonly referenceable: boolean;
   readonly onMode: (mode: PopupMode) => void;
 }
 
-/**
- * 最上部の「ノード追加」と「ノード参照」の切り替え
- */
 export function ModeTabs({ mode, referenceable, onMode }: ModeTabsProps): React.ReactElement {
   return (
     <div
@@ -93,9 +83,6 @@ export function ModeTabs({ mode, referenceable, onMode }: ModeTabsProps): React.
   );
 }
 
-/**
- * ノード定義の取り直し。探しているノードが無いのはここで気づくので、ここに置く。自動では取り直さない
- */
 export function RefreshDefinitionsButton(): React.ReactElement {
   const baseUrl = useSettingsStore((state) => state.baseUrl);
   const loading = useDefinitionsStore((state) => state.status === 'loading');
@@ -123,7 +110,6 @@ interface TypeSelectProps {
   readonly onChange: (type: string) => void;
 }
 
-/** 型での絞り込み。先頭は「指定なし」 */
 export function TypeSelect({
   label,
   title,

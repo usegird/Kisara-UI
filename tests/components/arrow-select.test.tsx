@@ -5,15 +5,10 @@ import { afterEach, describe, expect, it } from 'vitest';
 
 import { arrowSelect, type ArrowSelectLayout } from '@/components/ui/arrow-select';
 
-// ─────────────────────────────
-// 選ぶ画面の一覧の矢印キー。選んでいる項目から隣を選び直し、一覧を送らない。
-// ─────────────────────────────
-
 afterEach(cleanup);
 
 const NAMES = ['a', 'b', 'c', 'd'];
 
-/** 2 列の格子の位置（jsdom は配置しないので、項目の位置を名前から決める） */
 function placeAsGrid(element: HTMLElement, index: number): void {
   const left = (index % 2) * 100;
   const top = Math.floor(index / 2) * 50;
@@ -25,7 +20,6 @@ function Picker({ layout }: { readonly layout: ArrowSelectLayout }): React.React
   return (
     <div>
       <ul aria-label="一覧" onKeyDown={(event) => arrowSelect(event, layout)}>
-        {/* 一覧の中の文字の欄（矢印キーは欄のものとして残す） */}
         <li>
           <input aria-label="名前" />
         </li>
@@ -60,7 +54,6 @@ describe('一覧の矢印キー', () => {
     const first = screen.getByRole('button', { name: 'a' });
     fireEvent.click(first);
     first.focus();
-    // 既定（送る）を止めたら fireEvent は false を返す
     expect(fireEvent.keyDown(first, { key: 'ArrowDown' })).toBe(false);
     expect(pressed()).toBe('b');
     expect(document.activeElement?.textContent).toBe('b');

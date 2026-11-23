@@ -6,12 +6,6 @@ import { useRunReportStore } from '@/store/use-run-report-store';
 import { useSettingsStore } from '@/store/use-settings-store';
 import { useTabsStore } from '@/store/use-tabs-store';
 
-// ─────────────────────────────
-// 編集の印。写しの関係にあるタブを 2 か所で直していないかを、
-// 置き場のデータだけで見分ける（実行の報告の注意に使う）。
-// ─────────────────────────────
-
-/** 鍵を持たれているセッション（ほかのブラウザのタブが開いているもの） */
 let held: Set<string> | null;
 const heldSessions = () => Promise.resolve(held);
 
@@ -19,7 +13,6 @@ beforeEach(() => {
   held = new Set(['a', 'b']);
   useSettingsStore.setState({ clientId: 'me' });
   useRunReportStore.setState({ saveNotices: [] });
-  // 開いているタブ: セッション a（写しでない）
   useTabsStore.setState({
     tabs: [{ id: 'tab-1', kind: 'workflow', runSession: 'a' }],
     activeId: 'tab-1',
@@ -44,7 +37,6 @@ describe('編集の印', () => {
   it('同じ元の別のセッションが、読み込んだ後にほかで編集していたら注意を 1 回だけ出す', async () => {
     const store = createMemorySessionStore();
     const watch = createEditWatch(store, heldSessions, () => 100);
-    // 複製したブラウザのタブ（セッション b、元は a）が編集した
     await store.put('edit:b', { lineage: 'a', writer: 'other', name: 'portrait', savedAt: 200 });
 
     await watch.check();
@@ -62,7 +54,6 @@ describe('編集の印', () => {
     await watch.check();
     expect(useRunReportStore.getState().saveNotices).toHaveLength(1);
 
-    // 鍵の一覧が取れない間は確かめられないので外さない
     held = null;
     await watch.check();
     expect(useRunReportStore.getState().saveNotices).toHaveLength(1);

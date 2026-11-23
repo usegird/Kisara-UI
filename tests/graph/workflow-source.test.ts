@@ -4,11 +4,6 @@ import { readOpenedFile } from '@/graph/workflow-source';
 
 import { png, textChunk } from '../helpers/png';
 
-// ─────────────────────────────
-// 開くファイルの中身。JSON はそのまま、PNG は埋め込みの `workflow` を読む
-// （無ければ `prompt` から組み立てる）。
-// ─────────────────────────────
-
 const WORKFLOW = { nodes: [], links: [] };
 
 describe('開くファイルの中身', () => {

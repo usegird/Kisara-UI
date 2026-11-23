@@ -10,10 +10,6 @@ import { useSettingsStore } from '@/store/use-settings-store';
 import { fakeEmbeddingPort, type FakeEmbeddingPort } from '../helpers/embedding';
 import { LEAK_ALLOWANCE, LEAK_ROUNDS, leakWatch } from '../helpers/leak';
 
-// ─────────────────────────────
-// 動的追加辞書のカードの中の近似判定
-// ─────────────────────────────
-
 let port: FakeEmbeddingPort;
 
 beforeEach(() => {
@@ -30,7 +26,6 @@ afterEach(async () => {
 
 const toggle = () => screen.getByRole('checkbox', { name: '近似判定' });
 
-/** モデルの行の文（読んでいるか置いてあるか・名前・大きさ） */
 const modelRows = () => screen.queryAllByRole('listitem').map((row) => row.textContent);
 
 describe('近似判定のチェック', () => {

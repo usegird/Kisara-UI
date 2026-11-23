@@ -18,26 +18,17 @@ import { useGraphStore } from '@/store/use-graph-store';
 import { useImageTabsStore } from '@/store/use-image-tabs-store';
 import type { Tab, TabSnapshot, TabsState } from '@/store/use-tabs-store';
 
-// ─────────────────────────────
-// タブのストアの、タブを足す・画像のタブを開く・動かす・切り替える・閉じる操作。
-// 切り替えるときに今の内容を控えへ移し、行き先の控えを載せ直す。
-// ─────────────────────────────
-
-/** この slice が持つ操作 */
 type TabsSwitchActions = Pick<
   TabsState,
-  'addTab' | 'openImageTab' | 'moveTab' | 'selectTab' | 'closeTab' | 'prepareOpen'
+  'addTab' | 'openImageTab' | 'moveTab' | 'selectTab' | 'closeTab' | 'prepareOpen' | 'duplicateTab'
 >;
 
-/** 閉じたあとの並びと控え */
 interface ClosedTabs {
-  /** 閉じたあとに選ぶタブ。残らなければ null */
   readonly target: string | null;
   readonly rest: readonly Tab[];
   readonly snapshots: Readonly<Record<string, TabSnapshot>>;
 }
 
-/** タブを足す・動かす・切り替える・閉じる操作を作る */
 export const createTabsSwitchSlice: StateCreator<TabsState, [], [], TabsSwitchActions> = (
   set,
   get,
@@ -86,11 +77,9 @@ export const createTabsSwitchSlice: StateCreator<TabsState, [], [], TabsSwitchAc
 
       useImageTabsStore.getState().remove(id);
       const chatId = tabs.find((tab) => tab.id === id)?.chatId;
-      // 会話は置き場に残る。手元の中身だけを手放す
       if (chatId !== undefined) useChatStore.getState().unload(chatId);
       const target = nextActiveId(tabs, id, activeId);
       const rest = tabs.filter((tab) => tab.id !== id);
-      // 閉じたタブのセッションも、タスクの列に出し記録を書き続ける
       const closing = tabs.find((tab) => tab.id === id)?.runSession;
       set({ pastSessions: withPast(get().pastSessions, closing) });
       settleClosed(set, activeId, { target, rest, snapshots: omitKey(snapshots, id) });
@@ -98,22 +87,47 @@ export const createTabsSwitchSlice: StateCreator<TabsState, [], [], TabsSwitchAc
 
     prepareOpen: () => {
       const { tabs, activeId } = get();
-      // 画像と会話のタブにはワークフローを開かない
       const other = tabs.some((tab) => tab.id === activeId && tab.kind !== 'workflow');
       if (!other && useGraphStore.getState().workflow === null) return;
       get().addTab();
     },
+
+    duplicateTab: (id) => duplicateTabOf({ set, get }, id),
   };
 };
 
-/** 閉じたあとの並びを載せ、選ぶタブが替われば控えを載せ直す */
+function duplicateTabOf(
+  { set, get }: { set: StoreApi<TabsState>['setState']; get: () => TabsState },
+  id: string,
+): string | null {
+  const { tabs, activeId, snapshots } = get();
+  const index = tabs.findIndex((tab) => tab.id === id);
+  const source = get().readTab(id);
+  if (tabs[index]?.kind !== 'workflow' || source?.workflow == null) return null;
+
+  const copy: TabSnapshot = {
+    ...source,
+    selectedNodeIds: [],
+    history: undefined,
+    dialogs: undefined,
+  };
+  const fresh = nextId();
+  const tab: Tab = { id: fresh, kind: 'workflow', runSession: newSession() };
+  set({
+    tabs: [...tabs.slice(0, index + 1), tab, ...tabs.slice(index + 1)],
+    activeId: fresh,
+    snapshots: { ...snapshots, [activeId]: currentSnapshot() },
+  });
+  applySnapshot(copy);
+  return fresh;
+}
+
 function settleClosed(
   set: StoreApi<TabsState>['setState'],
   activeId: string,
   closed: ClosedTabs,
 ): void {
   const { target, rest, snapshots } = closed;
-  // 最後の 1 枚を閉じたら、空のタブを 1 枚残す（タブが 0 枚の状態を作らない）
   if (target === null) {
     const fresh = nextId();
     set({

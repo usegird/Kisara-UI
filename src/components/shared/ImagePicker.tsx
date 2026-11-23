@@ -13,74 +13,45 @@ import { t } from '@/i18n';
 import { CARD_LIST_STEP } from '@/store/settings-fields/card-size';
 import { useSettingsStore } from '@/store/use-settings-store';
 
-// ─────────────────────────────
-// 画像をカードで選ぶダイアログ。画像の出どころと置き方は呼び出し元が渡し、呼び出し元の部品・
-// ストアを知らない。開け閉ては基盤の Trigger に任せる。
-// ─────────────────────────────
-
-/** 知らせ。失敗は赤、それ以外（名前が変わったなど）はふつうの色 */
 interface Notice {
   readonly text: string;
   readonly failed: boolean;
 }
 
-/** ファイルを掴んで持ってきている間、格子に出す落とし先の枠 */
 const dropOverlay = cva(
   `border-primary bg-primary/5 text-primary pointer-events-none absolute inset-2 z-10 flex
     items-center justify-center rounded-md border-2 border-dashed text-sm`,
 );
 
-/** 掴んでいるのがファイルか（文字や要素のドラッグは受けない） */
 function carriesFiles(event: React.DragEvent): boolean {
   return event.dataTransfer.types.includes('Files');
 }
 
-/** 先頭の「なし」のカードの値（画像の値と重ならない）。決定すると空の値を返す */
 export const NONE_IMAGE = '\u0000none';
 
-/** 帯に足す操作に渡すもの */
 interface ImagePickerSelection {
-  /** 選んでいるカード。無ければ null */
   readonly item: ImageItem | null;
-  /** 選んでいるカードを外す */
   readonly clear: () => void;
-  /** 帯に知らせを出す（失敗なら赤） */
   readonly notify: (text: string, failed: boolean) => void;
 }
 
-/** 画像を選ぶダイアログの props */
 export interface ImagePickerProps {
-  /** ダイアログの id（位置と大きさを覚える鍵） */
   readonly id: string;
   readonly title: string;
-  /** 見出しの補足 */
   readonly subtitle?: string | undefined;
-  /** 開く引き金 */
   readonly trigger: React.ReactNode;
-  /** 現在の値（✓ を付けるカード） */
   readonly value: string;
   readonly items: readonly ImageItem[];
-  /** カードの画像の URL。作れなければ null（名前だけの枠） */
   readonly srcOf: (value: string) => string | null;
   readonly uploading: boolean;
-  /** アップロードできない（つながっていないなど） */
   readonly uploadDisabled: boolean;
-  /** 画像を置き、選ぶ値を返す */
   readonly upload: (files: readonly File[]) => Promise<UploadOutcome>;
-  /** 見出しの右端に足す操作（取り直しなど） */
   readonly headerActions?: React.ReactNode;
-  /** 帯のアップロードの後ろに足す操作（消すなど） */
   readonly bandActions?: (selection: ImagePickerSelection) => React.ReactNode;
-  /** 決定した値を返す。使い道は呼び出し元が決める（「なし」なら空） */
   readonly onPlace: (value: string) => void;
-  /** 渡すと、格子の先頭に画像を外す「なし」のカードを置く（その名前） */
   readonly noneLabel?: string | undefined;
 }
 
-/**
- * 画像を選ぶダイアログ。帯と画像のカードの格子を置き、ボタンか落とす操作でアップロードする。
- * アップロードを終えたら最後に置いた画像を選び、そのカードまで描いて送る（絞り込みは変えない）
- */
 export function ImagePicker({
   id,
   title,
@@ -100,13 +71,11 @@ export function ImagePicker({
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [selected, setSelected] = useState<string | null>(null);
-  // アップロードして見せたいカード。そこまで描いて送る
   const [reveal, setReveal] = useState<string | null>(null);
   const [notice, setNotice] = useState<Notice | null>(null);
   const [dropping, setDropping] = useState(false);
   const fileInput = useRef<HTMLInputElement>(null);
 
-  // 開いた瞬間に、いまの値のカードを選んだ状態へ戻す（描画中に前回から直す React の型）
   const [wasOpen, setWasOpen] = useState(open);
   if (open !== wasOpen) {
     setWasOpen(open);
@@ -119,8 +88,6 @@ export function ImagePicker({
   const height = useSettingsStore((state) => state.modelCardHeight);
   const ascending = useSettingsStore((state) => state.imageSortAscending);
   const setAscending = useSettingsStore((state) => state.setImageSortAscending);
-  // 「なし」のカードは絞り込み・並びに関わらず先頭に置く。
-  // この部品では compiler がこの 3 つを前回の物にしない（外すと描くたびに絞り込み直す）ので、手で書く
   const none = useMemo(
     (): ImageItem | null =>
       noneLabel === undefined ? null : { value: NONE_IMAGE, path: noneLabel, label: noneLabel },
@@ -142,7 +109,6 @@ export function ImagePicker({
     CARD_LIST_STEP,
     `${query} ${String(ascending)}`,
   );
-  // 見せたいカードがまだ描いていない所にあれば、そこまで描く
   const revealIndex = reveal === null ? -1 : visible.findIndex((item) => item.value === reveal);
   const shown = Math.max(count, revealIndex + 1);
 
@@ -177,7 +143,6 @@ export function ImagePicker({
       subtitle={subtitle}
       actions={headerActions}
     >
-      {/* Esc は選んだカード → ダイアログの順に閉じる。ファイルはダイアログのどこに落としてもよい */}
       <div
         className="relative flex min-h-0 flex-1 flex-col"
         onKeyDownCapture={(event) => {
@@ -193,7 +158,6 @@ export function ImagePicker({
           setDropping(true);
         }}
         onDragLeave={(event) => {
-          // 中の要素の間を動いたときは消さない（囲みの外へ出たときだけ）
           const next = event.relatedTarget;
           if (next instanceof Node && event.currentTarget.contains(next)) return;
           setDropping(false);
@@ -237,7 +201,6 @@ export function ImagePicker({
           filterLabel={t('imagePicker.filter.label')}
           query={query}
           onQuery={setQuery}
-          // 選択肢は名前しか持たないので、並びは名前だけ（向きは変えられる）
           sortOptions={[{ key: 'name', label: t('modelPicker.sort.name'), Icon: CaseSensitive }]}
           sortKey="name"
           ascending={ascending}
@@ -266,13 +229,11 @@ export function ImagePicker({
   );
 }
 
-/** 開いたときに選ぶカード。値が空なら「なし」のカード（無ければ選ばない） */
 function initialSelectionOf(value: string, noneLabel: string | undefined): string | null {
   if (value !== '') return value;
   return noneLabel === undefined ? null : NONE_IMAGE;
 }
 
-/** 選んでいるカードの画像。「なし」はそのカード、見つからなければ null */
 function selectedItemOf(
   selected: string | null,
   none: ImageItem | null,

@@ -9,10 +9,6 @@ import { groupTree } from '@/graph/search';
 import type { NodeId } from '@/graph/types';
 import { t } from '@/i18n';
 
-// ─────────────────────────────
-// ノードの検索の左の案内（カテゴリ・参照するノード）と参照の一覧
-// ─────────────────────────────
-
 interface CategoryNavProps {
   readonly tree: ReturnType<typeof groupTree>;
   readonly selected: string;
@@ -20,7 +16,6 @@ interface CategoryNavProps {
   readonly onSelect: (group: string) => void;
 }
 
-/** 左: 分類の木。よく使うもの・現在使用中 → すべて → 本体の分類・カスタム・パートナー */
 export function CategoryNav({
   tree,
   selected,
@@ -52,13 +47,11 @@ export function CategoryNav({
 
 interface ReferenceNodeNavProps {
   readonly candidates: readonly ReferenceSlot[];
-  /** 選んでいるノード。null はすべて */
   readonly selected: NodeId | null;
   readonly width: number;
   readonly onSelect: (nodeId: NodeId | null) => void;
 }
 
-/** 左: 参照するノード。先頭にすべて、あとはカードの並び */
 export function ReferenceNodeNav({
   candidates,
   selected,
@@ -108,7 +101,6 @@ interface ReferenceListProps {
   readonly onPick: (slot: ReferenceSlot) => void;
 }
 
-/** 右: 出力（接続元を選ぶ）か入力（接続先を選ぶ） */
 export function ReferenceList({
   side,
   candidates,

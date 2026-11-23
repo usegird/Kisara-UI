@@ -8,17 +8,12 @@ import { useChatStore } from '@/store/use-chat-store';
 
 import { chat } from '../helpers/llm';
 
-// ─────────────────────────────
-// プロンプトの項目を足す・消す操作の取り消し。
-// ─────────────────────────────
-
 afterEach(cleanup);
 
 beforeEach(() => {
   useChatStore.setState({ chats: { c1: chat() } });
 });
 
-/** keydown の代わり（焦点のある枠で押したことにする） */
 function press(key: string, shiftKey = false): React.KeyboardEvent<HTMLElement> {
   const target = document.createElement('div');
   return {

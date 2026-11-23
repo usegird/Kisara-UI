@@ -4,10 +4,6 @@ import { afterEach, describe, expect, it } from 'vitest';
 
 import { AccessibilityStatementRow } from '@/components/ui/accessibility-statement';
 
-// ─────────────────────────────
-// アクセシビリティ方針の全文。ご意見の窓口は問い合わせのフォーム
-// ─────────────────────────────
-
 const CONTACT_FORM_URL = 'https://contact.kisara-ui.com';
 
 afterEach(cleanup);

@@ -13,10 +13,6 @@ import {
 
 import { chat, chatMessage, contentText, llm, loreEntry } from '../helpers/llm';
 
-// ─────────────────────────────
-// プロンプトのタブの追加辞書の一覧
-// ─────────────────────────────
-
 function dictionary(id: string, name: string, entries: Dictionary['entries']): Dictionary {
   return { id, name, entries, createdAt: 0, updatedAt: 0 };
 }
@@ -52,7 +48,6 @@ describe('追加辞書の一覧', () => {
       ]),
       historyCount: 6,
     });
-    // 当たっていない項目（当たらない）は出さない。末尾から数えた 1 件目は今回のメッセージ
     expect(rows.additional.map(text)).toEqual([
       'ネットスラング: ぴえん (system)',
       'アリア: 門番 (system)',
@@ -86,7 +81,6 @@ describe('会話履歴の中の並びと送る順', () => {
       loreEntry({ constant: true, depth: { depth: 2, role: 'system' }, content: 'MINUS2' }),
       loreEntry({ constant: true, depth: { depth: 0, role: 'user' }, content: 'ZERO' }),
     ];
-    // u2 は今回送るメッセージ（送るときは会話履歴の最後に入っている）
     const messages = [
       chatMessage('u1', 'user', ['U1']),
       chatMessage('a1', 'assistant', ['A1']),
@@ -95,7 +89,6 @@ describe('会話履歴の中の並びと送る順', () => {
     const talk = chat(messages);
     const names = { userName: 'U', charName: 'C' };
     const lore = chatLore([{ id: 'd', entries }], talk.prompt, names, { messages, context: null });
-    // 送るときと同じく、今回のメッセージと受け取る側を足した会話から組む
     const sending = appendTurn(chat(messages.slice(0, -1)), {
       text: 'U2',
       userId: 'u2',

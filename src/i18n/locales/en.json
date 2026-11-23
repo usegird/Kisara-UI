@@ -94,8 +94,8 @@
       "chatFirst": "Keep chat tabs on the left"
     },
     "loraFormat": {
-      "label": "Lora copy format",
-      "note": "[loraname] is replaced with the name without extension, [learntext] with the most frequent training words, and [memo] with the notes. Leave empty to use the default."
+      "label": "Lora prompt format",
+      "note": "Use [] to name a key, such as [activation text]. Separate keys with | to use the key on the right when the value is not set."
     },
     "nodeDisplay": {
       "heading": "Node display"
@@ -339,7 +339,8 @@
     "decide": {
       "toolbar": "{kind} confirmation",
       "label": "Confirm {kind}",
-      "title": "Choose {name} and close (double-click or Enter also works)"
+      "title": "Choose {name} and close (double-click or Enter also works)",
+      "insertTitle": "Set the {kind} and close"
     },
     "insert": {
       "label": "Insert {kind} at the caret without closing"
@@ -383,32 +384,42 @@
     },
     "info": {
       "panel": "Model info",
+      "preview": "Preview of {name}",
       "close": "Close info",
-      "path": "Path",
+      "type": "type",
       "copyName": "Copy the name of {name}",
       "size": "Size",
-      "modified": "Modified",
-      "created": "Created",
-      "name": "Name",
-      "baseModel": "Base model",
+      "modified": "Modified date",
+      "created": "Created date",
+      "name": "name",
+      "baseModel": "base model",
       "network": "Network",
       "loading": "Loading info…",
       "error": "Couldn't get info: {error}",
       "noEmbedded": "No embedded info",
-      "triggerWords": "Frequent training words",
+      "triggerWords": "ss_tag_frequency",
       "copyTriggerWords": "Copy all frequent training words",
       "insertTriggerWords": "Insert all frequent training words at the caret",
-      "notes": "Notes",
-      "notesNone": "No notes file yet. Saving creates one.",
-      "notesLoading": "Loading notes…",
-      "notesFailed": "Couldn't read the notes: {error}",
-      "notesSave": "Save notes",
+      "notes": "txt",
+      "notesLoading": "Loading txt…",
+      "notesFailed": "Couldn't read txt: {error}",
+      "notesSave": "Save txt",
+      "notesEdit": "Edit txt",
+      "notesCancel": "Stop editing txt",
       "notesSaving": "Saving…",
       "notesSaved": "Saved",
       "notesSaveFailed": "Couldn't save: {error}",
-      "copyNotes": "Copy the notes",
-      "insertNotes": "Insert the notes at the caret",
-      "allEntries": "All embedded fields"
+      "copyNotes": "Copy txt",
+      "insertNotes": "Insert txt at the caret",
+      "json": "JSON",
+      "jsonLoading": "Loading the JSON…",
+      "jsonFailed": "Couldn't read the JSON: {error}",
+      "jsonEdit": "Edit {key}",
+      "jsonCancel": "Stop editing {key}",
+      "jsonSave": "Save {key}",
+      "copyActivationText": "Copy the activation text",
+      "insertActivationText": "Insert the activation text at the caret",
+      "allEntries": "model data"
     }
   },
   "imagePicker": {
@@ -441,14 +452,13 @@
   "insertBar": {
     "label": "Insert",
     "waiting": "Loading list",
-    "noTarget": "Choose where to insert before choosing, or drop the icon",
-    "caretMarker": "Insertion point (drag to move it to another position or field)",
-    "caretHandle": "Drop on a multiline field to insert there",
+    "noTarget": "Choose where to insert before choosing",
     "lora": {
       "title": "Choose a Lora and insert it at the caret",
       "label": "Insert Lora",
       "triggersFailed": "Could not get the frequent training words: {message}",
-      "memoFailed": "Could not get the notes: {message}"
+      "memoFailed": "Could not get txt: {message}",
+      "jsonFailed": "Could not get the JSON: {message}"
     },
     "style": {
       "title": "Open the style editor (confirm or double-click to insert at the caret)",
@@ -556,7 +566,7 @@
     },
     "insert": {
       "noFieldTitle": "Place the caret in a multi-line field outside this dialog first",
-      "title": "Insert at the caret in the selected field"
+      "title": "Insert at the caret in the selected field and close"
     },
     "saveAs": {
       "title": "Save as",
@@ -602,7 +612,7 @@
       "builtin": {
         "a1111Txt2img": {
           "title": "txt2img (A1111 style)",
-          "description": "Text to image laid out like the Stable Diffusion web UI. LoRA and wildcards in the prompt, Hires. fix and ADetailer switches. Needs Impact Pack (ADetailer also needs Impact Subpack)"
+          "description": "Text to image laid out like the Stable Diffusion web UI. LoRA and wildcards in the prompt, Hires. fix and ADetailer groups (bypassed at first). Needs Impact Pack (ADetailer also needs Impact Subpack)"
         }
       }
     },
@@ -623,6 +633,7 @@
       "empty": "No matching workflows"
     },
     "tabMenu": {
+      "duplicate": "Duplicate tab",
       "save": "Save",
       "saveAs": "Save as…",
       "export": "Export",
@@ -724,7 +735,17 @@
     "copy": "Copy wildcard",
     "noMatch": "No matches",
     "list": "Wildcard list",
-    "itemTitle": "{name} (double-click or drag onto a field to insert)"
+    "itemTitle": "{name} (double-click or drag onto a field to insert)",
+    "back": "Close the preview and go back to the list",
+    "preview": {
+      "title": "Preview",
+      "note": "Preview (nesting, wildcards, and weights are already applied, so this differs from what's actually written)",
+      "loading": "Loading the contents…",
+      "unavailable": "This server can't expand wildcards, so the preview can't be shown (you can still insert the name)",
+      "failed": "Couldn't load the contents: {error}",
+      "empty": "This wildcard has no options",
+      "entries": "Wildcard options"
+    }
   },
   "tagComplete": {
     "list": "Tag suggestions",
@@ -790,6 +811,7 @@
     "overwrite": {
       "title": "Overwrite?",
       "description": "A workflow with the same name already exists in ComfyUI (workflows/{path}). This cannot be undone.",
+      "shared": "This file is also open in another tab.\nOverwrite it anyway?",
       "confirm": "Overwrite"
     },
     "rootFallback": {
@@ -946,6 +968,7 @@
       "danglingReference": "The source ({source}) of input \"{name}\" is not included in the run",
       "namedMismatch": "Not run: the parameter names do not match the definition order (the values may be shifted)",
       "typeMismatch": "Not run: a parameter value does not match its type in the definition (the values may be shifted)",
+      "linkedChoice": "Not run: a link is connected to a selector that changes the following inputs (ComfyUI cannot pick the inputs from a linked value)",
       "excludedDownstream": "Not run because its input node {source} is not run",
       "subgraphCycle": "Subgraph \"{name}\" contains itself, so it cannot be expanded",
       "noOutputLeft": "Not submitted: no output node is left to run"
@@ -1109,6 +1132,7 @@
       "appInputOffTitle": "Make this an app input (App Mode)",
       "disconnectLabel": "Disconnect {name}",
       "disconnect": "Disconnect",
+      "dragLinkLabel": "Also connect the source of {name} to another row",
       "unconnected": "Not connected",
       "unconnectedRequired": "Not connected (required)",
       "unknownName": "Can't identify the parameter name",
@@ -1149,15 +1173,10 @@
       "toSubgraphTitle": "Move the members and the group into a new subgraph",
       "deleteGroup": "Delete group and members",
       "deleteGroupTitle": "Removes the frame and all the cards in it",
-      "switchShow": "Show switch in app inputs",
-      "switchHide": "Remove switch from app inputs",
-      "switchTitle": "A switch that bypasses all the cards in this group at once"
-    },
-    "groupSwitch": {
-      "title": "Switches",
-      "clearLabel": "Remove all switches",
-      "clearTitle": "Remove the switches from this column (the cards stay as they are)",
-      "mixed": "Partly"
+      "bypass": "Bypass all",
+      "bypassTitle": "Bypasses all the cards in this group (including inner groups)",
+      "enable": "Enable all",
+      "enableTitle": "Sets all the cards in this group back to normal (muted cards too)"
     },
     "subgraph": {
       "mark": "subgraph",
@@ -1270,11 +1289,43 @@
       "otherWriter": "The temporary save of \"{name}\" was updated by another browser tab ({time})",
       "parallelEdit": "\"{name}\" is also being edited in another browser tab (last edit {time})",
       "untitledTab": "Untitled",
-      "noIssues": "No issues"
+      "noIssues": "No issues",
+      "missingModel": "Model not found on the connected ComfyUI: {name}",
+      "model": {
+        "place": "Put it in: models/{directory}/",
+        "openSource": "Open download page",
+        "copyUrl": "Copy the download URL",
+        "copyPlace": "Copy the folder",
+        "source": "Download from: {url}"
+      },
+      "manager": {
+        "title": "Missing nodes: {count} types",
+        "find": "Find with ComfyUI-Manager",
+        "finding": "Looking up…",
+        "noManager": "ComfyUI-Manager is not installed on the connected ComfyUI. Install the missing node packs yourself.",
+        "failed": "Could not look up: {reason}",
+        "version": "ComfyUI-Manager {version}",
+        "packNodes": "Provides: {nodes}",
+        "install": "Install",
+        "installing": "Installing…",
+        "installed": "Installed (restart to use)",
+        "installFailed": "Install failed: {reason}",
+        "unresolved": "Not found in any pack: {nodes}",
+        "forbidden": "ComfyUI-Manager refused (security_level). Check config.ini and the ComfyUI terminal log.",
+        "restart": "Restart ComfyUI",
+        "restarting": "Restarting…",
+        "restarted": "Restart requested. After it reconnects, refresh the node definitions.",
+        "restartFailed": "Could not restart: {reason}",
+        "refreshDefinitions": "Refresh node definitions",
+        "confirmInstallTitle": "Install a node pack",
+        "confirmInstall": "Install \"{title}\" into the connected ComfyUI through ComfyUI-Manager?\nThis adds files to the ComfyUI server. A restart is needed before the nodes can be used.",
+        "confirmRestartTitle": "Restart ComfyUI",
+        "confirmRestart": "Restart the connected ComfyUI?\nRunning and queued jobs stop, and other users of this ComfyUI are disconnected."
+      }
     },
     "control": {
       "repeatHint": "Keeps queueing this tab's workflow one at a time until you stop it (keeps using the GPU). Repeats in other tabs keep running and take turns. Stops on interruption",
-      "repeatActive": "This tab is already repeating. Stop it from the task column",
+      "repeatStop": "Stop repeating",
       "blocked": {
         "noWorkflow": "Open a workflow",
         "notConnected": "Connect first",
@@ -1314,7 +1365,7 @@
       "openDetailHint": "Click to open what was run and its results",
       "cancel": "Remove from queue",
       "cancelHint": "Removes this task from the queue before it runs",
-      "nodeProgress": "{finished}/{total} nodes"
+      "nodeProgress": "{finished}/{total}"
     },
     "panel": {
       "fetchFailed": "Could not get the queue: {error}",
@@ -1353,9 +1404,11 @@
       "following": "Following: moves to each task when it finishes",
       "openViewer": "Open in viewer",
       "openViewerHint": "Switch to the viewer from this image",
+      "copyOutputText": "Copy the output text",
       "section": {
         "models": "Models",
         "prompts": "Prompts",
+        "outputTexts": "Output text",
         "settingsTimed": "Run order, duration, and settings",
         "settings": "Settings (seed, steps, etc.)"
       },
@@ -1467,8 +1520,11 @@
       "openImages": "Open the images of {name}",
       "openImagesHint": "Open every image of this workflow in the viewer",
       "openDetailHint": "Open the details of this workflow's runs",
-      "noModel": "unknown model",
-      "dateRuns": "{date} / {runs} runs"
+      "runsWorkflow": "{runs} / {workflow}",
+      "remove": "Delete the history of {name}",
+      "removeHint": "Delete this session's run history file",
+      "removeTitle": "Delete history",
+      "removeDescription": "Delete the run history of \"{name}\". This cannot be undone."
     },
     "detail": {
       "title": "History details",
@@ -1494,7 +1550,9 @@
       "session": "session: {id}",
       "sessionNamed": "{name} ({id})",
       "sessionLabel": "Session",
-      "typeLabel": "Type"
+      "typeLabel": "Type",
+      "rename": "Rename the session",
+      "renameInput": "Session name"
     },
     "panel": {
       "notRecording": "Run history is off.",
@@ -2008,14 +2066,7 @@
       "cleanup": {
         "heading": "Cleanup",
         "description": "Backups not in the browser that are 30 days old or older",
-        "none": "No matching backups.",
-        "notice": {
-          "title": "Cleanup",
-          "description": "Old backup data remains. Do you want to review it?",
-          "confirm": "Review",
-          "later": "Later"
-        }
-      },
+        "none": "No matching backups."      },
       "userFiles": {
         "history": "Run history",
         "historyHint": "Run records KisaraUI writes to the ComfyUI user folder (kisara/history).",
@@ -2066,6 +2117,7 @@
       "newChat": "New chat",
       "openFile": "Open from file",
       "openFileTitle": "Import exported chats, or start a new chat from a character card",
+      "tidyBackups": "Tidy up old data",
       "list": "Show chats",
       "empty": "Chats you send messages in appear here.",
       "place": "Where chats are saved",

@@ -1,36 +1,23 @@
 import { tagKey } from '@/graph/tag-dictionary';
 
-// ─────────────────────────────
-// タグの表の並べ替え（列の見出しで選ぶ。選んでいなければ今までの並び）。画面を閉じたら忘れる。
-// ─────────────────────────────
-
-/** 並べ替える列 */
 export type TagSortKey = 'tag' | 'aliases' | 'priority';
 
-/** 選んでいる並べ替え */
 export interface TagSort {
   readonly key: TagSortKey;
   readonly ascending: boolean;
 }
 
-/** 並べ替えに使う行の中身 */
 export interface TagSortFields {
   readonly tag: string;
-  /** 別名を `,` でつないだもの。無ければ空 */
   readonly aliases: string;
   readonly priority: number;
 }
 
-/** 見出しを押したときの次の並べ替え。別の列なら昇順、同じ列なら昇順 → 降順 → 選ばない */
 export function nextTagSort(current: TagSort | null, key: TagSortKey): TagSort | null {
   if (current?.key !== key) return { key, ascending: true };
   return current.ascending ? { key, ascending: false } : null;
 }
 
-/**
- * 行を並べ替える。選んでいなければそのまま。別名の無い行は向きに関わらず後ろに置く
- * （別名で並べたいときに、別名の無い大半の行が前に来ないように）。同じ値なら元の並び
- */
 export function sortTagRows<T>(
   rows: readonly T[],
   sort: TagSort | null,

@@ -4,7 +4,6 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { installTheme } from '@/store/install/install-theme';
 import { useSettingsStore } from '@/store/use-settings-store';
 
-/** OS の設定を差し替えられる matchMedia（jsdom には無い） */
 function stubSystemTheme(dark: boolean): (dark: boolean) => void {
   const listeners = new Set<() => void>();
   const query = {

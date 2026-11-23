@@ -5,10 +5,6 @@ import { readChatFile } from '@/chat/import';
 
 import { chat, chatMessage } from '../helpers/llm';
 
-// ─────────────────────────────
-// 会話のファイルの読み込み。形は中身で見分ける。
-// ─────────────────────────────
-
 const NOW = 5_000;
 
 describe('形の見分け', () => {

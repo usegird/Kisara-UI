@@ -14,20 +14,12 @@ import {
 } from '@/chat/types';
 import { finiteNumber, isRecord, isUnknownArray } from '@/lib/guards';
 
-// ─────────────────────────────
-// 会話のファイルの読み戻し。ChatGPT の `conversations.json` の形と、KisaraUI の持ち物を足した形を読む。
-// ─────────────────────────────
-
-/** 読み戻した会話と、外した会話・捨てた発言の数 */
 export interface ParsedChats {
   readonly chats: readonly Chat[];
-  /** 読めずに外した会話の数 */
   readonly skipped: number;
-  /** 捨てた発言（ツールの呼び出しとその結果・画像・添付）の数 */
   readonly dropped: number;
 }
 
-/** 本文の文字。文字でない中身（コード・画像・思考など）は null */
 function messageText(message: Record<string, unknown>): string | null {
   const content = message.content;
   if (!isRecord(content)) return null;
@@ -53,7 +45,6 @@ function kisaraOf(message: Record<string, unknown>): Record<string, unknown> | n
   return isRecord(metadata) && isRecord(metadata.kisara) ? metadata.kisara : null;
 }
 
-/** 節の候補（本文と記録）。読めなければ null */
 function candidateOf(message: Record<string, unknown>): Candidate | null {
   const text = messageText(message);
   if (text === null) return null;
@@ -79,7 +70,6 @@ function nodeOf(mapping: Record<string, unknown>, id: unknown): Record<string, u
   return isRecord(node) ? node : null;
 }
 
-/** 道の末端。`current_node` が無ければ、根から最後の子をたどった先 */
 function pathEnd(mapping: Record<string, unknown>, raw: Record<string, unknown>): string | null {
   const current = raw.current_node;
   if (typeof current === 'string' && nodeOf(mapping, current) !== null) return current;
@@ -98,7 +88,6 @@ function pathEnd(mapping: Record<string, unknown>, raw: Record<string, unknown>)
   return id ?? null;
 }
 
-/** 根から末端までの節の id */
 function pathTo(mapping: Record<string, unknown>, end: string): string[] {
   const path: string[] = [];
   const visited = new Set<string>();
@@ -113,7 +102,6 @@ function pathTo(mapping: Record<string, unknown>, end: string): string[] {
   return path.reverse();
 }
 
-/** 道の上の `assistant` の節と、同じ親を持つ `assistant` の兄弟（道に無い兄弟の子孫は読まない） */
 function assistantCandidates(
   mapping: Record<string, unknown>,
   nodeId: string,
@@ -139,7 +127,6 @@ function seconds(value: unknown): number {
   return time === null ? 0 : Math.round(time * MS_PER_SECOND);
 }
 
-/** 会話 1 つを読む。読めなければ null。捨てた発言の数を `dropped` に足す */
 function parseConversation(
   raw: unknown,
   counter: { dropped: number },
@@ -175,7 +162,6 @@ function parseConversation(
   return { chat: settleInterrupted(chat), own: kisara !== null };
 }
 
-/** 道の上の節 1 つを発言にする。読まない節は null */
 function messageOfNode(
   mapping: Record<string, unknown>,
   nodeId: string,
@@ -203,24 +189,20 @@ function messageOfNode(
   };
 }
 
-/** 発言として読む役割。読まない節は null（捨てた発言は `dropped` に足す） */
 function keptRole(
   message: Record<string, unknown>,
   counter: { dropped: number },
 ): 'user' | 'assistant' | null {
   const role = roleOf(message);
   const text = messageText(message);
-  // `system` の発言は読まない（システムプロンプトは会話に持たない）
   if (role === 'system') return null;
   if ((role !== 'user' && role !== 'assistant') || text === null) {
     counter.dropped += 1;
     return null;
   }
-  // ChatGPT の空の発言は飛ばす。KisaraUI の空の候補（失敗・止めた）は残す
   return text.length === 0 && kisaraOf(message) === null ? null : role;
 }
 
-/** 発言の id。KisaraUI の持ち物にあればそれ、無ければ節の id。重なれば後ろを足す */
 function uniqueId(message: Record<string, unknown>, nodeId: string, used: Set<string>): string {
   const own = kisaraOf(message)?.message;
   let id = typeof own === 'string' && own.length > 0 ? own : nodeId;
@@ -229,21 +211,15 @@ function uniqueId(message: Record<string, unknown>, nodeId: string, used: Set<st
   return id;
 }
 
-/** 会話の構成。KisaraUI の持ち物（`kisara`）にあればそこから読み、無ければ初めの構成 */
 function promptOf(kisara: Record<string, unknown> | null): PromptComposition {
   return parseComposition(kisara?.prompt) ?? defaultComposition();
 }
 
-/** ChatGPT の形のファイル（会話の配列か、会話 1 つ）か */
 export function isConversationsFile(raw: unknown): boolean {
   const first = isUnknownArray(raw) ? raw[0] : raw;
   return isRecord(first) && isRecord(first.mapping);
 }
 
-/**
- * ChatGPT の形のファイルを読む。`kisara` の無い会話（ChatGPT の書き出し）は、モデルと
- * 生成の設定を持ち込まない
- */
 export function parseConversations(raw: unknown): ParsedChats {
   const items = isUnknownArray(raw) ? raw : [raw];
   const counter = { dropped: 0 };

@@ -2,11 +2,6 @@ import { describe, expect, it } from 'vitest';
 
 import { adjustWeight } from '@/graph/prompt-weight';
 
-// ─────────────────────────────
-// 重みの増減。選んだ範囲か、キャレットを囲む括弧・語に 0.1 ずつ効かせ、1.0 で括弧を外す。
-// ─────────────────────────────
-
-/** 書き換えた後の文と、選んでいる文字 */
 function apply(text: string, start: number, end: number, direction: 1 | -1) {
   const edit = adjustWeight(text, start, end, direction);
   if (edit === null) return null;
@@ -85,6 +80,21 @@ describe('選んでいない・キャレットが語の上', () => {
     expect(apply('long hair, cat', 4, 4, 1)?.next).toBe('(long:1.1) hair, cat');
     expect(apply('long hair, cat', 9, 9, 1)?.next).toBe('long (hair:1.1), cat');
     expect(apply('a,cat', 2, 2, 1)?.next).toBe('a,(cat:1.1)');
+  });
+
+  it('書式の記号（| { } [ ] @ ~）は語に巻き込まない（タグ補完と同じ区切り）', () => {
+    expect(apply('{red|blue}', 2, 2, 1)?.next).toBe('{(red:1.1)|blue}');
+    expect(apply('{red|blue}', 6, 6, 1)?.next).toBe('{red|(blue:1.1)}');
+    expect(apply('[cat]', 2, 2, 1)?.next).toBe('[(cat:1.1)]');
+    expect(apply('@wlop', 3, 3, 1)?.next).toBe('@(wlop:1.1)');
+    expect(apply('cat~dog', 1, 1, 1)?.next).toBe('(cat:1.1)~dog');
+  });
+
+  it(': は括弧の中でだけ区切る。外では語の一部（顔文字のタグ・作者:名前）', () => {
+    expect(apply('[a:cat]', 4, 4, 1)?.next).toBe('[a:(cat:1.1)]');
+    expect(apply('{x:dog|y}', 3, 3, 1)?.next).toBe('{x:(dog:1.1)|y}');
+    expect(apply('artist:wlop', 9, 9, 1)?.next).toBe('(artist:wlop:1.1)');
+    expect(apply('a, :3', 4, 4, 1)?.next).toBe('a, (:3:1.1)');
   });
 
   it('\\( は語の文字として含める', () => {

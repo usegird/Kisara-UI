@@ -4,10 +4,6 @@ import { llmTargetOf } from '@/store/chat/llm-target';
 
 import { profile } from '../helpers/llm';
 
-// ─────────────────────────────
-// 会話で使う接続の設定・モデル・生成の設定（全体で 1 つ）。選んだものが無いときの代わり
-// ─────────────────────────────
-
 describe('使う接続の設定とモデル', () => {
   const profiles = [profile({ id: 'a', defaultModel: 'ma' }), profile({ id: 'b' })];
 

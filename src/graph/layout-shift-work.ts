@@ -12,45 +12,30 @@ import { positionOf, rectOf, type NodeRect, type OrderLayout } from '@/graph/nod
 import { routeLongLinks } from '@/graph/reroutes';
 import type { NodeId, Workflow, WorkflowNode } from '@/graph/types';
 
-// ─────────────────────────────
-// 変更箇所だけの置き直しの作業の形。作業中の位置と、箱・列の読み方。
-// ─────────────────────────────
-
-/** 位置を同じとみなす差（端数の違いでは動かしたことにしない） */
 const SAME_POSITION_TOLERANCE = 0.5;
 
 type Positions = Map<NodeId, [number, number]>;
 
-/** 置き直しの作業場。位置は書き換えながら読む */
 export interface Work {
   readonly workflow: Workflow;
   readonly layout: OrderLayout;
   readonly byId: Map<NodeId, WorkflowNode>;
   readonly pos: Positions;
-  /** 所属（作業中に書き換える） */
   readonly membership: Map<NodeId, number>;
-  /** グループの親（作業中に書き換える） */
   readonly parents: Map<number, number>;
-  /** 動かしたノード（線の中継点を置き直す束を決める） */
   readonly moved: Set<NodeId>;
 }
 
-/** 1 つの階層（外か、グループの中）に並ぶもの。ノード 1 つか、子のグループの箱 */
 export interface Item {
   readonly ids: readonly NodeId[];
-  /** グループの箱なら添字 */
   readonly group: number | null;
-  /** 読み戻しの位置（ノードは箱の左上、グループはメンバーの左端と上端） */
   readonly readLeft: number;
   readonly readTop: number;
-  /** 占める箱（グループは枠の余白と見出しを含む） */
   readonly rect: NodeRect;
 }
 
-/** 入れる先・抜く元の階層。外は null、グループの中は添字 */
 export type Container = number | null;
 
-/** 作業中の位置でのノードの箱。無いノードは null */
 export function nodeRect(work: Work, id: NodeId): NodeRect | null {
   const node = work.byId.get(id);
   if (!node) return null;
@@ -58,7 +43,6 @@ export function nodeRect(work: Work, id: NodeId): NodeRect | null {
   return rectOf({ ...node, pos: at }, work.layout);
 }
 
-/** 箱をすべて囲む箱 */
 export function union(rects: readonly NodeRect[]): NodeRect {
   return {
     left: Math.min(...rects.map((rect) => rect.left)),
@@ -68,7 +52,6 @@ export function union(rects: readonly NodeRect[]): NodeRect {
   };
 }
 
-/** グループの中のノード（子のグループの中も）。`skip` のノードは数えない */
 export function subtreeIds(work: Work, group: number, skip: ReadonlySet<NodeId>): NodeId[] {
   return work.workflow.nodes.flatMap((node) =>
     !skip.has(node.id) && lineage(work.membership.get(node.id), work.parents).includes(group)
@@ -77,7 +60,6 @@ export function subtreeIds(work: Work, group: number, skip: ReadonlySet<NodeId>)
   );
 }
 
-/** 階層に並ぶもの。`skip` のノードは数えない（入れる途中・抜く途中のもの） */
 export function itemsOf(work: Work, container: Container, skip: ReadonlySet<NodeId>): Item[] {
   const items: Item[] = [];
   const children = new Map<number, NodeId[]>();
@@ -103,7 +85,6 @@ export function itemsOf(work: Work, container: Container, skip: ReadonlySet<Node
   return items;
 }
 
-/** 読み戻しと同じ決まりで列に分ける（左端の順、差がゆとり以内なら同じ列、列の中は上から） */
 export function columnsOf(items: readonly Item[]): Item[][] {
   const byLeft = [...items].sort(
     (a, b) => a.readLeft - b.readLeft || a.readTop - b.readTop || (a.ids[0] ?? 0) - (b.ids[0] ?? 0),
@@ -124,7 +105,6 @@ export function columnsOf(items: readonly Item[]): Item[][] {
   );
 }
 
-/** 作業中の位置をまとめてずらす */
 export function translate(work: Work, ids: readonly NodeId[], dx: number, dy: number): void {
   if (dx === 0 && dy === 0) return;
   for (const id of ids) {
@@ -136,35 +116,26 @@ export function translate(work: Work, ids: readonly NodeId[], dx: number, dy: nu
   }
 }
 
-/** 要素の中のノードの id をすべて並べる */
 export function idsOf(items: readonly Item[]): NodeId[] {
   return items.flatMap((item) => item.ids);
 }
 
-/** 列の左端 */
 export function columnLeft(column: readonly Item[]): number {
   return Math.min(...column.map((item) => item.readLeft));
 }
 
-/** 列の右端 */
 export function columnRight(column: readonly Item[]): number {
   return Math.max(...column.map((item) => item.rect.right));
 }
 
-/** 縦の範囲が重なるか */
 export function overlapsVertically(a: NodeRect, b: NodeRect): boolean {
   return a.top < b.bottom && b.top < a.bottom;
 }
 
-/** そのノードが要素の中にあるか */
 export function containsItem(item: Item, id: NodeId): boolean {
   return item.ids.includes(id);
 }
 
-/**
- * グループの枠（今の位置から。`withGroupBounds` と同じく、直下のメンバーの箱と子のグループの枠を
- * 囲む）。中に誰も居なければ null
- */
 export function groupFrame(work: Work, group: number, skip: ReadonlySet<NodeId>): NodeRect | null {
   const rects: NodeRect[] = [];
   for (const [id, member] of work.membership) {
@@ -180,12 +151,10 @@ export function groupFrame(work: Work, group: number, skip: ReadonlySet<NodeId>)
   return rects.length === 0 ? null : frameAround(rects);
 }
 
-/** 階層の親（外は null） */
 export function parentOf(work: Work, group: number): Container {
   return work.parents.get(group) ?? null;
 }
 
-/** `container` から外へたどったグループの、今の枠（伸び縮みを外へ伝える前に測る） */
 export function framesUp(
   work: Work,
   container: Container,
@@ -198,7 +167,6 @@ export function framesUp(
   return frames;
 }
 
-/** 置き直しの作業を始める */
 export function startWork(
   workflow: Workflow,
   layout: OrderLayout,
@@ -216,7 +184,6 @@ export function startWork(
   };
 }
 
-/** 作業の結果を書き出す。位置の変わったノードだけ差し替え、枠と線の中継点を求め直す */
 export function finish(work: Work): Workflow {
   let changed = false;
   const nodes = work.workflow.nodes.map((node) => {

@@ -10,22 +10,15 @@ import type { CardMotion } from '@/hooks/flow/use-flow-motion';
 import type { NodeEditing } from '@/hooks/flow/use-node-editing';
 import { useGraphStore } from '@/store/use-graph-store';
 
-// ─────────────────────────────
-// カードの列の中身。カードに渡す手続きをストアと組み立ての側から集めて `NodeList` へ渡す。
-// ─────────────────────────────
-
-/** カードの列の中身が受け取るもの */
 interface FlowCardListProps {
   readonly views: readonly NodeView[];
   readonly definitionsLoaded: boolean;
   readonly cardGroups: CardGroups;
   readonly preview: DragPreview | null;
   readonly cardStates: ReadonlyMap<NodeId, NodeCardState>;
-  // 編集の状態をまるごと受けない。検索を開くたびに変わり、列の枠とここが描き直しになる
   readonly onCommit: NodeEditing['commitValue'];
   readonly onResizeText: NodeEditing['resizeText'];
   readonly onNeedOptions: NodeEditing['needOptions'];
-  /** カードのメニューの「詳細設定…」。無ければ出さない */
   readonly onOpenSettings: NodeEditing['setSettingsFor'] | undefined;
   readonly actions: CardActions;
   readonly motion: CardMotion;
@@ -33,7 +26,6 @@ interface FlowCardListProps {
   readonly frames: DisplayGraph['frames'] | undefined;
 }
 
-/** ストアの手続きはどれも変わらないので、ここで受けても描き直しは増えない */
 export function FlowCardList({
   views,
   definitionsLoaded,

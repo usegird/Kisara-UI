@@ -5,10 +5,6 @@ import { installTrace } from '@/store/install/install-trace';
 import { useSettingsStore } from '@/store/use-settings-store';
 import { useTabsStore } from '@/store/use-tabs-store';
 
-// ─────────────────────────────
-// 画面の出来事は分けず、そのときのタブの分野に入れる
-// ─────────────────────────────
-
 afterEach(() => {
   useSettingsStore.setState({ traceLevels: DEFAULT_TRACE_LEVELS });
   clearTrace();

@@ -9,11 +9,6 @@ import {
   uploadTempImage,
 } from '@/comfy/input-images';
 
-// ─────────────────────────────
-// 入力画像の取り口とアップロード。応答の形は本体のソースで確かめたもの。
-// 実機では叩かない（入力フォルダへ書くため）。
-// ─────────────────────────────
-
 const base = 'http://127.0.0.1:8188';
 
 describe('値から画像の取り口を作る', () => {
@@ -80,6 +75,7 @@ describe('アップロード', () => {
     expect(error).toMatchObject({ kind: 'parse', reasonCode: 'upload-unexpected' });
   });
 });
+
 describe('temp へのアップロード', () => {
   it('temp のサブフォルダへ送り、[temp] 付きの値を返す。上書きを頼まない', async () => {
     const fetchImpl = vi

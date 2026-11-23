@@ -121,7 +121,6 @@ describe('ノード定義ストア', () => {
     expect(deps.fetchOne).toHaveBeenCalledTimes(1);
   });
 
-  // 選択肢だけが変わるので、検索の索引は作り直さずに引き継ぐ。候補は新しい定義を返す
   it('選択肢を取り直しても検索の索引は引き継ぎ、候補は新しい定義を返す', async () => {
     const { store } = makeStore();
     await store.getState().load(BASE_URL);
@@ -147,7 +146,6 @@ describe('ノード定義ストア', () => {
     expect(deps.fetchOne).toHaveBeenCalledTimes(1);
   });
 
-  // 画像をアップロードしたときだけの取り直し（自動の取り直しを据え置いている中の例外）
   it('取り直しは選択肢が揃っていても取りに行き、知らないクラスは取らない', async () => {
     const { store, deps } = makeStore();
     await store.getState().load(BASE_URL);

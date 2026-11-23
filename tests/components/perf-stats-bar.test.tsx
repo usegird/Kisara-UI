@@ -47,7 +47,6 @@ describe('台帳の表', () => {
     });
     expect(table.textContent).toContain('render:NodeCard');
 
-    // 閉じたら読み直しを止める
     fireEvent.click(screen.getByRole('button', { name: '表を閉じる' }));
     expect(vi.getTimerCount()).toBe(0);
   });

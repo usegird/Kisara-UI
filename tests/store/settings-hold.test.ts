@@ -4,10 +4,6 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { isRecord } from '@/lib/guards';
 import { holdSettingsWrites, SETTINGS_KEY, useSettingsStore } from '@/store/use-settings-store';
 
-// ─────────────────────────────
-// 掴んで動かしている間は設定を書かず、離したら最後の値を 1 回書く
-// ─────────────────────────────
-
 afterEach(() => vi.restoreAllMocks());
 
 function settingsWrites(spy: { readonly mock: { readonly calls: string[][] } }): string[] {
@@ -31,7 +27,6 @@ describe('設定を書くのを止める', () => {
       useSettingsStore.getState().chatImageWidth,
     );
 
-    // 2 回目の再開では書かない。止めていなければ変えるたびに書く
     resume();
     useSettingsStore.getState().setChatImageSize(340, 400);
     expect(settingsWrites(spy)).toHaveLength(2);
@@ -39,7 +34,6 @@ describe('設定を書くのを止める', () => {
 
   it('書くときは、ほかのタブが変えた項目を消さずに、このタブで変えた項目だけを重ねる', () => {
     useSettingsStore.getState().setChatImageSize(300, 400);
-    // ほかのタブが同じ置き場のシステムプロンプトを書き換えた
     const stored: unknown = JSON.parse(localStorage.getItem(SETTINGS_KEY) ?? '{}');
     if (!isRecord(stored) || !isRecord(stored.state)) throw new Error('no settings');
     const state = { ...stored.state, llmSystemPrompt: 'from other tab' };

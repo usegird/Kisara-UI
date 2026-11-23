@@ -5,10 +5,6 @@ import { sortModels } from '@/components/llm/dialogs/model-sort';
 
 import { modelDetails } from '../helpers/llm';
 
-// ─────────────────────────────
-// 会話のモデルの並び替えと費用の 1 行。
-// ─────────────────────────────
-
 const prompt = (usd: number) => [{ name: 'prompt', usd, perToken: true }];
 
 describe('モデルの並び替え', () => {

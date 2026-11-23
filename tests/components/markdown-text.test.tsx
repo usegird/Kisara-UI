@@ -4,10 +4,6 @@ import { afterEach, describe, expect, it } from 'vitest';
 
 import { MarkdownText } from '@/components/llm/message/MarkdownText';
 
-// ─────────────────────────────
-// 会話の本文の Markdown。LLM の出力は信用しないデータとして描く。
-// ─────────────────────────────
-
 afterEach(cleanup);
 
 function draw(text: string): HTMLElement {

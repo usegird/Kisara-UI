@@ -17,31 +17,20 @@ import { NODE_MODE } from '@/graph/types';
 import { t, type MessageKey } from '@/i18n';
 import { useGraphStore } from '@/store/use-graph-store';
 
-// ─────────────────────────────
-// カードの右クリックメニューの実行モード・色。カスタムの色選びは use-color-picker。
-// ─────────────────────────────
-
 const MODE_CHOICES = [
   { value: NODE_MODE.normal, label: 'flow.style.modeNormal' },
   { value: NODE_MODE.bypass, label: 'flow.style.modeBypass' },
   { value: NODE_MODE.mute, label: 'flow.style.modeMute' },
 ] as const satisfies readonly { value: number; label: MessageKey }[];
 
-/** 既定（色なし）を表す選択肢の値。選ぶと両方のキーを落とす（`writeNodeSettings` は null で消す） */
 const NO_COLOR = '';
 
-/** 実行モード・色のメニューの受け取り物 */
 export interface NodeStyleMenuProps {
   readonly nodeId: number;
   readonly onSettingsChange: (id: number, patch: NodeSettingsPatch) => void;
-  /** 「カスタム…」。今の本体の色を渡す */
   readonly onPickColor: (current: string | null) => void;
 }
 
-/**
- * 右クリックメニューに実行モードと色の選択肢を出す。
- * メニューを開いている間だけストアを読む（カードの描画ごとには読まない）
- */
 export function NodeStyleMenu({
   nodeId,
   onSettingsChange,
@@ -74,7 +63,6 @@ export function NodeStyleMenu({
           ))}
         </ContextMenuRadioGroup>
       </ContextMenuSubmenu>
-      {/* 本体と同じく、見出しの帯と本体を組で塗る。見本は本体の色 */}
       <ContextMenuSubmenu label={t('flow.style.color')}>
         <ContextMenuRadioGroup
           value={choice ?? NO_COLOR}
@@ -100,7 +88,6 @@ export function NodeStyleMenu({
         <ContextMenuSeparator />
         <ContextMenuItem onClick={() => onPickColor(settings.bgcolor)}>
           <span className="flex items-center gap-2 pl-[22px]">
-            {/* 組に無い色のときだけ、今の色の見本を付ける */}
             {choice === 'custom' && settings.bgcolor !== null ? (
               <span
                 aria-hidden

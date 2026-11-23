@@ -8,22 +8,10 @@ import { reloadPage } from '@/lib/reload-page';
 import { THEME_PREFERENCES } from '@/lib/theme';
 import { useSettingsStore } from '@/store/use-settings-store';
 
-// ─────────────────────────────
-// 画面の言語と配色、タブの並べ方の欄。ComfyUI の設定のタブと、会話の設定のタブで同じものを使う。
-// 欄の id は部品ごとに作る（2 つの列に同時に出ても重ならない）
-// ─────────────────────────────
-
 const SELECT = field({ size: 'xs', width: 'control' });
 
-/**
- * 設定のタブの欄の見出し（言語・配色・アバターなど）。上の欄（入力欄・スイッチ）との間は、並びの間隔に
- * 12px 足す
- */
 export const SETTING_HEADING_CLASS = 'text-foreground mt-3 px-1';
 
-/**
- * 画面の言語。開いている間は変えないので、選んだら残して読み込み直す
- */
 export function LanguageSelect(): React.ReactElement {
   const id = useId();
   return (
@@ -50,10 +38,6 @@ export function LanguageSelect(): React.ReactElement {
   );
 }
 
-/**
- * 画面の配色。言語と違い、読み込み直さずにその場で塗り替える
- * （根の印は入口で取り付けたものが設定の変更に追う）
- */
 export function ThemeSelect(): React.ReactElement {
   const id = useId();
   const theme = useSettingsStore((state) => state.theme);
@@ -82,9 +66,6 @@ export function ThemeSelect(): React.ReactElement {
   );
 }
 
-/**
- * 会話のタブをワークフローのタブより左へ自動で寄せるかのスイッチ。どちらの設定のタブにも出す
- */
 export function ChatTabsFirstSwitch(): React.ReactElement {
   const on = useSettingsStore((state) => state.chatTabsFirst);
   return (

@@ -3,10 +3,6 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { useChatLibraryStore } from '@/store/use-chat-library-store';
 import { useSettingsStore } from '@/store/use-settings-store';
 
-// ─────────────────────────────
-// ヘッダーのハンバーガーメニューで会話の一覧を開け閉めする。
-// ─────────────────────────────
-
 afterEach(() => {
   useSettingsStore.setState({ chatSidebarCollapsed: false });
   useChatLibraryStore.setState({ drawerOpen: false });

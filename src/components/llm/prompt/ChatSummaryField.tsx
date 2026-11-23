@@ -12,11 +12,6 @@ import { guardPress } from '@/lib/press-guard';
 import { useChatStore } from '@/store/use-chat-store';
 import { useChatSummaryStore } from '@/store/use-chat-summary-store';
 
-// ─────────────────────────────
-// 会話履歴の要約を作る・直す。作るのは利用者が押したときだけ。プロンプトのタブの要約の欄と、
-// 会話の画面の外して送った知らせで使う。
-// ─────────────────────────────
-
 const FIELD = `${field({ size: 'xs' })} field-sizing-content max-h-80 min-h-20 w-full resize-y`;
 
 const TEXT_BUTTON =
@@ -26,13 +21,8 @@ const TEXT_BUTTON =
 const ICON_BUTTON = `text-muted-foreground hover:text-foreground hover:bg-muted inline-flex size-5
   shrink-0 items-center justify-center rounded`;
 
-/**
- * 「要約する」と、要約している間の処理中の印・作り終えた応答の情報（i）・失敗したときの知らせ。
- * 応答の情報を開いているかはこの欄だけの表示（保存しない）
- */
 export function SummarizeButton({ chatId }: { readonly chatId: string }): React.ReactElement {
   const state = useChatSummaryStore((store) => store.states[chatId]);
-  // 縮める発言があり、受け取り中でないか（数だけを読み、会話が変わるたびに描き直さない）
   const ready = useChatStore((store) => {
     const chat = store.chats[chatId];
     return chat !== undefined && !isStreaming(chat) && summaryRange(chat) !== null;
@@ -81,7 +71,6 @@ export function SummarizeButton({ chatId }: { readonly chatId: string }): React.
   );
 }
 
-/** セッション要約の行を開いた中。要約があれば本文の欄（空にすると送らない） */
 export function ChatSummaryField({
   chatId,
 }: {

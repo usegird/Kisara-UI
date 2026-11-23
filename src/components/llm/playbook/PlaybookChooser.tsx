@@ -8,17 +8,11 @@ import { t } from '@/i18n';
 import { useChatStore } from '@/store/use-chat-store';
 import { useSettingsStore } from '@/store/use-settings-store';
 
-// ─────────────────────────────
-// プレイブックの選ぶ所。
-// ─────────────────────────────
-
-/** 選ぶ所の 1 行。選んでいるものは地を付ける */
 const chooserRow = cva(
   'flex w-full flex-col items-start gap-0.5 rounded-md px-2 py-1.5 text-left',
   { variants: { chosen: { true: 'bg-muted', false: 'hover:bg-muted' } } },
 );
 
-/** 標準のプレイブックを並べ、押したものをその会話に写す */
 export function PlaybookChooser({
   chatId,
   onChosen,
@@ -43,7 +37,6 @@ export function PlaybookChooser({
     const store = useChatStore.getState();
     const chat = store.chats[chatId];
     if (!chosen(row) && chat !== undefined) {
-      // プレイブックの辞書（##playbook）は前のものを引き継ぎ、無ければ空の 1 冊を足す
       store.setPlaybook(chatId, startPlaybook(chat, row.playbook()));
     }
     onChosen();
@@ -86,7 +79,6 @@ export function PlaybookChooser({
     </section>
   );
 
-  // 自分のプレイブックはまだ作らないので、「自分のもの」の組と行のメニューは置かない
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto px-2 py-2">
       {group(t('llm.playbook.builtinGroup'), shown(rows.builtin), t('llm.playbook.allHidden'))}

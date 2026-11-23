@@ -10,11 +10,6 @@ import { useSettingsStore } from '@/store/use-settings-store';
 
 import { chat, chatMessage, loreEntry } from '../helpers/llm';
 
-// ─────────────────────────────
-// 機能のタブの動的追加辞書を切ったとき。全体の辞書も個別追加辞書も
-// 当てず、プロンプト構成に追加辞書の項目を出さない
-// ─────────────────────────────
-
 afterEach(() => {
   cleanup();
   useSettingsStore.setState({ loreDictionariesOn: true });

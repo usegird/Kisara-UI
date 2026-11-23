@@ -10,8 +10,6 @@ import { useChatStore } from '@/store/use-chat-store';
 
 import { chat, sampleComposition } from '../helpers/llm';
 
-// 並べ替えの読み上げは画面の言語と項目の名前で出す
-
 afterEach(() => {
   cleanup();
   useChatStore.setState({ chats: {} });
@@ -59,7 +57,6 @@ describe('PromptItemList の読み上げ', () => {
     fireEvent.keyDown(handle, { code: 'Space', key: ' ' });
     const live = screen.getByRole('status');
     expect(live.textContent).toBe(t('ui.drag.start', { name: itemLabel(first) }));
-    // 掴んだ後のキーは次の番から受ける（dnd-kit の KeyboardSensor）
     await act(() => new Promise((resolve) => setTimeout(resolve, 0)));
     fireEvent.keyDown(handle, { code: 'ArrowDown', key: 'ArrowDown' });
     expect(live.textContent).not.toContain(first.id);
@@ -77,7 +74,6 @@ describe('PromptItemList の動かせない行と無効', () => {
     expect(history.className).toContain('bg-band/50');
     expect(history.className).toContain('rounded-b-none');
     expect(row(t('llm.prompt.prefill')).className).not.toContain('-mt-1');
-    // 動かせる項目には付けない
     expect(screen.getAllByRole('listitem')[0]!.className).not.toContain('bg-band');
   });
 
@@ -97,6 +93,7 @@ describe('PromptItemList の動かせない行と無効', () => {
     expect(useChatStore.getState().chats['c1']!.prompt.items[0]!.enabled).toBe(true);
   });
 });
+
 describe('PromptItemList の深さの項目と tools の行', () => {
   const depthItem = (name: string, depth: number): PromptItem => ({
     id: name,
@@ -128,7 +125,6 @@ describe('PromptItemList の深さの項目と tools の行', () => {
         tools={<div>TOOLS-ROW</div>}
       />,
     );
-    // 画面の文字の並びで前後を見る（tools の行は並べ替えの並びに入らない）
     const text = document.body.textContent ?? '';
     const at = (part: string): number => text.indexOf(part);
     expect(at(t('llm.prompt.items.chatHistory'))).toBeLessThan(at('Deep'));

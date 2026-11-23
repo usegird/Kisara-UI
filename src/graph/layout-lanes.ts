@@ -1,22 +1,13 @@
 import { boxFor, sidePad, widthFor, type Box, type Context, type Item } from '@/graph/layout-items';
 import type { NodeId } from '@/graph/types';
 
-// ─────────────────────────────
-// 支流（並びで続き、本流の 1 つへ入るノードの列）を見つけ、入る先の左に横 1 段で並べる。
-// ─────────────────────────────
-
-/** 段に分けて並べる列の最短の長さ（合流先を含む） */
 const MIN_LANE_RUN = 3;
 
-/** 支流。並びで続くノードと、続きの最後のノード（入る先。列に並ぶ） */
 export interface Lane {
   readonly items: readonly Item[];
   readonly target: Item;
 }
 
-/**
- * 並びの中の支流。グループの箱は支流に入れない
- */
 export function findLanes(items: readonly Item[], context: Context): Lane[] {
   const lanes: Lane[] = [];
   const continues = (from: Item | undefined, to: Item | undefined): boolean =>
@@ -50,10 +41,6 @@ interface LaneState {
   readonly placed: Box[];
 }
 
-/**
- * 支流を置く。右端は入る先の左端－隙間、左へ実幅＋隙間で詰める。上端は X が重なる箱の下、
- * 重なる箱が無ければ入る先と中央を揃える。段のノードは上端を揃える
- */
 export function placeLane(lane: Lane, { context, tops, xOf, placed }: LaneState): void {
   const { layout } = context;
   const targetX = xOf.get(lane.target);
@@ -90,7 +77,6 @@ export function placeLane(lane: Lane, { context, tops, xOf, placed }: LaneState)
   });
 }
 
-/** 支流のノード → その支流が入る先のノード（列の接続先として使う） */
 export function laneVia(lanes: readonly Lane[], context: Context): Map<NodeId, NodeId> {
   const via = new Map<NodeId, NodeId>();
   for (const lane of lanes) {

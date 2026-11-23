@@ -3,10 +3,6 @@ import { describe, expect, it } from 'vitest';
 import { isRecord } from '@/lib/guards';
 import { mergeChangedItems, mergeChangedKeys } from '@/lib/merge-changes';
 
-// ─────────────────────────────
-// このタブで変わった所だけを置き場の値に重ねる
-// ─────────────────────────────
-
 describe('項目ごとに重ねる', () => {
   it('このタブで変えた項目だけを当て、ほかのタブが変えた項目は置き場のまま残す', () => {
     const previous = { prompt: 'old', width: 300 };

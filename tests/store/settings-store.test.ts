@@ -16,7 +16,6 @@ describe('設定ストア', () => {
 
   it('clientId はタブごとに決まり、決まったら入る', async () => {
     const clientId = await clientIdReady;
-    // 英小文字と数字の 8 文字
     expect(clientId).toMatch(/^[a-z0-9]{8}$/u);
     expect(useSettingsStore.getState().clientId).toBe(clientId);
   });
@@ -101,6 +100,7 @@ describe('設定ストア', () => {
       ),
     ).toEqual([true, 'right', 320, 48]);
   });
+
   it('プレイブックの設定を読み戻し、壊れた値は既定（出す・外さない）に落とす', () => {
     const merge = useSettingsStore.persist.getOptions().merge;
     const current = useSettingsStore.getState();

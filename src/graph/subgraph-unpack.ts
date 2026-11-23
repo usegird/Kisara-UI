@@ -16,33 +16,21 @@ import {
 import { lastGroupIdOf } from '@/graph/workflow-ids';
 import { isRecord, isUnknownArray } from '@/lib/guards';
 
-// ─────────────────────────────
-// subgraph → グループの部品。定義の線とノード・中のグループを外の階層へ持ち出す形にする。
-// ─────────────────────────────
-
-/** 定義の中のグループ（持ち出すもの）と、中の所属・親。添字は定義の `groups` のもの */
 interface InnerGroups {
   readonly groups: readonly Record<string, unknown>[];
   readonly membership: ReadonlyMap<NodeId, number>;
   readonly parents: ReadonlyMap<number, number>;
-  /** 中のノードを全部囲む、いちばん外側のグループ（1 つだけのとき）。無ければ null */
   readonly wrapping: number | null;
 }
 
-/** 定義の線を外へ出すときに見るもの */
 export interface UnpackContext {
   readonly definition: SubgraphDefinition;
   readonly instanceInputs: ReturnType<typeof nodeInputs>;
   readonly intoInstance: readonly LiveLink[];
   readonly fromInstance: readonly LiveLink[];
-  /** 中のノードの id → 外での新しい id */
   readonly map: (id: NodeId) => NodeId | undefined;
 }
 
-/**
- * 定義の線 1 本を、外へ出した後の線にする。入口からの線は外の出どころから直に、出口への線は
- * 外の受け手それぞれへ、中どうしは新しい id どうしで結ぶ。結べなければ空
- */
 export function unpackedLinks(
   raw: WorkflowLink,
   context: UnpackContext,
@@ -52,7 +40,6 @@ export function unpackedLinks(
   if (!link) return [];
   const { definition, map } = context;
   if (link.originId === SUBGRAPH_IO_NODE_ID.input) {
-    // 入口 → 外の出どころから直に
     const name = definition.inputs?.[link.originSlot]?.name;
     const slot = context.instanceInputs.findIndex((input) => input.name === name);
     const outer = context.intoInstance.find(({ link: l }) => l.targetSlot === slot)?.link;
@@ -63,7 +50,6 @@ export function unpackedLinks(
     ];
   }
   if (link.targetId === SUBGRAPH_IO_NODE_ID.output) {
-    // 中の出どころ → 出口 → 外の受け手それぞれへ
     const origin = map(link.originId);
     if (origin === undefined) return [];
     return context.fromInstance
@@ -83,7 +69,6 @@ export function unpackedLinks(
   return [[nextLinkId(), origin, link.originSlot, target, link.targetSlot, rawType(raw)]];
 }
 
-/** 中のノードに新しい id を振り、位置は箱の左上を原点に寄せる（置き場所は後で決める） */
 export function movedNodes(
   definition: SubgraphDefinition,
   map: (id: NodeId) => NodeId | undefined,
@@ -99,11 +84,6 @@ export function movedNodes(
   return { moved, origin: [left, top] };
 }
 
-/**
- * 戻した後のグループの一覧と、中のノードをまとめるグループ・その中の所属と親。
- * 中のグループは親子のまま持ち出す（id は振り直す）。中を全部囲むものが 1 つだけなら、
- * それをまとめるグループにする。無ければ包むグループを足す（名前はコメントか定義の名前）
- */
 export function unpackGroups(
   start: Workflow,
   {
@@ -126,7 +106,6 @@ export function unpackGroups(
 } {
   const inner = innerGroupsOf(start, definition, layout);
   const base = workflowGroups(start).length;
-  // 番号は外と全部の定義で共有する数えの次から配る（本体と同じ）
   let lastGroupId = lastGroupIdOf(start);
   const carried = inner.groups.map((group) => carriedGroup(group, ++lastGroupId, origin));
   const comment =
@@ -150,7 +129,6 @@ function innerGroupsOf(
   layout: OrderLayout,
 ): InnerGroups {
   const groups = workflowGroups(definition).map((group) => (isRecord(group) ? group : {}));
-  // 定義の中を 1 つの階層として読む（位置から所属と親を求める）
   const level: Workflow = { ...workflow, nodes: definition.nodes, links: [], groups };
   const membership = groupMembership(level, layout);
   const parents = groupParents(level);
@@ -163,7 +141,6 @@ function innerGroupsOf(
   return { groups, membership, parents, wrapping: tops.length === 1 ? (tops[0] ?? null) : null };
 }
 
-/** 持ち出す中のグループ 1 つ。id を振り直し、箱を中のノードと同じだけずらす */
 function carriedGroup(
   group: Record<string, unknown>,
   id: number,
@@ -180,7 +157,6 @@ function carriedGroup(
   };
 }
 
-/** 入れるグループの中の所属と親（外の添字で。まとめるグループの直下は載せない） */
 function insertedTreeOf(
   inner: InnerGroups,
   { base, groupIndex, carried }: { base: number; groupIndex: number; carried: number },
@@ -203,7 +179,6 @@ function insertedTreeOf(
   };
 }
 
-/** 外に残す線か（消した線と、インスタンスにつながる線を落とす） */
 export function keepsRootLink(
   raw: WorkflowLink,
   removedIds: ReadonlySet<LinkId>,
@@ -218,7 +193,6 @@ export function keepsRootLink(
   );
 }
 
-/** 戻すインスタンスのほかに、同じ定義を使うノードが（外か定義の中に）残っているか */
 export function isStillUsed(workflow: Workflow, instanceId: NodeId, definitionId: string): boolean {
   return [
     ...workflow.nodes.filter((node) => node.id !== instanceId),

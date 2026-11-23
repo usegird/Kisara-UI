@@ -4,13 +4,6 @@ import type { PromptComposition } from '@/chat/types';
 import { historyKeyOf, isTextEntry } from '@/lib/text-entry';
 import { useChatStore } from '@/store/use-chat-store';
 
-// ─────────────────────────────
-// プロンプトの項目を足す・消す操作の取り消し。会話の構成全体を、会話ごとに画面の中だけで控える。
-// ─────────────────────────────
-
-/**
- * 控える手の上限（古いものから捨てる）。
- */
 const LIMIT = 50;
 
 interface PromptHistory {
@@ -19,19 +12,13 @@ interface PromptHistory {
   readonly redo: readonly PromptComposition[];
 }
 
-/** 控える手続きと、取り消し・やり直しのキーの受け口 */
 interface PromptHistoryControls {
-  /** 足す・消す直前に呼ぶ。今の構成を控え、やり直しの控えを捨てる */
   readonly record: () => void;
-  /** プロンプトのタブの枠の keydown に渡す */
   readonly onKeyDown: (event: React.KeyboardEvent<HTMLElement>) => void;
 }
 
-/** 取り消し・やり直しのキー。どちらでもなければ null */
-/** 会話のプロンプトの構成を控え、取り消し・やり直しのキーで戻す。文字の入力欄の中では取らない */
 export function usePromptHistory(chatId: string): PromptHistoryControls {
   const [history, setHistory] = useState<PromptHistory>({ chatId, undo: [], redo: [] });
-  // 会話を替えたら控えを捨てる（描く間に合わせる）
   const current: PromptHistory =
     history.chatId === chatId ? history : { chatId, undo: [], redo: [] };
   if (current !== history) setHistory(current);

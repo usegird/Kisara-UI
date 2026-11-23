@@ -2,14 +2,14 @@ import { fetchText, postText, type RequestOptions } from '@/comfy/client';
 import { userdataItemUrl, userdataWriteUrl } from '@/comfy/endpoints';
 import { isNotFound } from '@/comfy/request-error';
 import { listUserdataPaths } from '@/comfy/userdata';
-import { KISARA_NOTES_DIR, notesFilePath } from '@/graph/kisara-files';
-import type { ModelNoteFile } from '@/port/comfy-port';
+import { jsonEditsFilePath, KISARA_NOTES_DIR, notesFilePath } from '@/graph/kisara-files';
+import {
+  parseModelJsonEdits,
+  serializeModelJsonEdits,
+  type ModelJsonEditValue,
+} from '@/graph/model-json-edits';
+import type { ModelJsonEditsFile, ModelNoteFile } from '@/port/models';
 
-// ─────────────────────────────
-// `kisara/notes/` のモデルのメモを読み書きする（消す・移す操作は持たない。どれを読むかはストアが決める）。
-// ─────────────────────────────
-
-/** 保存したメモの経路（`kisara/notes` からの相対）。置き場がまだ無ければ空 */
 export async function listSavedNotes(
   baseUrl: string,
   options: RequestOptions = {},
@@ -21,7 +21,6 @@ function notesPath(folder: string, filename: string): string {
   return `${KISARA_NOTES_DIR}/${notesFilePath(folder, filename)}`;
 }
 
-/** 保存したメモ。無ければ null */
 export async function fetchSavedNotes(
   baseUrl: string,
   folder: string,
@@ -37,7 +36,40 @@ export async function fetchSavedNotes(
   }
 }
 
-/** メモを書く。あれば上書きする（無ければ作られる） */
+function jsonEditsPath(folder: string, filename: string): string {
+  return `${KISARA_NOTES_DIR}/${jsonEditsFilePath(folder, filename)}`;
+}
+
+export async function fetchJsonEdits(
+  baseUrl: string,
+  folder: string,
+  filename: string,
+  options: RequestOptions = {},
+): Promise<Map<string, ModelJsonEditValue>> {
+  let text: string;
+  try {
+    const url = userdataItemUrl(baseUrl, jsonEditsPath(folder, filename));
+    text = await fetchText(url, { cache: 'no-store', ...options });
+  } catch (error) {
+    if (isNotFound(error)) return new Map();
+    throw error;
+  }
+  try {
+    return parseModelJsonEdits(JSON.parse(text));
+  } catch {
+    return new Map();
+  }
+}
+
+export async function saveJsonEdits(
+  baseUrl: string,
+  { folder, filename, edits }: ModelJsonEditsFile,
+  options: RequestOptions = {},
+): Promise<void> {
+  const url = userdataWriteUrl(baseUrl, jsonEditsPath(folder, filename), true);
+  await postText(url, serializeModelJsonEdits(edits), options);
+}
+
 export async function saveNotes(
   baseUrl: string,
   { folder, filename, text }: ModelNoteFile,

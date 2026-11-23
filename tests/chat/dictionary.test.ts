@@ -13,10 +13,6 @@ import {
 
 import { loreEntry } from '../helpers/llm';
 
-// ─────────────────────────────
-// 追加辞書のファイルの読み取りと、置き場の形
-// ─────────────────────────────
-
 function entriesOf(fileName: string, content: string) {
   const read = readDictionaryFile(fileName, content);
   return read.kind === 'ok' ? read.entries : [];
@@ -142,7 +138,6 @@ describe('置き場の形', () => {
     ) as unknown;
     const dictionary = parseDictionary(raw);
     expect(dictionary?.entries).toEqual([entry]);
-    // 知らない項目は読み捨てる
     expect(dictionary).not.toHaveProperty('source');
     expect(parseDictionary({ id: 'x' })).toBeNull();
   });
@@ -159,6 +154,7 @@ describe('置き場の形', () => {
     expect(sameEntries([loreEntry({ content: 'a' })], [loreEntry({ content: 'b' })])).toBe(false);
   });
 });
+
 describe('位置の割り振り', () => {
   it('作者のメモの前後（2・3）は深さ 4・system に差し込み、例の前後は追加辞書の印の後ろ', () => {
     const [note, example] = entriesOf(
@@ -200,6 +196,7 @@ describe('書き出し', () => {
     expect(back[3]).toMatchObject({ depth: { depth: 2, role: 'user' } });
   });
 });
+
 describe('SillyTavern の数値の読み方', () => {
   it('selectiveLogic と発動率を直し、知らない値は OR・いつも送る', () => {
     expect([0, 1, 2, 3, 9, 'x'].map(loreLogicOf)).toEqual(['or', 'nand', 'nor', 'and', 'or', 'or']);

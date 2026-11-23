@@ -10,19 +10,10 @@ import {
   TEXT_DRAG_TYPE,
 } from '@/lib/text-drag-session';
 
-// ─────────────────────────────
-// 文字のドラッグの落とし先。入る位置のキャレットを見せ、落ちたらそこへ入れる。
-// ─────────────────────────────
-
-/** 目印（`TEXT_DRAG_TYPE`）の付いたドラッグか。ほかのドラッグ（ファイルなど）には触れない */
 function isOurs(event: DragEvent): boolean {
   return event.dataTransfer?.types.includes(TEXT_DRAG_TYPE) === true;
 }
 
-/**
- * 落とし先の欄。挿入位置のアイコンの上なら、その下にある欄（アイコンはキャレットに付いてきて指先の真下に
- * 来るので、そのままでは落とせない印になる）
- */
 function dropFieldOf(event: DragEvent): HTMLTextAreaElement | null {
   const { target } = event;
   if (isTextDropTarget(target)) return target;
@@ -34,10 +25,6 @@ function dropFieldOf(event: DragEvent): HTMLTextAreaElement | null {
   return doc.elementsFromPoint(event.clientX, event.clientY).find(isTextDropTarget) ?? null;
 }
 
-/**
- * 指す位置へキャレットを動かす。位置が取れなければ動かさない（欄のいまのキャレット位置へ入れる）。
- * ブラウザ任せでは、重ねている間に落とす位置のキャレットが出ない環境があるので、欄に焦点を当てて見せる。
- */
 function placeCaret(field: HTMLTextAreaElement, event: DragEvent): void {
   if (field.ownerDocument.activeElement !== field) field.focus({ preventScroll: true });
   const offset = textFieldOffsetAt(field, event.clientX, event.clientY);
@@ -47,11 +34,6 @@ function placeCaret(field: HTMLTextAreaElement, event: DragEvent): void {
   }
 }
 
-/**
- * 文書全体で目印の付いた文字のドラッグを受け、重ねている間はキャレットを見せ、落ちたら同じ位置へ
- * 入れる（見せた位置と入る位置をずらさない）。入れる文字は落ちた時に作り（`text-drag-session`）、
- * 打鍵と同じく欄の取り消し履歴に積む（`placeEntry`。打った語ではないので補完は出さない）。
- */
 export function useTextDropCaret(): void {
   useEffect(() => {
     const doc = globalThis.document;
@@ -59,7 +41,6 @@ export function useTextDropCaret(): void {
     const onDragOver = (event: DragEvent): void => {
       const field = isOurs(event) ? dropFieldOf(event) : null;
       if (field === null) return;
-      // 落とせることを示す（既定のままだと、文字を持たないドラッグは落とせない扱いになる）
       event.preventDefault();
       if (event.dataTransfer !== null) event.dataTransfer.dropEffect = 'copy';
       placeCaret(field, event);
@@ -68,7 +49,6 @@ export function useTextDropCaret(): void {
     const onDrop = (event: DragEvent): void => {
       const field = isOurs(event) ? dropFieldOf(event) : null;
       if (field === null) return;
-      // ブラウザには入れさせない（見せた位置へこちらで入れる）
       event.preventDefault();
       placeCaret(field, event);
       const session = takeTextDrag();
@@ -78,12 +58,12 @@ export function useTextDropCaret(): void {
           session.onError?.(result.error);
           return;
         }
-        // 落とした所が見えているので札は飛ばさず、文字が広がるだけにする
-        if (field.isConnected) placeEntry(field, result.text, null);
+        if (field.isConnected) {
+          placeEntry(field, result.text, null);
+        }
       });
     };
 
-    // 落とさずに終えたら置き場を空にする（落としたときは取り出し済み）
     const onDragEnd = (): void => endTextDrag();
 
     doc.addEventListener('dragover', onDragOver, true);

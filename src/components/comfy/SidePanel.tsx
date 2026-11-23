@@ -8,22 +8,14 @@ import { t } from '@/i18n';
 import { reportAlert } from '@/queue/run-report';
 import { useSidePanelStore, type SidePanelTab } from '@/store/use-side-panel-store';
 
-// ─────────────────────────────
-// ComfyUI のタブの右の列。枠は共通の部品（`ui/side-column`）で、ここはタブと中身を渡す。
-// キューの見張りと繰り返しの送りは、会話のタブを見ている間も続けるので `ComfyBackground` が持つ。
-// ─────────────────────────────
-
 function isPanel(value: string): value is SidePanelTab {
   return PANELS.some((panel) => panel.value === value);
 }
 
-/** ComfyUI のタブの右の列を、共通の枠に中身を渡して描く */
 export function SidePanel(): React.ReactElement {
-  // 実行の操作の失敗のアイコンからも切り替えるので、選んでいるタブはストアに置く
   const tab = useSidePanelStore((state) => state.tab);
   const setTab = useSidePanelStore((state) => state.setTab);
   const report = useRunReport();
-  // 埋め込みのダイアログは右に置いたこの列の中身の欄まで広げる
   const attachPanel = useEmbedAnchor('side');
 
   const kit: SideColumnKit = {

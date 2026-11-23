@@ -10,11 +10,6 @@ import {
   TEXT_DRAG_TYPE,
 } from '@/lib/text-drag-session';
 
-// ─────────────────────────────
-// 文字のドラッグの落とし先。目印の付いたドラッグだけを受け持ち、
-// 重ねている間は欄にキャレットを置き、落ちたらそこへ入れる。文字は落ちた時に作る。
-// ─────────────────────────────
-
 afterEach(() => {
   cleanup();
   endTextDrag();
@@ -32,7 +27,6 @@ function Host(): React.ReactElement {
   );
 }
 
-/** ブラウザのドラッグの出来事（jsdom は DataTransfer を持たないので形だけ作る） */
 function dragEvent(type: 'dragover' | 'drop', types: readonly string[]): Event {
   const event = new Event(type, { bubbles: true, cancelable: true });
   Object.defineProperty(event, 'dataTransfer', { value: { types, dropEffect: 'none' } });
@@ -46,7 +40,6 @@ describe('文字のドラッグの落とし先', () => {
     const marker = document.createElement('span');
     marker.setAttribute(INSERT_CARET_MARK, '');
     document.body.append(marker);
-    // jsdom は位置で要素を探せないので、アイコンの下に欄がある形を与える
     Object.defineProperty(document, 'elementsFromPoint', {
       configurable: true,
       value: () => [marker, field, document.body],
@@ -82,7 +75,6 @@ describe('文字のドラッグの落とし先', () => {
     });
     expect(over.defaultPrevented).toBe(true);
     expect(document.activeElement).toBe(field);
-    // 重ねている間は作らない（落ちた時に作る）
     expect(resolved).toBe(false);
 
     const drop = dragEvent('drop', [TEXT_DRAG_TYPE]);
@@ -90,7 +82,7 @@ describe('文字のドラッグの落とし先', () => {
       field.dispatchEvent(drop);
     });
     expect(drop.defaultPrevented).toBe(true);
-    await waitFor(() => expect(field.value).toBe('aX\nb'));
+    await waitFor(() => expect(field.value).toBe('aXb'));
   });
 
   it('目印の無いドラッグと、画面の中の欄には触れない', () => {

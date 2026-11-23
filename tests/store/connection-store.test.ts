@@ -2,11 +2,6 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { useConnectionStore } from '@/store/use-connection-store';
 
-// ─────────────────────────────
-// 疎通確認の失敗を、CORS 拒否／未起動／HTTP エラーに切り分けて残すこと。
-// 1 回目が通常の要求、2 回目が中身を読まない到達確認。
-// ─────────────────────────────
-
 const BASE_URL = 'http://127.0.0.1:8188';
 
 function stubFetch(...results: Array<() => Promise<Response>>): void {

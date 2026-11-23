@@ -7,11 +7,6 @@ import type { NodeRow as NodeRowData, RowSource } from '@/graph/rows';
 
 import { nodeRow } from '../helpers/views';
 
-// ─────────────────────────────
-// カードの 1 行。チップの出入りの動きは、行が widget から接続済みに
-// 変わったことを前の描画と比べて決めるので、行の中身を分けても崩れないことを確かめる。
-// ─────────────────────────────
-
 afterEach(() => {
   cleanup();
 });
@@ -30,17 +25,12 @@ const source: RowSource = {
 const widgetRow = nodeRow({ name: 'seed', label: 'seed', widgetName: 'seed', inputSlot: 0 });
 const linkRow: NodeRowData = { ...widgetRow, kind: 'link', source };
 
-/** チップを包む要素（動きの印が付く） */
 function chipItem(): HTMLElement | null {
   return (
     screen.getByRole('button', { name: 'seed の接続を解除' }).parentElement?.parentElement ?? null
   );
 }
 
-/**
- * 動きの終わり（animationend）を知らせる。jsdom には AnimationEvent が無いので、
- * React は接頭辞付きの名前で待つ（`fireEvent.animationEnd` は届かない）
- */
 function animationEnd(element: HTMLElement | null): void {
   if (element) fireEvent(element, new Event('webkitAnimationEnd', { bubbles: true }));
 }
@@ -70,6 +60,25 @@ describe('チップの出入り', () => {
 
     animationEnd(chipItem());
     expect(onDisconnect).toHaveBeenCalledExactlyOnceWith(7);
+  });
+});
+
+describe('チップを掴む', () => {
+  const dragLabel = 'seed の接続元を別の行へもつなぐ';
+
+  it('結線を変えられる行では、番号と値を掴める（Tab では止めず、メニューに操作の名前で載せる）', () => {
+    render(<NodeRow nodeId={1} row={linkRow} onDisconnect={vi.fn()} />);
+    const handle = document.querySelector(`[data-menu-label="${dragLabel}"]`);
+
+    expect(handle?.getAttribute('aria-roledescription')).toBeTruthy();
+    expect(handle?.getAttribute('tabindex')).toBe('-1');
+    expect(handle?.textContent).toBe('3Seed / INT');
+  });
+
+  it('結線を変えられない行では掴めない', () => {
+    render(<NodeRow nodeId={1} row={linkRow} />);
+    expect(document.querySelector(`[data-menu-label="${dragLabel}"]`)).toBeNull();
+    expect(document.querySelector('[aria-roledescription]')).toBeNull();
   });
 });
 

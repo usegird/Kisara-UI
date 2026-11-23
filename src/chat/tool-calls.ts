@@ -1,10 +1,5 @@
 import type { Candidate, Chat, ChatMessage, ToolCallRecord, ToolCallState } from '@/chat/types';
 
-// ─────────────────────────────
-// ワークフローの呼び出しの列。どれも新しい会話を返し、変わらなければ同じ物を返す。
-// ─────────────────────────────
-
-/** 受け取った呼び出しの断片を足す。`index` で同じ呼び出しを指す */
 export function addToolCallPart(
   calls: readonly ToolCallRecord[],
   part: {
@@ -15,7 +10,6 @@ export function addToolCallPart(
   },
 ): ToolCallRecord[] {
   const next = [...calls];
-  // 番号は窓口で受け取った順に詰めてある。並びの外の番号は末尾に足し、穴を作らない
   const at =
     Number.isInteger(part.index) && part.index >= 0 && part.index < next.length
       ? part.index
@@ -33,10 +27,6 @@ export function addToolCallPart(
   return next;
 }
 
-/**
- * 本文を書かせている候補か。受け取り中で、確かめ終えた呼び出しを持つ。ふつうの受け取りでは、
- * 呼び出しは受け取り終えるまで確かめないので当たらない
- */
 export function writesReply(candidate: Candidate | undefined): boolean {
   return (
     candidate?.end.kind === 'streaming' &&
@@ -44,9 +34,6 @@ export function writesReply(candidate: Candidate | undefined): boolean {
   );
 }
 
-/**
- * 本文を書かせられる候補か。受け取り終えて、呼び出しを持ち、本文が空
- */
 export function canWriteReply(candidate: Candidate | undefined): boolean {
   return (
     candidate?.end.kind === 'done' &&
@@ -55,15 +42,10 @@ export function canWriteReply(candidate: Candidate | undefined): boolean {
   );
 }
 
-/** 呼び出しの id。返さないサーバーには候補の中の番号で作る */
 export function callId(call: ToolCallRecord, index: number): string {
   return call.id.length > 0 ? call.id : `call_${String(index)}`;
 }
 
-/**
- * 受け取りを終えた候補の呼び出しを確かめる。受け取り中の呼び出しを `check` の結果にする。
- * 止めた・失敗した受け取りの呼び出しは本文が欠けているので外す
- */
 export function settleReceivedCalls(
   candidate: Candidate,
   completed: boolean,
@@ -86,7 +68,6 @@ export function settleReceivedCalls(
 }
 
 function withCalls(candidate: Candidate, calls: readonly ToolCallRecord[]): Candidate {
-  // 空になったら持たない（呼び出しの無い候補と同じに扱う）
   return { ...candidate, toolCalls: calls.length > 0 ? calls : undefined };
 }
 
@@ -94,7 +75,6 @@ function selected(message: ChatMessage): Candidate | undefined {
   return message.candidates[message.selected];
 }
 
-/** その呼び出しの状態を変える。見つからなければ null */
 export function setToolCallState(
   chat: Chat,
   messageId: string,
@@ -104,11 +84,6 @@ export function setToolCallState(
   return updateToolCall(chat, messageId, callId, (call) => ({ ...call, state }));
 }
 
-/**
- * 呼び出しを実行し直す。今の実行を前の実行の列の後ろへ移し、`args` の本文で
- * 承諾を待つ状態から始める。まだ承諾を待っている呼び出しは、引数の本文だけを差し替える
- * （まだ実行していないので前の実行に残さない）。見つからなければ null
- */
 export function restartToolCall(
   chat: Chat,
   messageId: string,
@@ -130,10 +105,6 @@ export function restartToolCall(
   );
 }
 
-/**
- * 選んだワークフローで作らせた呼び出し（「ワークフローを実行」）を、その発言の選んでいる候補の
- * 呼び出しの列の後ろへ足す。見つからなければ null
- */
 export function appendToolCalls(
   chat: Chat,
   messageId: string,
@@ -178,28 +149,21 @@ function updateToolCall(
   return { ...chat, messages };
 }
 
-/** 最後のメッセージの選んでいる候補の呼び出し。無ければ空 */
 export function lastToolCalls(chat: Chat): readonly ToolCallRecord[] {
   const last = chat.messages.at(-1);
   if (last?.role !== 'assistant') return [];
   return (last === undefined ? undefined : selected(last))?.toolCalls ?? [];
 }
 
-/**
- * 完了を待つ 1 件の呼び出しと、その場所
- */
 export interface QueuedCall {
   readonly messageId: string;
   readonly callId: string;
   readonly promptId: string;
-  /** 結果として渡す出力ノード。空ならすべて */
   readonly outputs: readonly string[];
 }
 
-/** 実行の id を持つ呼び出しの状態（完了を待つ・不明） */
 export type PendingCallKind = 'queued' | 'unknown';
 
-/** その種類の、実行の id を持つ状態なら返す。違えば null */
 function pendingState(
   state: ToolCallState,
   kind: PendingCallKind,
@@ -209,7 +173,6 @@ function pendingState(
     : null;
 }
 
-/** 会話の中の、完了を待つ（`kind` が `unknown` なら不明の）呼び出し（どの候補のものも） */
 export function queuedToolCalls(chat: Chat, kind: PendingCallKind = 'queued'): QueuedCall[] {
   return chat.messages.flatMap((message) =>
     message.candidates.flatMap((candidate) =>
@@ -230,7 +193,6 @@ export function queuedToolCalls(chat: Chat, kind: PendingCallKind = 'queued'): Q
   );
 }
 
-/** 実行を待っている（`kind` が `unknown` なら不明の）呼び出しの、実行の id から場所を引く */
 export function findQueuedCall(
   chat: Chat,
   promptId: string,

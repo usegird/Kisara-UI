@@ -6,11 +6,6 @@ import { useRunHistoryStore } from '@/store/use-run-history-store';
 import { useSettingsStore } from '@/store/use-settings-store';
 import { activeSession, useTabsStore } from '@/store/use-tabs-store';
 
-// ─────────────────────────────
-// セッションの帯。開いているワークフローのタブのセッション名を直し、次のセッションへ切り替える。
-// ─────────────────────────────
-
-/** タスクのタブの最上部に置くセッションの帯 */
 export function SessionBar(): React.ReactElement {
   const baseUrl = useSettingsStore((state) => state.baseUrl);
   const session = useTabsStore(activeSession);
@@ -22,7 +17,6 @@ export function SessionBar(): React.ReactElement {
 
   return (
     <div className="flex items-center gap-1 px-1">
-      {/* 書いてある名前・セッションが変わったら欄を作り直す（打ちかけは捨てる） */}
       <input
         key={`${session ?? ''}:${sessionName}`}
         type="text"

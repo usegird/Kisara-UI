@@ -15,11 +15,6 @@ import { useTabsStore } from '@/store/use-tabs-store';
 
 import { chat, chatMessage } from '../helpers/llm';
 
-// ─────────────────────────────
-// 会話の置き場への書き込み。並びには会話の id と置き場、
-// 中身はブラウザの会話の表と一覧の表に 1 件ずつ。タブを閉じても消さない。
-// ─────────────────────────────
-
 const BROWSER = { kind: 'browser' } as const;
 let tables: BrowserChatTables;
 

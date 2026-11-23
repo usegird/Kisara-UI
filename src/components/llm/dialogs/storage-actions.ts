@@ -25,28 +25,15 @@ import {
 } from '@/store/persist/storage-export';
 import { deleteStorageItem, type StorageItem } from '@/store/persist/storage-usage';
 
-// ─────────────────────────────
-// ストレージの管理の手続き。印を付けた物をまとめて行い、結果を知らせる。ファイルの書き出しと読み込み、
-// 1 件のバックアップの取得もここで行う（状態は持たず、ダイアログが結果を受け取る）。
-// ─────────────────────────────
-
-/** 印を付けた物をまとめて行った結果（知らせと読み込み直しに使う） */
 export interface ApplyOutcome {
-  /** localStorage・sessionStorage を変えた（読み込み直す） */
   local: boolean;
-  /** IndexedDB・ユーザーフォルダを変えた（読み込み直しを勧める） */
   indexedDb: boolean;
-  /** 消せなかった物がある */
   failed: boolean;
   readonly restored: { added: number; updated: number; failed: boolean; any: boolean };
   readonly fromFile: { count: number; failed: boolean };
-  /**
-   * 上限の大きさを超えたので戻さなかった数（ファイルとバックアップの合計）
-   */
   tooLarge: number;
 }
 
-/** 印を付けた物をまとめて行う。戻すを先に、消すを後に、1 件ずつ順に行う */
 export async function applyMarks(
   all: readonly Mark[],
   byId: ReadonlyMap<string, Entry>,
@@ -59,12 +46,10 @@ export async function applyMarks(
     fromFile: { count: 0, failed: false },
     tooLarge: 0,
   };
-  // ファイルから戻す 1 件ずつの中身は、種類ごとにファイルを 1 回だけ読み直して集める
   const fromFiles = await fileValues(all, byId);
   for (const mark of all.filter((item) => item.side === 'restore')) {
     const target = byId.get(mark.entryId);
     if (target === undefined) continue;
-    // ファイルを開いている種類は、ファイルの中身で書き換える
     if (target.file !== null) {
       await restoreFromFile(outcome, target, mark, fromFiles.get(target.id));
     } else if (target.backup !== null) {
@@ -78,7 +63,6 @@ export async function applyMarks(
   return outcome;
 }
 
-/** まとめて行った結果を知らせる */
 export function toastApplied({ restored, fromFile, tooLarge, failed }: ApplyOutcome): void {
   if (restored.any) toastRestoreResult(restored);
   if (fromFile.count > 0) toastSuccess(t('llm.storage.fileRestored', { count: fromFile.count }));
@@ -87,12 +71,8 @@ export function toastApplied({ restored, fromFile, tooLarge, failed }: ApplyOutc
   if (failed) toastError(t('llm.storage.clearFailed'));
 }
 
-/**
- * エクスポートのファイルを読み、一覧に出す物だけを持つ。違う種類・読めなければ知らせて null
- */
 export async function openStorageFile(target: Entry, picked: File): Promise<OpenedFile | null> {
   if (!canExport(target.category)) return null;
-  // 流れのまま行ごとに読み、一覧に出す物だけを持つ（全体を 1 つの文字列にしない）
   const items = await scanStorageExport(picked, target.category);
   if (items === null) {
     toastError(t('llm.storage.openFailed'));
@@ -101,7 +81,6 @@ export async function openStorageFile(target: Entry, picked: File): Promise<Open
   return { name: picked.name, blob: picked, items };
 }
 
-/** 控えの無い 1 件のバックアップをその場で取り（印を付けず、すぐ書く）、結果を知らせる。取れたら true */
 export async function takeEntryBackup(target: Entry, key: string): Promise<boolean> {
   if (target.backup === null) return false;
   const found = target.items.find((item) => item.key === key);
@@ -115,17 +94,12 @@ export async function takeEntryBackup(target: Entry, key: string): Promise<boole
   return true;
 }
 
-/**
- * 種類のブラウザの 1 件ずつの中身を、書き出しのファイル（1 行 1 件の JSON を gzip で縮めた物）として
- * ダウンロードさせる
- */
 export async function exportEntry(entry: Entry): Promise<void> {
   if (!canExport(entry.category)) return;
   const keys = entry.items.map((item) => item.key);
   downloadBlob(await buildStorageExport(entry.category, keys), exportFileName(entry));
 }
 
-/** バックアップの列の 1 件の中身。ファイルを開いていればファイルから、ほかは接続先から読む */
 export function readReferenceValue(entry: Entry, key: string): Promise<unknown> {
   const { backup: kind, file } = entry;
   if (file !== null && canExport(entry.category)) {
@@ -136,7 +110,6 @@ export function readReferenceValue(entry: Entry, key: string): Promise<unknown> 
   return kind === null ? Promise.resolve(null) : readBackupRaw(kind, key);
 }
 
-/** 開いたファイルの中身で 1 件を書き換える */
 async function restoreFromFile(
   outcome: ApplyOutcome,
   target: Entry,
@@ -157,7 +130,6 @@ async function restoreFromFile(
   outcome.indexedDb ||= result && target.category.area === 'indexedDb';
 }
 
-/** バックアップから 1 件を戻す */
 async function restoreFromBackup(
   outcome: ApplyOutcome,
   backup: BackupKind,
@@ -171,7 +143,6 @@ async function restoreFromBackup(
   outcome.tooLarge += result.tooLarge ?? 0;
 }
 
-/** 印の付いた 1 件を消す（バックアップの側ならバックアップを、ほかはブラウザ・ユーザーフォルダの物を） */
 async function deleteMarked(outcome: ApplyOutcome, target: Entry, mark: Mark): Promise<void> {
   try {
     if (mark.side === 'backup' && target.backup !== null) {
@@ -180,7 +151,6 @@ async function deleteMarked(outcome: ApplyOutcome, target: Entry, mark: Mark): P
     }
     await deleteStorageItem(target.category, mark.key);
     outcome.local ||= target.category.area === 'local';
-    // ユーザーフォルダの物も、読んだ物が画面の中に残るので読み込み直しを勧める
     outcome.indexedDb ||=
       target.category.area === 'indexedDb' || target.category.area === 'userFiles';
   } catch {
@@ -188,10 +158,6 @@ async function deleteMarked(outcome: ApplyOutcome, target: Entry, mark: Mark): P
   }
 }
 
-/**
- * ファイルから戻す印の中身を、ファイルを開いている種類ごとに 1 回だけ読み直して集める。読めなかった種類は
- * 入れない（その種類の戻すは失敗として数える）
- */
 async function fileValues(
   marks: readonly Mark[],
   byId: ReadonlyMap<string, Entry>,
@@ -213,9 +179,6 @@ async function fileValues(
   return found;
 }
 
-/**
- * 種類ごとの一覧を並べて読む（接続先の控え・ユーザーフォルダの物）。読めなかった種類は 'failed'
- */
 export async function readRemoteLists<K extends string>(
   kinds: readonly K[],
   read: (kind: K) => Promise<StorageItem[] | null>,

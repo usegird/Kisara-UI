@@ -12,10 +12,6 @@ import {
 
 import { tagEntry } from '../helpers/tags';
 
-// ─────────────────────────────
-// タグ辞書の読み書き。pysssss の一覧は読むだけ、書くのは `kisara/tags/` の辞書と消したタグ。
-// ─────────────────────────────
-
 const base = 'http://127.0.0.1:8188';
 const dir = `${base}/userdata/kisara%2Ftags%2F`;
 

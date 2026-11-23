@@ -3,11 +3,6 @@ import { Info } from 'lucide-react';
 import type { ResponseFigure } from '@/components/llm/message/response-figures';
 import { t } from '@/i18n';
 
-// ─────────────────────────────
-// 応答の情報。`assistant` の操作の並びに置くアイコンと、押すと開く中身。
-// ─────────────────────────────
-
-/** 応答の情報を開く・閉じるアイコンのボタン */
 export function ResponseStatsButton({
   open,
   className,
@@ -31,7 +26,6 @@ export function ResponseStatsButton({
   );
 }
 
-/** 応答の情報の中身。行ごとに名前と値を並べる */
 export function ResponseStatsPanel({
   figures,
 }: {

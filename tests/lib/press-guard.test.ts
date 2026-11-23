@@ -2,10 +2,6 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { createPressGuard, guardPress, PRESS_GUARD_MS } from '@/lib/press-guard';
 
-// ─────────────────────────────
-// 押下の見張り。受け付けてから少しの間だけ同じ鍵の押下を捨て、完了は待たない
-// ─────────────────────────────
-
 afterEach(() => {
   vi.useRealTimers();
 });

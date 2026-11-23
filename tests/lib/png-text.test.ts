@@ -4,11 +4,6 @@ import { readPngTextChunks } from '@/lib/png-text';
 
 import { png, textChunk } from '../helpers/png';
 
-// ─────────────────────────────
-// PNG のテキストチャンク。ComfyUI は実行した API Prompt を `tEXt(prompt)` に埋める。
-// **壊れたデータでも落ちない**ことまで確かめる。
-// ─────────────────────────────
-
 describe('PNG のテキストチャンク', () => {
   it('キーワードごとに読める', () => {
     const buffer = png(textChunk('prompt', '{"1":{"class_type":"X"}}'), textChunk('foo', 'bar'));

@@ -2,25 +2,16 @@ import { allBackupsOf, backupsOf, type Entry } from '@/components/llm/dialogs/st
 import { isStaleBackup, orphanBackups } from '@/store/persist/storage-backups';
 import type { StorageItem } from '@/store/persist/storage-usage';
 
-// ─────────────────────────────
-// ストレージの管理の印の付け方。削除・戻すの印を付け外し、種類ごとに数える（描かない）。
-// 印は「適用」でまとめて行う。
-// ─────────────────────────────
-
-/** 適用で行う印。ブラウザの欄の削除・控えの欄の削除・控えから戻す */
 export interface Mark {
   readonly entryId: string;
   readonly side: 'browser' | 'backup' | 'restore';
   readonly key: string;
 }
 
-/** 付けた印（`markKey` → 印） */
 export type Marks = ReadonlyMap<string, Mark>;
 
-/** 印の鍵（種類・欄・1 件） */
 export const markKey = (mark: Mark): string => JSON.stringify([mark.entryId, mark.side, mark.key]);
 
-/** 印を付け外す。すべてに付いていれば外し、ほかは付ける（ブラウザの削除と戻すは片方だけ） */
 export function toggleMarks(current: Marks, targets: readonly Mark[]): Marks {
   const next = new Map(current);
   const all = targets.every((mark) => current.has(markKey(mark)));
@@ -30,14 +21,12 @@ export function toggleMarks(current: Marks, targets: readonly Mark[]): Marks {
       continue;
     }
     next.set(markKey(mark), mark);
-    // ブラウザの削除と戻すは片方だけ
     const rival = rivalOf(mark);
     if (rival !== null) next.delete(markKey(rival));
   }
   return next;
 }
 
-/** 種類のバックアップの列の印（戻す・バックアップの削除）を外す。列の中身を替えるとき */
 export function withoutReferenceMarks(current: Marks, entryId: string): Marks {
   const kept = [...current].filter(
     ([, mark]) => mark.entryId !== entryId || mark.side === 'browser',
@@ -45,7 +34,6 @@ export function withoutReferenceMarks(current: Marks, entryId: string): Marks {
   return new Map(kept);
 }
 
-/** 種類に付けた印の数（＋ 戻す・− 消す・上書き）。ブラウザにある 1 件へ戻すのは上書きなので両方に数える */
 export function markCounts(
   entry: Entry,
   marks: Marks,
@@ -65,16 +53,11 @@ export function markCounts(
   return { plus, minus };
 }
 
-/** クリーンアップの対象の 1 件と、その種類 */
 export interface StaleBackup {
   readonly entry: Entry;
   readonly item: StorageItem;
 }
 
-/**
- * クリーンアップの対象（ブラウザに元の無い、30 日より前のバックアップ）。読めなかった種類は除く。
- * つないでいない・読んでいる種類が 1 つでもあれば null
- */
 export function staleBackupsOf(
   entries: readonly Entry[],
   connected: boolean,
@@ -90,12 +73,10 @@ export function staleBackupsOf(
     );
 }
 
-/** クリーンアップの 1 件の削除の印（その種類のバックアップの欄の印と同じ） */
 export function staleMarkOf({ entry, item }: StaleBackup): Mark {
   return { entryId: entry.id, side: 'backup', key: item.key };
 }
 
-/** ブラウザの削除と戻すは片方だけ。付ける印と入れ替わる相手 */
 function rivalOf(mark: Mark): Mark | null {
   if (mark.side === 'backup') return null;
   return { ...mark, side: mark.side === 'browser' ? 'restore' : 'browser' };

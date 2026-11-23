@@ -1,21 +1,18 @@
-import { cva } from 'class-variance-authority';
 import { RefreshCw } from 'lucide-react';
-import { useState } from 'react';
+import { useDeferredValue, useState } from 'react';
 
 import { acceptInsertTarget, textAreaOf } from '@/components/comfy/dialogs/insert-target';
 import { InsertButton } from '@/components/comfy/dialogs/InsertButton';
-import { arrowSelect } from '@/components/ui/arrow-select';
-import { CopyButton } from '@/components/ui/copy-button';
+import { WildcardList, WildcardPreview } from '@/components/comfy/dialogs/WildcardPanelParts';
 import { PaneCloseButton } from '@/components/ui/decide-button';
 import { DIALOG_ICON_CLASS } from '@/components/ui/dialog';
 import { DialogToolbar } from '@/components/ui/dialog-toolbar';
-import { DirectoryList } from '@/components/ui/directory-list';
-import { InsertCaretAside, InsertTargetSubtitle } from '@/components/ui/insert-caret-marker';
+import { PathTreeList } from '@/components/ui/directory-list';
+import { InsertCaretMarker, InsertTargetSubtitle } from '@/components/ui/insert-caret-marker';
 import { PanelHeader } from '@/components/ui/panel-header';
 import { refreshIcon } from '@/components/ui/refresh-icon';
 import { SearchField } from '@/components/ui/search-field';
 import { SidePane } from '@/components/ui/side-pane';
-import { textDragProps } from '@/components/ui/text-drag';
 import { wildcardDirectory, wildcardLabel, wildcardPath } from '@/graph/wildcards';
 import { useTextFieldWhile } from '@/hooks/flow/use-text-field-focus';
 import { t } from '@/i18n';
@@ -24,19 +21,10 @@ import { directoryTree, isUnderDirectory } from '@/lib/path-tree';
 import { guardPress } from '@/lib/press-guard';
 import { matchesAnyTerm, rankBySearch, searchTerms } from '@/lib/search-terms';
 import { useSettingsStore } from '@/store/use-settings-store';
-import { useWildcardsStore } from '@/store/use-wildcards-store';
+import { useWildcardsStore, wildcardEntriesOf } from '@/store/use-wildcards-store';
 
-// ─────────────────────────────
-// ワイルドカードの画面の中身。作りはスタイルの編集に揃え、差し込み先の決まりも同じ（`insert-target`）。
-// ─────────────────────────────
+type RightView = 'list' | 'preview';
 
-/** 一覧のワイルドカード 1 つ */
-const wildcardItem = cva(
-  ['hover:bg-accent flex w-full items-baseline gap-2 rounded px-2 py-1', 'text-left'],
-  { variants: { selected: { true: 'bg-accent', false: '' } } },
-);
-
-/** ワイルドカードの名前を階層と語で絞り込み、外の入力欄へ差し込む画面 */
 export function WildcardPanel(): React.ReactElement | null {
   const baseUrl = useSettingsStore((state) => state.baseUrl);
   const open = useWildcardsStore((state) => state.panelOpen);
@@ -44,30 +32,56 @@ export function WildcardPanel(): React.ReactElement | null {
   const status = useWildcardsStore((state) => state.status);
   const refresh = useWildcardsStore((state) => state.refresh);
   const close = useWildcardsStore((state) => state.closePanel);
+  const ensureEntries = useWildcardsStore((state) => state.ensureEntries);
 
   const [query, setQuery] = useState('');
+  const [expanded, setExpanded] = useState<ReadonlySet<string>>(() => new Set());
   const [directory, setDirectory] = useState('');
+  const [view, setView] = useState<RightView>('list');
   const [selected, setSelected] = useState<string | null>(null);
   const field = useTextFieldWhile(acceptInsertTarget, open);
-
-  const directories = directoryTree(names.map(wildcardDirectory));
-  // 左の階層で絞り、語で絞る（前方一致は階層を除いた名前か中身の経路）
-  const terms = searchTerms(query);
-  const matched = names.filter(
-    (name) =>
-      isUnderDirectory(wildcardDirectory(name), directory) &&
-      matchesAnyTerm(wildcardPath(name), terms),
+  const fieldArea = textAreaOf(field);
+  const selectedEntries = useWildcardsStore((state) =>
+    selected === null ? null : wildcardEntriesOf(state.entries, selected),
   );
-  const shown = rankBySearch(matched, query, (name) => ({
-    names: [wildcardLabel(name), wildcardPath(name)],
-    texts: [wildcardPath(name)],
-  }));
+
+  const deferredQuery = useDeferredValue(query);
+  const terms = searchTerms(deferredQuery);
+  const matched = names.filter((name) => matchesAnyTerm(wildcardPath(name), terms));
+  const directories = directoryTree(matched.map(wildcardDirectory));
+  const leaves = matched.map((name) => ({ key: name, path: wildcardPath(name) }));
+  const listed = rankBySearch(
+    matched.filter((name) => isUnderDirectory(wildcardDirectory(name), directory)),
+    deferredQuery,
+    (name) => ({ names: [wildcardLabel(name), wildcardPath(name)], texts: [wildcardPath(name)] }),
+  );
 
   if (!open) return null;
 
+  const onDirectory = (path: string): void => {
+    const next = new Set(expanded);
+    if (!next.delete(path)) next.add(path);
+    setExpanded(next);
+    setDirectory(path);
+    setView('list');
+  };
+  const showAll = (): void => {
+    setDirectory('');
+    setView('list');
+  };
+  const select = (name: string): void => {
+    setSelected(name);
+    setView('preview');
+    setExpanded(withAncestors(expanded, wildcardDirectory(name)));
+    void ensureEntries(baseUrl, name);
+  };
+  const place = (name: string, origin: DOMRect): void => {
+    if (field !== null) placeEntry(field, name, origin);
+  };
+  const preview = view === 'preview' ? selected : null;
+
   return (
     <>
-      {/* 見出しの帯はスタイルの編集と同じ */}
       <PanelHeader
         title={t('wildcards.title')}
         subtitle={
@@ -93,30 +107,45 @@ export function WildcardPanel(): React.ReactElement | null {
       />
 
       <div className="flex min-h-0 flex-1">
-        {/* 左: 階層の絞り込み */}
         <SidePane
           paneKey="wildcards:left"
           label={t('wildcards.tree')}
           side="left"
-          // 左の列の帯: 決定と、右寄せの閉じる ×
           toolbar={
             <DialogToolbar label={t('wildcards.decideToolbar')}>
-              <InsertButton text={selected ?? ''} label={t('wildcards.insert')} field={field} />
-              <InsertCaretAside field={textAreaOf(field)} />
+              <InsertButton
+                text={selected ?? ''}
+                label={t('wildcards.insert')}
+                field={field}
+                onPlaced={close}
+              />
+              {fieldArea === null ? null : <InsertCaretMarker field={fieldArea} />}
               <PaneCloseButton label={t('wildcards.close')} onClick={close} />
             </DialogToolbar>
           }
         >
-          <DirectoryList
-            label={t('wildcards.tree')}
-            total={names.length}
-            directories={directories}
-            selected={directory}
-            onSelect={setDirectory}
-          />
+          {leaves.length === 0 ? (
+            <p className="text-muted-foreground p-2 text-xs">{t('wildcards.noMatch')}</p>
+          ) : (
+            <PathTreeList
+              label={t('wildcards.tree')}
+              directories={directories}
+              leaves={leaves}
+              expanded={terms.length > 0 ? 'all' : expanded}
+              onToggle={onDirectory}
+              all={{
+                total: matched.length,
+                active: preview === null && directory === '',
+                onSelect: showAll,
+              }}
+              activeDirectory={preview === null && directory !== '' ? directory : null}
+              selected={selected}
+              onSelect={select}
+              onPlace={place}
+            />
+          )}
         </SidePane>
 
-        {/* 右: 帯に左寄せの絞り込み、その下に選んだものと写し取り・一覧 */}
         <div className="flex min-w-0 flex-1 flex-col text-xs">
           <DialogToolbar label={t('wildcards.filterToolbar')}>
             <SearchField
@@ -126,57 +155,35 @@ export function WildcardPanel(): React.ReactElement | null {
               placeholder={t('wildcards.filterPlaceholder')}
             />
           </DialogToolbar>
-          {/* 選んだものと写し取り。選ぶまでは行ごと出さない */}
-          {selected === null ? null : (
-            <div className="flex min-h-7 items-center gap-2 border-b px-3 py-2">
-              <code className="bg-muted min-w-0 truncate rounded px-1.5 py-0.5 font-mono">
-                {selected}
-              </code>
-              <CopyButton iconOnly frameless text={selected} label={t('wildcards.copy')} />
-            </div>
+          {preview === null ? (
+            <WildcardList
+              shown={listed}
+              directory={directory}
+              selected={selected}
+              onSelect={select}
+              onPlace={place}
+            />
+          ) : (
+            <WildcardPreview
+              name={preview}
+              entries={selectedEntries}
+              insertBlocked={field === null ? t('insertBar.noTarget') : null}
+              onInsert={(origin) => {
+                if (field !== null) placeEntry(field, preview, origin);
+              }}
+              onBack={() => setView('list')}
+            />
           )}
-
-          {/* 一覧は `ul` / `li`（role を付けた div より支援技術が確実に読む） */}
-          <div className="min-h-0 flex-1 overflow-y-auto p-1">
-            {shown.length === 0 ? (
-              <p className="text-muted-foreground p-2">{t('wildcards.noMatch')}</p>
-            ) : (
-              <ul
-                aria-label={t('wildcards.list')}
-                onKeyDown={(event) => arrowSelect(event, 'list')}
-              >
-                {shown.map((name) => (
-                  // 掴んで欄へ落とせる（ブラウザの文字のドラッグ）
-                  <li key={name} {...textDragProps(name)}>
-                    <button
-                      type="button"
-                      className={wildcardItem({ selected: name === selected })}
-                      title={t('wildcards.itemTitle', { name })}
-                      aria-label={name}
-                      aria-pressed={name === selected}
-                      // 押すと焦点はここへ移るが、差し込み先は開いてから最後に入った欄のまま
-                      // （既定を止めると掴めなくなる）
-                      onClick={() => setSelected(name)}
-                      onDoubleClick={(event) => {
-                        if (field === null) return;
-                        placeEntry(field, name, event.currentTarget.getBoundingClientRect());
-                      }}
-                    >
-                      <span className="truncate">{wildcardLabel(name)}</span>
-                      {/* 「すべて」で見ているときは、どの階層のものかを薄く添える */}
-                      {directory === '' && wildcardDirectory(name) !== '' ? (
-                        <span className="text-muted-foreground truncate">
-                          {wildcardDirectory(name)}
-                        </span>
-                      ) : null}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
         </div>
       </div>
     </>
   );
+}
+
+function withAncestors(expanded: ReadonlySet<string>, directory: string): ReadonlySet<string> {
+  if (directory === '') return expanded;
+  const next = new Set(expanded);
+  const segments = directory.split('/');
+  segments.forEach((_, end) => next.add(segments.slice(0, end + 1).join('/')));
+  return next;
 }

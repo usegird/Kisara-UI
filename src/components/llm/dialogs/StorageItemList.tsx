@@ -34,16 +34,6 @@ import { formatBytes } from '@/lib/text';
 import { canExport } from '@/store/persist/storage-export';
 import { isClearable, readStorageRaw } from '@/store/persist/storage-usage';
 
-// ─────────────────────────────
-// ストレージの管理の右の列の、選んだ種類の 1 件ずつと帯の種類ごとの操作。
-// 印と開いたファイルはダイアログが持ち、ここは描いて押したことを返すだけ。
-// ─────────────────────────────
-
-// 1 件ずつの一覧は、行が列を分け合う格子（subgrid）にし、見出しと行の境目の線を縦に揃える。
-// 列は ブラウザ（名前・大きさ・時刻・生データ・削除）とバックアップ（バックアップする種類だけ）。
-// 幅が足りなくなり、名前の 3 割が隠れるほどになると、ブラウザの時刻とアイコンが名前・大きさの下へ回り込む
-// （大きさがアイコンの上に来る）。さらに足りなければ、バックアップの欄は時刻の下に大きさ（左寄せ）と
-// アイコンが回る
 const gridClass = cva('grid', {
   variants: {
     backed: {
@@ -59,7 +49,6 @@ const keySize = cva('text-muted-foreground text-right tabular-nums', {
   variants: { marked: MARKED },
 });
 
-/** 選んだ種類の 1 件ずつの props */
 export interface ItemListProps {
   readonly entry: Entry;
   readonly connected: boolean;
@@ -71,11 +60,6 @@ export interface ItemListProps {
   readonly onCloseFile: () => void;
 }
 
-/**
- * 選んだ種類の 1 件ずつ。localStorage・sessionStorage はファイルを開いていなければ IndexedDB の合計と
- * 同じ形の表にする。ほかは、左にブラウザの欄を置き、バックアップの列（控えを書く種類・ファイルを開いている
- * 種類）があれば右端に欄と境目の線を足す（つないでいないときは欄だけで空）。狭くしても時刻と大きさは隠さない
- */
 export function ItemList({
   entry,
   connected,
@@ -100,7 +84,6 @@ export function ItemList({
       busy={busy}
       onToggle={onToggle}
       onTake={
-        // ブラウザにだけある 1 件は、控えの一覧を読めていればその場で取れる
         takeable && item.browser !== null && item.backup === null
           ? () => onTake(item.key)
           : undefined
@@ -108,11 +91,8 @@ export function ItemList({
     />
   );
   return (
-    // どの種類でも同じ形: 情報（件数・大きさ・バックアップ・開くアイコン）→ 列の見出し → 1 件ずつ。
-    // 情報・見出し・名前の左端は揃える
     <div className="flex flex-col gap-2">
       <div className="text-muted-foreground flex flex-wrap items-center gap-x-1 gap-y-0.5 tabular-nums">
-        {/* ユーザーフォルダの物は、読めていなければ件数の代わりにその旨 */}
         <span>{entry.remote === null ? figures(entry.items) : t(REMOTE_TEXT[entry.remote])}</span>
         {backupInfo === null ? null : <span>{backupInfo}</span>}
         <FileOpener entry={entry} onOpen={onOpenFile} />
@@ -127,7 +107,6 @@ export function ItemList({
             </span>
             {backed ? (
               <span className={`${BACKUP_CELL} min-w-0 py-1`}>
-                {/* ファイルを開いている間は、見出しの代わりにファイルの名前と外すアイコン */}
                 {entry.file === null ? (
                   <span className="truncate">{t('llm.storage.column.backup')}</span>
                 ) : (
@@ -165,9 +144,6 @@ export function ItemList({
   );
 }
 
-/**
- * 帯の種類ごとの操作。エクスポート（書き出せる種類だけ）と全て削除（消せない種類（sessionStorage）は出さない）
- */
 export function EntryHeader({
   entry,
   marks,
@@ -216,10 +192,6 @@ export function EntryHeader({
   );
 }
 
-/**
- * 件数の行の右端の、エクスポートのファイルを開くアイコン（書き出せる種類だけ）。開いたファイルの名前と
- * 外すアイコンは、バックアップの列の見出しの代わりに出す
- */
 function FileOpener({
   entry,
   onOpen,
@@ -232,7 +204,6 @@ function FileOpener({
   const onOpenClick = (): void => input.current?.click();
   const onFileChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
     const picked = event.currentTarget.files?.[0];
-    // 同じファイルを選び直しても読むよう、選んだ物を空に戻す
     event.currentTarget.value = '';
     if (picked !== undefined) onOpen(picked);
   };
@@ -250,7 +221,6 @@ function FileOpener({
       <input
         ref={input}
         type="file"
-        // 書き出しと同じ 1 行 1 件の gzip
         accept=".jsonl.gz,.gz,application/gzip"
         className="hidden"
         aria-hidden
@@ -261,10 +231,6 @@ function FileOpener({
   );
 }
 
-/**
- * localStorage・sessionStorage の 1 件ずつの表（IndexedDB の合計の表と同じ形）。
- * 名前（分かる鍵は説明も）・大きさ・生データ・削除（sessionStorage は消さないので空き）
- */
 function KeyTable({
   entry,
   marks,

@@ -8,25 +8,14 @@ import { DialogHeader } from '@/components/ui/dialog-header';
 import { useDragFrom } from '@/hooks/ui/use-drag-from';
 import { t } from '@/i18n';
 
-// ─────────────────────────────
-// 確認ダイアログ。取り返しのつかない操作と、並びを一度に崩す操作（処理順に並べる）の確認に使う。
-// 焦点の閉じ込め・Escape・読み上げは Base UI に任せる。
-// ─────────────────────────────
-
-/** 確認ダイアログの props */
 export interface ConfirmDialogProps {
   readonly open: boolean;
   readonly title: string;
-  /** 何を確かめるかの文。改行はそのまま出す */
   readonly description: string;
-  /** 実行のボタンの文字 */
   readonly confirmLabel: string;
-  /** やめるのボタンの文字。既定は「キャンセル」 */
   readonly cancelLabel?: string;
   readonly onConfirm: () => void;
-  /** やめる・Escape で閉じる */
   readonly onCancel: () => void;
-  /** 説明の下に足すもの（選択肢など） */
   readonly children?: React.ReactNode;
 }
 
@@ -37,17 +26,12 @@ interface Offset {
 
 const CENTER: Offset = { x: 0, y: 0 };
 
-/**
- * 帯を掴んで中央からずらす。開き直したら中央へ戻す（位置は残さない）。
- * ボタン・入力の上で押したときは掴まない
- */
 function useConfirmOffset(open: boolean): {
   readonly offset: Offset;
   readonly move: DialogChrome['move'];
 } {
   const [offset, setOffset] = useState(CENTER);
   const [wasOpen, setWasOpen] = useState(open);
-  // 開いたときに中央へ戻す（描画中に前回の値と比べる）
   if (wasOpen !== open) {
     setWasOpen(open);
     if (open) setOffset(CENTER);
@@ -65,10 +49,6 @@ function useConfirmOffset(open: boolean): {
   return { offset, move };
 }
 
-/**
- * 確認ダイアログ。自由移動だけで出し、開くたびに中央へ戻す。
- * 閉じる × は置かない（やめる・実行のどちらかを選ばせる）
- */
 export function ConfirmDialog({
   open,
   title,
@@ -84,10 +64,8 @@ export function ConfirmDialog({
     defaultMode: 'floating',
     open,
     size: 'sm',
-    // 動かすのはここで持つ（大きさは変えず、位置も残さない）
     movable: false,
     embeddable: false,
-    // 確かめている間は、確かめている元の画面を閉じさせない
     onClose: null,
   });
   const { container, backdropClassName, popupClassName, popupRef } = placement;
@@ -102,12 +80,10 @@ export function ConfirmDialog({
       }}
     >
       <AlertDialog.Portal container={container}>
-        {/* 確かめるダイアログは外を押しても閉じない（どちらの出し方でも同じ） */}
         <AlertDialog.Backdrop className={backdropClassName} />
         <AlertDialog.Popup
           ref={popupRef}
           className={popupClassName}
-          // 中央寄せ（`translate`）に重ねてずらす
           style={{ transform: `translate(${String(offset.x)}px, ${String(offset.y)}px)` }}
         >
           <DialogChromeContext.Provider value={chrome}>

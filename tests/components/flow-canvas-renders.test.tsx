@@ -18,10 +18,6 @@ import {
   STILL,
 } from '../helpers/flow-canvas';
 
-// ─────────────────────────────
-// フロー画面の描き直しの回数（値の編集・選択・実行の進捗）（組み立ては tests/helpers/flow-canvas.tsx）
-// ─────────────────────────────
-
 setupFlowCanvas();
 
 describe('描き直しの回数（値の編集・選択・実行の進捗）', () => {
@@ -42,7 +38,6 @@ describe('描き直しの回数（値の編集・選択・実行の進捗）', (
     ],
     ['カードの選択', 1, STILL, () => useGraphStore.getState().select(1)],
     [
-      // 位置は線と変数の列だけが使う。カードは位置が変わっても描き直さない
       'カードの列のスクロール',
       0,
       FOLLOW,
@@ -62,7 +57,6 @@ describe('描き直しの回数（値の編集・選択・実行の進捗）', (
     expectWithinBudget(cards, panels);
   });
 
-  // 進捗の通知はノードの状態を作り直すが、カードの状態が変わらなければ何も描き直さない
   it('実行の進捗（カードの状態が変わらない通知）', async () => {
     act(() => {
       useExecutionStore.setState({ nodeStates: { '1': 'running' } });

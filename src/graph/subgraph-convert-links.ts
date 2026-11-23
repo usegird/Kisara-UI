@@ -14,27 +14,17 @@ import {
   type WorkflowNode,
 } from '@/graph/types';
 
-// ─────────────────────────────
-// グループと subgraph の変換が使う、線の読み分けと付け直し・入口と出口のまとめ。
-// ─────────────────────────────
-
-/** 受け手が実際に指している線と、元の形のままの線 */
 export interface LiveLink {
   readonly link: ResolvedLink;
   readonly raw: WorkflowLink;
 }
 
-/** グループの中と外にまたがる線の読み分け */
 interface SplitLinks {
-  /** 中どうし */
   readonly internal: LiveLink[];
-  /** 外から中へ */
   readonly incoming: LiveLink[];
-  /** 中から外へ */
   readonly outgoing: LiveLink[];
 }
 
-/** 入口・出口 1 つぶん（出どころが同じ線をまとめたもの） */
 export interface Port {
   readonly key: string;
   readonly name: string;
@@ -43,12 +33,10 @@ export interface Port {
   readonly links: LiveLink[];
 }
 
-/** 線の型（元の形のまま。配列の線は 6 番目、キー付きの線は `type`） */
 export function rawType(link: WorkflowLink): unknown {
   return Array.isArray(link) ? link[5] : link.type;
 }
 
-/** 受け手の入力が実際に指している線だけ（`links[]` に古い線が残っていることがある） */
 export function liveLinks(workflow: Workflow): LiveLink[] {
   const byId = new Map(workflow.nodes.map((node) => [node.id, node]));
   return workflow.links.flatMap((raw) => {
@@ -59,7 +47,6 @@ export function liveLinks(workflow: Workflow): LiveLink[] {
   });
 }
 
-/** 線を、中どうし・外から中・中から外に分ける（外どうしは入れない） */
 export function splitLinks(live: readonly LiveLink[], members: ReadonlySet<NodeId>): SplitLinks {
   const inside = (id: NodeId): boolean => members.has(id);
   return {
@@ -69,7 +56,6 @@ export function splitLinks(live: readonly LiveLink[], members: ReadonlySet<NodeI
   };
 }
 
-/** 外とまたがる線を入口と出口にまとめる。名前は受け手の入力・出どころの出力から取る */
 export function boundaryPorts(
   workflow: Workflow,
   split: SplitLinks,
@@ -86,7 +72,6 @@ export function boundaryPorts(
   return { inputs, outputs };
 }
 
-/** 定義の中の線: 中どうし・入口から出る線（id はそのまま）・出口へ入る線（出どころごとに 1 本） */
 export function innerLinksOf(
   internal: readonly LiveLink[],
   inputs: readonly Port[],
@@ -113,10 +98,6 @@ export function innerLinksOf(
   ];
 }
 
-/**
- * ノードの入出力の線の参照を、線の一覧に合わせて付け直す。`ids` のノードだけを触る。
- * 入力は受けている線、出力はそこから出る線（並びは元の順を保ち、足したものは後ろ）
- */
 export function relink(
   nodes: readonly WorkflowNode[],
   links: readonly WorkflowLink[],
@@ -145,7 +126,6 @@ export function relink(
   });
 }
 
-/** 定義の入口・出口 1 つ */
 export function ioOf(port: Port, linkIds: readonly LinkId[]): SubgraphIo {
   return {
     id: uuid(),
@@ -157,12 +137,10 @@ export function ioOf(port: Port, linkIds: readonly LinkId[]): SubgraphIo {
   };
 }
 
-/** 定義と入口・出口の id（本体と同じ UUID） */
 export function uuid(): string {
   return globalThis.crypto.randomUUID();
 }
 
-/** 出どころ（ノードと出力口）ごとにまとめる。名前は `nameOf` の最初のもの */
 function portsOf(
   links: readonly LiveLink[],
   nameOf: (link: ResolvedLink) => { readonly name: string; readonly label?: string | undefined },
@@ -206,7 +184,6 @@ function objectLink(
   };
 }
 
-/** 名前が重なれば番号を足す */
 function uniqueName(name: string, taken: readonly string[]): string {
   if (!taken.includes(name)) return name;
   let at = 1;

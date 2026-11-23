@@ -24,11 +24,6 @@ import { cn } from '@/lib/utils';
 import { pageNumbers, SLIDE_FILTERS, type Slide, type SlideFilter } from '@/queue/viewer-slides';
 import { VIEWER_GRID_MAX } from '@/store/settings-fields/viewer-grid';
 
-// ─────────────────────────────
-// ビューワーの見出しの帯（送り・何枚目か・番号と名前・操作・閉じる）。重ねでも別窓でも同じものを出す。
-// 状態は `ViewerSurface` が持ち、ここは描くだけ
-// ─────────────────────────────
-
 interface ViewerHeaderProps {
   readonly first: Slide | undefined;
   readonly label: string;
@@ -40,7 +35,6 @@ interface ViewerHeaderProps {
   readonly onClose: () => void;
 }
 
-/** 見出しの帯（重ね・別窓で共通）。並びはタスクの詳細の見出しに揃える（送り・番号と名前・操作・閉じる） */
 export function ViewerHeader({
   first,
   label,
@@ -96,11 +90,9 @@ interface SlideCountProps {
   readonly total: number;
   readonly start: number;
   readonly perPage: number;
-  /** 先頭のページへ送る（分母を押したとき） */
   readonly onFirst: () => void;
 }
 
-/** 何枚目を見ているか（「3–4 / 10」）。画像が無ければ出さない。分母を押すと先頭へ */
 export function SlideCount({
   total,
   start,
@@ -149,7 +141,6 @@ const FILTER_LABELS = {
   output: 'queue.viewer.filter.output',
 } as const satisfies Record<SlideFilter, MessageKey>;
 
-/** 帯の操作（追従・スライドショー・実サイズ・行と列・種別・呼び出し元が足すもの） */
 export function ViewerControls({
   follow,
   onFollow,
@@ -171,18 +162,14 @@ export function ViewerControls({
   };
   return (
     <>
-      {/* スライドショー中は追従が効かないので、追従の代わりに送りの間隔の欄を出す（アイコンの左） */}
       {playing ? (
-        // 三角のボタンを含むので label で囲まない（押した所が先頭のボタンに回る）
         <span className="text-muted-foreground flex shrink-0 items-center gap-0.5 text-xs">
-          {/* 上下の三角は欄の左（部品が置く）。欄の幅は 2 桁 */}
           <SlideshowSecondsField
             className={cn(dialogControl({ kind: 'field' }), 'h-7 w-6 text-right tabular-nums')}
           />
           {t('queue.viewer.slideshow.unit')}
         </span>
       ) : (
-        // 追従は押すたびに入り切りする（入っている間は押された見た目）
         <button
           type="button"
           className={cn(DIALOG_ICON_CLASS, DIALOG_TOGGLE_ON_CLASS)}
@@ -194,7 +181,6 @@ export function ViewerControls({
           <Sparkles className="size-4" aria-hidden />
         </button>
       )}
-      {/* スライドショーは追従（再生中は秒数の欄）の右。押すたびに始める・止める */}
       <button
         type="button"
         className={cn(DIALOG_ICON_CLASS, DIALOG_TOGGLE_ON_CLASS)}
@@ -209,7 +195,6 @@ export function ViewerControls({
           <Play className="size-4" aria-hidden />
         )}
       </button>
-      {/* 実サイズはスライドショーの右。再生の操作とは少し離す */}
       <button
         type="button"
         className={cn(DIALOG_ICON_CLASS, 'ml-1.5')}
@@ -223,7 +208,6 @@ export function ViewerControls({
           <Maximize2 className="size-4" aria-hidden />
         )}
       </button>
-      {/* 行と列は上下の三角で 1 ずつ増減する（枚数は一度に大きく変えない） */}
       <GridStepper
         label={t('queue.viewer.grid.rows')}
         hint={t('queue.viewer.grid.rowsHint')}
@@ -238,8 +222,6 @@ export function ViewerControls({
         value={cols}
         onChange={(value) => onGrid({ cols: value })}
       />
-      {/* 出す画像の種別。プレビューと保存の両方を持つと同じ画像が 2 つの種別で出る。
-          両脇に 3px 足す（左は帯の間隔 4px と 3px、右の別窓のアイコンとは 4px と 6px） */}
       <select
         className={cn(dialogControl({ kind: 'choice' }), 'mr-1.5 ml-[3px] h-7')}
         value={filter}
@@ -259,7 +241,6 @@ export function ViewerControls({
   );
 }
 
-/** 行・列の上下の三角。アイコンの半分の高さで 2 段に積む */
 const STEP_CLASS =
   'hover:text-foreground flex h-2 w-3 items-center justify-center disabled:opacity-30';
 
@@ -271,10 +252,6 @@ interface GridStepperProps {
   readonly onChange: (value: number) => void;
 }
 
-/**
- * 行・列の増減。**数字は出さず**、アイコンの右に上下の三角だけを置く
- * （今の値は指したときの説明と読み上げで伝える）
- */
 function GridStepper({ label, hint, icon, value, onChange }: GridStepperProps): React.ReactElement {
   return (
     <div

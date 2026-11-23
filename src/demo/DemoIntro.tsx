@@ -4,12 +4,6 @@ import { useState } from 'react';
 import { t } from '@/i18n';
 import { safeStorage } from '@/lib/safe-storage';
 
-// ─────────────────────────────
-// 初めて開いたときの案内の帯。閉じたらこのブラウザに残し、次からは出さない
-// （残せない環境では毎回出る）
-// ─────────────────────────────
-
-/** 閉じたことを残す名前 */
 export const DEMO_INTRO_KEY = 'kisara.demo.introDismissed';
 
 const storage = safeStorage();
@@ -23,11 +17,9 @@ function dismissedBefore(): boolean {
 }
 
 interface DemoIntroProps {
-  /** 何を試すページかの一行も出す（見出しの帯に一行が無い狭い画面） */
   readonly withTagline: boolean;
 }
 
-/** 案内の帯。触り方と、閉じるボタンを出す */
 export function DemoIntro({ withTagline }: DemoIntroProps): React.ReactElement | null {
   const [open, setOpen] = useState(() => !dismissedBefore());
   if (!open) return null;
@@ -37,7 +29,6 @@ export function DemoIntro({ withTagline }: DemoIntroProps): React.ReactElement |
     try {
       void storage.setItem(DEMO_INTRO_KEY, '1');
     } catch {
-      // 残せなくても閉じる
     }
   };
 

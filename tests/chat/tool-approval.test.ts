@@ -2,10 +2,6 @@ import { describe, expect, it } from 'vitest';
 
 import { runsWithoutConfirm, type ToolApprovalInput } from '@/chat/tool-approval';
 
-// ─────────────────────────────
-// 承諾の関門で確認を省いてよいかの判断。既定は確認を待ち、すべてを満たすときだけ省く
-// ─────────────────────────────
-
 const ALL: ToolApprovalInput = {
   kind: 'workflow',
   skipConfirm: true,

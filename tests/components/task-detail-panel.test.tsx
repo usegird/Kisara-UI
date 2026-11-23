@@ -8,17 +8,12 @@ import { useSettingsStore } from '@/store/use-settings-store';
 
 import { outputFile, queueTask } from '../helpers/queue';
 
-// 履歴も画像も取りに行かない（テストから ComfyUI に触れない）
 vi.mock('@/comfy/queue', async (importOriginal) => ({
   ...(await importOriginal<typeof import('@/comfy/queue')>()),
   fetchHistoryItem: () => Promise.reject(new Error('テストでは取らない')),
   fetchOutputImage: () => Promise.reject(new Error('テストでは取らない')),
   fetchPromptFromImage: () => Promise.reject(new Error('テストでは取らない')),
 }));
-
-// ─────────────────────────────
-// キューの詳細。ノードと変数の列に重ねる。画像は右上のアイコンでビューワーに切り替える
-// ─────────────────────────────
 
 afterEach(() => {
   cleanup();
@@ -76,7 +71,6 @@ describe('重ねた詳細の操作', () => {
     const onClose = vi.fn();
     show({ onFollowChange, onClose });
 
-    // 入っている間は押された見た目（ビューワーと同じアイコン）
     const follow = screen.getByRole('button', { name: '新しいタスクに追従する' });
     expect(follow.getAttribute('aria-pressed')).toBe('true');
     fireEvent.click(follow);
@@ -84,5 +78,34 @@ describe('重ねた詳細の操作', () => {
 
     fireEvent.keyDown(screen.getByRole('region', { name: 'タスクの詳細' }), { key: 'Escape' });
     expect(onClose).toHaveBeenCalled();
+  });
+});
+
+describe('出力の文字', () => {
+  function entryWith(outputs: Record<string, unknown>): unknown {
+    const nodes = { '5': { class_type: 'PreviewAny', inputs: {} } };
+    return { prompt: [0, 'p1', nodes, {}, []], outputs };
+  }
+
+  it('出力ノードが返した文字を、ノードの表記と写し取りを添えて改行のまま出す', async () => {
+    show({
+      cached: entryWith({
+        '5': { text: ['a cat,\nsmile'] },
+        '9': { images: [{ filename: 'a.png', subfolder: '', type: 'output' }] },
+      }),
+    });
+
+    const heading = await screen.findByText('出力の文字');
+    const section = heading.closest('section') ?? heading.parentElement;
+    expect(section?.textContent).toContain('#5 PreviewAny');
+    expect(screen.getByText(/a cat,/u).textContent).toBe('a cat,\nsmile');
+    expect(screen.getByRole('button', { name: '出力の文字を写す' })).toBeTruthy();
+  });
+
+  it('文字を返したノードが無ければ段を出さない', async () => {
+    show({ cached: entryWith({ '9': { images: [] } }) });
+
+    expect(await screen.findByText('プロンプト')).toBeTruthy();
+    expect(screen.queryByText('出力の文字')).toBeNull();
   });
 });

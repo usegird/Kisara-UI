@@ -1,12 +1,3 @@
-// ─────────────────────────────
-// 処理順の芯。処理の順（上流が先）を守ったうえで、それぞれを最初に使うものの直前まで遅らせる。
-// 並べるものの中身は知らない（ノードかグループの箱かは呼ぶ側が決める）。
-// ─────────────────────────────
-
-/**
- * 生成元 → 消費先。`slot` は消費先の入力口。`use` が偽の線は「使う」に数えない
- * （受け取った型を次へ出していない入力。受け手は出力を使われないものと同じく直後に付く）
- */
 export interface Edge<K> {
   readonly from: K;
   readonly to: K;
@@ -14,63 +5,43 @@ export interface Edge<K> {
   readonly use: boolean;
 }
 
-/**
- * 近さの比べ方。まとまりの何番目を使うものの入力かまで比べる（後ろほど近い。前のものの上流を
- * たどり切ってから戻ると、後ろのものの上流がずっと手前へ押し出される）
- */
 const POSITION_SPAN = 10_000;
 
-/** 並びの中の線を引ける形にしたもの */
 interface EdgeGraph<K> {
-  /** 今の並びの位置 */
   readonly rank: ReadonlyMap<K, number>;
   readonly consumers: ReadonlyMap<K, Set<K>>;
   readonly producers: ReadonlyMap<K, Set<K>>;
-  /** 「使う」に数える消費先 */
   readonly used: ReadonlyMap<K, Set<K>>;
-  /** 生成元 → 消費先 → 消費先の入力口（いちばん前のもの） */
   readonly slots: ReadonlyMap<K, Map<K, number>>;
   readonly linked: ReadonlySet<K>;
-  /** 上流の段数の控え */
   readonly depths: Map<K, number>;
 }
 
-/** 後ろから置いていく間の持ち物 */
 interface PlaceState<K> {
   readonly graph: EdgeGraph<K>;
-  /** 出力を誰も使わないもの（今の並びの順） */
   readonly ends: readonly K[];
   readonly endSet: ReadonlySet<K>;
   readonly remaining: Set<K>;
-  /** まだ置いていない消費先の数 */
   readonly waiting: Map<K, number>;
-  /** 置いたものの近さ（置いた回とまとまりの中の位置） */
   readonly closeness: Map<K, number>;
   readonly reversed: K[];
   round: number;
 }
 
-/** 一緒にまとめる入力と、それを最初に使うもの */
 interface Batch<K> {
   readonly user: K;
   readonly siblings: K[];
 }
 
-/**
- * 使う直前まで遅らせた処理順。`keys` は今の並び。
- * 線の無いもの（`edges` に現れないもの）は今の直前の後ろに付ける
- */
 export function latestOrder<K>(keys: readonly K[], edges: readonly Edge<K>[]): K[] {
   const graph = edgeGraphOf(keys, edges);
 
-  // 出力を誰も使わないもの。入力元のうち最後に並ぶものの直後に置く（後ろから見て直前）
   const linkedKeys = keys.filter((key) => graph.linked.has(key));
   const ends = linkedKeys.filter(
     (key) => (graph.used.get(key)?.size ?? 0) === 0 && (graph.producers.get(key)?.size ?? 0) > 0,
   );
   const endSet = new Set(ends);
 
-  // 後ろから決める。置いたものには近さ（置いた回とまとまりの中の位置）を控える
   const remaining = new Set(linkedKeys.filter((key) => !endSet.has(key)));
   const state: PlaceState<K> = {
     graph,
@@ -86,8 +57,6 @@ export function latestOrder<K>(keys: readonly K[], edges: readonly Edge<K>[]): K
 
   while (remaining.size > 0) placeNext(state);
 
-  // 線の無いものは、今の並びで直前にあったものの後ろへ（先頭なら先頭へ）
-  // 置けなかったもの（入力元が循環の中にしか無い終端など）も落とさず末尾に付ける
   const placed = new Set(state.reversed);
   const result = [...state.reversed.reverse(), ...linkedKeys.filter((key) => !placed.has(key))];
   pullToUnused(result, edges, (from, to) => slotOf(graph, from, to));
@@ -118,11 +87,9 @@ function edgeGraphOf<K>(keys: readonly K[], edges: readonly Edge<K>[]): EdgeGrap
   return { rank, consumers, producers, used, slots, linked, depths: new Map() };
 }
 
-/** 1 回ぶん置く。まとめる相手があれば、最初に使うものが同じ入力をまとめて置く */
 function placeNext<K>(state: PlaceState<K>): void {
   const later = (a: K, b: K): number => compareLater(state, a, b);
   let ready = [...state.remaining].filter((key) => (state.waiting.get(key) ?? 0) === 0);
-  // 循環（本来 DAG なので想定外）も落とさない。今の並びでいちばん後ろのものから切る
   if (ready.length === 0) ready = [[...state.remaining].sort(later)[0] as K];
   const next = ready.sort(later)[0] as K;
   state.round += 1;
@@ -132,7 +99,6 @@ function placeNext<K>(state: PlaceState<K>): void {
     return;
   }
 
-  // 最初に使うものが同じ入力をまとめる。出力を誰も使わないものを従える入力は手前へ
   const { graph } = state;
   const { user, siblings } = batch;
   const byInput = (a: K, b: K): number =>
@@ -151,10 +117,6 @@ function placeNext<K>(state: PlaceState<K>): void {
   });
 }
 
-/**
- * `next` と一緒にまとめる入力と、それを最初に使うもの。使うものが出力の無い終端なら、
- * 終端をここで置いて（入力の直後）その入力をまとめる。まとめる相手が無ければ null
- */
 function batchOf<K>(state: PlaceState<K>, next: K, ready: readonly K[]): Batch<K> | null {
   const { graph } = state;
   const user = nearestUser(state, next);
@@ -194,10 +156,6 @@ function place<K>(state: PlaceState<K>, key: K, position: number): void {
   }
 }
 
-/**
- * この入力元の直後に来る、出力を誰も使わないもの（今の並びの順）。
- * それにも続くものがあれば、さらにその後ろ（後ろから置くので先に積む）
- */
 function pushEnds<K>(state: PlaceState<K>, key: K, value: number): void {
   for (const end of [...state.ends].reverse()) {
     if (state.closeness.has(end) || !(state.graph.producers.get(end)?.has(key) ?? false)) continue;
@@ -207,12 +165,10 @@ function pushEnds<K>(state: PlaceState<K>, key: K, value: number): void {
   }
 }
 
-/** 遅らせる相手になる消費先（出力を誰も使わないものは数えない） */
 function usersOf<K>(state: PlaceState<K>, key: K): K[] {
   return [...(state.graph.used.get(key) ?? [])].filter((to) => !state.endSet.has(to));
 }
 
-/** 置き済みの消費先のうち、いちばん近いもの。無ければ null */
 function nearestUser<K>(state: PlaceState<K>, key: K): K | null {
   let best: K | null = null;
   for (const to of usersOf(state, key)) {
@@ -229,7 +185,6 @@ function nearOf<K>(state: PlaceState<K>, key: K): number {
   return user === null ? -1 : (state.closeness.get(user) ?? -1);
 }
 
-/** 後ろから置く順の比べ方。近い消費先・浅い上流・今の並びで後ろのものが先 */
 function compareLater<K>(state: PlaceState<K>, a: K, b: K): number {
   const { graph } = state;
   return (
@@ -239,7 +194,6 @@ function compareLater<K>(state: PlaceState<K>, a: K, b: K): number {
   );
 }
 
-/** 上流の段数（入力元をたどった最長の数）。循環はたどり直さない */
 function depthOf<K>(graph: EdgeGraph<K>, key: K, visiting: ReadonlySet<K> = new Set()): number {
   const known = graph.depths.get(key);
   if (known !== undefined) return known;
@@ -254,12 +208,6 @@ function slotOf<K>(graph: EdgeGraph<K>, from: K, to: K): number {
   return graph.slots.get(from)?.get(to) ?? 0;
 }
 
-/**
- * 「使う」に数えない線の入力元が受け手より後ろにあれば、受け手の入力のまとまりへ移す。
- * 受け手の手前にある入力元のうち、入力口が後ろのものより前（無ければ受け手の直前）。
- * **入力元の上流のうち移す先より後ろにあるものも、順を保って一緒に移す**（上流への線を逆走させない）。
- * 受け手が入力元の上流にいる（輪）なら移さない
- */
 function pullToUnused<K>(
   order: K[],
   edges: readonly Edge<K>[],
@@ -287,7 +235,6 @@ function pullToUnused<K>(
     if (at < 0 || target < 0 || at < target) continue;
     const upstream = upstreamOf(from);
     if (upstream.has(to)) continue;
-    // 移す先: 入力口が後ろの入力元のうち最も手前のもの（入力元の上流は基準にしない）
     const slot = slotOf(from, to);
     const anchor =
       edges

@@ -13,20 +13,12 @@ import { useHistoryDetailStore } from '@/store/use-history-detail-store';
 import { useSettingsStore } from '@/store/use-settings-store';
 import { useViewerStore } from '@/store/use-viewer-store';
 
-// ─────────────────────────────
-// 履歴の詳細をノードと変数の列に重ねて出す。置く場所は呼び出し側が決め、ここは中身の材料を集めるだけ。
-// ─────────────────────────────
-
-/**
- * 詳細の中身は開いたときに読む。枠（重ねる画面）だけ先に出す
- */
 const HistoryDetailPanel = lazyPart<HistoryDetailPanelProps>(
   'history.detail.title',
   () => import('@/components/comfy/queue/HistoryDetailPanel').then((m) => m.HistoryDetailPanel),
   () => <PartLoading label={t('history.detail.title')} />,
 );
 
-/** 開いている履歴のカードの詳細を、ダイアログの枠に入れて出す。カードが無ければ何も出さない */
 export function HistoryDetailOverlay(): React.ReactElement | null {
   const baseUrl = useSettingsStore((state) => state.baseUrl);
   const openedKey = useHistoryDetailStore((state) => state.key);
@@ -34,12 +26,10 @@ export function HistoryDetailOverlay(): React.ReactElement | null {
   const close = useHistoryDetailStore((state) => state.close);
   const openViewer = useViewerStore((state) => state.openOverlay);
 
-  // 履歴のタブと同じ並び（隣のカードへの送りを揃える）
   const { cards } = useHistoryCards();
   const index = cards.findIndex((card) => card.key === openedKey);
   const { open: openAsWorkflow, opening, error: openError, clearError } = useOpenRunWorkflow();
 
-  // 詳細のキーの受け口（effect）の依存になる。作り直すと付け直すので、compiler に任せず手で固定する
   const moveCard = useCallback(
     (direction: number): void => {
       const next = cards[index + direction];
@@ -50,7 +40,6 @@ export function HistoryDetailOverlay(): React.ReactElement | null {
     [cards, index, open, clearError],
   );
 
-  /** 選んでいる実行の画像から、同じ場所にビューワーを重ねる。**詳細は閉じる** */
   const openImages = (card: HistoryCard, run: number): void => {
     close();
     const tasks = historyTasks(card);
@@ -58,7 +47,6 @@ export function HistoryDetailOverlay(): React.ReactElement | null {
   };
 
   const card = cards[index];
-  // 記録を読み直して消えたカードは閉じる
   if (card === undefined) return null;
 
   return (

@@ -10,25 +10,15 @@ import { disclosure, rerunButton } from '@/components/llm/message/tool-call-styl
 import { field } from '@/components/ui/field';
 import { t } from '@/i18n';
 
-// ─────────────────────────────
-// ワークフローの呼び出しのカードの畳んだ中身。作らせた応答の情報・思考と、直せる引数。
-// 開閉は欄ごとの表示（保存しない）。直した引数はメッセージの部品が持つ。
-// ─────────────────────────────
-
 const ARGUMENT_FIELD = `${field({ size: 'xs', width: 'full' })} field-sizing-content max-h-40
   resize-y`;
 
-/** 呼び出しを作らせた応答の情報の props */
 export interface GenerationProps {
   readonly chatId: string;
   readonly callId: string;
   readonly generation: ToolCallGeneration;
 }
 
-/**
- * 呼び出しを作らせた応答の情報（トークン・時間・費用の 1 行と、右端に送った中身のアイコン）と、
- * その下に畳んだ思考。思考の開閉はこの欄だけの表示（保存しない）
- */
 export function Generation({ chatId, callId, generation }: GenerationProps): React.ReactElement {
   const [open, setOpen] = useState(false);
   const figures = buildGenerationFigures(generation);
@@ -64,14 +54,12 @@ export function Generation({ chatId, callId, generation }: GenerationProps): Rea
   );
 }
 
-/** 引数の一覧の props */
 export interface ArgumentListProps {
   readonly raw: string;
   readonly edits: ReadonlyMap<string, string>;
   readonly onEdit: (name: string, value: string) => void;
 }
 
-/** 引数名の下に値の欄。値は欄で直せる（直した値を重ねて出す） */
 export function ArgumentList({ raw, edits, onEdit }: ArgumentListProps): React.ReactElement | null {
   const { lines, editable } = argumentLines(raw);
   if (lines.length === 0) return null;

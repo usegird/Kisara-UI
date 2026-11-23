@@ -19,10 +19,6 @@ import { applyStreamEvents, finishStream } from '@/chat/stream-receive';
 
 import { chat, chatMessage } from '../helpers/llm';
 
-// ─────────────────────────────
-// 会話の操作。受け取る候補はいつも最後の assistant の選んでいる候補。
-// ─────────────────────────────
-
 const answered = chat([chatMessage('u1', 'user', ['hi']), chatMessage('a1', 'assistant', ['A'])]);
 
 describe('送る', () => {
@@ -65,7 +61,6 @@ describe('受け取り', () => {
       { kind: 'finish', reason: 'length' },
       { kind: 'delta', content: 'llo', reasoning: '' },
     ]);
-    // 終わり方が届いても、受け取りを終えるまでは受け取り中
     expect(isStreaming(next)).toBe(true);
     next = finishStream(next, null);
     const candidate = next.messages.at(-1)?.candidates[0];
@@ -100,6 +95,7 @@ describe('生成し直す', () => {
     expect(last?.selected).toBe(1);
     expect(next === null ? false : isStreaming(next)).toBe(true);
   });
+
   it('指示があれば、今の候補を土台にした候補にする。失敗してもう一度でも持ったまま', () => {
     const next = regenerate(answered, 'Shorter.');
     expect(next?.messages.at(-1)?.candidates[1]?.revision).toEqual({
@@ -125,7 +121,6 @@ describe('生成し直す', () => {
     expect(back?.chat.messages).toEqual([]);
     expect(back?.content).toBe('hi');
     expect(back?.images).toEqual([]);
-    // 添えた画像も入力欄へ戻す
     const png = 'data:image/png;base64,iVBORw0KGgo=';
     const pictured = chat([chatMessage('u9', 'user', ['see'], 0, [png])]);
     expect(rollback(pictured, 'u9')?.images).toEqual([png]);

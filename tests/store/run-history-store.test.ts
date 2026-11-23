@@ -9,9 +9,7 @@ import { useTaskLogStore } from '@/store/use-task-log-store';
 
 import { definition, definitionMap, widget } from '../helpers/definitions';
 
-// 接続先のユーザーフォルダには触れない。読み書きを手元の表に置き換える
 const disk = vi.hoisted(() => new Map<string, unknown>());
-/** 読めない形のファイル（古い形など）の印 */
 const UNREADABLE = 'unreadable';
 const saved = vi.hoisted(() => vi.fn());
 vi.mock('@/comfy/run-history', async (importOriginal) => ({
@@ -27,22 +25,22 @@ vi.mock('@/comfy/run-history', async (importOriginal) => ({
     disk.set(name, file);
     return Promise.resolve();
   },
-  // 一覧は名前と時期（ここでは置いた順）だけ。中身は読まない
   listRunHistoryFiles: () =>
     Promise.resolve([...disk.keys()].map((name, index) => ({ name, modified: index }))),
 }));
 
-// ─────────────────────────────
-// 実行の記録の書き手と読み手
-// ─────────────────────────────
+vi.mock('@/comfy/user-files', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/comfy/user-files')>()),
+  removeUserFile: (_baseUrl: string, _kind: string, path: string) => {
+    disk.delete(path);
+    return Promise.resolve();
+  },
+}));
 
 const BASE = 'http://comfy.test';
-/** 時刻の起点（2026 年 10 月 10 日 0 時 UTC） */
 const T0 = Date.UTC(2026, 9, 10);
-/** このタブのセッションの記録のファイル（セッションの id + `.json`） */
 const FILE = 'tab-1.json';
 
-/** `/history` の 1 件。セッションの既定はこのタブのもの（`tab-1`） */
 function historyItem(start: number, files: readonly string[], session = 'tab-1'): unknown {
   return {
     prompt: [
@@ -63,7 +61,6 @@ function runsOf(name = FILE): number {
 
 beforeEach(() => {
   useSettingsStore.setState({ recordRunHistory: true });
-  // 開いているワークフローのタブのセッションを `tab-1` にする
   useTabsStore.setState({
     tabs: [{ id: 'w', kind: 'workflow', runSession: 'tab-1' }],
     activeId: 'w',
@@ -90,7 +87,6 @@ describe('実行の記録を書く', () => {
 
   it('既にあるファイルは、最初に書く前に読んで続きから足す（読み込み直したタブ）', async () => {
     await useRunHistoryStore.getState().ingest(BASE, { a: historyItem(T0, ['a.png']) });
-    // 読み込み直した: 手元の中身は消えるが、ファイルは残り、セッションも変わらない
     const before = disk.get(FILE);
     useRunHistoryStore.getState().clear();
     disk.set(FILE, before);
@@ -129,7 +125,6 @@ describe('実行の記録を書く', () => {
   });
 
   it('この画面から送った実行は、/history ではなく送った Workflow JSON で記録する', async () => {
-    // サーバー側で書き換えられた Workflow JSON（`/history` の方）と見分けるため、カードを足す
     useDefinitionsStore.setState({
       definitions: definitionMap(definition('Sent', [widget('seed', 'INT')], { outputNode: true })),
     });
@@ -155,7 +150,6 @@ describe('実行の記録を書く', () => {
   });
 
   it('ほかのセッションで送った実行は、送った物を控えていても書かない', async () => {
-    // 複製元のタブが送った実行。控え（Workflow JSON）が写っていても、送り元が違えば書かない
     useRunHistoryStore.getState().rememberSent('x', { nodes: [], links: [] });
     await useRunHistoryStore.getState().ingest(BASE, { x: historyItem(T0, ['x.png'], 'tab-2') });
 
@@ -169,6 +163,7 @@ describe('実行の記録を書く', () => {
     expect(saved).not.toHaveBeenCalled();
   });
 });
+
 describe('セッション名', () => {
   it('今のセッションの記録のファイルに書き、読み直すと出す。空にすると外す', async () => {
     const store = useRunHistoryStore.getState();
@@ -191,6 +186,44 @@ describe('セッション名', () => {
     await useRunHistoryStore.getState().setSessionName(BASE, 'x');
 
     expect(saved).not.toHaveBeenCalled();
+  });
+});
+
+describe('履歴の画面からの書き直しと削除', () => {
+  it('ほかのセッションの記録も、読み直してから名前だけを書き直す', async () => {
+    await useRunHistoryStore.getState().ingest(BASE, { a: historyItem(T0, ['a.png']) });
+    disk.set('other.json', disk.get(FILE));
+    await useRunHistoryStore.getState().load(BASE);
+    await useRunHistoryStore.getState().fetchFiles(BASE, ['other.json']);
+
+    await useRunHistoryStore.getState().renameSession(BASE, 'other.json', ' night ');
+
+    const file = disk.get('other.json') as RunHistoryFile | undefined;
+    expect(file?.name).toBe('night');
+    expect(file?.runs).toHaveLength(1);
+    expect(useRunHistoryStore.getState().files.get('other.json')?.name).toBe('night');
+    expect(useRunHistoryStore.getState().sessionName).toBe('');
+  });
+
+  it('今のセッションの名前を書き直すと、セッションの帯の名前も変わる', async () => {
+    await useRunHistoryStore.getState().ingest(BASE, { a: historyItem(T0, ['a.png']) });
+    await useRunHistoryStore.getState().renameSession(BASE, FILE, 'cats');
+
+    expect((disk.get(FILE) as RunHistoryFile | undefined)?.name).toBe('cats');
+    expect(useRunHistoryStore.getState().sessionName).toBe('cats');
+  });
+
+  it('今のセッションの記録を消すと、次はその後の実行だけで作り直す', async () => {
+    const store = useRunHistoryStore.getState();
+    await store.ingest(BASE, { a: historyItem(T0, ['a.png']) });
+    await store.load(BASE);
+
+    await store.removeSession(BASE, FILE);
+    expect(disk.has(FILE)).toBe(false);
+    expect(useRunHistoryStore.getState().entries).toHaveLength(0);
+
+    await store.ingest(BASE, { b: historyItem(T0 + 1_000, ['b.png']) });
+    expect(runsOf()).toBe(1);
   });
 });
 

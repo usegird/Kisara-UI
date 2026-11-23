@@ -14,10 +14,6 @@ import {
   formatRunError,
 } from '@/queue/comfy-failure-text';
 
-// ─────────────────────────────
-// 通信の失敗を理由の符号から文にする。通信の層で訳していたときと同じ鍵と値を引くこと
-// ─────────────────────────────
-
 const TARGET_URL = 'http://127.0.0.1:8188/x';
 
 function failure(reasonCode: ComfyFailureReason, params: ComfyFailureParams = {}): object {
@@ -77,7 +73,6 @@ describe('通信の失敗の文', () => {
     expect(formatComfyFailure(new Error('boom'))).toBe('boom');
     expect(formatComfyFailure('text')).toBe('text');
     expect(formatComfyFailure({ reasonCode: 'nope', params: {} })).toBe('[object Object]');
-    // DOMException の数の code や、知らない文字列を符号と取り違えない
     expect(comfyFailureOf(new DOMException('x', 'AbortError'))).toBeNull();
     expect(comfyFailureOf({ reasonCode: 'ECONNREFUSED', params: {} })).toBeNull();
   });

@@ -5,10 +5,10 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { ModelInfoPanel } from '@/components/comfy/flow/dialogs/ModelInfoPanel';
 import { buildModelItems, modelFileIndex } from '@/graph/model-files';
 import type { ModelInfo } from '@/graph/model-metadata';
+import { useModelJson } from '@/hooks/flow/use-model-json';
 
 import { modelFile } from '../helpers/model-files';
 
-// 埋め込みの情報は取りに行かない（テストから ComfyUI に触れない）
 const INFO: ModelInfo = {
   title: 'b',
   baseModel: 'sdxl',
@@ -22,10 +22,10 @@ const INFO: ModelInfo = {
 vi.mock('@/hooks/flow/use-model-metadata', () => ({
   useModelMetadata: () => ({ status: 'ready', info: INFO, error: null }),
 }));
-
-// ─────────────────────────────
-// モデルの情報。下に置いたときは横の広さを使って組む。
-// ─────────────────────────────
+vi.mock('@/hooks/flow/use-model-json', async (original) => {
+  const actual = await original<typeof import('@/hooks/flow/use-model-json')>();
+  return { ...actual, useModelJson: vi.fn(actual.useModelJson) };
+});
 
 afterEach(cleanup);
 
@@ -37,17 +37,68 @@ function item(): ReturnType<typeof buildModelItems>[number] {
 }
 
 describe('モデルの情報（下に置いたとき）', () => {
-  it('上段は 2 列で、右に大きさ・日時。学習語はその外で 1 行を通す', () => {
+  it('上段は name・type・base model・ss_tag_frequency を見出しなしの項目として並べる', () => {
     render(<ModelInfoPanel item={item()} folder="loras" layout="wide" onClose={vi.fn()} />);
 
-    const size = screen.getByText('大きさ').closest('section');
-    const path = screen.getByText('パス').closest('section');
-    expect(size).not.toBe(path);
-    expect(path?.textContent).toContain('名称');
-    expect(size?.parentElement?.className).toContain('grid-cols-2');
+    const top = screen.getByText('name').closest('section');
+    expect(top?.textContent).toBe('namebtype.safetensorsbase modelsdxlss_tag_frequency1girlsmile');
+    expect(screen.queryByRole('heading', { name: 'ss_tag_frequency' })).toBeNull();
+  });
 
-    const words = screen.getByText('学習で多かった語').closest('section');
-    expect(words?.parentElement).not.toBe(size?.parentElement);
+  it('name・type・base model は 1 つの行に横に並べる', () => {
+    render(<ModelInfoPanel item={item()} folder="loras" onClose={vi.fn()} />);
+
+    const line = screen.getByText('name').parentElement?.parentElement?.parentElement;
+    expect(line?.className).toContain('flex-wrap');
+    expect(line?.children).toHaveLength(3);
+    expect(line?.textContent).not.toContain('ss_tag_frequency');
+  });
+
+  it('Lora の段は JSON・txt・model data の順', () => {
+    vi.mocked(useModelJson).mockReturnValueOnce({
+      status: 'loading',
+      source: null,
+      error: null,
+      save: vi.fn(),
+    });
+    render(<ModelInfoPanel item={item()} folder="loras" onClose={vi.fn()} />);
+
+    const order = screen
+      .getAllByRole('heading', { level: 4 })
+      .map((heading) => heading.textContent);
+    expect(order.filter((name) => ['JSON', 'txt', 'model data'].includes(name ?? ''))).toEqual([
+      'JSON',
+      'txt',
+      'model data',
+    ]);
+  });
+
+  it('model data の段の先頭はサイズ・作成日・更新日・ネットワークの順', () => {
+    const files = [modelFile('b.safetensors', { size: 2048, created: 1, modified: 2 })];
+    const [dated] = buildModelItems(['b.safetensors'], modelFileIndex(files));
+    if (dated === undefined) throw new Error('組み立てられない');
+    render(<ModelInfoPanel item={dated} folder="loras" onClose={vi.fn()} />);
+
+    const metadata = screen.getByRole('heading', { name: 'model data' }).closest('section');
+    const labels = [...(metadata?.querySelectorAll('span.text-muted-foreground') ?? [])];
+    expect(labels.map((label) => label.textContent)).toEqual([
+      'サイズ',
+      '作成日',
+      '更新日',
+      'ネットワーク',
+    ]);
+    expect(metadata?.contains(screen.getByText('ss_short'))).toBe(true);
+  });
+
+  it('name は経路から拡張子を除いたもの（ディレクトリを含む）を写す', () => {
+    const files = [modelFile('style/b.v2.safetensors')];
+    const [nested] = buildModelItems(['style\\b.v2.safetensors'], modelFileIndex(files));
+    if (nested === undefined) throw new Error('組み立てられない');
+    render(<ModelInfoPanel item={nested} folder="loras" onClose={vi.fn()} />);
+
+    const copy = screen.getByRole('button', { name: 'b.v2 の名前を写す' });
+    expect(copy.previousElementSibling?.textContent).toBe('name');
+    expect(copy.parentElement?.nextElementSibling?.textContent).toBe('style/b.v2');
   });
 
   it('学習で多かった語の並びはメモの欄と同じ高さまでで、越えたらスクロールする', () => {
@@ -58,23 +109,25 @@ describe('モデルの情報（下に置いたとき）', () => {
     expect(words?.className).toContain('overflow-y-auto');
   });
 
-  it('右に置いたとき、上段は名称が一番上で、日時と網の間を空けない', () => {
+  it('txt・JSON・model data の見出しの左にアイコンを置く（読み上げない）', () => {
     render(<ModelInfoPanel item={item()} folder="loras" onClose={vi.fn()} />);
 
-    const name = screen.getByText('名称');
-    const section = name.closest('section');
-    expect(section?.firstElementChild?.contains(name)).toBe(true);
-    expect(section?.contains(screen.getByText('大きさ'))).toBe(true);
-    expect(section?.contains(screen.getByText('ネットワーク'))).toBe(true);
+    const heading = screen.getByRole('heading', { name: 'model data' });
+    const icon = heading.previousElementSibling;
+    expect(icon?.tagName.toLowerCase()).toBe('svg');
+    expect(icon?.getAttribute('aria-hidden')).toBe('true');
+    expect(heading.closest('section')?.className).toBe('pt-1');
+    expect(heading.parentElement?.className).toContain('min-h-5');
   });
 
-  it('情報の幅が狭いときは、上段も名前と値を 2 行に分ける', () => {
+  it('上段・model data の先頭の項目は、名前の行の下に値を出す', () => {
     render(<ModelInfoPanel item={item()} folder="loras" onClose={vi.fn()} />);
 
-    expect(screen.getByLabelText('モデルの情報').className).toContain('@container');
-    const label = screen.getByText('パス');
-    expect(label.className).toContain('@max-[18rem]:w-full');
-    expect(label.parentElement?.className).toContain('flex-wrap');
+    for (const name of ['type', 'ネットワーク']) {
+      const label = screen.getByText(name);
+      expect(label.parentElement?.nextElementSibling?.textContent).not.toBe('');
+      expect(label.parentElement?.textContent).toBe(name);
+    }
   });
 
   it('全項目は名前と値を 1 行に並べ、長い値だけ 1 行を通して使う', () => {
@@ -113,5 +166,46 @@ describe('モデルの情報（下に置いたとき）', () => {
 
     const toggle = screen.getByRole('button', { name: '情報を右に出す' });
     expect(toggle.nextElementSibling?.getAttribute('aria-label')).toBe('情報を閉じる');
+  });
+});
+
+describe('モデルの情報（カードの画像）', () => {
+  const preview = { baseUrl: 'http://127.0.0.1:8188' };
+
+  it('カードに重なったとき（preview を渡したとき）だけ、見出しの下の最上段に画像を出す', async () => {
+    render(
+      <ModelInfoPanel item={item()} folder="checkpoints" preview={preview} onClose={vi.fn()} />,
+    );
+
+    const image = await screen.findByRole('img', { name: 'b のプレビュー' });
+    expect(image.parentElement?.firstElementChild).toBe(image);
+    cleanup();
+
+    render(<ModelInfoPanel item={item()} folder="checkpoints" onClose={vi.fn()} />);
+    expect(screen.queryByRole('img')).toBeNull();
+  });
+
+  it('読めない画像は出さない', async () => {
+    render(
+      <ModelInfoPanel item={item()} folder="checkpoints" preview={preview} onClose={vi.fn()} />,
+    );
+
+    fireEvent.error(await screen.findByRole('img', { name: 'b のプレビュー' }));
+    expect(screen.queryByRole('img')).toBeNull();
+  });
+});
+
+describe('モデルの情報（選び直し）', () => {
+  it('別の Lora を選び直しても、txt の段は 1 つのまま', () => {
+    const files = [modelFile('a.safetensors'), modelFile('b.safetensors')];
+    const items = buildModelItems(['a.safetensors', 'b.safetensors'], modelFileIndex(files));
+    const [first, second] = items;
+    if (first === undefined || second === undefined) throw new Error('組み立てられない');
+    const { rerender } = render(<ModelInfoPanel item={first} folder="loras" onClose={vi.fn()} />);
+
+    rerender(<ModelInfoPanel item={second} folder="loras" onClose={vi.fn()} />);
+    rerender(<ModelInfoPanel item={first} folder="loras" onClose={vi.fn()} />);
+
+    expect(screen.getAllByRole('heading', { name: 'txt' })).toHaveLength(1);
   });
 });

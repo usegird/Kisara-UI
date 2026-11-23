@@ -15,10 +15,6 @@ import { usePromptAdvisorStore } from '@/store/use-prompt-advisor-store';
 import { LEAK_ALLOWANCE, LEAK_ROUNDS, leakWatch } from '../helpers/leak';
 import { chat } from '../helpers/llm';
 
-// ─────────────────────────────
-// 選ぶ所の組とメニューと、作る・直すダイアログ
-// ─────────────────────────────
-
 afterEach(cleanup);
 
 beforeEach(() => {
@@ -41,10 +37,6 @@ function Screen(): React.ReactElement {
 const storyName = (): string => tPath('llm.playbook.builtin.story.name');
 const editorDialogs = (): HTMLElement[] => screen.queryAllByRole('dialog');
 
-/**
- * 行のメニューと作る・直すダイアログだけを置く画面。選ぶ所は自分のプレイブックをまだ作らないので
- * メニューを置かないが、ダイアログの部品は残すので、ここから開いて確かめる
- */
 function ManageScreen(): React.ReactElement {
   const manage = usePlaybookManage();
   const rows = playbookRows(usePlaybooksStore((state) => state.playbooks));
@@ -87,6 +79,7 @@ describe('自分のプレイブック（作る・直すダイアログ）', () =
     const own = Object.values(usePlaybooksStore.getState().playbooks);
     expect(own.map((item) => item.playbook.name)).toEqual(['Mine']);
   });
+
   it('写して作ると、直前の応答を校正の入力欄に入れる印も写す', async () => {
     render(<ManageScreen />);
     openCopyOfStory();
@@ -112,6 +105,7 @@ describe('自分のプレイブック（作る・直すダイアログ）', () =
     });
     expect(save).toHaveProperty('disabled', false);
   });
+
   it('作るダイアログを開いて閉じてもダイアログが残らない', async () => {
     const leak = leakWatch();
     render(<ManageScreen />);
@@ -123,7 +117,6 @@ describe('自分のプレイブック（作る・直すダイアログ）', () =
       const dialog = (await screen.findAllByRole('dialog'))[0]!;
       leak.watch(dialog);
       fireEvent.click(screen.getByRole('button', { name: t('common.cancel') }));
-      // 写して作るは直しかけのまま閉じるので確かめる
       fireEvent.click(await screen.findByRole('button', { name: t('common.ok') }));
       await waitFor(() => expect(editorDialogs()).toHaveLength(0));
     }

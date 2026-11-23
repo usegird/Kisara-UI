@@ -8,14 +8,8 @@ import type { NodeDefinition, NodeId, Workflow } from '@/graph/types';
 import { createGraphKit } from '@/store/slices/graph-kit';
 import type { GraphState } from '@/store/use-graph-store';
 
-// ─────────────────────────────
-// グラフのストアの、カードの見え方（タイトル・複数行の高さ・折りたたみ）の操作。
-// ─────────────────────────────
-
-/** この slice が持つ操作 */
 type GraphNodeLookActions = Pick<GraphState, 'setTitle' | 'setMultilineHeight' | 'toggleCollapsed'>;
 
-/** カードの見え方の操作を作る */
 export const createGraphNodeLookSlice: StateCreator<GraphState, [], [], GraphNodeLookActions> = (
   rawSet,
   get,
@@ -37,7 +31,6 @@ export const createGraphNodeLookSlice: StateCreator<GraphState, [], [], GraphNod
       const workflow = get().workflow;
       if (!workflow) return;
 
-      // 高さが変わると、下に置いた線の無いノードの位置も変わる
       const next = inLevel(workflow, levelOfId(nodeId), (level) =>
         resizeMultiline(level, nodeId, definition, height),
       );
@@ -63,7 +56,6 @@ export const createGraphNodeLookSlice: StateCreator<GraphState, [], [], GraphNod
   };
 };
 
-/** 階層の中の 1 つのノードの複数行の高さを変える。変わらなければ元の階層 */
 function resizeMultiline(
   level: Workflow,
   nodeId: NodeId,

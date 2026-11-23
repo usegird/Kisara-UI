@@ -3,16 +3,11 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { claimTabId } from '@/lib/tab-id';
 
-// ─────────────────────────────
-// タブごとの識別子。複製したタブとは分ける
-// ─────────────────────────────
-
 afterEach(() => {
   sessionStorage.clear();
   vi.unstubAllGlobals();
 });
 
-/** Web Locks の代わり。`held` にある名前の鍵は取れない */
 function stubLocks(held: ReadonlySet<string>): void {
   vi.stubGlobal('navigator', {
     locks: {

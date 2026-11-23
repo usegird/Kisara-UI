@@ -8,27 +8,22 @@ import { addRuns, EMPTY_RUN_HISTORY } from '@/queue/run-history';
 import { buildHistoryCards, type HistoryCard } from '@/queue/run-history-view';
 import { PLAIN_LABELER } from '@/queue/task-failure';
 import { useConnectionStore } from '@/store/use-connection-store';
+import { outputViewUrl, useOutputImagesStore } from '@/store/use-output-images-store';
+import { useRunHistoryStore } from '@/store/use-run-history-store';
 
 import { definition, definitionMap, widget } from '../helpers/definitions';
 import { LEAK_ALLOWANCE, LEAK_ROUNDS, leakWatch } from '../helpers/leak';
 import { runSource } from '../helpers/run-history';
 
-// 画像の中身は取りに行かない（テストから ComfyUI に触れない）
 vi.mock('@/comfy/queue', async (importOriginal) => ({
   ...(await importOriginal<typeof import('@/comfy/queue')>()),
   fetchOutputImage: () => Promise.reject(new Error('テストでは取らない')),
 }));
 
-// ─────────────────────────────
-// 履歴の詳細。末尾に実行ごとの一覧、画像は少しずつ描く
-// ─────────────────────────────
-
 const DEFINITIONS = definitionMap(
-  // 実行の形は出力ノードから辿れるノードだけになるので、出力ノードにする
   definition('Noise', [widget('seed', 'INT'), widget('label', 'STRING')], { outputNode: true }),
 );
 
-/** モデルの区分を決める一覧（無ければ入力名で分ける） */
 const KINDS = { modelNames: new Set<string>(), loraNames: new Set<string>() };
 
 function card(runs: number, imagesPerRun = 1): HistoryCard {
@@ -84,6 +79,27 @@ afterEach(() => {
 });
 
 describe('履歴の詳細', () => {
+  it('見出しはセッション名か id。セッションの行の鉛筆で直すと記録に書き、Esc では書かない', () => {
+    const renameSession = vi.fn(() => Promise.resolve());
+    const original = useRunHistoryStore.getState().renameSession;
+    useRunHistoryStore.setState({ renameSession });
+    show(card(1));
+
+    expect(screen.getByRole('heading', { name: 's' })).toBeDefined();
+    fireEvent.click(screen.getByRole('button', { name: 'セッション名を変える' }));
+    const input = screen.getByRole('textbox', { name: 'セッション名' });
+    fireEvent.change(input, { target: { value: 'night' } });
+    fireEvent.keyDown(input, { key: 'Escape' });
+    expect(renameSession).toHaveBeenCalledWith('http://comfy.test', 's.json', '');
+
+    fireEvent.click(screen.getByRole('button', { name: 'セッション名を変える' }));
+    const again = screen.getByRole('textbox', { name: 'セッション名' });
+    fireEvent.change(again, { target: { value: 'night' } });
+    fireEvent.keyDown(again, { key: 'Enter' });
+    expect(renameSession).toHaveBeenLastCalledWith('http://comfy.test', 's.json', 'night');
+    useRunHistoryStore.setState({ renameSession: original });
+  });
+
   it('実行ごとの一覧に新しい順でシードを出し、行を押すとその実行を選ぶ', () => {
     show(card(2));
 
@@ -109,7 +125,6 @@ describe('履歴の詳細', () => {
     expect(seeds?.textContent).not.toContain('#');
     expect(seeds?.textContent).toContain('ノード 1');
     expect(seeds?.textContent).toContain('Noise');
-    // ノード番号の次に入力名、すぐ後に値、その後にノード名
     expect(seeds?.textContent).toMatch(/ノード 1seed100Noise/u);
     expect(seeds?.textContent).toContain('seed');
     expect(seeds?.textContent).toContain('100');
@@ -129,7 +144,6 @@ describe('履歴の詳細', () => {
     expect(document.activeElement).toBe(selected());
     fireEvent.keyDown(selected(), { key: 'ArrowUp' });
     fireEvent.keyDown(selected(), { key: 'ArrowUp' });
-    // 端では止まる
     expect(selected().textContent).toContain('シード 102');
   });
 
@@ -205,6 +219,44 @@ describe('履歴の詳細', () => {
     expect(onOpenWorkflow).toHaveBeenCalledWith(target.runs[0]);
   });
 
+  it('PNG がすべて消えたと分かったら、ワークフローを開くアイコンを出さない', () => {
+    vi.stubGlobal(
+      'URL',
+      class extends URL {
+        static override createObjectURL = (): string => 'blob:test';
+      },
+    );
+    const target = card(1);
+    const file = target.runs[0]?.outputs[0];
+    const url = file === undefined ? null : outputViewUrl('http://comfy.test', file);
+    if (url === null) throw new Error('no url');
+    useOutputImagesStore.setState({ images: new Map([[url, 'missing']]) });
+    show(target);
+
+    expect(screen.queryByRole('button', { name: 'このワークフローを開く' })).toBeNull();
+    useOutputImagesStore.setState({ images: new Map() });
+  });
+
+  it('狭いときの画像の領域を横に送ると隣の実行を選び、一覧で選び直すと面も移る', () => {
+    show(card(2));
+    const pager = document.querySelector<HTMLElement>('[data-image-strip] .snap-x');
+    if (pager === null) throw new Error('no pager');
+    Object.defineProperty(pager, 'clientWidth', { value: 100 });
+
+    pager.scrollLeft = 100;
+    fireEvent.scroll(pager);
+    expect(screen.getByRole('button', { pressed: true }).textContent).toContain('シード 100');
+
+    fireEvent.click(screen.getByRole('button', { pressed: false, name: /シード 101/u }));
+    expect(pager.scrollLeft).toBe(0);
+  });
+
+  it('PNG の出力が無い実行では、ワークフローを開くアイコンを出さない', () => {
+    show(card(1, 0));
+
+    expect(screen.queryByRole('button', { name: 'このワークフローを開く' })).toBeNull();
+  });
+
   it('ワークフローを開けなかった理由を出し、読んでいる間は押せない', () => {
     render(
       <HistoryDetailPanel
@@ -227,7 +279,6 @@ describe('履歴の詳細', () => {
   });
 
   it('画像は選んでいる実行のものだけを、最初のまとまりだけ描く', async () => {
-    // 末尾の目印は見えないものとする（足す合図が来ない）。画像の目印（`span`）はすぐ見えたことにする
     type Notify = (entries: { isIntersecting: boolean }[]) => void;
     vi.stubGlobal(
       'IntersectionObserver',
@@ -243,17 +294,17 @@ describe('履歴の詳細', () => {
         disconnect(): void {}
       },
     );
-    // 画像はつないでいる間だけ取りに行く
     useConnectionStore.setState({ status: 'connected' });
     show(card(2, 10));
 
-    // 手元へ写せなかった画像は `/view` を指して出る（非同期）
-    await waitFor(() => expect(document.querySelectorAll('img')).toHaveLength(8));
-    expect(document.querySelector('img')?.getAttribute('alt')).toBe('r1_9.png');
+    const column = 'img:not([data-image-strip] img)';
+    await waitFor(() => expect(document.querySelectorAll(column)).toHaveLength(8));
+    expect(document.querySelectorAll('[data-run-page="current"] img')).toHaveLength(10);
+    expect(document.querySelector(column)?.getAttribute('alt')).toBe('r1_9.png');
 
     fireEvent.click(screen.getByRole('button', { pressed: false, name: /シード 100/u }));
     await waitFor(() =>
-      expect(document.querySelector('img')?.getAttribute('alt')).toBe('r0_9.png'),
+      expect(document.querySelector(column)?.getAttribute('alt')).toBe('r0_9.png'),
     );
     useConnectionStore.setState({ status: 'disconnected' });
   });

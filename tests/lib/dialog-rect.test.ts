@@ -11,10 +11,6 @@ import {
   viewDialogRect,
 } from '@/lib/dialog-rect';
 
-// ─────────────────────────────
-// 動かせるダイアログの位置と大きさ
-// ─────────────────────────────
-
 const VIEWPORT = { width: 1400, height: 850 };
 const RECT = { left: 300, top: 100, width: 800, height: 600 };
 

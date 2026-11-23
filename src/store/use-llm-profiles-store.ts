@@ -14,65 +14,34 @@ import { hasLlmKeyNow } from '@/store/use-llm-keys-store';
 import { useSettingsStore } from '@/store/use-settings-store';
 import { cloudAgreed } from '@/store/use-terms-store';
 
-// ─────────────────────────────
-// LLM の接続の設定（複数の会話から使う）。小さい保存領域に置く。API キーは持たない（ゲートウェイが持つ）。
-// モデルの一覧と文脈長も残さない。
-// ─────────────────────────────
-
 export const PROFILES_KEY = 'kisaraui.llm.profiles';
 
-/** 確かめた結果（モデルの一覧と文脈長） */
 type ModelCheck =
   | { readonly kind: 'checking' }
   | {
       readonly kind: 'ok';
       readonly models: readonly string[];
       readonly contexts: Readonly<Record<string, number>>;
-      /**
-       * モデルごとの付帯情報（返すサーバーだけ）
-       */
       readonly details: Readonly<Record<string, ModelDetails>>;
       readonly serverContext: number | null;
-      /**
-       * 上限の件数を超えた分を捨てたか
-       */
       readonly truncated?: boolean;
     }
   | { readonly kind: 'failed'; readonly failure: LlmFailure };
 
-/** 接続の設定の直す分（id は変えない） */
 type ProfilePatch = Partial<Omit<ConnectionProfile, 'id'>>;
 
-/** 接続の設定の一覧・確かめた結果と、その操作 */
 interface LlmProfilesState {
   readonly profiles: readonly ConnectionProfile[];
   readonly checks: Readonly<Record<string, ModelCheck>>;
-  /** サーバーの断りで知った文脈長（設定の id → モデル → 長さ）。接続で読んだ値より先に使う */
   readonly learned: Readonly<Record<string, Readonly<Record<string, number>>>>;
-  /**
-   * 断りで知った文脈長を覚える
-   */
   readonly learnContext: (id: string, model: string, context: number) => void;
-  /** 空の設定を足す。返り値は id */
   readonly add: () => string;
   readonly update: (id: string, patch: ProfilePatch) => void;
   readonly remove: (id: string) => void;
-  /** 接続先の履歴の × で、同じベース URL の設定も消す。`keep`（選んでいる設定）は残す */
   readonly forgetUrl: (url: string, keep: string | null) => void;
-  /** モデルの一覧を取る（`GET /models`） */
   readonly check: (id: string) => Promise<void>;
-  /**
-   * 自動で 1 回だけ試す。ページを開いてからその設定を一度も試しておらず、
-   * ベース URL があるときだけ取る。失敗しても繰り返さない
-   */
   readonly autoCheck: (id: string) => void;
-  /**
-   * 自動でつなぐのをキーが無くて見送った設定に、ゲートウェイがキーを戻したらつなぐ
-   */
   readonly resumeKeyed: () => void;
-  /**
-   * 入力の窓で入ったキーを、接続と同じ規則で確かめる。同じベース URL の設定があれば、その接続の状況も替える
-   */
   readonly verifyKey: (baseUrl: string) => Promise<LlmKeyOutcome>;
 }
 
@@ -85,7 +54,6 @@ function readJson(key: string): unknown {
   }
 }
 
-/** 残した設定を読む */
 export function loadProfiles(): ConnectionProfile[] {
   const raw = readJson(PROFILES_KEY);
   if (!isUnknownArray(raw)) return [];
@@ -114,10 +82,6 @@ function storedForm(profiles: readonly ConnectionProfile[]): StoredProfile[] {
   }));
 }
 
-/**
- * 書く。`previous`（このタブの前の一覧）を
- * 渡すと、置き場を読み直し、このタブで足した・直した・消した 1 件だけを重ねる
- */
 export function saveProfiles(
   profiles: readonly ConnectionProfile[],
   previous?: readonly ConnectionProfile[],
@@ -130,27 +94,16 @@ export function saveProfiles(
   safeStorage('local').setItem(PROFILES_KEY, JSON.stringify(value));
 }
 
-/** 確かめている要求。同じ設定を続けて確かめたら前のものを止める */
 const checking = new Map<string, AbortController>();
 
-/** このページで自動で試した設定（1 回だけにする） */
 const autoChecked = new Set<string>();
 
-/** 自動でつなぐのを、キーが無くて見送った設定 */
 const waitingForKey = new Set<string>();
 
-/**
- * このページでその設定を自動で試したか（試していなければ、つながるかはまだ分からない）。
- * 試したときは確かめた結果も入れるので、ストアを購読するセレクタの中で読んでよい
- */
 export function wasAutoChecked(id: string): boolean {
   return autoChecked.has(id);
 }
 
-/**
- * モデルの文脈長。断りで知った値（`learned`）を先に、次にサーバーの起動時の設定、無ければ一覧の値。
- * わからなければ null（プロンプトのタブの合計の上限に使う）
- */
 export function contextLengthOf(
   check: ModelCheck | undefined,
   model: string,
@@ -161,10 +114,6 @@ export function contextLengthOf(
   return check.serverContext ?? check.contexts[model] ?? null;
 }
 
-/**
- * 足したが、まだ一度もつながっていない設定。画面の中だけに持ち、つながったら端末に書く
- * （打ち間違えた URL の設定を残さない）
- */
 const unconfirmed = new Set<string>();
 
 function confirmed(profiles: readonly ConnectionProfile[]): readonly ConnectionProfile[] {
@@ -218,9 +167,7 @@ export const useLlmProfilesStore = create<LlmProfilesState>()((set, get) => {
       const profile = get().profiles.find((item) => item.id === id);
       if (profile === undefined || profile.baseUrl.trim().length === 0) return;
       if (get().checks[id] !== undefined) return;
-      // 私的なアドレスの外には、注意に合意するまで自動でつながない
       if (isRemoteHost(profile.baseUrl) && !cloudAgreed()) return;
-      // キーが要るのにまだゲートウェイに無い（開いた直後）。ゲートウェイがキーを戻したら resumeKeyed でつなぐ
       if (profile.keyRequired && !hasLlmKeyNow(profile.baseUrl)) {
         waitingForKey.add(id);
         return;
@@ -243,9 +190,7 @@ export const useLlmProfilesStore = create<LlmProfilesState>()((set, get) => {
       checking.delete(id);
       set({ checks: { ...get().checks, [id]: modelCheckOf(result) } });
       if (!result.ok) return;
-      // つながったベース URL だけを履歴に残し、最後につないだものを先頭にする
       useSettingsStore.getState().rememberLlmUrl(profile.baseUrl);
-      // つながった設定だけを端末に残す（打ち間違えた URL の設定は増やさない）
       if (unconfirmed.delete(id)) {
         const profiles = confirmed(get().profiles);
         saveProfiles(profiles, without(profiles, id));
@@ -263,13 +208,8 @@ export const useLlmProfilesStore = create<LlmProfilesState>()((set, get) => {
   };
 });
 
-/** モデルの一覧を取った結果 */
 type ModelListResult = Awaited<ReturnType<ReturnType<typeof llmPort>['listModels']>>;
 
-/**
- * モデルの一覧を取る。OpenRouter はモデルの一覧をキー無しでも返すので、入れたキーが通るかを別に
- * 確かめる。断られたときだけ失敗にする（届かないなどは一覧が取れていれば続ける）
- */
 async function fetchCheckedModels(baseUrl: string, signal?: AbortSignal): Promise<ModelListResult> {
   const endpoint = { baseUrl };
   const result = await llmPort().listModels(endpoint, signal);
@@ -279,7 +219,6 @@ async function fetchCheckedModels(baseUrl: string, signal?: AbortSignal): Promis
   return result;
 }
 
-/** 一覧を取った結果を、確かめた状態にする */
 function modelCheckOf(result: ModelListResult): ModelCheck {
   if (!result.ok) return { kind: 'failed', failure: result.failure };
   return {
@@ -292,18 +231,15 @@ function modelCheckOf(result: ModelListResult): ModelCheck {
   };
 }
 
-/** キーが無くて自動でつなぐのを見送った設定のうち、キーが戻ったものをつなぐ */
 function resumeWaiting(state: LlmProfilesState): void {
   for (const id of waitingForKey) {
     const profile = state.profiles.find((item) => item.id === id);
     if (profile === undefined || !hasLlmKeyNow(profile.baseUrl)) continue;
-    // 待つのは 1 回だけ（自動でつなぐのはページを開いてから 1 回）
     waitingForKey.delete(id);
     if (state.checks[id] === undefined) void state.check(id);
   }
 }
 
-/** 入ったキーを確かめる。同じベース URL の設定があれば、それをつなぎ直して結果を読む */
 async function verifyKeyWith(
   get: () => LlmProfilesState,
   baseUrl: string,
@@ -315,7 +251,6 @@ async function verifyKeyWith(
   return keyOutcomeOf(get().checks[first.id]);
 }
 
-/** 確かめた状態を、入力の窓へ返す結果にする（取り直しで追い越されて確かめ中のままなら失敗） */
 function keyOutcomeOf(check: ModelCheck | undefined): LlmKeyOutcome {
   if (check?.kind === 'ok') return 'ok';
   return check?.kind === 'failed' && check.failure.kind === 'auth' ? 'auth' : 'failed';

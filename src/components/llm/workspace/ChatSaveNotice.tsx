@@ -8,16 +8,10 @@ import { useChatLibraryStore } from '@/store/use-chat-library-store';
 import { chatSizeLevelOf, useChatStore, type ChatPending } from '@/store/use-chat-store';
 import { useSettingsStore } from '@/store/use-settings-store';
 
-// ─────────────────────────────
-// 会話の置き場（ブラウザ）の知らせ。ComfyUI の控えが書けないことは出さない（ブラウザには書けている）。
-// ─────────────────────────────
-
-/** 会話をブラウザに書けない・書けなくなりそうな知らせ。メッセージのある会話を開いたら消さないよう頼む */
 export function ChatSaveNotice({ chatId }: { readonly chatId: string }): React.ReactElement | null {
   const saveState = useChatStore((state) => state.saveStates[chatId]);
   const nearFull = useChatStore((state) => state.nearFull);
   const hasMessages = useChatStore((state) => (state.chats[chatId]?.messages.length ?? 0) > 0);
-  // 大きさは注意を出すときだけ 0.1MB 刻みで読む（受け取り中に語ごとに描き直さない）
   const maxMegabytes = useSettingsStore((state) => state.chatMaxMegabytes);
   const sizeLevel = useChatStore((state) => chatSizeLevelOf(state, chatId, maxMegabytes));
   const sizeText = useChatStore((state) => {
@@ -26,7 +20,6 @@ export function ChatSaveNotice({ chatId }: { readonly chatId: string }): React.R
     return formatMegabytes(chatBytes(chat));
   });
 
-  // 頼むのはブラウザの外の仕組み（1 回の読み込みで一度だけ）
   useEffect(() => {
     if (hasMessages) void ensurePersisted();
   }, [hasMessages]);
@@ -84,7 +77,6 @@ export function ChatSaveNotice({ chatId }: { readonly chatId: string }): React.R
   return null;
 }
 
-/** タブで開いたが、まだ中身を持っていない会話の知らせ */
 export function ChatPendingNotice({
   pending,
 }: {
@@ -101,7 +93,6 @@ export function ChatPendingNotice({
   );
 }
 
-/** まだ中身を持っていない会話の知らせの文 */
 function pendingTextOf(pending: ChatPending | undefined): string {
   if (pending === undefined) return t('common.loading');
   switch (pending.kind) {

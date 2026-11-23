@@ -1,9 +1,10 @@
-import { Expand, ImageOff, RefreshCw } from 'lucide-react';
-import { memo, useEffect } from 'react';
+import { Expand, ImageOff, RefreshCw, Trash2 } from 'lucide-react';
+import { memo, useEffect, useState } from 'react';
 
 import { cardList, THUMBNAIL_FRAME } from '@/components/comfy/queue/card-list';
 import { HistoryRangeSlider } from '@/components/comfy/queue/HistoryRangeSlider';
 import { OutputImage } from '@/components/comfy/queue/OutputImage';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { refreshIcon } from '@/components/ui/refresh-icon';
 import { useHistoryCards } from '@/hooks/run/use-history-cards';
 import { useIncrementalList } from '@/hooks/ui/use-incremental-list';
@@ -11,7 +12,7 @@ import { t } from '@/i18n';
 import { formatDateTime } from '@/i18n/format';
 import { guardPress } from '@/lib/press-guard';
 import { pickImage } from '@/queue/outputs';
-import { historyCardTitle, historyTasks, type HistoryCard } from '@/queue/run-history-view';
+import { historySessionTitle, historyTasks, type HistoryCard } from '@/queue/run-history-view';
 import { buildSlides } from '@/queue/viewer-slides';
 import { useConnectionStore } from '@/store/use-connection-store';
 import { useHistoryDetailStore } from '@/store/use-history-detail-store';
@@ -20,42 +21,36 @@ import { useSettingsStore } from '@/store/use-settings-store';
 import { useTaskDetailStore } from '@/store/use-task-detail-store';
 import { useViewerStore } from '@/store/use-viewer-store';
 
-// ─────────────────────────────
-// 右の列の履歴タブ。実行の記録をまとめたカードを積む。記録を書くのはストアで、ここは読んで並べるだけ。
-// ─────────────────────────────
+const CARD_CLASS = `group/card border-border/70 bg-muted/30 has-[[data-detail]:hover]:bg-accent
+  relative flex w-full min-w-0 gap-2 rounded-md border p-1.5`;
 
-const CARD_CLASS = `border-border/70 bg-muted/30 has-[[data-detail]:hover]:bg-accent relative flex
-  w-full min-w-0 gap-2 rounded-md border p-1.5`;
+const REMOVE_CLASS = `text-muted-foreground hover:text-destructive absolute top-1/2 right-1.5
+  -translate-y-1/2 rounded-md p-1 opacity-0 transition-opacity
+  group-hover/card:opacity-100 group-focus-within/card:opacity-100 focus-visible:outline-2`;
 
-/** 1 回に足すカードの数。足りなければ目印が見えている間続けて足す（画面に入る分まで） */
 const CARD_STEP = 8;
-/**
- * 先読みの余白。画面に入る分を少し超えるだけにする
- */
 const CARD_MARGIN = '120px';
 
-/**
- * 受け取り物が同じなら描き直さない（記録を書き足しても、変わったカードだけ描き直す）。
- * 並びが変わると compiler は全部のカードの要素を作り直すので、手で memo する
- */
 const HistoryItem = memo(function HistoryItem({
   card,
   baseUrl,
   onOpenImage,
   onOpenDetail,
+  onRemove,
 }: {
   readonly card: HistoryCard;
   readonly baseUrl: string;
   readonly onOpenImage: (card: HistoryCard) => void;
   readonly onOpenDetail: (card: HistoryCard) => void;
+  readonly onRemove: (card: HistoryCard) => void;
 }): React.ReactElement {
   const latest = card.runs[0];
   const file = latest === undefined ? null : pickImage(latest.outputs);
-  const name = card.workflowName ?? t('history.card.unnamed');
-  const title = historyCardTitle(card);
-  const when = t('history.card.dateRuns', {
-    date: formatDateTime(latest?.startedAt ?? null),
-    runs: String(card.runs.length),
+  const name = historySessionTitle(card);
+  const when = formatDateTime(latest?.startedAt ?? null);
+  const summary = t('history.card.runsWorkflow', {
+    runs: t('history.detail.runCount', { count: String(card.runs.length) }),
+    workflow: card.workflowName ?? t('history.card.unnamed'),
   });
 
   return (
@@ -103,27 +98,32 @@ const HistoryItem = memo(function HistoryItem({
         <span className="min-w-0 truncate" title={name}>
           {name}
         </span>
-        <span className="text-muted-foreground min-w-0 truncate" title={title}>
-          {title}
+        <span className="text-muted-foreground min-w-0 truncate tabular-nums" title={summary}>
+          {summary}
         </span>
+      </button>
+      <button
+        type="button"
+        className={REMOVE_CLASS}
+        aria-label={t('history.card.remove', { name })}
+        title={t('history.card.removeHint')}
+        onClick={() => onRemove(card)}
+      >
+        <Trash2 className="size-3.5" aria-hidden />
       </button>
     </li>
   );
 });
 
-/** 並べるものが無いときの文。つながっていない・読んでいる・本当に無いを分ける */
 function emptyMessage(connected: boolean, loading: boolean): string {
   if (!connected) return t('history.panel.connectToShow');
   return loading ? t('history.panel.loading') : t('history.panel.empty');
 }
 
-/** 履歴タブの受け取り物 */
 export interface HistoryPanelProps {
-  /** 折り返して並べるか（右の列を下に置いたとき）。既定は縦に積む */
   readonly wrap?: boolean | undefined;
 }
 
-/** 履歴のさかのぼる範囲・更新・記録を入れるリンクと、実行の記録のカードの並び */
 export function HistoryPanel({ wrap = false }: HistoryPanelProps): React.ReactElement {
   const baseUrl = useSettingsStore((state) => state.baseUrl);
   const recording = useSettingsStore((state) => state.recordRunHistory);
@@ -135,29 +135,24 @@ export function HistoryPanel({ wrap = false }: HistoryPanelProps): React.ReactEl
   const load = useRunHistoryStore((state) => state.load);
   const setUpTo = useRunHistoryStore((state) => state.setUpTo);
 
-  // 別窓の出し先は画面に 1 つ（ViewerWindowHost）。ここは開く・閉じるだけ
   const viewerMode = useViewerStore((state) => state.mode);
   const openOverlay = useViewerStore((state) => state.openOverlay);
   const closeViewer = useViewerStore((state) => state.close);
   const openHistoryDetail = useHistoryDetailStore((state) => state.open);
   const closeHistoryDetail = useHistoryDetailStore((state) => state.close);
   const closeTaskDetail = useTaskDetailStore((state) => state.close);
+  const removeSession = useRunHistoryStore((state) => state.removeSession);
+  const [removing, setRemoving] = useState<HistoryCard | null>(null);
 
-  // 読み直すのは接続したとき（右の列が持つ）と、更新を押したときだけ
   const { cards, names, labels, range, rangeNames } = useHistoryCards();
   const fetchFiles = useRunHistoryStore((state) => state.fetchFiles);
-  // 一覧を読み直すと中身を捨てるので、出す名前が同じでも読み直す（一覧は読み直したときだけ変わる）
   const entries = useRunHistoryStore((state) => state.entries);
-  // 画面に入る分だけ描き、送ると続きを足す。範囲を変えたら先頭から数え直す。
-  // 数えるのはファイルの一覧（中身を読む前に並びが決まる）
   const { count, done, sentinelRef } = useIncrementalList(
     rangeNames.length,
     CARD_STEP,
     range ?? '',
     CARD_MARGIN,
   );
-  // 出す分のファイルだけ中身を読む（読んだもの・読んでいるものは重ねない）
-  // 鍵は名前の並びの文字列（並びを作り直しても、中身が同じなら読み直さない）
   const shownKey = rangeNames.slice(0, count).join('\n');
   useEffect(() => {
     if (shownKey.length > 0) void fetchFiles(baseUrl, shownKey.split('\n'));
@@ -168,22 +163,24 @@ export function HistoryPanel({ wrap = false }: HistoryPanelProps): React.ReactEl
       closeViewer();
       return;
     }
-    // 重ねるものは 1 つだけ
     closeHistoryDetail();
     const tasks = historyTasks(card);
     openOverlay(buildSlides(tasks)[0]?.key ?? null, tasks);
   };
-  // 詳細を開く。重ねるものは 1 つだけなので、タスクの詳細とビューワーは閉じる
   const openDetail = (card: HistoryCard): void => {
     closeTaskDetail();
     closeViewer();
     openHistoryDetail(card.key);
   };
+  const onConfirmRemove = guardPress('history-remove', () => {
+    if (removing === null) return;
+    setRemoving(null);
+    if (useHistoryDetailStore.getState().key === removing.key) closeHistoryDetail();
+    void removeSession(baseUrl, removing.key);
+  });
 
   return (
     <div className="flex flex-col gap-1.5">
-      {/* 最上部の帯。横のスライドバー（記録が 2 つ以上のときだけ）と、右端に更新。
-          つまみのポップアウトを下のカードより手前に出すため、帯ごと重なりの上に置く */}
       <div className="relative z-10 flex items-center justify-end gap-2 px-1">
         {names.length < 2 ? null : (
           <HistoryRangeSlider names={names} labels={labels} upTo={range} onChange={setUpTo} />
@@ -235,12 +232,23 @@ export function HistoryPanel({ wrap = false }: HistoryPanelProps): React.ReactEl
               baseUrl={baseUrl}
               onOpenImage={openImages}
               onOpenDetail={openDetail}
+              onRemove={setRemoving}
             />
           ))}
-          {/* 末尾の目印。見えたら続きを足す（折り返して並べるときも 1 段を占める） */}
           {done ? null : <li ref={sentinelRef} className="col-span-full h-px" aria-hidden />}
         </ul>
       )}
+
+      <ConfirmDialog
+        open={removing !== null}
+        title={t('history.card.removeTitle')}
+        description={t('history.card.removeDescription', {
+          name: removing === null ? '' : historySessionTitle(removing),
+        })}
+        confirmLabel={t('common.deleteConfirm')}
+        onConfirm={onConfirmRemove}
+        onCancel={() => setRemoving(null)}
+      />
     </div>
   );
 }

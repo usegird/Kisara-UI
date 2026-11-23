@@ -17,24 +17,17 @@ import { PLAYBOOK_FIELD } from '@/components/llm/playbook/playbook-link';
 import { t } from '@/i18n';
 import { useChatStore } from '@/store/use-chat-store';
 
-// ─────────────────────────────
-// アウトラインの一覧。アウトラインの辞書の項目を段として 1 行ずつ並べる。
-// ─────────────────────────────
-
-/** 行。有効な段は地の色を付ける */
 const entryRow = cva('flex items-start gap-1.5 rounded-md px-1 py-0.5', {
   variants: { current: { true: 'bg-muted', false: '' } },
 });
 
 const ICON_BUTTON = 'text-muted-foreground hover:text-foreground mt-0.5 shrink-0';
 
-/** アウトラインの段の一覧。有効な段に印を付け、題を押すと題と本文の欄を開く */
 export function PlaybookStepList({
   chatId,
   view,
 }: {
   readonly chatId: string;
-  /** 段の選び方。読むだけなら印は押せず、題を押すと本文を文字のまま出す */
   readonly view: OutlineView;
 }): React.ReactElement {
   const steps = useChatStore(
@@ -74,7 +67,6 @@ export function PlaybookStepList({
             )}
           </button>
         ) : (
-          // いくつでも選べるならチェック。読むだけでも、どの段が有効かを見せるために出す（押せない）
           <input
             type="checkbox"
             className="mt-1 shrink-0"
@@ -108,15 +100,12 @@ export function PlaybookStepList({
   return (
     <ol className="flex max-h-72 flex-col gap-0.5 overflow-y-auto">
       {steps.map((entry, index) => (
-        // 段は辞書の項目の並びで id を持たず、ここでは並べ替えない（並べ替えは辞書のダイアログ）。
-        // 題を打つたびに行を作り直さないよう、並びの位置で見分ける
         <li key={`step-${String(index)}`}>{row(entry, index)}</li>
       ))}
     </ol>
   );
 }
 
-/** 開いた段の題と本文の欄。打つたびにアウトラインの辞書の項目を直す */
 function StepFields({
   chatId,
   entry,

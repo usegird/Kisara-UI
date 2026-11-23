@@ -11,10 +11,6 @@ import {
 
 import { chatMessage, loreEntry as entry } from '../helpers/llm';
 
-// ─────────────────────────────
-// ロアブックの近似判定の対象・比べる発言・点・当たり
-// ─────────────────────────────
-
 const vector = (...values: number[]) => Float32Array.from(values);
 
 describe('対象と比べる発言', () => {

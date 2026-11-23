@@ -3,10 +3,6 @@ import { describe, expect, it } from 'vitest';
 import { viewerRegion } from '@/components/comfy/queue/viewer-region';
 import type { AnchorRect, Rects } from '@/hooks/ui/use-anchor-registry';
 
-// ─────────────────────────────
-// 会話のタブで画像ビューワーを重ねる範囲。
-// ─────────────────────────────
-
 function rect(left: number, top: number, right: number, bottom: number): AnchorRect {
   return { left, top, right, bottom, centerY: (top + bottom) / 2 };
 }

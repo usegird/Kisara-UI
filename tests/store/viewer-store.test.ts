@@ -3,11 +3,6 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import type { Popup } from '@/lib/popup';
 import { useViewerStore } from '@/store/use-viewer-store';
 
-// ─────────────────────────────
-// 結果画像の見せ方。**重ねと別窓で同じ位置を見る**（開き方だけが違う）。
-// 窓は押した瞬間にしか開けないので、開いた側から預かる。
-// ─────────────────────────────
-
 const popup = { window: {} as Window, mount: {} as HTMLElement } satisfies Popup;
 
 beforeEach(() => {

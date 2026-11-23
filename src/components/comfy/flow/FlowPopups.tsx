@@ -19,21 +19,12 @@ import type { NodeEditing } from '@/hooks/flow/use-node-editing';
 import { t } from '@/i18n';
 import { useDefinitionsStore } from '@/store/use-definitions-store';
 
-// ─────────────────────────────
-// ワークフロー画面のポップアップ（詳細設定・ノードの検索・繋ぎ先の問い合わせ）
-// ─────────────────────────────
-
-/**
- * ノードの検索は開いたときに読む。読んでいる間は何も出さない。
- * 仮の枠を出すと、本物の枠に付け替えるぶん描き直しが倍になる
- */
 const NodeSearchDialog = lazyPart<NodeSearchDialogProps>(
   'flow.canvas.nodeSearch',
   () => import('@/components/comfy/flow/dialogs/NodeSearchDialog').then((m) => m.NodeSearchDialog),
   () => null,
 );
 
-/** ノードの詳細設定も開いたときに読む。読んでいる間は何も出さない（同上） */
 const NodeSettingsDialog = lazyPart<NodeSettingsDialogProps>(
   'flow.canvas.nodeSettings',
   () =>
@@ -41,7 +32,6 @@ const NodeSettingsDialog = lazyPart<NodeSettingsDialogProps>(
   () => null,
 );
 
-/** ポップアップが描けなかったときの差し替え。閉じられるように画面の中央に出す */
 function PopupFault({
   label,
   error,
@@ -69,7 +59,6 @@ function PopupFault({
   );
 }
 
-/** ワークフロー画面から開くポップアップを描く。開いている物の状態は `editing` が持つ */
 export function FlowPopups({
   editing,
   settingsNode,
@@ -123,10 +112,7 @@ export function FlowPopups({
         </ErrorBoundary>
       ) : null}
 
-      {/* 開いている間だけ置く。閉じていても置くと、画面を描き直すたびに
-          ノード定義の数だけ候補を組み立て直す。開け閉めのたびに作り直すのは元から同じ */}
       {search === null ? null : (
-        // 閉じたら開いたボタンへ焦点を戻す（外すと基盤が戻さないため）
         <ReturnFocus>
           <ErrorBoundary
             label={t('flow.canvas.nodeSearch')}
@@ -146,11 +132,9 @@ export function FlowPopups({
               definitions={definitions}
               frequency={frequency}
               title={searchTitle(search)}
-              // 先へ足すならその型を**受けられる**ノード、手前へ足すなら**出せる**ノード
               initialFilters={initialFilters(search)}
               onSelect={onPickDefinition}
               onClose={onSearchClose}
-              // 既にあるノードへ繋ぐ（ノード参照）。隠しているノードも選べるよう全部を渡す
               reference={referenceTarget(search)}
               views={allViews}
               onPickReference={editing.pickReference}
@@ -158,7 +142,6 @@ export function FlowPopups({
           </ErrorBoundary>
         </ReturnFocus>
       )}
-      {/* 繋ぎ先が型で決まらないときだけ尋ねる */}
       <ConnectSlotDialog choice={editing.connectChoice} onResolve={onResolveConnect} />
     </>
   );

@@ -12,11 +12,6 @@ import { callRequestKey, useSentRequestsStore } from '@/store/use-sent-requests-
 import { LEAK_ALLOWANCE, LEAK_ROUNDS, leakWatch } from '../helpers/leak';
 import { chat, chatMessage } from '../helpers/llm';
 
-// ─────────────────────────────
-// `user` の発言の送った中身のアイコン。続く応答の候補ごとに送った要求を出し、既定は
-// 選んでいる候補。画面では data URL を縮め、開け閉めで閉じたダイアログを残さない
-// ─────────────────────────────
-
 afterEach(() => {
   cleanup();
   useSentRequestsStore.setState({ byKey: {} });

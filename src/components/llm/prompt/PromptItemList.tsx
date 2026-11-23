@@ -52,73 +52,43 @@ import { t } from '@/i18n';
 import { isRecord } from '@/lib/guards';
 import { useChatStore } from '@/store/use-chat-store';
 
-// ─────────────────────────────
-// プロンプトの項目の一覧。並べ替えは dnd-kit（キーボードでも動く）。入れられる所の決まりは構成の側
-// （dropSlots）に置き、入る先は落とした位置の前後の行で決める。
-// ─────────────────────────────
-
 export type { ItemSummary };
 
-/** 開いている項目の中のプレフィルの鍵（項目の id と重ならない） */
 export const PREFILL_KEY = ':prefill';
 
-/** プロンプトの項目の一覧の props */
 export interface PromptItemListProps {
   readonly chatId: string;
   readonly composition: PromptComposition;
-  /** 出さない項目（構成には残す。並べ替えは出している項目の間で行う） */
   readonly hidden?: ((item: PromptItem) => boolean) | undefined;
-  /**
-   * 項目ごとの見積もり。ふつうは数。メッセージの項目は打つたびに変わるので、打ちかけを購読する要素を
-   * 渡す（一覧ごと描き直さない）
-   */
   readonly tokens: ReadonlyMap<string, React.ReactNode>;
-  /** プレフィルの見積もり。無効なら undefined */
   readonly prefillTokens: number | undefined;
   readonly summary: (item: PromptItem) => ItemSummary;
-  /** 項目を足す（プレフィルの下の「項目を追加」から。会話履歴の手前に入れる） */
   readonly onAdd: () => void;
-  /** 開いている項目の id（プレフィルは PREFILL_KEY） */
   readonly open: ReadonlySet<string>;
   readonly onToggle: (id: string) => void;
-  /** 項目を消す（取り消しの控えを取ってから消す） */
   readonly onRemove: (id: string) => void;
-  /** 項目を追加の下に置くもの（合計と送る中身を見る欄） */
   readonly preview?: React.ReactNode;
-  /** 足したばかりで、名前の欄を開いて出す項目の id */
   readonly naming: string | null;
   readonly onNamed: () => void;
-  /** 会話履歴の行のすぐ上に置くセッション要約の行 */
   readonly sessionSummary: SessionSummaryRow;
-  /** セッション要約の行のすぐ上に置くプレイブックの行（プレイブックのある会話だけ） */
   readonly playbook?: PlaybookPromptRow | undefined;
-  /** プレフィルの行のすぐ下に置く行（`messages` の外の `tools`） */
   readonly tools?: React.ReactNode;
 }
 
-/** 画面の 1 行（プレフィルは最後に別に置く）と、入れられるか（決まりは構成の側の dropSlots） */
 interface Row {
   readonly item: PromptItem;
   readonly slot: DropSlot;
 }
 
-/**
- * 履歴の前・会話・履歴の後の段とプレフィルを並べ、運んでいる間は落としたあとの並びをそのまま見せる。
- * role と有効は段の位置と文字の色で表すので、選ぶ欄を出さない
- */
 export function PromptItemList(props: PromptItemListProps): React.ReactElement {
   const { chatId, composition, tokens, summary, open, onToggle, onRemove } = props;
   const hidden = props.hidden;
   const rows = sendOrder(rowsOf(composition).filter((row) => hidden?.(row.item) !== true));
-  // 並べ替えの並び（画面の順）と、行ごとの入れられるか。セッション要約の行は会話履歴の行の手前に
-  // 加わる。運んでいる間も落としたときも、同じ並び（droppedOrder）を使う
   const slots = slotsOf(rows, props.playbook !== undefined);
   const ids = slots.map((slot) => slot.id);
   const kinds = slots.map((slot) => slot.kind);
-  // 動かせない行の地のつなぎ方（間に項目を入れられない所だけつなげる）
   const joins = new Map(bandJoins(slots).map((join, at) => [ids[at], join]));
   const joinOf = (id: string): BandJoin => joins.get(id) ?? NO_JOIN;
-  // 指せる行（入れられない行は測るが、指しても反応しない）
   const allowed = (id: UniqueIdentifier): boolean => kinds[ids.indexOf(String(id))] !== 'fixed';
   const sensors = useSensors(
     useSensor(MouseSensor, MOUSE_ACTIVATION),
@@ -126,7 +96,6 @@ export function PromptItemList(props: PromptItemListProps): React.ReactElement {
     useSensor(KeyboardSensor, { coordinateGetter: slotKeyboardCoordinates(allowed) }),
   );
   const [dragLabel, setDragLabel] = useState<string | null>(null);
-  // 落としたあと、ほかの行を新しい位置へ滑らせる
   const { attachSlideList, remember } = useReorderSlide();
   const onDragEnd = ({ active, over }: DragEndEvent): void => {
     setDragLabel(null);
@@ -198,7 +167,6 @@ export function PromptItemList(props: PromptItemListProps): React.ReactElement {
                 {props.tools}
               </li>
             )}
-            {/* 枠も地も付けない文字のボタン。並べ替えの並びには加えない */}
             <li role="presentation" {...slideKey(':add')}>
               <button
                 type="button"
@@ -211,14 +179,12 @@ export function PromptItemList(props: PromptItemListProps): React.ReactElement {
               </button>
             </li>
             {props.preview === undefined ? null : (
-              // 項目を追加と送る生データを表示の間も、行の間（4px）だけにする
               <li role="presentation" {...slideKey(':preview')}>
                 {props.preview}
               </li>
             )}
           </ol>
         </SortableContext>
-        {/* 運んでいる項目の札。列の外（画面の上）に出す */}
         {createPortal(
           <DragOverlay dropAnimation={null}>
             {dragLabel === null ? null : (
@@ -234,7 +200,6 @@ export function PromptItemList(props: PromptItemListProps): React.ReactElement {
   );
 }
 
-/** 画面の行の並び。履歴の前の段・会話の段・履歴の後の段の順。入れられるかは dropSlots から引く */
 function rowsOf(composition: PromptComposition): Row[] {
   const slots = dropSlots(composition);
   return sectionViews(composition).flatMap((view) =>
@@ -242,10 +207,6 @@ function rowsOf(composition: PromptComposition): Row[] {
   );
 }
 
-/**
- * 並べ替えの並びの行と、入れられるか・動かせないか。プレイブックの行とセッション要約の行（会話履歴の
- * 行の手前）とプレフィルの行は構成の項目ではなく、入れられず、動かせない
- */
 function slotsOf(
   rows: readonly Row[],
   playbook: boolean,
@@ -267,10 +228,6 @@ function slotsOf(
   ];
 }
 
-/**
- * 画面の並びを送る順にそろえる。深さ 0 の項目は送るときに今回のメッセージの
- * すぐ後ろに入るので、メッセージの行の下へ移す（メッセージの行が無ければそのまま会話履歴の行の下）
- */
 function sendOrder(rows: readonly Row[]): Row[] {
   const depthZero = (row: Row): boolean =>
     row.item.position.kind === 'depth' && row.item.position.depth === 0;
@@ -282,26 +239,17 @@ function sendOrder(rows: readonly Row[]): Row[] {
   });
 }
 
-/**
- * 落としたあとの並びで、`at` の前（-1）か後ろ（1）の項目の id。プレフィルと端は null。
- * セッション要約の行は構成の項目ではないので飛ばす
- */
 function neighbor(order: readonly string[], at: number, step: -1 | 1): string | null {
   const key = order[at + step];
   if (key === SUMMARY_KEY || key === PLAYBOOK_KEY) return neighbor(order, at + step, step);
   return key === undefined || key === PREFILL_KEY ? null : key;
 }
 
-/** 掴んだ項目の名前（`useSortable` の data の label） */
 function dragLabelOf(data: unknown): string | null {
   if (!isRecord(data)) return null;
   return typeof data.label === 'string' ? data.label : null;
 }
 
-/**
- * プレフィルの行（掴めない・無効にしない。本文が無ければ灰色の文字にして、送らないことを
- * 示す）。落とし先にはしない
- */
 function PrefillCard({
   chatId,
   composition,
@@ -313,7 +261,6 @@ function PrefillCard({
   const prefill = composition.prefill;
   const empty = prefill.content.length === 0;
   const isOpen = open.has(PREFILL_KEY);
-  // 掴めず、落とし先にもしない（指しても反応しない）。並びの最後には加わる
   const { setNodeRef, transform, transition } = useSortable({
     id: PREFILL_KEY,
     disabled: { draggable: true, droppable: false },

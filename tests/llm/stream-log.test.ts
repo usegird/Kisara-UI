@@ -3,10 +3,6 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { createSseReader, observeSseLines } from '@/llm/sse';
 import { createStreamLog, STREAM_LOG_LIMIT } from '@/llm/stream-log';
 
-// ─────────────────────────────
-// 受け取った SSE の行の記録。注釈の行も残し、読み取りの結果は変えない
-// ─────────────────────────────
-
 afterEach(() => observeSseLines(null));
 
 describe('受け取った行の記録', () => {

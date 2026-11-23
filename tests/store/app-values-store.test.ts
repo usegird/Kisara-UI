@@ -3,11 +3,6 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { useAppValuesStore } from '@/store/use-app-values-store';
 import { useGraphStore } from '@/store/use-graph-store';
 
-// ─────────────────────────────
-// アプリ入力の値（カードには書き戻さない。保存のとき `extra.kisara.values` に書く）。
-// 取り込みボタンで既存の値を上書きするので、**Ctrl+Z で1手戻せる**必要がある。
-// ─────────────────────────────
-
 beforeEach(() => {
   useAppValuesStore.getState().clear();
 });
@@ -35,7 +30,6 @@ describe('アプリ入力の値', () => {
     expect(useAppValuesStore.getState().undo()).toBe(true);
     expect(useAppValuesStore.getState().values.has('3')).toBe(false);
 
-    // これ以上は戻せない
     expect(useAppValuesStore.getState().undo()).toBe(false);
   });
 
@@ -57,7 +51,7 @@ describe('アプリ入力の値', () => {
   it('取り込みで上書きしても元の値に戻せる', () => {
     const store = useAppValuesStore.getState();
     store.setValue('3', 'text', '手で入れた値');
-    store.setValue('3', 'text', 'カードの値'); // 取り込みボタン相当
+    store.setValue('3', 'text', 'カードの値');
 
     expect(useAppValuesStore.getState().undo()).toBe(true);
     expect(useAppValuesStore.getState().values.get('3')).toEqual({ text: '手で入れた値' });
@@ -70,6 +64,7 @@ describe('アプリ入力の値', () => {
     expect(useAppValuesStore.getState().canUndo()).toBe(false);
   });
 });
+
 describe('未保存の印', () => {
   beforeEach(() => {
     useGraphStore.getState().loadWorkflow({ nodes: [], links: [] });

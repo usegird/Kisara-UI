@@ -18,23 +18,14 @@ import { DIALOG_MIN } from '@/lib/dialog-rect';
 import { newShortId } from '@/lib/id';
 import { usePlaybooksStore } from '@/store/use-playbooks-store';
 
-// ─────────────────────────────
-// プレイブックを作る・直すダイアログ。直しかけを持ち、保存で自分のプレイブックに書く（写して作るは 1 冊足す）。
-// ─────────────────────────────
-
 const navRow = cva('w-full truncate rounded-md px-2 py-1 text-left text-sm', {
   variants: { selected: { true: 'bg-muted font-medium', false: 'hover:bg-muted' } },
 });
 
-/** 開く物。標準か自分のものを写して作るか、自分のものを直すか */
 export type PlaybookEditing =
   | { readonly kind: 'copy'; readonly source: Playbook }
   | { readonly kind: 'edit'; readonly id: string };
 
-/**
- * 左に「全体」とフェーズの並び、右に選んだ物の欄。開くたびに中身を作り直す（`key` に開いた物を渡す。
- * 直しかけを持ち越さない）
- */
 export function PlaybookEditorDialog({
   editing,
   onClose,
@@ -54,7 +45,6 @@ export function PlaybookEditorDialog({
         }
       : original;
   const [draft, setDraft] = useState<Playbook | undefined>(initial);
-  // 右に出す物。全体（null）かフェーズの id
   const [selected, setSelected] = useState<string | null>(null);
   const [confirmingClose, setConfirmingClose] = useState(false);
   if (draft === undefined || initial === undefined) return null;
@@ -161,7 +151,6 @@ export function PlaybookEditorDialog({
                     onChange={(event) => setDraft({ ...draft, role: event.target.value })}
                   />
                 </label>
-                {/* 入力欄の「続ける」で送る指示 */}
                 <label className={LABEL}>
                   {t('llm.playbook.editor.continue')}
                   <textarea
@@ -170,7 +159,6 @@ export function PlaybookEditorDialog({
                     onChange={(event) => setDraft({ ...draft, continue: event.target.value })}
                   />
                 </label>
-                {/* 決める段で開く構成の相談の用途 */}
                 <label className={LABEL}>
                   {t('llm.playbook.editor.advisor')}
                   <select

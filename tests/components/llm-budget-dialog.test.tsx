@@ -8,10 +8,6 @@ import { useLlmBudgetStore } from '@/store/use-llm-budget-store';
 
 import { LEAK_ALLOWANCE, LEAK_ROUNDS, leakWatch } from '../helpers/leak';
 
-// ─────────────────────────────
-// 要求の量が閾値を超えたときの確かめ
-// ─────────────────────────────
-
 afterEach(() => {
   cleanup();
   resumeLlmBudget();

@@ -14,21 +14,14 @@ import {
 import { useSettingsStore } from '@/store/use-settings-store';
 import { useTaskLogStore } from '@/store/use-task-log-store';
 
-// ─────────────────────────────
-// 一度読んだ結果画像はメモリに持ち、以後はそれを出す。
-// `temp` が ComfyUI の再起動で消えても、読み込み直すまでは見える。
-// ─────────────────────────────
-
 const fetchOutputImage = vi.hoisted(() => vi.fn<() => Promise<OutputImageBody>>());
 vi.mock('@/comfy/queue', () => ({ fetchOutputImage }));
 
 const file = (filename: string): OutputFileRef => ({ filename, subfolder: '', type: 'temp' });
-/** 読めた画像の中身。更新時刻は省くと分からない扱い */
 const body = (modifiedAt: number | null = null): OutputImageBody => ({
   blob: new Blob(['x']),
   modifiedAt,
 });
-/** つながっている接続先の `/view` の URL（作れないことは無い） */
 const viewOf = (filename: string): string => outputViewUrl('http://comfy', file(filename)) ?? '';
 
 let made = 0;
@@ -39,7 +32,6 @@ beforeEach(() => {
   revoke.mockReset();
   URL.revokeObjectURL = revoke;
   useOutputImagesStore.setState({ images: new Map() });
-  // つないでいる間だけ取りに行く
   useConnectionStore.setState({ status: 'connected' });
   fetchOutputImage.mockReset();
   forgetGoneTemps();
@@ -70,7 +62,6 @@ describe('手元へ写す', () => {
     const task = useOutputImagesStore.getState().ensure('http://comfy', file('gone.png'));
     expect(outputSrc(useOutputImagesStore.getState().images, url)).toBeNull();
 
-    // 応答が無い・読めない（CORS を許していない接続先）ときは `img` が直接読むのに任せる
     fail(new TypeError('Failed to fetch'));
     await task;
     expect(outputSrc(useOutputImagesStore.getState().images, url)).toBe(url);
@@ -90,12 +81,10 @@ describe('手元へ写す', () => {
 
     await hold('http://comfy', file('a.png'));
     expect(fetchOutputImage.mock.calls[0] as unknown[]).toContainEqual({ cache: 'force-cache' });
-    // 描き直して頼み直しても取りに行かない。`img` にも渡さない
     await hold('http://comfy', file('a.png'));
     expect(fetchOutputImage).toHaveBeenCalledTimes(1);
     expect(outputSrc(useOutputImagesStore.getState().images, url)).toBeNull();
 
-    // つないだら印を外し、頼み直すと取る
     fetchOutputImage.mockResolvedValue(body());
     useConnectionStore.setState({ status: 'connected' });
     expect(useOutputImagesStore.getState().images.has(url)).toBe(false);
@@ -106,7 +95,6 @@ describe('手元へ写す', () => {
 });
 
 describe('再起動で消えた temp', () => {
-  /** 実行の終わりが `until` の temp を 1 枚頼む */
   const hold = (name: string, until: number): Promise<void> =>
     useOutputImagesStore.getState().ensure('http://comfy', file(name), { until });
   const notFound = (): Promise<OutputImageBody> =>
@@ -115,7 +103,6 @@ describe('再起動で消えた temp', () => {
     fetchOutputImage.mock.calls.map((call) => ((call as unknown[])[1] as OutputFileRef).filename);
 
   it('同じ描画の分は境目を半分ずつ読んで探し、境目より前は取りに行かない', async () => {
-    // 終わりが 1〜4 は消え、5〜8 は残っている
     fetchOutputImage.mockImplementation((...args: unknown[]) => {
       const name = (args[1] as OutputFileRef).filename;
       return Number(name.slice(1, 2)) <= 4 ? notFound() : Promise.resolve(body());
@@ -134,7 +121,6 @@ describe('再起動で消えた temp', () => {
       true,
       true,
     ]);
-    // 消えた 4 枚のうち読んだのは境目を探した分（t3・t4）だけで、それより前は取りに行かない
     expect(requestedNames().filter((name) => Number(name.slice(1, 2)) <= 4).sort()).toEqual([
       't3.png',
       't4.png',
@@ -166,7 +152,6 @@ describe('同じ名前で書き直された temp', () => {
     const { images } = useOutputImagesStore.getState();
 
     expect(outputSrc(images, viewOf('a.png'), 1_000)).toBe(false);
-    // 完了の少し後（書き終わりの遅れ）までは同じ実行のものとして出す
     expect(outputSrc(images, viewOf('a.png'), 9_000)).toBe('blob:1');
     expect(outputSrc(images, viewOf('a.png'))).toBe('blob:1');
   });
@@ -199,7 +184,6 @@ describe('読む順', () => {
     fetchOutputImage.mockResolvedValue(body());
     const { ensure: hold } = useOutputImagesStore.getState();
 
-    // 一覧は新しい順に並ぶので、新しいものから頼まれる
     await Promise.all([
       hold('http://comfy', file('new.png'), { order: 3 }),
       hold('http://comfy', file('mid.png'), { order: 2 }),
@@ -216,7 +200,6 @@ describe('読む順', () => {
 describe('上限', () => {
   it('超えたら古く読んだものから手放し、その中身は無効にして /view を直接指す', () => {
     const images = new Map<string, OutputImageEntry>([
-      // 読んだ順ではなく古さ（order）で手放す
       ['c', { src: 'blob:c', bytes: 60, order: 2, modifiedAt: null }],
       ['b', 'pending'],
       ['a', { src: 'blob:a', bytes: 60, order: 1, modifiedAt: null }],

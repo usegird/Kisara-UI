@@ -17,19 +17,8 @@ import { useDefinitionsStore } from '@/store/use-definitions-store';
 import { useSettingsStore } from '@/store/use-settings-store';
 import { useTermsStore } from '@/store/use-terms-store';
 
-// ─────────────────────────────
-// 「ComfyUI に接続する」のポップアップの中身。起動と接続の 2 つの手順と、失敗の案内・注意を並べる。
-// ─────────────────────────────
-
-/** ページのオリジン。`--enable-cors-header` に渡す値になる */
-/** 接続先の例。空の欄で Tab を押すとそのまま入る */
 const URL_EXAMPLE = 'http://127.0.0.1:8188';
 
-/**
- * 接続先の欄と接続のボタンを出し、失敗したら推定した原因の案内を出す。
- * ブラウザは CORS 拒否・Local Network Access 拒否・接続不能を区別できないため、推定した原因
- * （`diagnoseFailure`）ごとに次にやることが 1 つに決まる案内にし、「接続できません」で終わらせない。
- */
 export function ComfyConnectPanel(): React.ReactElement {
   const [draft, setDraft] = useBaseUrlDraft();
   const history = useSettingsStore((state) => state.baseUrlHistory);
@@ -41,14 +30,11 @@ export function ComfyConnectPanel(): React.ReactElement {
   const definitionsStatus = useDefinitionsStore((state) => state.status);
   const definitionCount = useDefinitionsStore((state) => state.definitions.size);
 
-  // 操作だけ。起動時の自動接続は AppShell が 1 回だけ持つ（ここでも呼ぶと 2 回試す）
   const { connect, connected, busy } = useComfyConnect();
 
-  // 私的なアドレスの外の接続先に初めてつなぐ前の、注意への合意。`connect` が頼む
   const remotePending = useComfyConnectDialogStore((state) => state.remotePending);
 
   const origin = pageOrigin();
-  // 文に入れる接続先は、実際に失敗した要求の宛先（入力欄はその後で書き換えられる）
   const failure =
     diagnosis === null
       ? null
@@ -64,7 +50,6 @@ export function ComfyConnectPanel(): React.ReactElement {
         <li>
           <p className="font-medium">{t('comfy.connect.urlStep')}</p>
           <div className="mt-2 flex flex-wrap items-center gap-2">
-            {/* つながった接続先の履歴から選べる。空の欄で Tab を押すと例が入る */}
             <HistoryCombobox
               className="min-w-72"
               value={draft}
@@ -78,12 +63,10 @@ export function ComfyConnectPanel(): React.ReactElement {
               onRemove={forgetBaseUrl}
             />
             <ConnectButton
-              // つながっている間だけ「再接続」。つながっていても押せる（`useComfyConnect`）
               again={connected}
               disabled={busy || status === 'connecting'}
               onConnect={guardPress('comfy-connect', () => void connect(draft))}
             />
-            {/* 接続の状況は接続のボタンの右に出す（失敗の案内は下） */}
             {failure ? null : (
               <ConnectionNotice
                 status={status}
@@ -115,11 +98,6 @@ export function ComfyConnectPanel(): React.ReactElement {
   );
 }
 
-// ─────────────────────────────
-// 手順 1・2：起動と接続、失敗の案内
-// ─────────────────────────────
-
-/** 手順 1。ComfyUI を起動するコマンドに起動オプションを足した形を、シェルの見本として見せる */
 function LaunchStep({ origin }: { readonly origin: string }): React.ReactElement {
   const sample = launchSample(origin);
   return (
@@ -160,12 +138,10 @@ function ConnectButton({
   );
 }
 
-// つながっている間は青い点と一言、つないでいる途中は薄い一行（失敗の案内と同じ場所）
 const notice = cva('flex items-center gap-1.5 text-xs', {
   variants: { tone: { connected: '', connecting: 'text-muted-foreground' } },
 });
 
-/** 接続の状況。失敗の案内が無いときに接続のボタンの右へ出す。つないでいなければ何も出さない */
 function ConnectionNotice({
   status,
   ready,
@@ -185,7 +161,6 @@ function ConnectionNotice({
   if (status !== 'connected') return null;
   return (
     <p role="status" className={notice({ tone: 'connected' })}>
-      {/* 青はつながっている印（右の列の接続の状況と同じ色） */}
       <span aria-hidden className="bg-slot-image size-2 shrink-0 rounded-full" />
       {ready ? t('comfy.connect.connected', { count }) : t('comfy.connect.connectedPlain')}
     </p>

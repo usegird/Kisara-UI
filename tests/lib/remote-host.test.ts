@@ -2,10 +2,6 @@ import { describe, expect, it } from 'vitest';
 
 import { isPrivateHost, isRemoteHost } from '@/lib/remote-host';
 
-// ─────────────────────────────
-// 接続前の注意に使う、宛先が私的なネットワークの外かの見分け。表を持たず範囲で決める
-// ─────────────────────────────
-
 describe('isPrivateHost', () => {
   it.each([
     'localhost',

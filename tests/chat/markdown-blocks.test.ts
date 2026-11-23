@@ -2,10 +2,6 @@ import { describe, expect, it } from 'vitest';
 
 import { splitMarkdownBlocks } from '@/chat/markdown-blocks';
 
-// ─────────────────────────────
-// 本文を Markdown の塊に分ける。受け取り中に確定した塊を描き直さないため。
-// ─────────────────────────────
-
 describe('塊に分ける', () => {
   it('空行で区切る', () => {
     expect(splitMarkdownBlocks('a\nb\n\nc\n\n\nd')).toEqual(['a\nb', 'c', 'd']);

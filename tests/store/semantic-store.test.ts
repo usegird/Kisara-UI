@@ -19,10 +19,6 @@ import {
   setDefaultLlm,
 } from '../helpers/llm';
 
-// ─────────────────────────────
-// 近似判定のモデルの読み込みと、送るときの当たり
-// ─────────────────────────────
-
 let port: FakeEmbeddingPort;
 
 beforeEach(() => {
@@ -59,6 +55,7 @@ describe('読み込み', () => {
     await useSemanticStore.getState().load();
     expect(useSemanticStore.getState()).toMatchObject({ status: 'failed', error: 'offline' });
   });
+
   it('無効にするとメモリから降ろし、落とした物は残す', async () => {
     await useSemanticStore.getState().load();
     expect(useSemanticStore.getState().stored).toHaveLength(1);
@@ -172,7 +169,6 @@ describe('送るとき', () => {
     useChatStore.getState().put('c1', chat());
 
     useChatStore.getState().setDraft('c1', 'Any treasure here?');
-    // 入力欄から焦点が外れたときに、打ちかけの本文で見込みを作る
     refreshLorePreview('c1');
     await expect
       .poll(() => useSemanticStore.getState().previews.c1?.hits.get('d1')?.has(0))

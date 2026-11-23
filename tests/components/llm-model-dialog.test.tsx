@@ -11,10 +11,6 @@ import { useSettingsStore } from '@/store/use-settings-store';
 import { LEAK_ALLOWANCE, LEAK_ROUNDS, leakWatch } from '../helpers/leak';
 import { modelDetails, profile } from '../helpers/llm';
 
-// ─────────────────────────────
-// 会話のモデルを選ぶダイアログ。`/` のディレクトリ・絞り込み・打った名前・決定。
-// ─────────────────────────────
-
 const MODELS = ['openai/gpt-x', 'anthropic/claude-a', 'anthropic/claude-b', 'local-model'];
 
 beforeEach(() => {
@@ -29,7 +25,6 @@ afterEach(() => {
   useSettingsStore.setState({ dialogLayouts: {} });
 });
 
-/** 開いているかは呼ぶ側が持つので、テストでは手元で持つ */
 function ModelButton({
   value,
   attention = false,
@@ -50,7 +45,6 @@ function ModelButton({
   );
 }
 
-/** 並び替えは開くボタンが持つので、テストでは手元で持つ */
 function SortedDialog({
   value,
   onDecide,
@@ -112,7 +106,6 @@ describe('会話のモデルを選ぶダイアログ', () => {
   it('絞り込みは空白で区切った語をすべて含むものだけ残す（AND）', () => {
     open();
     fireEvent.change(screen.getByRole('searchbox'), { target: { value: 'anthropic b' } });
-    // 先頭は打った名前を使う行なので、2 行目からが一覧
     expect(titles().slice(1)).toEqual(['anthropic/claude-b']);
   });
 
@@ -164,17 +157,14 @@ describe('選んだモデルの情報', () => {
     });
     open();
     fireEvent.click(within(list()).getByTitle('openai/gpt-x'));
-    // 一覧の 2 行目に費用を 1 行で出す
     expect(within(list()).getByTitle('openai/gpt-x').textContent).toContain('prompt $2/1M');
     const info = await screen.findByRole('region', { name: 'モデルの情報' });
     expect(info.textContent).toContain('必須（思考モデル）');
     expect(info.textContent).toContain('$2 / 1M トークン');
-    // 段は費用・説明・入出力・思考の順
     const titles = [...info.querySelectorAll('h3')].map((title) => title.textContent);
     expect(titles.slice(0, 4)).toEqual(['費用', '説明', '入力 → 出力', '思考']);
     expect(info.textContent).toContain('説明の本文');
     expect(info.textContent).toContain('top_provider.max_completion_tokens');
-    // × で情報だけを閉じる（選んだモデルはそのまま）
     fireEvent.click(within(info).getByRole('button', { name: 'モデルの情報を閉じる' }));
     expect(screen.queryByRole('region', { name: 'モデルの情報' })).toBeNull();
     expect(within(list()).getByTitle('openai/gpt-x').getAttribute('aria-pressed')).toBe('true');
@@ -212,7 +202,6 @@ describe('並び替え', () => {
       'anthropic/claude-a',
       'local-model',
     ]);
-    // もう一度押すと降順（費用の無いモデルは末尾のまま）
     fireEvent.click(screen.getByRole('button', { name: '費用・昇順（押すと降順）' }));
     expect(titles().slice(0, 2)).toEqual(['openai/gpt-x', 'anthropic/claude-b']);
   });

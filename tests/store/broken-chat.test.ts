@@ -19,16 +19,10 @@ import { chat, chatMessage } from '../helpers/llm';
 const download = vi.hoisted(() => vi.fn<(text: string, name: string, type: string) => void>());
 vi.mock('@/lib/download', () => ({ downloadText: download }));
 
-// ─────────────────────────────
-// 壊れた会話のフェイルストップ。消さない・上書きしない・開かない。
-// 書き出しとクリアだけを通す
-// ─────────────────────────────
-
 const BROWSER = { kind: 'browser' } as const;
 let tables: BrowserChatTables;
 let stop: () => void;
 
-/** 2 つ目の発言の候補が読めない会話（本文は表に直に書く） */
 function brokenRecord(): unknown {
   const good = chat([chatMessage('u', 'user', ['hello'])], { name: 'kept' });
   return { chat: { ...good, messages: [...good.messages, { id: 'a', role: 'assistant' }] } };

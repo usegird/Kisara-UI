@@ -8,10 +8,6 @@ import { nodeInputs, nodeOutputs } from '@/graph/types';
 
 import { template } from '../helpers/template';
 
-// ─────────────────────────────
-// 標準のワークフロー。テンプレートの選択のカテゴリと、同梱の本体の形。
-// ─────────────────────────────
-
 async function firstBuiltin(): Promise<unknown> {
   const [template] = builtinTemplateSection().templates;
   if (!template) throw new Error('no builtin');
@@ -32,7 +28,6 @@ describe('builtinTemplateSection', () => {
 
 describe('loadBuiltinWorkflow', () => {
   it('接続先のテンプレートには null を返す（取りに行く側に任せる）', () => {
-    // 名前が同じでも、同梱の印が無ければ接続先のもの
     expect(loadBuiltinWorkflow(template('kisara-a1111-txt2img'))).toBeNull();
   });
 

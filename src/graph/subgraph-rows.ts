@@ -14,21 +14,14 @@ import {
 } from '@/graph/types';
 import { resolveWidgetValues } from '@/graph/widgets';
 
-// ─────────────────────────────
-// subgraph のインスタンスのカードの行。インスタンスの入力と、昇格した widget（値は中のノード）。
-// ─────────────────────────────
-
-/** subgraph のインスタンスの行を組み立てる間の持ち物 */
 interface SubgraphRowsState {
   readonly context: RowContext;
   readonly node: WorkflowNode;
   readonly definition: SubgraphDefinition;
   readonly appInputs: ReadonlySet<string>;
-  /** 内部ノードは id で何度も引くので、先に表にする（行ごとに配列を走査しない） */
   readonly innerNodes: ReadonlyMap<NodeId, WorkflowNode>;
 }
 
-/** 昇格 widget の型と選択肢（内部ノードの定義から引く） */
 interface InnerInputSpec {
   readonly type: string;
   readonly options: readonly unknown[] | null;
@@ -36,11 +29,6 @@ interface InnerInputSpec {
   readonly config: Record<string, unknown>;
 }
 
-/**
- * subgraph インスタンスは展開せず1枚のカードとして扱う。
- * 行は「インスタンスの入力」＋「昇格 widget（proxyWidgets）」の2系統で、
- * 昇格 widget の値の実体は内部ノード側にある。
- */
 export function rowsForSubgraph(
   context: RowContext,
   node: WorkflowNode,
@@ -56,7 +44,6 @@ export function rowsForSubgraph(
   const covered = new Set<string>();
 
   const proxies = proxyWidgets(node);
-  // 昇格 widget も名前で引く。同じ名前が複数あれば先頭を採る（`find` と同じ）
   const proxyByWidget = new Map<string, (typeof proxies)[number]>();
   for (const proxy of proxies) {
     if (!proxyByWidget.has(proxy.widget)) proxyByWidget.set(proxy.widget, proxy);
@@ -75,10 +62,8 @@ export function rowsForSubgraph(
   return rows;
 }
 
-/** 昇格した widget 1 つ（中のノードとその widget 名） */
 type Proxy = ReturnType<typeof proxyWidgets>[number];
 
-/** インスタンスの入力 1 つの行。昇格した widget なら値と書き込み先は中のノード */
 function instanceInputRow(
   state: SubgraphRowsState,
   slot: ReturnType<typeof nodeInputs>[number],
@@ -116,7 +101,6 @@ function instanceRowKind(source: RowSource | null, widget: unknown): NodeRowKind
   return widget ? 'widget' : 'socket';
 }
 
-/** インスタンスの入力に無い昇格 widget の行 */
 function proxyRow(state: SubgraphRowsState, proxy: Proxy): NodeRow {
   const io = (state.definition.inputs ?? []).find((candidate) => candidate.name === proxy.widget);
   const spec = innerInput(state, proxy.nodeId, proxy.widget);
@@ -141,7 +125,6 @@ function proxyRow(state: SubgraphRowsState, proxy: Proxy): NodeRow {
   };
 }
 
-/** 昇格 widget の書き込み先（中のノード）。中のノードが無ければ null */
 function innerTarget(state: SubgraphRowsState, proxy: Proxy): RowTarget | null {
   const inner = state.innerNodes.get(proxy.nodeId);
   if (!inner) return null;
@@ -153,10 +136,6 @@ function innerTarget(state: SubgraphRowsState, proxy: Proxy): RowTarget | null {
   };
 }
 
-/**
- * 昇格 widget の型と選択肢は subgraph 定義側に無いので、**内部ノードの定義**から引く。
- * ここを取り違えると数値が文字列で書き込まれる。
- */
 function innerInput(
   state: SubgraphRowsState,
   innerNodeId: NodeId,
@@ -166,7 +145,6 @@ function innerInput(
   const innerDefinition = inner ? state.context.definitions.get(inner.type) : undefined;
   const input = innerDefinition?.inputs.find((candidate) => candidate.name === widget);
 
-  // control_after_generate は入力ではなくフロントエンド側の widget
   if (!input && widget === CONTROL_AFTER_GENERATE) {
     return { type: 'COMBO', options: SEED_CONTROLS, multiline: false, config: {} };
   }
@@ -185,6 +163,5 @@ function innerValue(state: SubgraphRowsState, innerNodeId: NodeId, widget: strin
   if (!inner || !innerDefinition) return undefined;
 
   const values = resolveWidgetValues(inner, innerDefinition);
-  // 昇格 widget は widget 名で参照される（control_after_generate を含む）
   return values.ok ? values.byWidget.get(widget) : undefined;
 }

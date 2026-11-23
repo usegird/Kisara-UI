@@ -4,13 +4,7 @@ import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 
 import { useDragScroll } from '@/hooks/ui/use-drag-scroll';
 
-// ─────────────────────────────
-// 画像の実サイズの表示で掴んで送る。掴んだ所が付いてくる向きに送り、
-// 動かして離したときは押したことにしない。
-// ─────────────────────────────
-
 beforeAll(() => {
-  // jsdom はポインタの捕捉を持たない
   HTMLElement.prototype.setPointerCapture = () => undefined;
   HTMLElement.prototype.hasPointerCapture = () => false;
 });

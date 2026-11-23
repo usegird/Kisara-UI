@@ -8,10 +8,6 @@ import { toastManager } from '@/components/ui/toast-manager';
 import { useStorageWarningsStore, warnUnsaved } from '@/store/use-storage-warnings-store';
 import { useTabsStore } from '@/store/use-tabs-store';
 
-// ─────────────────────────────
-// 書けなかった物の警告と、タブが多すぎるときの促し
-// ─────────────────────────────
-
 afterEach(() => {
   cleanup();
   vi.restoreAllMocks();

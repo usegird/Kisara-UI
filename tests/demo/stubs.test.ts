@@ -5,10 +5,6 @@ import { ComfyRequestError } from '@/comfy/request-error';
 import * as stub from '@/demo/stubs/comfy-client';
 import { fetchJson, postText } from '@/demo/stubs/comfy-client';
 
-// ─────────────────────────────
-// デモのビルドで送る処理の代わりに入る物。呼ばれても送らず、届かなかったとして断る
-// ─────────────────────────────
-
 describe('デモの送る処理の代わり', () => {
   it('取りに行かず、届かなかった失敗で断る', async () => {
     const error: unknown = await fetchJson('/object_info').catch((caught: unknown) => caught);

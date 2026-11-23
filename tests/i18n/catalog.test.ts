@@ -11,8 +11,6 @@ import {
 } from '@/i18n/catalog-shape';
 import { LOCALES, SOURCE_LOCALE } from '@/i18n/locales';
 
-// 表の形の検査。抜けはここでは落とさない（pnpm check:i18n が一覧にする）
-
 const DIR = join(import.meta.dirname, '../../src/i18n/locales');
 
 function read(code: string): Map<string, CatalogEntry> {
@@ -21,10 +19,8 @@ function read(code: string): Map<string, CatalogEntry> {
 
 const source = read(SOURCE_LOCALE);
 
-/** 項目が使う差し込みの印の名前（数の言い分けはすべての分類を合わせたもの。名前順） */
 function placeholdersOf(entry: CatalogEntry): string[] {
   const texts = typeof entry === 'string' ? [entry] : Object.values(entry);
-  // 分けた奇数番目が印の名前
   const names = texts.flatMap((text) => splitPlaceholders(text).filter((_, at) => at % 2 === 1));
   return [...new Set(names)].sort();
 }

@@ -5,11 +5,6 @@ import { formatNumber } from '@/i18n/format';
 import { budgetWindowMs, resumeLlmBudget } from '@/store/ports/llm-budget';
 import { useLlmBudgetStore } from '@/store/use-llm-budget-store';
 
-// ─────────────────────────────
-// 要求の量が閾値を超えたときの、続けるかの確かめ。
-// ─────────────────────────────
-
-/** 要求の量の上限で止めている間に出す、続けるか止めたままにするかの確かめのダイアログ */
 export function LlmBudgetDialog(): React.ReactElement {
   const asking = useLlmBudgetStore((state) => state.asking);
   const input = useLlmBudgetStore((state) => state.paused?.input ?? 0);

@@ -7,11 +7,6 @@ import { reloadPage } from '@/lib/reload-page';
 import { useComfyConnectDialogStore } from '@/store/use-comfy-connect-dialog-store';
 import { useSettingsStore } from '@/store/use-settings-store';
 
-// ─────────────────────────────
-// 設定タブの言語。選ぶと残して読み込み直す。選択肢は各言語をその言語の名前で出す
-// ─────────────────────────────
-
-// 読み込み直すのは差し替える（`location` は vitest の vmForks では定義し直せない）
 vi.mock('@/lib/reload-page', () => ({ reloadPage: vi.fn() }));
 
 afterEach(() => {
@@ -52,7 +47,6 @@ describe('ComfyUI バックエンドの欄', () => {
     useSettingsStore.setState({ baseUrl: 'http://127.0.0.1:8188' });
     renderPanel();
     expect(screen.getByText('Comfyバックエンド').tagName).toBe('P');
-    // 接続先は入力の欄でなく文字で出す（入力はポップアップで行う）
     expect(screen.queryByLabelText('接続先 ComfyUI の URL')).toBeNull();
     const url = screen.getByText('http://127.0.0.1:8188');
     const button = screen.getByRole('button', { name: '再接続' });
@@ -72,7 +66,26 @@ describe('ComfyUI バックエンドの欄', () => {
   it('幅の上限は操作の部品だけにかけ、説明の文にはかけない', () => {
     renderPanel();
     expect(screen.getByLabelText('言語').className).toContain('max-w-(--control-max)');
-    expect(screen.getByText(/拡張子を除いた名前/).className).not.toContain('max-w');
+    expect(screen.getByText(/でキー名を指定できます/).className).not.toContain('max-w');
+  });
+});
+
+describe('Lora プロンプト書式', () => {
+  it('空の欄で Tab を押すと既定の書式を入れて欄に留まり、空でなければ何もしない', () => {
+    useSettingsStore.setState({ loraCopyFormat: '' });
+    renderPanel();
+    const field = screen.getByLabelText<HTMLInputElement>('Lora プロンプト書式');
+    expect(field.placeholder).toContain('<lora:[name]:');
+    expect(screen.getByText(/\[\]でキー名を指定できます/)).toBeTruthy();
+
+    const filled = fireEvent.keyDown(field, { key: 'Tab' });
+    expect(filled).toBe(false);
+    expect(useSettingsStore.getState().loraCopyFormat).toBe(field.placeholder);
+    expect(field.value).toBe(field.placeholder);
+
+    expect(fireEvent.keyDown(field, { key: 'Tab' })).toBe(true);
+    useSettingsStore.setState({ loraCopyFormat: '' });
+    expect(fireEvent.keyDown(field, { key: 'Tab', shiftKey: true })).toBe(true);
   });
 });
 

@@ -10,10 +10,6 @@ import { budgetLlmPort, resumeLlmBudget, setBudgetClock } from '@/store/ports/ll
 import { DEFAULT_SAFEGUARDS } from '@/store/settings-fields/safeguards';
 import { useLlmBudgetStore } from '@/store/use-llm-budget-store';
 
-// ─────────────────────────────
-// 要求の量の歯止め。1 回の上限と、窓の間の入力・出力の閾値。値は防御機構の既定
-// ─────────────────────────────
-
 const REQUEST_INPUT_MAX = DEFAULT_SAFEGUARDS.llmRequestInputMax;
 const BUDGET_WINDOW_MS = DEFAULT_SAFEGUARDS.llmWindowMinutes * 60_000;
 const WINDOW_OUTPUT_LIMIT = DEFAULT_SAFEGUARDS.llmWindowOutputLimit;
@@ -22,7 +18,6 @@ const WINDOW_INPUT_LIMIT = DEFAULT_SAFEGUARDS.llmWindowInputLimit;
 const ENDPOINT = { baseUrl: 'http://llm' };
 let clock = 0;
 
-/** 届けるものを順に流し、止める合図が来たら 'stopped' で終わる作り物 */
 function fakePort(events: readonly ChatStreamEvent[]): LlmPort & { sent: number } {
   const port = {
     sent: 0,
@@ -105,16 +100,15 @@ describe('要求の量の歯止め', () => {
     const port = fakePort([usage(half, 10)]);
     const guarded = budgetLlmPort(port);
     expect((await send(guarded)).ok).toBe(true);
-    // 2 回目の応答の数で閾値を超えたと分かる
     expect(await send(guarded)).toEqual({ ok: false, failure: { kind: 'paused' } });
     expect(await send(guarded)).toEqual({ ok: false, failure: { kind: 'paused' } });
     expect(port.sent).toBe(2);
   });
+
   it('中身が上限の時間届かなければ止める。処理中の印では数え直さない', async () => {
     vi.useFakeTimers();
     const silentMs = DEFAULT_SAFEGUARDS.llmSilentMinutes * 60_000;
     const sink: { deliver: (event: ChatStreamEvent) => void } = { deliver: () => undefined };
-    /** 止める合図まで終わらない受け取り */
     const endless = {
       ...fakePort([]),
       streamChat: (_e: unknown, _r: unknown, { onEvent, signal }: ChatStreamReceiver) => {

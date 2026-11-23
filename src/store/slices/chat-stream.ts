@@ -38,44 +38,23 @@ import { useLlmProfilesStore } from '@/store/use-llm-profiles-store';
 import { responseKey, useResponseStatsStore } from '@/store/use-response-stats-store';
 import { semanticHitsOf, useSemanticStore } from '@/store/use-semantic-store';
 
-// ─────────────────────────────
-// 会話のストアの slice が共有する、会話を変える・受け取り中の候補へ送る・届いた分を間引いて足す手続き。
-// 受け取り中の要求と、まだ足していない分は会話ごとに 1 つ（ストアは 1 つなのでここに持つ）。
-// ─────────────────────────────
-
-/** 画面が描かれる合図が来ないとき（裏に回ったブラウザのタブなど）に、待つ上限（ms） */
 const FLUSH_FALLBACK_MS = 100;
 
-/** 受け取り中の要求。会話ごとに 1 つ */
 const controllers = new Map<string, AbortController>();
 
-/**
- * 受け取り中の候補の記録の鍵。会話ごとに 1 つ
- */
 const statsKeys = new Map<string, string>();
 
-/**
- * 届いて、まだ会話へ足していない分。描き直しを間引くため、届いた分は溜めて画面が描かれる間隔で
- * 1 回だけ会話へ足す
- */
 const pending = new Map<string, ChatStreamEvent[]>();
-/** 予約した書き込みを取り消す手続き。予約していなければ null */
 let cancelFlush: (() => void) | null = null;
 
-/** 外す件数と、そのときの見積もり */
 type SendPlan = ReturnType<typeof planSend>;
 
-/** slice が使う、会話を変える・送る手続き */
 interface ChatStream {
-  /** 会話を変える。最後に変えた時刻を進める。会話が無いか `next` が null なら false */
   readonly change: (chatId: string, next: Chat | null) => boolean;
-  /** 会話を変えられたら、受け取り中の候補へ送る */
   readonly start: (chatId: string, next: Chat | null) => void;
-  /** 送れるか（会話があり、送れる設定で、容量の不足で止めていない）。送れれば会話 */
   readonly sendable: (chatId: string) => Chat | null;
 }
 
-/** 送る手続きの中で使う、ストアの読み書き */
 interface StreamKit {
   readonly get: () => ChatState;
   readonly change: ChatStream['change'];
@@ -83,7 +62,6 @@ interface StreamKit {
   readonly receive: (chatId: string, event: ChatStreamEvent) => void;
 }
 
-/** 送る 1 回の材料 */
 interface StreamSend {
   readonly chatId: string;
   readonly chat: Chat;
@@ -96,7 +74,6 @@ interface StreamSend {
   readonly signal: AbortSignal;
 }
 
-/** ストアの set と get から、slice が使う会話を変える・送る手続きを作る */
 export function createChatStream(
   set: StoreApi<ChatState>['setState'],
   get: () => ChatState,
@@ -104,8 +81,6 @@ export function createChatStream(
   const change: ChatStream['change'] = (chatId, next) => {
     const { chats } = get();
     if (next === null || chats[chatId] === undefined) return false;
-    // 写す前からの会話は、変えて書くときにプリセットの id を写す（開いたときにプリセットを
-    // 読み終えていなかった分）
     set({ chats: { ...chats, [chatId]: { ...next, updatedAt: Date.now() } } });
     return true;
   };
@@ -146,19 +121,16 @@ export function createChatStream(
   };
 }
 
-/** 受け取り中の要求を止める */
 export function abortStream(chatId: string): void {
   controllers.get(chatId)?.abort();
 }
 
-/** 開いている会話を手放すときに、受け取り中の要求を止め、まだ足していない分を捨てる */
 export function forgetStream(chatId: string): void {
   controllers.get(chatId)?.abort();
   controllers.delete(chatId);
   pending.delete(chatId);
 }
 
-/** 受け取り中の候補へ送る。送る中身は送る時点の会話から組み立てる */
 async function stream(kit: StreamKit, chatId: string): Promise<void> {
   const chat = kit.get().chats[chatId];
   const target = currentLlmTarget();
@@ -170,18 +142,13 @@ async function stream(kit: StreamKit, chatId: string): Promise<void> {
     if (chat !== undefined) kit.change(chatId, finishStream(chat, failure));
     return;
   }
-  // プレフィルはロアを使わないので、近似判定を待たずに受け取りを始める（送るのを二重にしない）
   const prefill = prefillText(chat.prompt, sourcesOf(chat));
   kit.change(chatId, startWithPrefill(chat, prefill));
-  // 近似判定を待つ間に止められるよう、先に止め口を置く（止めたら送らずに「止めた」で終わる）
   const controller = new AbortController();
   controllers.set(chatId, controller);
-  // Web 検索・取得の注意は有効にするときに確かめたので、送るときは確かめない
   const materials = sendMaterials(chat, profile.baseUrl);
-  // 送るときだけ発動率を振り、近似判定を行う。行わないときは待たない
   const scoring = semanticHitsOf(loreSourcesOf(chat, currentLoreLibrary()), chat.messages);
   const semantic = scoring === null ? NO_SEMANTIC_HITS : await scoring;
-  // 送るときに行った結果は、プロンプトのタブの見込みにも使う
   if (scoring !== null) useSemanticStore.getState().setPreview(chatId, semantic);
   const sources = sourcesOf(chat, undefined, { roll: Math.random, semantic });
   const key = startStats(kit, chatId, target, materials.web !== null);
@@ -196,9 +163,6 @@ async function stream(kit: StreamKit, chatId: string): Promise<void> {
   finishReceived(kit, { chatId, chat, key }, result);
 }
 
-/**
- * 受け取る候補の時刻と、送る時点の費用を記録し始める（残さない）。受け取る候補の鍵を返す
- */
 function startStats(
   kit: StreamKit,
   chatId: string,
@@ -210,15 +174,10 @@ function startStats(
     receiving === undefined ? null : responseKey(chatId, receiving.id, receiving.selected);
   if (key === null) return null;
   statsKeys.set(chatId, key);
-  // 「ツールを実行中」はサーバー側のツールを送ったときだけ出す
   useResponseStatsStore.getState().start(key, responsePriceOf(target), performance.now(), web);
   return key;
 }
 
-/**
- * 送る。上限が分かれば、収まるまで古い履歴を外して送る。断りで上限と補正を知ったら、
- * 何も受け取っておらず、外す件数が増えるなら 1 回だけ送り直す
- */
 async function sendFitting(kit: StreamKit, send: StreamSend): Promise<LlmResult<null>> {
   const { chatId, chat, sources, materials } = send;
   let plan = planSend({ chat, composition: chat.prompt, sources }, materials.budget());
@@ -238,7 +197,6 @@ async function sendFitting(kit: StreamKit, send: StreamSend): Promise<LlmResult<
   }
 }
 
-/** 外す件数を決めた要求を 1 回送る */
 function sendOnce(kit: StreamKit, send: StreamSend, plan: SendPlan): Promise<LlmResult<null>> {
   const { chatId, key } = send;
   const sending = kit.get().chats[chatId];
@@ -247,7 +205,6 @@ function sendOnce(kit: StreamKit, send: StreamSend, plan: SendPlan): Promise<Llm
     materials: send.materials,
     drop: plan.drop,
   });
-  // 発言の送った中身のアイコンで引けるよう、受け取る候補の鍵を添える
   if (key !== null) tagSentRequest(request, key);
   return llmPort().streamChat(endpointOf(send.profile), request, {
     onEvent: (event) => kit.receive(chatId, event),
@@ -255,10 +212,6 @@ function sendOnce(kit: StreamKit, send: StreamSend, plan: SendPlan): Promise<Llm
   });
 }
 
-/**
- * 受け取り終えた会話を仕上げる。受け取りの記録は候補に残し（読み込み直しても消えない）、
- * 新しく受け取った呼び出しを受け手に渡す
- */
 function finishReceived(
   kit: StreamKit,
   sent: { readonly chatId: string; readonly chat: Chat; readonly key: string | null },
@@ -280,7 +233,6 @@ function finishReceived(
   const finished = kit.get().chats[chatId];
   const last = finished?.messages.at(-1);
   if (finished === undefined || last === undefined) return;
-  // 受け取る前からあった呼び出し（本文を書かせた候補の分）は渡し直さない
   const before = new Set(lastToolCalls(sent.chat).map((call) => call.id));
   const waiting = lastToolCalls(finished).filter(
     (call) => call.state.kind === 'waiting' && !before.has(call.id),
@@ -288,10 +240,6 @@ function finishReceived(
   if (waiting.length > 0) passFreshToolCalls(chatId, last.id, waiting);
 }
 
-/**
- * 届いた知らせを記録に写す。会話へ足すなら true。最初の本文か思考の本文が届いた時刻を記録し
- * （2 回目からは記録しない）、処理中の注釈の行は会話に足さない（受け取り中の印にだけ効く）
- */
 function noteReceived(chatId: string, event: ChatStreamEvent): boolean {
   const key = statsKeys.get(chatId);
   if (key !== undefined && event.kind === 'delta' && (event.content || event.reasoning)) {
@@ -304,10 +252,6 @@ function noteReceived(chatId: string, event: ChatStreamEvent): boolean {
   return false;
 }
 
-/**
- * 次に画面が描かれるときに 1 回だけ呼ぶ。合図が来なくても `FLUSH_FALLBACK_MS` で呼ぶ
- * （裏のブラウザのタブでも受け取った分を会話へ足し、控えに書けるように）。取り消す手続きを返す
- */
 function scheduleFrame(callback: () => void): () => void {
   let done = false;
   const run = (): void => {

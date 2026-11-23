@@ -2,10 +2,6 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { yieldToMain } from '@/lib/yield-to-main';
 
-// ─────────────────────────────
-// 長い処理の合間にブラウザへ処理を返す
-// ─────────────────────────────
-
 afterEach(() => vi.unstubAllGlobals());
 
 describe('ブラウザへ処理を返す', () => {

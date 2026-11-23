@@ -3,10 +3,6 @@ import { describe, expect, it } from 'vitest';
 import { modelDetailsOf } from '@/llm/model-details';
 import { parseModelList } from '@/llm/schema';
 
-// ─────────────────────────────
-// 一覧の項目の付帯情報。OpenRouter の形を読み、形の合わない所は捨て、何も無ければ作らない。
-// ─────────────────────────────
-
 describe('モデルの付帯情報', () => {
   it('費用は文字列を数にし、トークン単位の項目に印を付ける。overrides は条件ごとに分ける', () => {
     const details = modelDetailsOf({
@@ -76,7 +72,6 @@ describe('モデルの付帯情報', () => {
 
   it('付帯情報の無い項目（ほかのサーバー）では作らず、一覧にも入れない', () => {
     expect(modelDetailsOf({ id: 'm', object: 'model' })).toBeNull();
-    // OpenAI 互換の一覧がどこでも返す項目だけなら作らない（思考を「非対応」と誤って出さない）
     expect(modelDetailsOf({ id: 'm', object: 'model', created: 1, owned_by: 'me' })).toBeNull();
     const list = parseModelList({
       data: [

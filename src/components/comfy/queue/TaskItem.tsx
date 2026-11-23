@@ -1,6 +1,6 @@
 import { cva } from 'class-variance-authority';
 import { Expand, Hourglass, ImageOff, Loader2, Square, X } from 'lucide-react';
-import { memo } from 'react';
+import { memo, useLayoutEffect, useRef } from 'react';
 
 import { THUMBNAIL_FRAME } from '@/components/comfy/queue/card-list';
 import { OutputImage } from '@/components/comfy/queue/OutputImage';
@@ -14,9 +14,10 @@ import { pickImage } from '@/queue/outputs';
 import { progressRatio, type QueueTask } from '@/queue/queue-tasks';
 import type { NodeProgress, RunningNodeLabel } from '@/queue/running-node';
 
-// ─────────────────────────────
-// キューのタスクのカード 1 枚（サムネイル・要約・進み具合）
-// ─────────────────────────────
+const MAX_EASED_STEP = 0.15;
+
+const MATRIX_X_AT = 4;
+const MATRIX3D_X_AT = 12;
 
 const taskCard = cva(
   `border-border/70 bg-muted/30 has-[[data-detail]:hover]:bg-accent group/card relative flex
@@ -32,7 +33,6 @@ const taskMessage = cva('truncate', {
   variants: { quiet: { true: 'text-muted-foreground', false: 'text-destructive/90' } },
 });
 
-/** 縮小画像の中身。画像があればそれ、無ければ状態の絵（待っている・実行中・それ以外） */
 function ThumbnailContent({
   task,
   file,
@@ -61,10 +61,6 @@ function ThumbnailContent({
   );
 }
 
-/**
- * 画像がある縮小画像。指し示すと白っぽくして開くアイコンを出し、押すとビューワーへ。
- * ボタンの中にボタンを入れられないので、詳細を開くカード本体とは別のボタンにして横に並べる
- */
 function ThumbnailButton({
   task,
   file,
@@ -101,10 +97,6 @@ function ThumbnailButton({
   );
 }
 
-/**
- * 受け取り物が同じなら描き直さない（進捗で動くのは実行中のカードだけ）。
- * 並びが変わると compiler は全部のカードの要素を作り直すので、手で memo する
- */
 export const TaskItem = memo(function TaskItem({
   task,
   baseUrl,
@@ -119,27 +111,18 @@ export const TaskItem = memo(function TaskItem({
 }: {
   readonly task: QueueTask;
   readonly baseUrl: string;
-  /** 実行したワークフロー名（この画面から投げたときだけ分かる） */
   readonly workflowName: string | null;
-  /** 実行中のノード（このタスクが自分の実行のときだけ） */
   readonly node: RunningNodeLabel | null;
-  /** ノードの進み具合（同上） */
   readonly nodes: NodeProgress | null;
   readonly onOpen: (task: QueueTask) => void;
-  /** 縮小画像を押したとき。そのタスクの画像からビューワーを開く */
   readonly onOpenImage: (task: QueueTask) => void;
-  /** 読み込み中の絵を押したとき。一番新しい画像から開く。画像が無ければ undefined */
   readonly onOpenLatest?: (() => void) | undefined;
-  /** 実行中のカードの右上に出す中断（そのタスクだけを止める）。実行中でなければ undefined */
   readonly onInterrupt?: ((task: QueueTask) => void) | undefined;
-  /** 待機中のカードの右上に出す取り消し（キューから外す）。待機中でなければ undefined */
   readonly onCancel?: ((task: QueueTask) => void) | undefined;
 }): React.ReactElement {
   const failed = task.state === 'failed';
   const file = pickImage(task.outputs);
-  // まだ画像の無い実行中の絵は、一番新しい画像から開く入口にする
   const latest = file === null && task.state === 'running' ? onOpenLatest : undefined;
-  // 右上の止める操作。実行中は中断、待機中はキューから外す
   const corner =
     onInterrupt !== undefined
       ? {
@@ -157,7 +140,6 @@ export const TaskItem = memo(function TaskItem({
           }
         : null;
 
-  // 全カードで 1 つの名前に数える（回数がそのまま描き直したカードの枚数になる）
   return (
     <RenderProbe id="TaskItem">
       <li className={taskCard({ failed })}>
@@ -193,7 +175,6 @@ export const TaskItem = memo(function TaskItem({
           <TaskSummary task={task} workflowName={workflowName} node={node} nodes={nodes} />
         </button>
 
-        {/* 実行中と待機中だけ、指し示すと右上に止める操作を出す（そのタスクだけ） */}
         {corner === null ? null : (
           <button
             type="button"
@@ -219,10 +200,6 @@ interface TaskSummaryProps {
   readonly nodes: NodeProgress | null;
 }
 
-/**
- * カードの文字の列（番号と開始時刻・所要時間とノード数・進捗・処理中のカード・伝える文）。
- * 処理中のカードの行は、終わったらワークフロー名を残す
- */
 function TaskSummary({ task, workflowName, node, nodes }: TaskSummaryProps): React.ReactElement {
   const ratio = progressRatio(task);
   const duration = task.durationMs === null ? null : formatDuration(task.durationMs);
@@ -236,78 +213,89 @@ function TaskSummary({ task, workflowName, node, nodes }: TaskSummaryProps): Rea
         <span className="text-muted-foreground shrink-0 tabular-nums">
           {formatTime(task.startedAt)}
         </span>
+        {duration === null ? null : (
+          <span className="text-muted-foreground ml-auto shrink-0 tabular-nums">{duration}</span>
+        )}
       </div>
 
-      {/* どちらも無ければ行ごと出さない（断られた実行でカードが縦に伸びないように） */}
-      {duration === null && nodes === null ? null : (
-        <TaskTiming duration={duration} nodes={nodes} />
-      )}
-
-      {/* 進捗バー。割合が分からないときは出さない */}
-      {ratio === null ? null : (
-        <div className="bg-muted h-1 w-full overflow-hidden rounded-full">
-          <div
-            className="bg-slot-conditioning h-full rounded-full"
-            style={{ width: `${String(Math.round(ratio * PERCENT))}%` }}
-          />
-        </div>
-      )}
-
-      {/* 処理中のカード（通番 + コメント/ノード名） */}
-      {node ? (
-        <RunningNode node={node} />
+      {node !== null || nodes !== null ? (
+        <RunningNode node={node} nodes={nodes} />
       ) : task.state !== 'running' && workflowName !== null ? (
         <span className="text-muted-foreground min-w-0 truncate" title={workflowName}>
           {workflowName}
         </span>
       ) : null}
 
+      {ratio === null ? null : <ProgressBar ratio={ratio} />}
+
       <TaskMessage task={task} />
     </div>
   );
 }
 
-/** 所要時間と何ノード目か。片方だけでも出す */
-function TaskTiming({
-  duration,
+function ProgressBar({ ratio }: { readonly ratio: number }): React.ReactElement {
+  const bar = useRef<HTMLDivElement>(null);
+
+  useLayoutEffect(() => {
+    const element = bar.current;
+    if (element === null || element.offsetWidth === 0) return;
+    const shift = translateXOf(getComputedStyle(element).transform);
+    if (shift === null || Math.abs(ratio - (1 + shift / element.offsetWidth)) <= MAX_EASED_STEP) {
+      return;
+    }
+
+    element.style.transition = 'none';
+    void element.offsetWidth;
+    element.style.transition = '';
+  }, [ratio]);
+
+  return (
+    <div className="bg-muted h-1 w-full overflow-hidden rounded-full">
+      <div
+        ref={bar}
+        className="bg-slot-conditioning h-full w-full rounded-full transition-transform
+          duration-1000 ease-linear motion-reduce:transition-none"
+        style={{ transform: `translateX(${String((ratio - 1) * PERCENT)}%)` }}
+      />
+    </div>
+  );
+}
+
+function RunningNode({
+  node,
   nodes,
 }: {
-  readonly duration: string | null;
+  readonly node: RunningNodeLabel | null;
   readonly nodes: NodeProgress | null;
 }): React.ReactElement {
   return (
-    <div className="text-muted-foreground flex items-baseline gap-1.5 tabular-nums">
-      {duration === null ? null : <span className="shrink-0">{duration}</span>}
+    <span className="flex min-w-0 items-baseline gap-1" title={node?.name}>
       {nodes === null ? null : (
-        <span className="shrink-0">
+        <span className="text-muted-foreground shrink-0 tabular-nums">
           {t('queue.card.nodeProgress', {
             finished: String(nodes.finished),
             total: String(nodes.total),
           })}
         </span>
       )}
-    </div>
+      {node === null ? null : <RunningNodeName node={node} />}
+    </span>
   );
 }
 
-/** 処理中のカード。通番があれば前に付ける */
-function RunningNode({ node }: { readonly node: RunningNodeLabel }): React.ReactElement {
+function RunningNodeName({ node }: { readonly node: RunningNodeLabel }): React.ReactElement {
   return (
-    <span className="flex min-w-0 items-baseline gap-1" title={node.name}>
+    <>
       {node.index === null ? null : (
         <span className="bg-muted shrink-0 rounded px-1 font-semibold tabular-nums">
           {node.index}
         </span>
       )}
       <span className="min-w-0 truncate">{node.name}</span>
-    </span>
+    </>
   );
 }
 
-/**
- * 伝える文は 1 行で省略する（カードを縦に伸ばさない）。全文は指したときと詳細で出す。
- * 不明のもの・実行中は失敗と分けて薄く出す（落ちたとは限らない）
- */
 function TaskMessage({ task }: { readonly task: QueueTask }): React.ReactElement | null {
   if (task.message === null) return null;
   const quiet = task.state === 'unknown' || task.state === 'running';
@@ -316,4 +304,12 @@ function TaskMessage({ task }: { readonly task: QueueTask }): React.ReactElement
       {task.message}
     </span>
   );
+}
+
+function translateXOf(transform: string): number | null {
+  const match = /^matrix(3d)?\(([^)]*)\)$/u.exec(transform);
+  if (match === null) return null;
+  const parts = (match[2] ?? '').split(',');
+  const value = Number(parts[match[1] === undefined ? MATRIX_X_AT : MATRIX3D_X_AT]);
+  return Number.isFinite(value) ? value : null;
 }

@@ -5,11 +5,6 @@ import { useTaskLogStore } from '@/store/use-task-log-store';
 
 import { historyEntry, taskLogEntry } from '../helpers/queue';
 
-// ─────────────────────────────
-// タスクの控え。ComfyUI の履歴は再起動で消えるので、**画面を開いている間だけ**覚えておく。
-// 保存はしない（再読み込みで消えるのが仕様）。名前と応答は、あとから来た記録で消さない。
-// ─────────────────────────────
-
 function entry(
   promptId: string,
   startedAt: number,

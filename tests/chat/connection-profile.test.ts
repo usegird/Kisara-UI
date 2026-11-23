@@ -4,10 +4,6 @@ import { profileForConnect, sameBaseUrl } from '@/chat/connection-profile';
 
 import { profile } from '../helpers/llm';
 
-// ─────────────────────────────
-// 接続するときに書く先の設定。ベース URL で見分け、同じ URL の設定は 1 つ
-// ─────────────────────────────
-
 const OPENROUTER = 'https://openrouter.ai/api/v1';
 
 describe('sameBaseUrl', () => {

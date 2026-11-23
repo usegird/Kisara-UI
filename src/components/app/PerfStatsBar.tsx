@@ -13,45 +13,28 @@ import {
   type StatRow,
 } from '@/lib/perf-stats';
 
-// ─────────────────────────────
-// 回数の台帳の表と、空にするボタン・表を開くボタン。**開発と計測用ビルドでだけ**入口から読む。
-// ─────────────────────────────
-
-/** 表を開いている間、台帳を読み直す間隔 */
 const REFRESH_MS = 1000;
 
-/** 字下げ 1 段の幅（px） */
 const INDENT_PX = 12;
 
 type Rows = readonly StatRow[];
 
-/** 今の台帳を表の並びで読む */
 function readRows(): Rows {
   return statRows(statsSnapshot(), probeParents());
 }
 
-/** ミリ秒を小数 1 桁で出す */
 function formatMilliseconds(value: number): string {
   return value.toFixed(1);
 }
 
-/** 台帳の表の props */
 export interface PerfStatsBarProps {
-  /**
-   * 計測用ビルドか。時間の列と JS ヒープの量を出し、表を開いた状態で始める
-   * （開発サーバの時間は StrictMode・HMR・開発用のモジュールが乗り使えない）
-   */
   readonly profiling: boolean;
 }
 
-/** 台帳のボタンと表。画面とは別の根に描くので、押しても読み直しても台帳は増えない */
 export function PerfStatsBar({ profiling }: PerfStatsBarProps): React.ReactElement {
-  /** 最後に読んだ台帳。閉じていれば null */
   const [rows, setRows] = useState<Rows | null>(() => (profiling ? readRows() : null));
-  /** 最後に読んだ JS ヒープの量。台帳と同じ時に読み直す */
   const [heap, setHeap] = useState<HeapUsage | null>(() => (profiling ? heapUsage() : null));
 
-  // 下の effect の依存なので手で固定する（作り直すと読み直しのタイマーを張り直す）
   const read = useCallback((): void => {
     setRows(readRows());
     if (profiling) setHeap(heapUsage());
@@ -62,7 +45,6 @@ export function PerfStatsBar({ profiling }: PerfStatsBarProps): React.ReactEleme
     if (rows !== null) setRows([]);
   };
 
-  // 台帳は React の外にあるので、開いている間だけ定期的に読み直す
   const open = rows !== null;
   useEffect(() => {
     if (!open) return;
@@ -130,7 +112,6 @@ export function PerfStatsBar({ profiling }: PerfStatsBarProps): React.ReactEleme
               <tbody>
                 {rows.map(({ name, depth, stat }) => (
                   <tr key={name}>
-                    {/* 字下げの段は数で決まるので、幅だけを style で渡す */}
                     <td className="pr-3 font-mono" style={{ paddingLeft: depth * INDENT_PX }}>
                       {depth > 0 ? <span className="text-muted-foreground">└ </span> : null}
                       {name}
